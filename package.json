@@ -1,0 +1,59 @@
+{
+  "name": "spacegraphjs",
+  "version": "3.1.0",
+  "description": "Declarative, high-performance library for creating interactive 2D/3D visualizations.",
+  "main": "./dist/spacegraph.umd.cjs",
+  "module": "./dist/spacegraph.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && tsc --emitDeclarationOnly",
+    "test": "vitest",
+    "test:visual": "playwright test",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/automenta/spacegraphjs3.git"
+  },
+  "keywords": [
+    "3d",
+    "graph",
+    "visualization",
+    "threejs",
+    "solidjs",
+    "declarative",
+    "reactive"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/automenta/spacegraphjs3/issues"
+  },
+  "homepage": "https://github.com/automenta/spacegraphjs3#readme",
+  "dependencies": {
+    "@use-gesture/vanilla": "^10.3.1",
+    "d3-force-3d": "^3.0.6",
+    "popmotion": "^11.0.5",
+    "solid-js": "^1.9.9",
+    "three": "^0.179.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/three": "^0.179.0",
+    "eslint": "^9.34.0",
+    "eslint-config-prettier": "^10.1.8",
+    "jsdom": "^26.1.0",
+    "playwright": "^1.55.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.42.0",
+    "vite": "^7.1.4",
+    "vitest": "^3.2.4"
+  },
+  "files": [
+    "dist"
+  ]
+}
