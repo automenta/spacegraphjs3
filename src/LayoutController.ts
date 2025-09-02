@@ -1,67 +1,63 @@
 import { createEffect, onCleanup } from 'solid-js';
 import { Store } from 'solid-js/store';
-import { forceSimulation, forceManyBody, forceCenter, forceLink } from 'd3-force-3d';
-import { Spec, Element } from './types';
+import { forceSimulation, forceManyBody, forceCenter, forceLink, Simulation } from 'd3-force-3d';
+import { Spec, Element, Edge } from './types';
 
+// Extend the d3-force Node type to include our Element properties
 interface Node extends Element, d3.SimulationNodeDatum {}
 
 export class LayoutController {
   private state: Store<Spec>;
-  private updateState: (spec: Partial<Spec>) => void;
-  private simulation: d3.Simulation<Node, d3.SimulationLinkDatum<Node>> | null = null;
+  private simulation: Simulation<Node, Edge> | null = null;
 
-  constructor(state: Store<Spec>, updateState: (spec: Partial<Spec>) => void) {
+  constructor(state: Store<Spec>) {
     this.state = state;
-    this.updateState = updateState;
 
     createEffect(() => {
       const layoutType = this.state.layout?.type;
-      const nodes = this.state.data?.nodes || [];
-
       if (layoutType === 'force-directed') {
-        this.initForceSimulation(nodes as Node[]);
+        this.initForceSimulation();
       } else {
         this.stopSimulation();
       }
     });
 
-    onCleanup(() => {
-      this.stopSimulation();
-    });
+    onCleanup(() => this.stopSimulation());
   }
 
-  private initForceSimulation(nodes: Node[]) {
-    this.stopSimulation(); // Ensure any existing simulation is stopped
+  private initForceSimulation() {
+    this.stopSimulation();
 
-    // Use the reactive nodes directly from the state
-    const reactiveNodes = this.state.data?.nodes as Node[] || [];
+    const originalNodes = (this.state.data?.nodes || []) as Node[];
+    const edges = (this.state.data?.edges || []) as Edge[];
 
-    this.simulation = forceSimulation<Node, d3.SimulationLinkDatum<Node>>(nodes)
-      .force('charge', forceManyBody().strength(-30))
+    // Create a deep copy of the nodes for the simulation to avoid proxy issues.
+    const simNodes: Node[] = JSON.parse(JSON.stringify(originalNodes));
+
+    // Initialize positions for d3.
+    simNodes.forEach(node => {
+      node.x = node.position?.x ?? 0;
+      node.y = node.position?.y ?? 0;
+      node.z = node.position?.z ?? 0;
+    });
+
+    this.simulation = forceSimulation<Node, Edge>(simNodes)
+      .force('charge', forceManyBody().strength(-50))
       .force('center', forceCenter())
-      .force('link', forceLink<Node, d3.SimulationLinkDatum<Node>>().id((d: Node) => d.id).distance(50))
+      .force('link', forceLink<Node, Edge>(edges).id((d: Node) => d.id).distance(50).strength(1))
       .on('tick', () => {
-        // Directly update the position properties of the reactive nodes using updateState with produce
-        this.updateState(s => {
-          if (s.data?.nodes) {
-            for (const node of nodes) {
-              const reactiveNode = s.data.nodes.find(n => n.id === node.id);
-              if (reactiveNode && reactiveNode.position && node.x !== undefined && node.y !== undefined && node.z !== undefined) {
-                reactiveNode.position.x = node.x;
-                reactiveNode.position.y = node.y;
-                reactiveNode.position.z = node.z;
-              }
-            }
+        // On each tick, update the positions of the original reactive nodes.
+        simNodes.forEach((simNode, i) => {
+          const originalNode = originalNodes[i];
+          if (originalNode?.position) {
+            originalNode.position.x = simNode.x!;
+            originalNode.position.y = simNode.y!;
+            originalNode.position.z = simNode.z!;
           }
         });
       });
 
-    // Add links if they exist in the spec
-    if (this.state.data?.edges) {
-      this.simulation.force('link', forceLink<Node, d3.SimulationLinkDatum<Node>>(this.state.data.edges).id((d: Node) => d.id).distance(50));
-    }
-
-    this.simulation.alphaTarget(0.3).restart(); // Start or restart the simulation with a target alpha
+    this.simulation.alpha(1).restart();
   }
 
   private stopSimulation() {
@@ -72,24 +68,26 @@ export class LayoutController {
   }
 
   public resume() {
-    if (this.simulation) {
-      this.simulation.alphaTarget(0.3).restart();
-    }
+    if (this.simulation) this.simulation.alphaTarget(0.3).restart();
   }
 
   public pause() {
-    if (this.simulation) {
-      this.simulation.alphaTarget(0);
-    }
+    if (this.simulation) this.simulation.alphaTarget(0);
   }
 
   public reheat() {
-    if (this.simulation) {
-      this.simulation.alpha(1).restart();
-    }
+    if (this.simulation) this.simulation.alpha(1).restart();
   }
 
   public dispose() {
     this.stopSimulation();
+  }
+
+  public tick(iterations = 1) {
+    if (this.simulation) {
+      for (let i = 0; i < iterations; i++) {
+        this.simulation.tick();
+      }
+    }
   }
 }

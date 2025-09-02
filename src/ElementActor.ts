@@ -44,6 +44,14 @@ export class ElementActor {
 
       (this.mesh.material as THREE.MeshBasicMaterial).color.set(color);
     });
+
+    // Add a new effect for position
+    createEffect(() => {
+      const x = this.state.x ?? this.state.position?.x ?? 0;
+      const y = this.state.y ?? this.state.position?.y ?? 0;
+      const z = this.state.z ?? this.state.position?.z ?? 0;
+      this.mesh.position.set(x, y, z);
+    });
   }
 
   private initMesh() {

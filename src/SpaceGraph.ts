@@ -1,23 +1,24 @@
-// src/SpaceGraph.ts
 import * as THREE from 'three';
 import { createRoot, createEffect } from 'solid-js';
-import { Store } from 'solid-js/store'; // Import Store
+import { Store } from 'solid-js/store';
 import { createState } from './createState';
 import { ElementActor } from './ElementActor';
 import { Spec } from './types';
-import { createGesture } from '@use-gesture/vanilla'; // Corrected import
+import { createGesture } from '@use-gesture/vanilla';
 import { LayoutController } from './LayoutController';
+import { CameraController } from './CameraController';
 
 export class SpaceGraph {
   private container: HTMLElement;
-  public state!: Store<Spec>; // SolidJS store proxy, definite assignment
-  private updateState!: (spec: Partial<Spec>) => void; // Definite assignment
-  private scene!: THREE.Scene; // Definite assignment
-  private camera!: THREE.PerspectiveCamera; // Definite assignment
-  private renderer: THREE.WebGLRenderer | null = null; // Changed to nullable and initialized
+  public state: Store<Spec>;
+  private updateState: (spec: Partial<Spec>) => void;
+  private scene: THREE.Scene;
+  private threeCamera: THREE.PerspectiveCamera; // Renamed from 'camera'
+  private renderer: THREE.WebGLRenderer | null = null;
   private actors: Map<string, ElementActor> = new Map();
-  private layoutController!: LayoutController; // Definite assignment
-  private dispose!: () => void; // Function to dispose SolidJS root, definite assignment
+  private layoutController: LayoutController;
+  private cameraController: CameraController; // New controller
+  private dispose: () => void;
 
   constructor(containerSelector: string, initialSpec: Spec) {
     const container = document.querySelector(containerSelector);
@@ -26,6 +27,7 @@ export class SpaceGraph {
     }
     this.container = container as HTMLElement;
 
+    // The createRoot ensures all SolidJS reactivity is disposed of properly
     this.dispose = createRoot((dispose) => {
       const { state, updateState } = createState(initialSpec);
       this.state = state;
@@ -33,121 +35,92 @@ export class SpaceGraph {
 
       this.initRenderer();
       this.initScene();
-      this.initReactiveScene();
+      this.initReactiveEffects(); // Combined reactive initializers
       this.initInteraction();
-      this.layoutController = new LayoutController(this.state, this.updateState);
-      window.addEventListener('resize', this.handleResize); // Add resize listener
 
+      // Initialize controllers
+      this.layoutController = new LayoutController(this.state);
+      this.cameraController = new CameraController(this.state);
+
+      window.addEventListener('resize', this.handleResize);
       this.animate();
+
       return dispose;
     });
   }
 
-  private raycaster!: THREE.Raycaster; // Definite assignment
-  private pointer!: THREE.Vector2; // Definite assignment
-  private interactionCleanup!: ReturnType<typeof createGesture>; // Corrected type
+  // Public getters for controllers
+  public get layout() {
+    return this.layoutController;
+  }
+
+  public get camera() {
+    return this.cameraController;
+  }
+
+  private raycaster: THREE.Raycaster;
+  private pointer: THREE.Vector2;
+  private interactionCleanup: () => void;
 
   private initInteraction() {
     this.raycaster = new THREE.Raycaster();
     this.pointer = new THREE.Vector2();
 
-    const { width, height } = this.renderer!.domElement; // Use non-null assertion
-
     this.interactionCleanup = createGesture(
       {
-        onDrag: ({ movement: [mx, my], active }: { movement: [number, number]; active: boolean }) => {
+        onDrag: ({ movement: [mx, my], active }) => {
           if (active && this.state.camera) {
-            const sensitivity = 0.01;
-            this.updateState({
-              camera: {
-                position: {
-                  x: this.state.camera.position.x - mx * sensitivity,
-                  y: this.state.camera.position.y + my * sensitivity,
-                },
-              },
-            });
+            // Directly mutate state for interaction feedback
+            this.state.camera.position.x -= mx * 0.01;
+            this.state.camera.position.y += my * 0.01;
           }
         },
-        onWheel: ({ movement: [, my] }: { movement: [number, number] }) => {
+        onWheel: ({ movement: [, my] }) => {
           if (this.state.camera) {
             const zoomSpeed = 0.01;
             const newZoom = Math.max(0.1, this.state.camera.zoom - my * zoomSpeed);
-            this.updateState({
-              camera: {
-                zoom: newZoom,
-              },
-            });
+            // Mutate state directly
+            this.state.camera.zoom = newZoom;
           }
         },
-        onPointerMove: ({ clientX, clientY }: { clientX: number; clientY: number }) => {
+        onPointerMove: ({ event }) => {
+          const { clientX, clientY } = event as PointerEvent;
           const { width, height } = this.renderer!.domElement;
           this.pointer.x = (clientX / width) * 2 - 1;
           this.pointer.y = -(clientY / height) * 2 + 1;
 
-          this.raycaster.setFromCamera(this.pointer, this.camera);
+          this.raycaster.setFromCamera(this.pointer, this.threeCamera); // Use threeCamera
           const intersects = this.raycaster.intersectObjects(this.scene.children);
 
-          if (intersects.length > 0) {
-            const intersectedObject = intersects[0].object;
-            // Find the actor associated with the intersected object
-            const hoveredActor = Array.from(this.actors.values()).find(
-              (actor) => actor.mesh === intersectedObject
-            );
-            if (hoveredActor && this.state.interaction && this.state.interaction.hoveredElementId !== hoveredActor.state.id) {
-              this.updateState({
-                interaction: {
-                  hoveredElementId: hoveredActor.state.id,
-                },
-              });
-            } else if (!hoveredActor && this.state.interaction && this.state.interaction.hoveredElementId !== null) {
-              this.updateState({
-                interaction: {
-                  hoveredElementId: null,
-                },
-              });
-            }
+          const hoveredActor = intersects.length > 0
+            ? Array.from(this.actors.values()).find(actor => actor.mesh === intersects[0].object)
+            : undefined;
+
+          this.updateState({
+            interaction: { hoveredElementId: hoveredActor?.state.id ?? null }
+          });
         },
-
         onClick: () => {
-          this.raycaster.setFromCamera(this.pointer, this.camera);
+          this.raycaster.setFromCamera(this.pointer, this.threeCamera); // Use threeCamera
           const intersects = this.raycaster.intersectObjects(this.scene.children);
 
           if (intersects.length > 0) {
-            const intersectedObject = intersects[0].object;
-            const clickedActor = Array.from(this.actors.values()).find(
-              (actor) => actor.mesh === intersectedObject
-            );
-            if (clickedActor && this.state.interaction) {
+            const clickedActor = Array.from(this.actors.values()).find(actor => actor.mesh === intersects[0].object);
+            if (clickedActor) {
               const clickedId = clickedActor.state.id;
-              if (this.state.interaction.selectedElementIds.includes(clickedId)) {
-                this.updateState({
-                  interaction: {
-                    selectedElementIds: this.state.interaction.selectedElementIds.filter(
-                      (id) => id !== clickedId
-                    ),
-                  },
-                });
-              } else {
-                this.updateState({
-                  interaction: {
-                    selectedElementIds: [...this.state.interaction.selectedElementIds, clickedId],
-                  },
-                });
-              }
+              const selectedIds = this.state.interaction.selectedElementIds;
+              const newSelectedIds = selectedIds.includes(clickedId)
+                ? selectedIds.filter(id => id !== clickedId)
+                : [...selectedIds, clickedId];
+
+              this.updateState({ interaction: { selectedElementIds: newSelectedIds }});
             }
-          } else if (this.state.interaction) {
-            this.updateState({
-              interaction: {
-                selectedElementIds: [],
-              },
-            });
+          } else {
+            this.updateState({ interaction: { selectedElementIds: [] }});
           }
         },
       },
-      {
-        domTarget: this.renderer!.domElement,
-        eventOptions: { passive: false },
-      }
+      { domTarget: this.renderer!.domElement, eventOptions: { passive: false } }
     );
   }
 
@@ -160,24 +133,39 @@ export class SpaceGraph {
 
   private initScene() {
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(
+    this.threeCamera = new THREE.PerspectiveCamera(
       75,
       this.container.clientWidth / this.container.clientHeight,
       0.1,
       1000
     );
-    this.camera.position.z = 5;
+    this.scene.add(this.threeCamera); // Add camera to scene
   }
 
-  private initReactiveScene() {
+  private initReactiveEffects() {
+    // Effect to sync Three.js camera with reactive state
+    createEffect(() => {
+      const cameraState = this.state.camera;
+      if (cameraState) {
+        this.threeCamera.position.set(
+          cameraState.position.x,
+          cameraState.position.y,
+          cameraState.position.z
+        );
+        this.threeCamera.zoom = cameraState.zoom;
+        this.threeCamera.updateProjectionMatrix();
+      }
+    });
+
+    // Effect to sync scene elements with reactive state
     createEffect(() => {
       const nodes = this.state.data?.nodes || [];
-      const currentIds = new Set(nodes.map((n) => n.id));
+      const currentIds = new Set(nodes.map(n => n.id));
 
       // Add/update nodes
       for (const nodeState of nodes) {
         if (!this.actors.has(nodeState.id)) {
-          const actor = new ElementActor(nodeState, this.state as any); // Pass global state, cast to any
+          const actor = new ElementActor(nodeState, this.state);
           this.actors.set(nodeState.id, actor);
           this.scene.add(actor.mesh);
         }
@@ -203,43 +191,30 @@ export class SpaceGraph {
     const width = this.container.clientWidth;
     const height = this.container.clientHeight;
 
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
+    this.threeCamera.aspect = width / height;
+    this.threeCamera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
   };
 
   private animate = () => {
-    if (!this.renderer) return; // Stop animation if destroyed
+    if (!this.renderer) return;
     requestAnimationFrame(this.animate);
-    this.renderer.render(this.scene, this.camera);
+    this.renderer.render(this.scene, this.threeCamera); // Use threeCamera
   };
 
-  public get layout() {
-    return this.layoutController;
-  }
-
   public destroy() {
-    // Dispose all actors
     for (const actor of this.actors.values()) {
       this.scene.remove(actor.mesh);
       actor.dispose();
     }
     this.actors.clear();
 
-    // Dispose SolidJS subscriptions
-    this.dispose();
-
-    // Dispose interaction listeners
-    if (this.interactionCleanup) {
-      this.interactionCleanup.destroy(); // Call destroy method
-    }
-
-    // Dispose layout controller
+    this.dispose(); // Dispose SolidJS root and all effects
+    this.interactionCleanup();
     this.layoutController.dispose();
 
-    window.removeEventListener('resize', this.handleResize); // Remove resize listener
+    window.removeEventListener('resize', this.handleResize);
 
-    // Dispose Three.js resources
     if (this.renderer) {
       this.renderer.dispose();
       this.container.removeChild(this.renderer.domElement);

@@ -15,6 +15,12 @@ export interface Edge {
   [key: string]: any;
 }
 
+export interface CameraSpec {
+  position: { x: number; y: number; z: number };
+  zoom: number;
+  [key: string]: any;
+}
+
 export interface Spec {
   data?: {
     nodes?: Element[];
@@ -25,7 +31,7 @@ export interface Spec {
     type?: string;
     [key: string]: any;
   };
-  camera?: { [key: string]: any; };
+  camera?: CameraSpec;
   controls?: { [key: string]: any; };
   interaction: { // Made non-optional
     hoveredElementId: string | null;

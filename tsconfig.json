@@ -9,8 +9,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "preserve",
-    "jsxImportSource": "solid-js",
-    "types": ["vitest/globals"]
+    "jsxImportSource": "solid-js"
   },
   "include": ["src/**/*", "tests/**/*"],
   "exclude": ["node_modules"]
