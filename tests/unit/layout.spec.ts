@@ -7,7 +7,7 @@ import { Spec } from '../../src/types';
 // vi.spyOn(window, 'requestAnimationFrame').mockImplementation(cb => setTimeout(() => cb(0), 16));
 
 describe('LayoutController', () => {
-  it('should apply force-directed layout and update node positions', () => {
+  it('should apply force-directed layout and update node positions', async () => {
     const initialSpec: Spec = {
       data: {
         nodes: [
@@ -25,6 +25,9 @@ describe('LayoutController', () => {
 
     const { state } = createState(initialSpec);
     const layoutController = new LayoutController(state);
+
+    // Wait for the simulation to initialize via createEffect
+    await new Promise(resolve => setTimeout(resolve, 0));
 
     // Manually step the simulation forward. This is more reliable than setTimeout.
     // @ts-ignore - tick is a testing-only method
@@ -42,7 +45,7 @@ describe('LayoutController', () => {
     layoutController.dispose();
   });
 
-  it('should pause and resume the layout simulation', () => {
+  it('should pause and resume the layout simulation', async () => {
     const initialSpec: Spec = {
       data: {
         nodes: [
@@ -60,6 +63,9 @@ describe('LayoutController', () => {
 
     const { state } = createState(initialSpec);
     const layoutController = new LayoutController(state);
+
+    // Wait for the simulation to initialize via createEffect
+    await new Promise(resolve => setTimeout(resolve, 0));
 
     // Run for a bit
     // @ts-ignore

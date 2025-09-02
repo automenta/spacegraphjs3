@@ -2,11 +2,11 @@ import * as THREE from 'three';
 import { createRoot, createEffect } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { createState } from './createState';
-import { ElementActor } from './ElementActor';
 import { Spec } from './types';
-import { createGesture } from '@use-gesture/vanilla';
 import { LayoutController } from './LayoutController';
 import { CameraController } from './CameraController';
+import { InteractionController } from './InteractionController';
+import { InstancedRenderer } from './InstancedRenderer';
 
 export class SpaceGraph {
   private container: HTMLElement;
@@ -15,9 +15,10 @@ export class SpaceGraph {
   private scene: THREE.Scene;
   private threeCamera: THREE.PerspectiveCamera; // Renamed from 'camera'
   private renderer: THREE.WebGLRenderer | null = null;
-  private actors: Map<string, ElementActor> = new Map();
   private layoutController: LayoutController;
   private cameraController: CameraController; // New controller
+  private interactionController: InteractionController;
+  private instancedRenderer: InstancedRenderer;
   private dispose: () => void;
 
   constructor(containerSelector: string, initialSpec: Spec) {
@@ -35,12 +36,23 @@ export class SpaceGraph {
 
       this.initRenderer();
       this.initScene();
+
+      this.instancedRenderer = new InstancedRenderer(this.scene, this.state);
+
       this.initReactiveEffects(); // Combined reactive initializers
-      this.initInteraction();
 
       // Initialize controllers
       this.layoutController = new LayoutController(this.state);
       this.cameraController = new CameraController(this.state);
+      this.interactionController = new InteractionController(
+        this.renderer!.domElement,
+        this.state,
+        this.updateState,
+        this.threeCamera,
+        this.scene,
+        this.instancedRenderer
+      );
+
 
       window.addEventListener('resize', this.handleResize);
       this.animate();
@@ -56,72 +68,6 @@ export class SpaceGraph {
 
   public get camera() {
     return this.cameraController;
-  }
-
-  private raycaster: THREE.Raycaster;
-  private pointer: THREE.Vector2;
-  private interactionCleanup: () => void;
-
-  private initInteraction() {
-    this.raycaster = new THREE.Raycaster();
-    this.pointer = new THREE.Vector2();
-
-    this.interactionCleanup = createGesture(
-      {
-        onDrag: ({ movement: [mx, my], active }) => {
-          if (active && this.state.camera) {
-            // Directly mutate state for interaction feedback
-            this.state.camera.position.x -= mx * 0.01;
-            this.state.camera.position.y += my * 0.01;
-          }
-        },
-        onWheel: ({ movement: [, my] }) => {
-          if (this.state.camera) {
-            const zoomSpeed = 0.01;
-            const newZoom = Math.max(0.1, this.state.camera.zoom - my * zoomSpeed);
-            // Mutate state directly
-            this.state.camera.zoom = newZoom;
-          }
-        },
-        onPointerMove: ({ event }) => {
-          const { clientX, clientY } = event as PointerEvent;
-          const { width, height } = this.renderer!.domElement;
-          this.pointer.x = (clientX / width) * 2 - 1;
-          this.pointer.y = -(clientY / height) * 2 + 1;
-
-          this.raycaster.setFromCamera(this.pointer, this.threeCamera); // Use threeCamera
-          const intersects = this.raycaster.intersectObjects(this.scene.children);
-
-          const hoveredActor = intersects.length > 0
-            ? Array.from(this.actors.values()).find(actor => actor.mesh === intersects[0].object)
-            : undefined;
-
-          this.updateState({
-            interaction: { hoveredElementId: hoveredActor?.state.id ?? null }
-          });
-        },
-        onClick: () => {
-          this.raycaster.setFromCamera(this.pointer, this.threeCamera); // Use threeCamera
-          const intersects = this.raycaster.intersectObjects(this.scene.children);
-
-          if (intersects.length > 0) {
-            const clickedActor = Array.from(this.actors.values()).find(actor => actor.mesh === intersects[0].object);
-            if (clickedActor) {
-              const clickedId = clickedActor.state.id;
-              const selectedIds = this.state.interaction.selectedElementIds;
-              const newSelectedIds = selectedIds.includes(clickedId)
-                ? selectedIds.filter(id => id !== clickedId)
-                : [...selectedIds, clickedId];
-
-              this.updateState({ interaction: { selectedElementIds: newSelectedIds }});
-            }
-          } else {
-            this.updateState({ interaction: { selectedElementIds: [] }});
-          }
-        },
-      },
-      { domTarget: this.renderer!.domElement, eventOptions: { passive: false } }
-    );
   }
 
   private initRenderer() {
@@ -156,30 +102,6 @@ export class SpaceGraph {
         this.threeCamera.updateProjectionMatrix();
       }
     });
-
-    // Effect to sync scene elements with reactive state
-    createEffect(() => {
-      const nodes = this.state.data?.nodes || [];
-      const currentIds = new Set(nodes.map(n => n.id));
-
-      // Add/update nodes
-      for (const nodeState of nodes) {
-        if (!this.actors.has(nodeState.id)) {
-          const actor = new ElementActor(nodeState, this.state);
-          this.actors.set(nodeState.id, actor);
-          this.scene.add(actor.mesh);
-        }
-      }
-
-      // Remove old nodes
-      for (const [id, actor] of this.actors.entries()) {
-        if (!currentIds.has(id)) {
-          this.scene.remove(actor.mesh);
-          actor.dispose();
-          this.actors.delete(id);
-        }
-      }
-    });
   }
 
   public update(spec: Partial<Spec>) {
@@ -203,15 +125,10 @@ export class SpaceGraph {
   };
 
   public destroy() {
-    for (const actor of this.actors.values()) {
-      this.scene.remove(actor.mesh);
-      actor.dispose();
-    }
-    this.actors.clear();
-
     this.dispose(); // Dispose SolidJS root and all effects
-    this.interactionCleanup();
+    this.interactionController.dispose();
     this.layoutController.dispose();
+    this.instancedRenderer.dispose();
 
     window.removeEventListener('resize', this.handleResize);
 

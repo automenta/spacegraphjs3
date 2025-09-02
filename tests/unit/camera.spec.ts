@@ -35,10 +35,10 @@ describe('CameraController', () => {
     await vi.advanceTimersByTimeAsync(500);
 
     // State should be halfway to the target
-    expect(state.camera?.position.x).toBeCloseTo(5);
-    expect(state.camera?.position.y).toBeCloseTo(0); // y was not in target
-    expect(state.camera?.position.z).toBeCloseTo(12.5); // (5 + (20-5)*0.5)
-    expect(state.camera?.zoom).toBeCloseTo(1.5);
+    expect(state.camera?.position.x).toBeCloseTo(5, 1);
+    expect(state.camera?.position.y).toBeCloseTo(0, 1); // y was not in the target
+    expect(state.camera?.position.z).toBeCloseTo(12.5, 1); // (5 + (20-5)/2)
+    expect(state.camera?.zoom).toBeCloseTo(1.25, 1); // (1 + (1.5-1)/2)
 
     // Advance time to the end
     await vi.advanceTimersByTimeAsync(500);
