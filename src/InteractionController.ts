@@ -51,19 +51,31 @@ export class InteractionController {
 
     this.gesture = createGesture(
       {
-        onDrag: ({ movement: [mx, my], active }) => {
-          if (active && this.state.camera) {
-            // Directly mutate state for interaction feedback
-            this.state.camera.position.x -= mx * 0.01;
-            this.state.camera.position.y += my * 0.01;
+        onDrag: ({ movement: [mx, my], event, active }) => {
+          if (!active || !this.state.camera) return;
+          const e = event as PointerEvent;
+
+          // Right-click drag for rotation (orbit)
+          if (e.buttons === 2) {
+            const rotateSpeed = 0.005;
+            this.state.camera.theta -= mx * rotateSpeed;
+            this.state.camera.phi -= my * rotateSpeed;
+            // Clamp phi to avoid flipping over at the poles
+            this.state.camera.phi = Math.max(0.1, Math.min(Math.PI - 0.1, this.state.camera.phi));
+          }
+          // Left-click drag for panning
+          else {
+            const panSpeed = 0.01;
+            this.state.camera.target.x -= mx * panSpeed;
+            this.state.camera.target.y += my * panSpeed;
           }
         },
         onWheel: ({ movement: [, my] }) => {
           if (this.state.camera) {
-            const zoomSpeed = 0.01;
-            const newZoom = Math.max(0.1, this.state.camera.zoom - my * zoomSpeed);
+            const zoomSpeed = 0.1;
+            const newDistance = this.state.camera.distance + my * zoomSpeed;
             // Mutate state directly
-            this.state.camera.zoom = newZoom;
+            this.state.camera.distance = Math.max(0.1, newDistance);
           }
         },
         onPointerMove: ({ event }) => {

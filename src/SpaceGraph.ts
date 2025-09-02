@@ -93,12 +93,23 @@ export class SpaceGraph {
     createEffect(() => {
       const cameraState = this.state.camera;
       if (cameraState) {
+        // Calculate position from spherical coordinates (phi, theta, distance)
+        const phi = cameraState.phi;
+        const theta = cameraState.theta;
+        const distance = cameraState.distance;
+        const target = cameraState.target;
+
+        const x = distance * Math.sin(phi) * Math.sin(theta);
+        const y = distance * Math.cos(phi);
+        const z = distance * Math.sin(phi) * Math.cos(theta);
+
         this.threeCamera.position.set(
-          cameraState.position.x,
-          cameraState.position.y,
-          cameraState.position.z
+          target.x + x,
+          target.y + y,
+          target.z + z
         );
-        this.threeCamera.zoom = cameraState.zoom;
+
+        this.threeCamera.lookAt(new THREE.Vector3(target.x, target.y, target.z));
         this.threeCamera.updateProjectionMatrix();
       }
     });

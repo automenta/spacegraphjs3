@@ -22,8 +22,10 @@ const initialSpec: Spec = {
     type: 'force-directed', // Use the force-directed layout
   },
   camera: {
-    position: { x: 0, y: 0, z: 15 }, // Start further away
-    zoom: 1,
+    target: { x: 0, y: 0, z: 0 },
+    phi: 0.2, // A bit of an angle from the top
+    theta: 0.1, // A bit of an angle from the side
+    distance: 15,
   },
   interaction: {
     hoveredElementId: null,
@@ -55,11 +57,8 @@ setTimeout(() => {
   resultsHTML += `Layout Test: <span style="color: ${layoutPass ? 'lightgreen' : 'red'}">${layoutPass ? 'PASS' : 'FAIL'}</span><br>`;
 
   // Test 2: Camera Animation
-  const cameraTargetZ = 5;
-  const cameraTargetZoom = 1.5;
-  const cameraPass =
-    Math.abs(graph.state.camera.position.z - cameraTargetZ) < 0.1 &&
-    Math.abs(graph.state.camera.zoom - cameraTargetZoom) < 0.1;
+  const cameraTargetDistance = 5;
+  const cameraPass = Math.abs(graph.state.camera.distance - cameraTargetDistance) < 0.1;
   resultsHTML += `Camera Test: <span style="color: ${cameraPass ? 'lightgreen' : 'red'}">${cameraPass ? 'PASS' : 'FAIL'}</span><br>`;
 
   resultsDiv.innerHTML = resultsHTML;
@@ -73,8 +72,7 @@ setTimeout(() => {
   console.log('Kicking off camera animation...');
   graph.camera.flyTo(
     {
-      position: { z: 5 },
-      zoom: 1.5,
+      distance: 5,
     },
     { duration: 2000 }
   );

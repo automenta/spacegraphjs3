@@ -1,94 +1,83 @@
 import { describe, it, expect } from 'vitest';
+import { createRoot } from 'solid-js';
 import { createState } from '../../src/createState';
 import { LayoutController } from '../../src/LayoutController';
 import { Spec } from '../../src/types';
 
-// Use a mock for requestAnimationFrame if needed, although manual ticking avoids this.
-// vi.spyOn(window, 'requestAnimationFrame').mockImplementation(cb => setTimeout(() => cb(0), 16));
-
 describe('LayoutController', () => {
   it('should apply force-directed layout and update node positions', async () => {
-    const initialSpec: Spec = {
-      data: {
-        nodes: [
-          { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } },
-          { id: 'n2', type: 'sphere', position: { x: 1, y: 1, z: 1 } },
-        ],
-        edges: [{ id: 'e1', source: 'n1', target: 'n2' }],
-      },
-      layout: { type: 'force-directed' },
-      camera: { position: { x: 0, y: 0, z: 5 }, zoom: 1 },
-      interaction: { hoveredElementId: null, selectedElementIds: [] },
-      style: {},
-      controls: {},
-    };
+    await createRoot(async (dispose) => {
+      const initialSpec: Spec = {
+        data: {
+          nodes: [
+            { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } },
+            { id: 'n2', type: 'sphere', position: { x: 1, y: 1, z: 1 } },
+          ],
+          edges: [{ id: 'e1', source: 'n1', target: 'n2' }],
+        },
+        layout: { type: 'force-directed' },
+        camera: { target: { x: 0, y: 0, z: 0 }, phi: 0, theta: 0, distance: 10 },
+        interaction: { hoveredElementId: null, selectedElementIds: [] },
+      };
 
-    const { state } = createState(initialSpec);
-    const layoutController = new LayoutController(state);
+      const { state } = createState(initialSpec);
+      const layoutController = new LayoutController(state);
 
-    // Wait for the simulation to initialize via createEffect
-    await new Promise(resolve => setTimeout(resolve, 0));
+      await layoutController.ready;
 
-    // Manually step the simulation forward. This is more reliable than setTimeout.
-    // @ts-ignore - tick is a testing-only method
-    layoutController.tick(300);
+      layoutController.tick(300);
 
-    const node1 = state.data.nodes.find(n => n.id === 'n1');
-    const node2 = state.data.nodes.find(n => n.id === 'n2');
+      const node1 = state.data.nodes.find(n => n.id === 'n1');
+      const node2 = state.data.nodes.find(n => n.id === 'n2');
 
-    // Check that positions have moved from their initial state.
-    expect(node1?.position?.x).not.toBeCloseTo(0);
-    expect(node1?.position?.y).not.toBeCloseTo(0);
-    expect(node2?.position?.x).not.toBeCloseTo(1);
-    expect(node2?.position?.y).not.toBeCloseTo(1);
+      expect(node1?.position?.x).not.toBeCloseTo(0);
+      expect(node1?.position?.y).not.toBeCloseTo(0);
+      expect(node2?.position?.x).not.toBeCloseTo(1);
+      expect(node2?.position?.y).not.toBeCloseTo(1);
 
-    layoutController.dispose();
+      layoutController.dispose();
+      dispose();
+    });
   });
 
   it('should pause and resume the layout simulation', async () => {
-    const initialSpec: Spec = {
-      data: {
-        nodes: [
-          { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } },
-          { id: 'n2', type: 'sphere', position: { x: 1, y: 1, z: 1 } },
-        ],
-        edges: [{ id: 'e1', source: 'n1', target: 'n2' }],
-      },
-      layout: { type: 'force-directed' },
-      camera: { position: { x: 0, y: 0, z: 5 }, zoom: 1 },
-      interaction: { hoveredElementId: null, selectedElementIds: [] },
-      style: {},
-      controls: {},
-    };
+    await createRoot(async (dispose) => {
+      const initialSpec: Spec = {
+        data: {
+          nodes: [
+            { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } },
+            { id: 'n2', type: 'sphere', position: { x: 1, y: 1, z: 1 } },
+          ],
+          edges: [{ id: 'e1', source: 'n1', target: 'n2' }],
+        },
+        layout: { type: 'force-directed' },
+        camera: { target: { x: 0, y: 0, z: 0 }, phi: 0, theta: 0, distance: 10 },
+        interaction: { hoveredElementId: null, selectedElementIds: [] },
+      };
 
-    const { state } = createState(initialSpec);
-    const layoutController = new LayoutController(state);
+      const { state } = createState(initialSpec);
+      const layoutController = new LayoutController(state);
 
-    // Wait for the simulation to initialize via createEffect
-    await new Promise(resolve => setTimeout(resolve, 0));
+      await layoutController.ready;
 
-    // Run for a bit
-    // @ts-ignore
-    layoutController.tick(150);
+      layoutController.tick(150);
 
-    layoutController.pause();
-    const pos1_paused_x = state.data.nodes.find(n => n.id === 'n1')?.position?.x;
+      layoutController.pause();
+      const pos1_paused_x = state.data.nodes.find(n => n.id === 'n1')?.position?.x;
 
-    // Run some more, positions should not change because it's paused.
-    // @ts-ignore
-    layoutController.tick(150);
-    const pos1_after_pause_x = state.data.nodes.find(n => n.id === 'n1')?.position?.x;
+      layoutController.tick(150);
+      const pos1_after_pause_x = state.data.nodes.find(n => n.id === 'n1')?.position?.x;
 
-    expect(pos1_after_pause_x).toBeCloseTo(pos1_paused_x!);
+      expect(pos1_after_pause_x).toBeCloseTo(pos1_paused_x!);
 
-    layoutController.resume();
-    // Run again
-    // @ts-ignore
-    layoutController.tick(150);
-    const pos1_after_resume_x = state.data.nodes.find(n => n.id === 'n1')?.position?.x;
+      layoutController.resume();
+      layoutController.tick(150);
+      const pos1_after_resume_x = state.data.nodes.find(n => n.id === 'n1')?.position?.x;
 
-    expect(pos1_after_resume_x).not.toBeCloseTo(pos1_after_pause_x!);
+      expect(pos1_after_resume_x).not.toBeCloseTo(pos1_after_pause_x!);
 
-    layoutController.dispose();
+      layoutController.dispose();
+      dispose();
+    });
   });
 });

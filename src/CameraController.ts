@@ -10,22 +10,24 @@ export class CameraController {
   }
 
   public flyTo(
-    target: Partial<CameraSpec>,
+    targetState: Partial<CameraSpec>,
     options: { duration?: number; ease?: (t: number) => number } = {}
   ) {
     const { duration = 1000, ease } = options;
-
-    // Ensure there's a camera state to animate
     if (!this.state.camera) return;
 
-    const fromState: CameraSpec = {
-      position: { ...this.state.camera.position },
-      zoom: this.state.camera.zoom,
+    const fromState = {
+      target: { ...this.state.camera.target },
+      phi: this.state.camera.phi,
+      theta: this.state.camera.theta,
+      distance: this.state.camera.distance,
     };
 
-    const toState: CameraSpec = {
-      position: { ...fromState.position, ...target.position },
-      zoom: target.zoom ?? fromState.zoom,
+    const toState = {
+      target: { ...fromState.target, ...targetState.target },
+      phi: targetState.phi ?? fromState.phi,
+      theta: targetState.theta ?? fromState.theta,
+      distance: targetState.distance ?? fromState.distance,
     };
 
     animate({
@@ -34,21 +36,15 @@ export class CameraController {
       duration,
       ease,
       onUpdate: (latest) => {
-        // Directly mutate the reactive state. SolidJS will track these changes.
-        if (this.state.camera) {
-          if (toState.position.x !== fromState.position.x) {
-            this.state.camera.position.x = fromState.position.x + (toState.position.x - fromState.position.x) * latest;
-          }
-          if (toState.position.y !== fromState.position.y) {
-            this.state.camera.position.y = fromState.position.y + (toState.position.y - fromState.position.y) * latest;
-          }
-          if (toState.position.z !== fromState.position.z) {
-            this.state.camera.position.z = fromState.position.z + (toState.position.z - fromState.position.z) * latest;
-          }
-          if (toState.zoom !== fromState.zoom) {
-            this.state.camera.zoom = fromState.zoom + (toState.zoom - fromState.zoom) * latest;
-          }
-        }
+        if (!this.state.camera) return;
+
+        // Interpolate each property and update the reactive state
+        this.state.camera.target.x = fromState.target.x + (toState.target.x - fromState.target.x) * latest;
+        this.state.camera.target.y = fromState.target.y + (toState.target.y - fromState.target.y) * latest;
+        this.state.camera.target.z = fromState.target.z + (toState.target.z - fromState.target.z) * latest;
+        this.state.camera.phi = fromState.phi + (toState.phi - fromState.phi) * latest;
+        this.state.camera.theta = fromState.theta + (toState.theta - fromState.theta) * latest;
+        this.state.camera.distance = fromState.distance + (toState.distance - fromState.distance) * latest;
       },
     });
   }

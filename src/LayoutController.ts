@@ -9,8 +9,13 @@ interface Node extends Element, d3.SimulationNodeDatum {}
 export class LayoutController {
   private state: Store<Spec>;
   private simulation: Simulation<Node, Edge> | null = null;
+  public ready: Promise<void>;
+  private resolveReady: () => void;
 
   constructor(state: Store<Spec>) {
+    this.ready = new Promise(resolve => {
+      this.resolveReady = resolve;
+    });
     this.state = state;
 
     createEffect(() => {
@@ -58,6 +63,7 @@ export class LayoutController {
       });
 
     this.simulation.alpha(1).restart();
+    this.resolveReady();
   }
 
   private stopSimulation() {

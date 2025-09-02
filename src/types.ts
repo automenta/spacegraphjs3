@@ -16,9 +16,11 @@ export interface Edge {
 }
 
 export interface CameraSpec {
-  position: { x: number; y: number; z: number };
-  zoom: number;
-  [key: string]: any;
+  target: { x: number; y: number; z: number };
+  phi: number;
+  theta: number;
+  distance: number;
+  [key:string]: any;
 }
 
 export interface Spec {

@@ -14,39 +14,52 @@ describe('CameraController', () => {
 
   it('should animate camera state with flyTo', async () => {
     const initialSpec: Spec = {
-      camera: { position: { x: 0, y: 0, z: 5 }, zoom: 1 },
+      camera: {
+        target: { x: 0, y: 0, z: 0 },
+        phi: 0,
+        theta: 0,
+        distance: 10,
+      },
       interaction: { hoveredElementId: null, selectedElementIds: [] },
     };
 
     const { state } = createState(initialSpec);
     const cameraController = new CameraController(state);
 
-    const target = { position: { x: 10, z: 20 }, zoom: 2 };
-    const options = { duration: 1000, ease: (t: number) => t }; // Use linear easing for predictable testing
+    const target = {
+      target: { x: 10, y: 10, z: 10 },
+      distance: 5,
+      phi: 1,
+      theta: 1,
+    };
+    const options = { duration: 1000, ease: (t: number) => t };
 
-    // Start the animation
     cameraController.flyTo(target, options);
 
-    // Initial state should be unchanged on the first frame
-    expect(state.camera?.position.x).toBe(0);
-    expect(state.camera?.zoom).toBe(1);
+    expect(state.camera?.target.x).toBe(0);
+    expect(state.camera?.distance).toBe(10);
 
-    // Advance time by 500ms (halfway through)
     await vi.advanceTimersByTimeAsync(500);
 
     // State should be halfway to the target
-    expect(state.camera?.position.x).toBeCloseTo(5, 1);
-    expect(state.camera?.position.y).toBeCloseTo(0, 1); // y was not in the target
-    expect(state.camera?.position.z).toBeCloseTo(12.5, 1); // (5 + (20-5)/2)
-    expect(state.camera?.zoom).toBeCloseTo(1.25, 1); // (1 + (1.5-1)/2)
+    const checkIsClose = (val: number, target: number) => expect(Math.abs(val - target)).toBeLessThan(0.1);
+    checkIsClose(state.camera!.target.x, 5);
+    checkIsClose(state.camera!.target.y, 5);
+    checkIsClose(state.camera!.target.z, 5);
+    checkIsClose(state.camera!.distance, 7.5);
+    checkIsClose(state.camera!.phi, 0.5);
+    checkIsClose(state.camera!.theta, 0.5);
+
 
     // Advance time to the end
     await vi.advanceTimersByTimeAsync(500);
 
     // State should be at the target
-    expect(state.camera?.position.x).toBeCloseTo(10);
-    expect(state.camera?.position.y).toBeCloseTo(0);
-    expect(state.camera?.position.z).toBeCloseTo(20);
-    expect(state.camera?.zoom).toBeCloseTo(2);
+    checkIsClose(state.camera!.target.x, 10);
+    checkIsClose(state.camera!.target.y, 10);
+    checkIsClose(state.camera!.target.z, 10);
+    checkIsClose(state.camera!.distance, 5);
+    checkIsClose(state.camera!.phi, 1);
+    checkIsClose(state.camera!.theta, 1);
   });
 });
