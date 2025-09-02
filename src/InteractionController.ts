@@ -3,6 +3,7 @@ import { createGesture, Gesture } from '@use-gesture/vanilla';
 import { Store } from 'solid-js/store';
 import { Spec, Element } from './types';
 import { InstancedRenderer } from './InstancedRenderer';
+import { InteractionLogic } from './InteractionLogic';
 import {
   acceleratedRaycast,
   computeBoundsTree,
@@ -29,6 +30,9 @@ export class InteractionController {
   private raycaster: THREE.Raycaster;
   private pointer: THREE.Vector2;
   private lastHoveredId: string | null = null;
+  private draggedElementId: string | null = null;
+  private dragPlane = new THREE.Plane();
+  private dragStartOffset = new THREE.Vector3();
 
   constructor({
     rendererEl,
@@ -69,32 +73,64 @@ export class InteractionController {
 
     this.gesture = createGesture(
       {
-        onDrag: ({ movement: [mx, my], event, active }) => {
-          if (!active || !this.state.camera) return;
-          const e = event as PointerEvent;
+        onDragStart: ({ event }) => {
+          const { clientX, clientY } = event as PointerEvent;
+          this.draggedElementId = this._getHoveredElementId(clientX, clientY);
 
-          // Right-click drag for rotation (orbit)
-          if (e.buttons === 2) {
-            const rotateSpeed = 0.005;
-            const newTheta = this.state.camera.theta - mx * rotateSpeed;
-            let newPhi = this.state.camera.phi - my * rotateSpeed;
-            // Clamp phi to avoid flipping over at the poles
-            newPhi = Math.max(0.1, Math.min(Math.PI - 0.1, newPhi));
-            this.updateState({
-              camera: { ...this.state.camera, theta: newTheta, phi: newPhi },
-            });
+          if (this.draggedElementId) {
+            const element = this.getElement(this.draggedElementId);
+            if (element?.position) {
+              // Create a plane that is parallel to the camera and passes through the dragged object
+              this.threeCamera.getWorldDirection(this.dragPlane.normal);
+              this.dragPlane.setFromNormalAndCoplanarPoint(
+                this.dragPlane.normal,
+                new THREE.Vector3(
+                  element.position.x,
+                  element.position.y,
+                  element.position.z
+                )
+              );
+
+              // Inform layout engine to pin the node
+              this.emit('layout:pin', [this.draggedElementId]);
+            }
           }
-          // Left-click drag for panning
-          else {
-            const panSpeed = 0.01;
-            const newTarget = {
-              x: this.state.camera.target.x - mx * panSpeed,
-              y: this.state.camera.target.y + my * panSpeed,
-              z: this.state.camera.target.z,
-            };
-            this.updateState({
-              camera: { ...this.state.camera, target: newTarget },
-            });
+        },
+        onDrag: ({ movement: [mx, my], event, xy: [vx, vy], active }) => {
+          if (!active || !this.state.camera) return;
+
+          if (this.draggedElementId) {
+            // It's a node drag
+            InteractionLogic.handleNodeDrag(
+              vx,
+              vy,
+              this.draggedElementId,
+              this.dragPlane,
+              this.rendererEl,
+              this.threeCamera,
+              this.state
+            );
+          } else {
+            // It's a background drag (pan/orbit)
+            const e = event as PointerEvent;
+            if (e.buttons === 2) {
+              InteractionLogic.handleOrbit(mx, my, this.state, this.updateState);
+            } else {
+              InteractionLogic.handlePan(
+                mx,
+                my,
+                this.state,
+                this.updateState,
+                this.threeCamera
+              );
+            }
+          }
+        },
+        onDragEnd: () => {
+          if (this.draggedElementId) {
+            // Inform layout engine to unpin the node
+            this.emit('layout:unpin', [this.draggedElementId]);
+            this.draggedElementId = null;
           }
         },
         onWheel: ({ movement: [, my] }) => {

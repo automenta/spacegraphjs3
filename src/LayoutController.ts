@@ -119,6 +119,38 @@ export class LayoutController {
     if (this.simulation) this.simulation.alpha(1).restart();
   }
 
+  /**
+   * Pins nodes in the layout simulation, fixing their position.
+   * @param nodeIds - An array of node IDs to pin.
+   */
+  public pinNodes(nodeIds: string[]) {
+    if (!this.simulation) return;
+    this.simulation.nodes().forEach((node) => {
+      if (nodeIds.includes(node.id)) {
+        node.fx = node.x;
+        node.fy = node.y;
+        node.fz = node.z;
+      }
+    });
+  }
+
+  /**
+   * Unpins nodes in the layout simulation, allowing them to move freely.
+   * @param nodeIds - An array of node IDs to unpin.
+   */
+  public unpinNodes(nodeIds: string[]) {
+    if (!this.simulation) return;
+    this.simulation.nodes().forEach((node) => {
+      if (nodeIds.includes(node.id)) {
+        node.fx = null;
+        node.fy = null;
+        node.fz = null;
+      }
+    });
+    // Reheat the simulation slightly to incorporate the unpinned node
+    this.reheat();
+  }
+
   public dispose() {
     this.stopSimulation();
   }

@@ -1,4 +1,8 @@
 import * as THREE from 'three';
+import {
+  CSS3DRenderer,
+  CSS3DObject,
+} from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 import { createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { createState } from './createState';
@@ -7,6 +11,8 @@ import { LayoutController } from './LayoutController';
 import { CameraController } from './CameraController';
 import { InteractionController } from './InteractionController';
 import { InstancedRenderer } from './InstancedRenderer';
+import { EdgeRenderer } from './EdgeRenderer';
+import { HTMLRenderer } from './HTMLRenderer';
 import { HUDController } from './HUDController';
 
 export class SpaceGraph {
@@ -14,12 +20,16 @@ export class SpaceGraph {
   public state: Store<Spec>;
   private updateState: (spec: Partial<Spec>) => void;
   private scene: THREE.Scene;
+  private cssScene: THREE.Scene;
   private threeCamera: THREE.PerspectiveCamera; // Renamed from 'camera'
   private renderer: THREE.WebGLRenderer | null = null;
-  private layoutController: LayoutController;
+  private cssRenderer: CSS3DRenderer | null = null;
+  public layoutController: LayoutController;
   private cameraController: CameraController; // New controller
   private interactionController: InteractionController;
   private instancedRenderer: InstancedRenderer;
+  private edgeRenderer: EdgeRenderer;
+  private htmlRenderer: HTMLRenderer;
   private hudController: HUDController;
   private dispose: () => void;
   private eventListeners: Map<string, ((...args: any[]) => void)[]> = new Map();
@@ -39,11 +49,13 @@ export class SpaceGraph {
       this.updateState = updateState;
 
       // Initialize the three.js renderer and scene
-      this.initRenderer();
-      this.initScene();
+      this.initRenderers();
+      this.initScenes();
 
       // Create the instanced renderer for nodes
       this.instancedRenderer = new InstancedRenderer(this.scene, this.state);
+      this.edgeRenderer = new EdgeRenderer(this.scene, this.state);
+      this.htmlRenderer = new HTMLRenderer(this.cssScene, this.state);
 
       // Initialize all the controllers that manage different parts of the application
       this._initControllers((eventName: string, ...args: any[]) =>
@@ -120,9 +132,18 @@ export class SpaceGraph {
       getElement: this.getElement.bind(this),
     });
     this.hudController = new HUDController(this.container, this.state);
+
+    // Wire up events between controllers
+    this.on('layout:pin', (nodeIds: string[]) => {
+      this.layoutController.pinNodes(nodeIds);
+    });
+    this.on('layout:unpin', (nodeIds: string[]) => {
+      this.layoutController.unpinNodes(nodeIds);
+    });
   }
 
-  private initRenderer() {
+  private initRenderers() {
+    // Initialize WebGL Renderer
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setSize(
       this.container.clientWidth,
@@ -130,10 +151,27 @@ export class SpaceGraph {
     );
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.container.appendChild(this.renderer.domElement);
+
+    // Initialize CSS3D Renderer
+    this.cssRenderer = new CSS3DRenderer();
+    this.cssRenderer.setSize(
+      this.container.clientWidth,
+      this.container.clientHeight
+    );
+    this.cssRenderer.domElement.style.position = 'absolute';
+    this.cssRenderer.domElement.style.top = '0';
+    this.cssRenderer.domElement.style.pointerEvents = 'none'; // Initially, let webgl handle events
+    this.container.appendChild(this.cssRenderer.domElement);
+
+    // Ensure container is positioned relatively to anchor the absolute CSS renderer
+    if (getComputedStyle(this.container).position === 'static') {
+      this.container.style.position = 'relative';
+    }
   }
 
-  private initScene() {
+  private initScenes() {
     this.scene = new THREE.Scene();
+    this.cssScene = new THREE.Scene();
     this.threeCamera = new THREE.PerspectiveCamera(
       75,
       this.container.clientWidth / this.container.clientHeight,
@@ -148,19 +186,21 @@ export class SpaceGraph {
   }
 
   private handleResize = () => {
-    if (!this.renderer) return;
+    if (!this.renderer || !this.cssRenderer) return;
     const width = this.container.clientWidth;
     const height = this.container.clientHeight;
 
     this.threeCamera.aspect = width / height;
     this.threeCamera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
+    this.cssRenderer.setSize(width, height);
   };
 
   private animate = () => {
-    if (!this.renderer) return;
+    if (!this.renderer || !this.cssRenderer) return;
     requestAnimationFrame(this.animate);
-    this.renderer.render(this.scene, this.threeCamera); // Use threeCamera
+    this.renderer.render(this.scene, this.threeCamera);
+    this.cssRenderer.render(this.cssScene, this.threeCamera);
   };
 
   public destroy() {
@@ -168,14 +208,24 @@ export class SpaceGraph {
     this.interactionController.dispose();
     this.layoutController.dispose();
     this.instancedRenderer.dispose();
+    this.edgeRenderer.dispose();
+    this.htmlRenderer.dispose();
     this.hudController.dispose();
 
     window.removeEventListener('resize', this.handleResize);
 
     if (this.renderer) {
       this.renderer.dispose();
-      this.container.removeChild(this.renderer.domElement);
+      if (this.renderer.domElement.parentNode === this.container) {
+        this.container.removeChild(this.renderer.domElement);
+      }
       this.renderer = null;
+    }
+    if (this.cssRenderer) {
+      if (this.cssRenderer.domElement.parentNode === this.container) {
+        this.container.removeChild(this.cssRenderer.domElement);
+      }
+      this.cssRenderer = null;
     }
   }
 }

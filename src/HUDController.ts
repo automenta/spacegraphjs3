@@ -1,10 +1,11 @@
+import { createEffect, onCleanup } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { Spec } from './types';
 
 export class HUDController {
   private state: Store<Spec>;
   private hudContainer: HTMLDivElement;
-  private menuBar: HTMLDivElement;
+  public statsContainer: HTMLDivElement;
 
   constructor(container: HTMLElement, state: Store<Spec>) {
     this.state = state;
@@ -14,26 +15,51 @@ export class HUDController {
     this.hudContainer.style.left = '0';
     this.hudContainer.style.width = '100%';
     this.hudContainer.style.height = '100%';
-    this.hudContainer.style.pointerEvents = 'none'; // Allow clicks to pass through to the canvas
+    this.hudContainer.style.pointerEvents = 'none';
+    this.hudContainer.style.color = 'white';
+    this.hudContainer.style.fontFamily = 'monospace';
+    this.hudContainer.style.fontSize = '12px';
     container.appendChild(this.hudContainer);
 
-    this.initMenuBar();
-    // The REPL has been removed for security reasons.
-    // this.initStatusBar(onExecute);
+    this.initStatsDisplay();
+
+    onCleanup(() => this.dispose());
   }
 
-  private initMenuBar() {
-    this.menuBar = document.createElement('div');
-    this.menuBar.style.position = 'absolute';
-    this.menuBar.style.top = '10px';
-    this.menuBar.style.left = '10px';
-    this.menuBar.style.color = 'white';
-    this.menuBar.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-    this.menuBar.style.padding = '5px 10px';
-    this.menuBar.style.borderRadius = '5px';
-    this.menuBar.style.pointerEvents = 'auto'; // Re-enable pointer events for the menu
-    this.menuBar.textContent = 'SpaceGraphJS v3.1';
-    this.hudContainer.appendChild(this.menuBar);
+  private initStatsDisplay() {
+    this.statsContainer = document.createElement('div');
+    this.statsContainer.style.position = 'absolute';
+    this.statsContainer.style.bottom = '10px';
+    this.statsContainer.style.left = '10px';
+    this.statsContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    this.statsContainer.style.padding = '5px 10px';
+    this.statsContainer.style.borderRadius = '5px';
+    this.hudContainer.appendChild(this.statsContainer);
+
+    createEffect(() => this.updateStats());
+  }
+
+  public updateStats() {
+    const nodes = this.state.data?.nodes?.length || 0;
+    const edges = this.state.data?.edges?.length || 0;
+    const camera = this.state.camera;
+
+    const cameraTarget = camera?.target
+      ? `x:${camera.target.x.toFixed(2)}, y:${camera.target.y.toFixed(
+          2
+        )}, z:${camera.target.z.toFixed(2)}`
+      : 'N/A';
+
+    this.statsContainer.innerHTML = `
+        Nodes: ${nodes}<br>
+        Edges: ${edges}<br>
+        <hr>
+        Camera:<br>
+        &nbsp;&nbsp;Phi: ${camera?.phi?.toFixed(2) ?? 'N/A'}<br>
+        &nbsp;&nbsp;Theta: ${camera?.theta?.toFixed(2) ?? 'N/A'}<br>
+        &nbsp;&nbsp;Distance: ${camera?.distance?.toFixed(2) ?? 'N/A'}<br>
+        &nbsp;&nbsp;Target: ${cameraTarget}
+      `;
   }
 
   public dispose() {

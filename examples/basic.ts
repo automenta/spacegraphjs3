@@ -10,9 +10,16 @@ const initialSpec: Spec = {
       { id: 'n3', type: 'sphere', label: 'Node 3', color: '#3357ff' },
       { id: 'n4', type: 'sphere', label: 'Node 4', color: '#ff33a1' },
       { id: 'n5', type: 'sphere', label: 'Node 5', color: '#a133ff' },
+      {
+        id: 'n6',
+        type: 'html',
+        content: '<div>Hello World!</div>',
+        className: 'my-html-node',
+      },
     ],
     edges: [
       { id: 'e1', source: 'n1', target: 'n2' },
+      { id: 'e5', source: 'n2', target: 'n6' },
       { id: 'e2', source: 'n1', target: 'n3' },
       { id: 'e3', source: 'n1', target: 'n4' },
       { id: 'e4', source: 'n1', target: 'n5' },
