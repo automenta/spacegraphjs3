@@ -11,12 +11,14 @@ export class LayoutController {
   private simulation: Simulation<Node, Edge> | null = null;
   public ready: Promise<void>;
   private resolveReady: () => void;
+  private emit: (eventName: string, ...args: any[]) => void;
 
-  constructor(state: Store<Spec>) {
+  constructor(state: Store<Spec>, emit: (eventName: string, ...args: any[]) => void) {
     this.ready = new Promise(resolve => {
       this.resolveReady = resolve;
     });
     this.state = state;
+    this.emit = emit;
 
     createEffect(() => {
       const layoutType = this.state.layout?.type;
@@ -60,9 +62,14 @@ export class LayoutController {
             originalNode.position.z = simNode.z!;
           }
         });
+        this.emit('layout:tick');
+      })
+      .on('end', () => {
+        this.emit('layout:stabilize');
       });
 
     this.simulation.alpha(1).restart();
+    this.emit('layout:start');
     this.resolveReady();
   }
 

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { createGesture, Gesture } from '@use-gesture/vanilla';
 import { Store } from 'solid-js/store';
-import { Spec } from './types';
+import { Spec, Element } from './types';
 import { InstancedRenderer } from './InstancedRenderer';
 import { acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from 'three-mesh-bvh';
 
@@ -24,6 +24,8 @@ export class InteractionController {
   private gesture: Gesture;
   private raycaster: THREE.Raycaster;
   private pointer: THREE.Vector2;
+  private emit: (eventName: string, ...args: any[]) => void;
+  private lastHoveredId: string | null = null;
 
   constructor(
     rendererEl: HTMLElement,
@@ -31,7 +33,8 @@ export class InteractionController {
     updateState: (spec: Partial<Spec>) => void,
     threeCamera: THREE.PerspectiveCamera,
     scene: THREE.Scene,
-    instancedRenderer: InstancedRenderer
+    instancedRenderer: InstancedRenderer,
+    emit: (eventName: string, ...args: any[]) => void
   ) {
     this.rendererEl = rendererEl;
     this.state = state;
@@ -39,6 +42,7 @@ export class InteractionController {
     this.threeCamera = threeCamera;
     this.scene = scene;
     this.instancedRenderer = instancedRenderer;
+    this.emit = emit;
 
     this.initInteraction();
   }
@@ -95,11 +99,23 @@ export class InteractionController {
             }
           }
 
+          if (hoveredId !== this.lastHoveredId) {
+            if (this.lastHoveredId) {
+              const target = this.getElementById(this.lastHoveredId);
+              if (target) this.emit('element:hover:leave', { target });
+            }
+            if (hoveredId) {
+              const target = this.getElementById(hoveredId);
+              if (target) this.emit('element:hover:enter', { target });
+            }
+            this.lastHoveredId = hoveredId;
+          }
+
           this.updateState({
             interaction: { hoveredElementId: hoveredId ?? null }
           });
         },
-        onClick: () => {
+        onClick: ({ event }) => {
           this.raycaster.setFromCamera(this.pointer, this.threeCamera);
           const intersects = this.raycaster.intersectObjects([this.instancedRenderer.instancedMesh]);
 
@@ -108,6 +124,9 @@ export class InteractionController {
             if (intersection.instanceId !== undefined) {
               const clickedId = this.instancedRenderer.getNodeId(intersection.instanceId);
               if (clickedId) {
+                const target = this.getElementById(clickedId);
+                if (target) this.emit('element:click', { target, domEvent: event });
+
                 const selectedIds = this.state.interaction.selectedElementIds;
                 const newSelectedIds = selectedIds.includes(clickedId)
                   ? selectedIds.filter(id => id !== clickedId)
@@ -117,12 +136,17 @@ export class InteractionController {
               }
             }
           } else {
+            this.emit('background:click', { domEvent: event });
             this.updateState({ interaction: { selectedElementIds: [] }});
           }
         },
       },
       { domTarget: this.rendererEl, eventOptions: { passive: false } }
     );
+  }
+
+  private getElementById(id: string): Element | undefined {
+    return this.state.data?.nodes?.find(n => n.id === id) || this.state.data?.edges?.find(e => e.id === id);
   }
 
   public dispose() {

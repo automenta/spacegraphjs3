@@ -1,12 +1,15 @@
+import * as THREE from 'three';
 import { Store } from 'solid-js/store';
 import { animate } from 'popmotion';
-import { Spec, CameraSpec } from './types';
+import { Spec, CameraSpec, Element } from './types';
 
 export class CameraController {
   private state: Store<Spec>;
+  private emit: (eventName: string, ...args: any[]) => void;
 
-  constructor(state: Store<Spec>) {
+  constructor(state: Store<Spec>, emit: (eventName: string, ...args: any[]) => void) {
     this.state = state;
+    this.emit = emit;
   }
 
   public flyTo(
@@ -30,6 +33,7 @@ export class CameraController {
       distance: targetState.distance ?? fromState.distance,
     };
 
+    this.emit('camera:animation:start');
     animate({
       from: 0,
       to: 1,
@@ -46,12 +50,46 @@ export class CameraController {
         this.state.camera.theta = fromState.theta + (toState.theta - fromState.theta) * latest;
         this.state.camera.distance = fromState.distance + (toState.distance - fromState.distance) * latest;
       },
+      onComplete: () => {
+        this.emit('camera:animation:end');
+      }
     });
   }
 
-  public frame(elements: Element[], options?: any) {
-    // TODO: This would calculate the bounding box of the elements
-    // and then call flyTo to frame them.
-    console.warn('frame() is not yet implemented.');
+  public frame(
+    elements: Element[],
+    options: { padding?: number; duration?: number } = {}
+  ) {
+    if (elements.length === 0) return;
+
+    const { padding = 1.2, duration = 1000 } = options;
+
+    const box = new THREE.Box3();
+
+    for (const el of elements) {
+      if (el.position) {
+        box.expandByPoint(new THREE.Vector3(el.position.x, el.position.y, el.position.z));
+      }
+    }
+
+    const center = new THREE.Vector3();
+    box.getCenter(center);
+
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    const maxDim = Math.max(size.x, size.y, size.z);
+
+    // This is a rough approximation. A proper implementation would
+    // need the camera's FOV. Assuming a default FOV around 50-75 degrees,
+    // a distance of maxDim * 1.5 is a reasonable starting point.
+    const distance = maxDim * 1.5 * padding;
+
+    this.flyTo(
+      {
+        target: { x: center.x, y: center.y, z: center.z },
+        distance: distance,
+      },
+      { duration }
+    );
   }
 }

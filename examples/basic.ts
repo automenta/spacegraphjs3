@@ -5,11 +5,11 @@ import { Spec } from '../src/types';
 const initialSpec: Spec = {
   data: {
     nodes: [
-      { id: 'n1', type: 'sphere', label: 'Node 1', color: '#ff5733', position: { x: 0, y: 0, z: 0 } },
-      { id: 'n2', type: 'sphere', label: 'Node 2', color: '#33ff57', position: { x: 1, y: 1, z: 0 } },
-      { id: 'n3', type: 'sphere', label: 'Node 3', color: '#3357ff', position: { x: -1, y: 1, z: 0 } },
-      { id: 'n4', type: 'sphere', label: 'Node 4', color: '#ff33a1', position: { x: -1, y: -1, z: 0 } },
-      { id: 'n5', type: 'sphere', label: 'Node 5', color: '#a133ff', position: { x: 1, y: -1, z: 0 } },
+      { id: 'n1', type: 'sphere', label: 'Node 1', color: '#ff5733' },
+      { id: 'n2', type: 'sphere', label: 'Node 2', color: '#33ff57' },
+      { id: 'n3', type: 'sphere', label: 'Node 3', color: '#3357ff' },
+      { id: 'n4', type: 'sphere', label: 'Node 4', color: '#ff33a1' },
+      { id: 'n5', type: 'sphere', label: 'Node 5', color: '#a133ff' },
     ],
     edges: [
       { id: 'e1', source: 'n1', target: 'n2' },
@@ -19,12 +19,12 @@ const initialSpec: Spec = {
     ],
   },
   layout: {
-    type: 'force-directed', // Use the force-directed layout
+    type: 'force-directed',
   },
   camera: {
     target: { x: 0, y: 0, z: 0 },
-    phi: 0.2, // A bit of an angle from the top
-    theta: 0.1, // A bit of an angle from the side
+    phi: 0.2,
+    theta: 0.1,
     distance: 15,
   },
   interaction: {
@@ -33,47 +33,54 @@ const initialSpec: Spec = {
   },
   style: {
     'node:hover': { color: '#ffff00' },
-    'node:selected': { color: '#ffffff' },
+    'node:selected': { color: '#ffffff', glow: { color: '#ffffff', strength: 1.5 } },
   },
 };
 
 // 2. Create the SpaceGraph instance.
 const graph = new SpaceGraph('#container', initialSpec);
 
-// 3. Expose the graph instance for debugging and testing.
+// 3. Expose the graph instance for debugging and testing via the console and the HUD REPL.
 (window as any).graph = graph;
-console.log('SpaceGraph initialized');
+console.log(`
+  SpaceGraphJS Initialized!
+  -------------------------
+  You can interact with the graph instance via the 'graph' variable in the console,
+  or by using the REPL at the bottom of the screen.
 
-// 4. Automated Verification Logic
-setTimeout(() => {
-  console.log('Running automated verification...');
-  const resultsDiv = document.getElementById('test-results')!;
-  let resultsHTML = '';
+  Try commands like:
+  - graph.camera.flyTo({ distance: 5 }, { duration: 1000 })
+  - graph.update({ style: { 'node:selected': { color: '#ff00ff' } } })
+  - const nodes = graph.state.data.nodes; graph.camera.frame(nodes)
+`);
 
-  // Test 1: Layout Engine
-  const node1 = graph.state.data.nodes.find(n => n.id === 'n1');
-  const initialNodePos = initialSpec.data!.nodes!.find(n => n.id === 'n1')!.position!;
-  const layoutPass = node1!.position.x !== initialNodePos.x || node1!.position.y !== initialNodePos.y;
-  resultsHTML += `Layout Test: <span style="color: ${layoutPass ? 'lightgreen' : 'red'}">${layoutPass ? 'PASS' : 'FAIL'}</span><br>`;
+// 4. Use the new event system to react to graph events.
+graph.on('layout:start', () => {
+  console.log('Layout simulation started.');
+});
 
-  // Test 2: Camera Animation
-  const cameraTargetDistance = 5;
-  const cameraPass = Math.abs(graph.state.camera.distance - cameraTargetDistance) < 0.1;
-  resultsHTML += `Camera Test: <span style="color: ${cameraPass ? 'lightgreen' : 'red'}">${cameraPass ? 'PASS' : 'FAIL'}</span><br>`;
+graph.on('layout:stabilize', () => {
+  console.log('Layout has stabilized.');
+});
 
-  resultsDiv.innerHTML = resultsHTML;
-  console.log('Verification complete.');
+graph.on('element:click', ({ target }) => {
+  console.log(`Element clicked:`, target);
+  // Example of direct manipulation:
+  // target.color = '#00ff00';
+});
 
-}, 7000); // Run checks after layout and animation have had time to finish.
+graph.on('element:hover:enter', ({ target }) => {
+  console.log('Hover entered:', target.id);
+});
 
+graph.on('element:hover:leave', ({ target }) => {
+  console.log('Hover left:', target.id);
+});
 
-// 5. Demonstrate camera animation (for visual inspection)
-setTimeout(() => {
-  console.log('Kicking off camera animation...');
-  graph.camera.flyTo(
-    {
-      distance: 5,
-    },
-    { duration: 2000 }
-  );
-}, 4000);
+graph.on('camera:animation:start', () => {
+  console.log('Camera animation started.');
+});
+
+graph.on('camera:animation:end', () => {
+  console.log('Camera animation finished.');
+});
