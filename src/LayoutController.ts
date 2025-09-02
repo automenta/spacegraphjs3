@@ -1,4 +1,4 @@
-import { createEffect, onCleanup } from 'solid-js';
+import { onCleanup } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { forceSimulation, forceManyBody, forceCenter, forceLink, Simulation } from 'd3-force-3d';
 import { Spec, Element, Edge } from './types';
@@ -12,6 +12,8 @@ export class LayoutController {
   public ready: Promise<void>;
   private resolveReady: () => void;
   private emit: (eventName: string, ...args: any[]) => void;
+  private originalNodes: Node[] = [];
+  private paused = false;
 
   constructor(state: Store<Spec>, emit: (eventName: string, ...args: any[]) => void) {
     this.ready = new Promise(resolve => {
@@ -20,26 +22,26 @@ export class LayoutController {
     this.state = state;
     this.emit = emit;
 
-    createEffect(() => {
-      const layoutType = this.state.layout?.type;
-      if (layoutType === 'force-directed') {
-        this.initForceSimulation();
-      } else {
-        this.stopSimulation();
-      }
-    });
-
     onCleanup(() => this.stopSimulation());
+  }
+
+  public init() {
+    const layoutType = this.state.layout?.type;
+    if (layoutType === 'force-directed') {
+      this.initForceSimulation();
+    } else {
+      this.stopSimulation();
+    }
   }
 
   private initForceSimulation() {
     this.stopSimulation();
 
-    const originalNodes = (this.state.data?.nodes || []) as Node[];
+    this.originalNodes = (this.state.data?.nodes || []) as Node[];
     const edges = (this.state.data?.edges || []) as Edge[];
 
     // Create a deep copy of the nodes for the simulation to avoid proxy issues.
-    const simNodes: Node[] = JSON.parse(JSON.stringify(originalNodes));
+    const simNodes: Node[] = JSON.parse(JSON.stringify(this.originalNodes));
 
     // Initialize positions for d3.
     simNodes.forEach(node => {
@@ -54,8 +56,8 @@ export class LayoutController {
       .force('link', forceLink<Node, Edge>(edges).id((d: Node) => d.id).distance(50).strength(1))
       .on('tick', () => {
         // On each tick, update the positions of the original reactive nodes.
-        simNodes.forEach((simNode, i) => {
-          const originalNode = originalNodes[i];
+        this.simulation?.nodes().forEach((simNode, i) => {
+          const originalNode = this.originalNodes[i];
           if (originalNode?.position) {
             originalNode.position.x = simNode.x!;
             originalNode.position.y = simNode.y!;
@@ -81,10 +83,12 @@ export class LayoutController {
   }
 
   public resume() {
+    this.paused = false;
     if (this.simulation) this.simulation.alphaTarget(0.3).restart();
   }
 
   public pause() {
+    this.paused = true;
     if (this.simulation) this.simulation.alphaTarget(0);
   }
 
@@ -97,10 +101,20 @@ export class LayoutController {
   }
 
   public tick(iterations = 1) {
-    if (this.simulation) {
+    if (this.simulation && !this.paused) {
       for (let i = 0; i < iterations; i++) {
         this.simulation.tick();
       }
+      // Manually update positions for tests
+      this.simulation.nodes().forEach((simNode, i) => {
+        const originalNode = this.originalNodes[i];
+        if (originalNode?.position) {
+          originalNode.position.x = simNode.x!;
+          originalNode.position.y = simNode.y!;
+          originalNode.position.z = simNode.z!;
+        }
+      });
+      this.emit('layout:tick');
     }
   }
 }

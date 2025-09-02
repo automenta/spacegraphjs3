@@ -4,6 +4,7 @@ import { Store } from 'solid-js/store';
 import { Spec, Element } from './types';
 import { InstancedRenderer } from './InstancedRenderer';
 import { acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from 'three-mesh-bvh';
+import type { SpaceGraph } from './SpaceGraph';
 
 // Add the bvh properties to the THREE.Raycaster
 // @ts-ignore
@@ -15,6 +16,7 @@ THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 
 
 export class InteractionController {
+  private graph: SpaceGraph;
   private state: Store<Spec>;
   private updateState: (spec: Partial<Spec>) => void;
   private threeCamera: THREE.PerspectiveCamera;
@@ -28,6 +30,7 @@ export class InteractionController {
   private lastHoveredId: string | null = null;
 
   constructor(
+    graph: SpaceGraph,
     rendererEl: HTMLElement,
     state: Store<Spec>,
     updateState: (spec: Partial<Spec>) => void,
@@ -36,6 +39,7 @@ export class InteractionController {
     instancedRenderer: InstancedRenderer,
     emit: (eventName: string, ...args: any[]) => void
   ) {
+    this.graph = graph;
     this.rendererEl = rendererEl;
     this.state = state;
     this.updateState = updateState;
@@ -101,11 +105,11 @@ export class InteractionController {
 
           if (hoveredId !== this.lastHoveredId) {
             if (this.lastHoveredId) {
-              const target = this.getElementById(this.lastHoveredId);
+              const target = this.graph.getElement(this.lastHoveredId);
               if (target) this.emit('element:hover:leave', { target });
             }
             if (hoveredId) {
-              const target = this.getElementById(hoveredId);
+              const target = this.graph.getElement(hoveredId);
               if (target) this.emit('element:hover:enter', { target });
             }
             this.lastHoveredId = hoveredId;
@@ -124,7 +128,7 @@ export class InteractionController {
             if (intersection.instanceId !== undefined) {
               const clickedId = this.instancedRenderer.getNodeId(intersection.instanceId);
               if (clickedId) {
-                const target = this.getElementById(clickedId);
+                const target = this.graph.getElement(clickedId);
                 if (target) this.emit('element:click', { target, domEvent: event });
 
                 const selectedIds = this.state.interaction.selectedElementIds;
@@ -143,10 +147,6 @@ export class InteractionController {
       },
       { domTarget: this.rendererEl, eventOptions: { passive: false } }
     );
-  }
-
-  private getElementById(id: string): Element | undefined {
-    return this.state.data?.nodes?.find(n => n.id === id) || this.state.data?.edges?.find(e => e.id === id);
   }
 
   public dispose() {

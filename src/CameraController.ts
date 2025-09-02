@@ -2,19 +2,47 @@ import * as THREE from 'three';
 import { Store } from 'solid-js/store';
 import { animate } from 'popmotion';
 import { Spec, CameraSpec, Element } from './types';
+import { createEffect } from 'solid-js';
 
 export class CameraController {
   private state: Store<Spec>;
   private emit: (eventName: string, ...args: any[]) => void;
+  private threeCamera: THREE.PerspectiveCamera;
 
-  constructor(state: Store<Spec>, emit: (eventName: string, ...args: any[]) => void) {
+  constructor(
+    state: Store<Spec>,
+    emit: (eventName: string, ...args: any[]) => void,
+    threeCamera: THREE.PerspectiveCamera,
+  ) {
     this.state = state;
     this.emit = emit;
+    this.threeCamera = threeCamera;
+
+    // Effect to sync Three.js camera with reactive state
+    createEffect(() => {
+      const cameraState = this.state.camera;
+      if (cameraState) {
+        // Calculate position from spherical coordinates (phi, theta, distance)
+        const phi = cameraState.phi;
+        const theta = cameraState.theta;
+        const distance = cameraState.distance;
+        const target = cameraState.target;
+
+        const x = distance * Math.sin(phi) * Math.sin(theta);
+        const y = distance * Math.cos(phi);
+        const z = distance * Math.sin(phi) * Math.cos(theta);
+
+        this.threeCamera.position.set(target.x + x, target.y + y, target.z + z);
+
+        this.threeCamera.lookAt(new THREE.Vector3(target.x, target.y, target.z));
+        this.threeCamera.updateProjectionMatrix();
+      }
+    });
   }
 
   public flyTo(
     targetState: Partial<CameraSpec>,
-    options: { duration?: number; ease?: (t: number) => number } = {}
+    options: { duration?: number; ease?: (t: number) => number } = {},
   ) {
     const { duration = 1000, ease } = options;
     if (!this.state.camera) return;
@@ -43,22 +71,26 @@ export class CameraController {
         if (!this.state.camera) return;
 
         // Interpolate each property and update the reactive state
-        this.state.camera.target.x = fromState.target.x + (toState.target.x - fromState.target.x) * latest;
-        this.state.camera.target.y = fromState.target.y + (toState.target.y - fromState.target.y) * latest;
-        this.state.camera.target.z = fromState.target.z + (toState.target.z - fromState.target.z) * latest;
+        this.state.camera.target.x =
+          fromState.target.x + (toState.target.x - fromState.target.x) * latest;
+        this.state.camera.target.y =
+          fromState.target.y + (toState.target.y - fromState.target.y) * latest;
+        this.state.camera.target.z =
+          fromState.target.z + (toState.target.z - fromState.target.z) * latest;
         this.state.camera.phi = fromState.phi + (toState.phi - fromState.phi) * latest;
         this.state.camera.theta = fromState.theta + (toState.theta - fromState.theta) * latest;
-        this.state.camera.distance = fromState.distance + (toState.distance - fromState.distance) * latest;
+        this.state.camera.distance =
+          fromState.distance + (toState.distance - fromState.distance) * latest;
       },
       onComplete: () => {
         this.emit('camera:animation:end');
-      }
+      },
     });
   }
 
   public frame(
     elements: Element[],
-    options: { padding?: number; duration?: number } = {}
+    options: { padding?: number; duration?: number } = {},
   ) {
     if (elements.length === 0) return;
 
@@ -79,17 +111,17 @@ export class CameraController {
     box.getSize(size);
     const maxDim = Math.max(size.x, size.y, size.z);
 
-    // This is a rough approximation. A proper implementation would
-    // need the camera's FOV. Assuming a default FOV around 50-75 degrees,
-    // a distance of maxDim * 1.5 is a reasonable starting point.
-    const distance = maxDim * 1.5 * padding;
+    // Calculate distance to frame the object based on camera FOV
+    const fov = this.threeCamera.fov * (Math.PI / 180);
+    let distance = maxDim / 2 / Math.tan(fov / 2);
+    distance *= padding; // Apply padding
 
     this.flyTo(
       {
         target: { x: center.x, y: center.y, z: center.z },
         distance: distance,
       },
-      { duration }
+      { duration },
     );
   }
 }

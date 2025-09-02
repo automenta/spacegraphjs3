@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createState } from '../../src/createState';
 import { CameraController } from '../../src/CameraController';
 import { Spec } from '../../src/types';
+import * as THREE from 'three';
 
 describe('CameraController', () => {
   beforeEach(() => {
@@ -24,7 +25,9 @@ describe('CameraController', () => {
     };
 
     const { state } = createState(initialSpec);
-    const cameraController = new CameraController(state);
+    const mockEmit = vi.fn();
+    const mockCamera = new THREE.PerspectiveCamera();
+    const cameraController = new CameraController(state, mockEmit, mockCamera);
 
     const target = {
       target: { x: 10, y: 10, z: 10 },

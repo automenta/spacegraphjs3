@@ -55,24 +55,8 @@ export class SpaceGraph {
 
       this.instancedRenderer = new InstancedRenderer(this.scene, this.state);
 
-      this.initReactiveEffects(); // Combined reactive initializers
-
       const emit = this.events.emit.bind(this.events);
-
-      // Initialize controllers
-      this.layoutController = new LayoutController(this.state, emit);
-      this.cameraController = new CameraController(this.state, emit);
-      this.interactionController = new InteractionController(
-        this.renderer!.domElement,
-        this.state,
-        this.updateState,
-        this.threeCamera,
-        this.scene,
-        this.instancedRenderer,
-        emit,
-      );
-
-      this.hudController = new HUDController(this.container, this.state, (command) => this.execute(command));
+      this._initControllers(emit);
 
 
       window.addEventListener('resize', this.handleResize);
@@ -99,6 +83,23 @@ export class SpaceGraph {
     return this.cameraController;
   }
 
+  private _initControllers(emit: (eventName: string, ...args: any[]) => void) {
+    this.layoutController = new LayoutController(this.state, emit);
+    this.layoutController.init();
+    this.cameraController = new CameraController(this.state, emit, this.threeCamera);
+    this.interactionController = new InteractionController(
+      this,
+      this.renderer!.domElement,
+      this.state,
+      this.updateState,
+      this.threeCamera,
+      this.scene,
+      this.instancedRenderer,
+      emit,
+    );
+    this.hudController = new HUDController(this.container, this.state, (command) => this.execute(command));
+  }
+
   private initRenderer() {
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
@@ -115,33 +116,6 @@ export class SpaceGraph {
       1000
     );
     this.scene.add(this.threeCamera); // Add camera to scene
-  }
-
-  private initReactiveEffects() {
-    // Effect to sync Three.js camera with reactive state
-    createEffect(() => {
-      const cameraState = this.state.camera;
-      if (cameraState) {
-        // Calculate position from spherical coordinates (phi, theta, distance)
-        const phi = cameraState.phi;
-        const theta = cameraState.theta;
-        const distance = cameraState.distance;
-        const target = cameraState.target;
-
-        const x = distance * Math.sin(phi) * Math.sin(theta);
-        const y = distance * Math.cos(phi);
-        const z = distance * Math.sin(phi) * Math.cos(theta);
-
-        this.threeCamera.position.set(
-          target.x + x,
-          target.y + y,
-          target.z + z
-        );
-
-        this.threeCamera.lookAt(new THREE.Vector3(target.x, target.y, target.z));
-        this.threeCamera.updateProjectionMatrix();
-      }
-    });
   }
 
   public update(spec: Partial<Spec>) {
@@ -165,6 +139,9 @@ export class SpaceGraph {
   };
 
   public execute(command: string) {
+    console.warn(
+      'Warning: The execute method uses `new Function()` to run arbitrary code, which can be a security risk if the input is not properly sanitized. Use with caution.',
+    );
     try {
       // A "safe" eval context.
       const func = new Function('graph', `with(graph) { ${command} }`);

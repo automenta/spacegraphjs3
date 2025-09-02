@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { createRoot } from 'solid-js';
 import { createState } from '../../src/createState';
 import { LayoutController } from '../../src/LayoutController';
@@ -21,7 +21,9 @@ describe('LayoutController', () => {
       };
 
       const { state } = createState(initialSpec);
-      const layoutController = new LayoutController(state);
+      const mockEmit = vi.fn();
+      const layoutController = new LayoutController(state, mockEmit);
+      layoutController.init();
 
       await layoutController.ready;
 
@@ -56,7 +58,9 @@ describe('LayoutController', () => {
       };
 
       const { state } = createState(initialSpec);
-      const layoutController = new LayoutController(state);
+      const mockEmit = vi.fn();
+      const layoutController = new LayoutController(state, mockEmit);
+      layoutController.init();
 
       await layoutController.ready;
 
