@@ -1,6 +1,12 @@
 import { onCleanup } from 'solid-js';
 import { Store } from 'solid-js/store';
-import { forceSimulation, forceManyBody, forceCenter, forceLink, Simulation } from 'd3-force-3d';
+import {
+  forceSimulation,
+  forceManyBody,
+  forceCenter,
+  forceLink,
+  Simulation,
+} from 'd3-force-3d';
 import { Spec, Element, Edge } from './types';
 
 // Extend the d3-force Node type to include our Element properties
@@ -15,8 +21,11 @@ export class LayoutController {
   private originalNodes: Node[] = [];
   private paused = false;
 
-  constructor(state: Store<Spec>, emit: (eventName: string, ...args: any[]) => void) {
-    this.ready = new Promise(resolve => {
+  constructor(
+    state: Store<Spec>,
+    emit: (eventName: string, ...args: any[]) => void
+  ) {
+    this.ready = new Promise((resolve) => {
       this.resolveReady = resolve;
     });
     this.state = state;
@@ -34,6 +43,9 @@ export class LayoutController {
     }
   }
 
+  /**
+   * Initialize the d3-force simulation.
+   */
   private initForceSimulation() {
     this.stopSimulation();
 
@@ -44,16 +56,27 @@ export class LayoutController {
     const simNodes: Node[] = JSON.parse(JSON.stringify(this.originalNodes));
 
     // Initialize positions for d3.
-    simNodes.forEach(node => {
+    simNodes.forEach((node) => {
       node.x = node.position?.x ?? 0;
       node.y = node.position?.y ?? 0;
       node.z = node.position?.z ?? 0;
     });
 
+    const layoutSpec = this.state.layout as import('./types').ForceDirectedLayoutSpec;
+    const charge = layoutSpec.charge ?? -50;
+    const linkDistance = layoutSpec.linkDistance ?? 50;
+    const linkStrength = layoutSpec.linkStrength ?? 1;
+
     this.simulation = forceSimulation<Node, Edge>(simNodes)
-      .force('charge', forceManyBody().strength(-50))
+      .force('charge', forceManyBody().strength(charge))
       .force('center', forceCenter())
-      .force('link', forceLink<Node, Edge>(edges).id((d: Node) => d.id).distance(50).strength(1))
+      .force(
+        'link',
+        forceLink<Node, Edge>(edges)
+          .id((d: Node) => d.id)
+          .distance(linkDistance)
+          .strength(linkStrength)
+      )
       .on('tick', () => {
         // On each tick, update the positions of the original reactive nodes.
         this.simulation?.nodes().forEach((simNode, i) => {

@@ -5,14 +5,16 @@ export interface Element {
   type: string;
   pinning?: { x: number; y: number; z: number } | string;
   data?: Record<string, any>;
-  [key: string]: any;
+  position?: { x: number; y: number; z: number; };
+  color?: string;
+  delete?: boolean;
 }
 
 export interface Edge {
   id: string;
   source: string;
   target: string;
-  [key: string]: any;
+  delete?: boolean;
 }
 
 export interface CameraSpec {
@@ -20,22 +22,36 @@ export interface CameraSpec {
   phi: number;
   theta: number;
   distance: number;
-  [key:string]: any;
 }
+
+export interface NodeStyle {
+  color?: string;
+}
+
+export type StyleSpec = {
+  'node:hover'?: NodeStyle;
+  'node:selected'?: NodeStyle;
+};
+
+export interface ForceDirectedLayoutSpec {
+  type: 'force-directed';
+  charge?: number;
+  linkDistance?: number;
+  linkStrength?: number;
+}
+
+export type LayoutSpec = ForceDirectedLayoutSpec; // Add more layout types here in the future
 
 export interface Spec {
   data?: {
     nodes?: Element[];
     edges?: Edge[];
   };
-  style?: { [key: string]: any; };
-  layout?: {
-    type?: string;
-    [key: string]: any;
-  };
+  style?: StyleSpec;
+  layout?: LayoutSpec;
   camera?: CameraSpec;
-  controls?: { [key: string]: any; };
-  interaction: { // Made non-optional
+  interaction: {
+    // Made non-optional
     hoveredElementId: string | null;
     selectedElementIds: string[];
   };

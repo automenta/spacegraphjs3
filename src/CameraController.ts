@@ -12,7 +12,7 @@ export class CameraController {
   constructor(
     state: Store<Spec>,
     emit: (eventName: string, ...args: any[]) => void,
-    threeCamera: THREE.PerspectiveCamera,
+    threeCamera: THREE.PerspectiveCamera
   ) {
     this.state = state;
     this.emit = emit;
@@ -34,7 +34,9 @@ export class CameraController {
 
         this.threeCamera.position.set(target.x + x, target.y + y, target.z + z);
 
-        this.threeCamera.lookAt(new THREE.Vector3(target.x, target.y, target.z));
+        this.threeCamera.lookAt(
+          new THREE.Vector3(target.x, target.y, target.z)
+        );
         this.threeCamera.updateProjectionMatrix();
       }
     });
@@ -42,7 +44,7 @@ export class CameraController {
 
   public flyTo(
     targetState: Partial<CameraSpec>,
-    options: { duration?: number; ease?: (t: number) => number } = {},
+    options: { duration?: number; ease?: (t: number) => number } = {}
   ) {
     const { duration = 1000, ease } = options;
     if (!this.state.camera) return;
@@ -77,8 +79,10 @@ export class CameraController {
           fromState.target.y + (toState.target.y - fromState.target.y) * latest;
         this.state.camera.target.z =
           fromState.target.z + (toState.target.z - fromState.target.z) * latest;
-        this.state.camera.phi = fromState.phi + (toState.phi - fromState.phi) * latest;
-        this.state.camera.theta = fromState.theta + (toState.theta - fromState.theta) * latest;
+        this.state.camera.phi =
+          fromState.phi + (toState.phi - fromState.phi) * latest;
+        this.state.camera.theta =
+          fromState.theta + (toState.theta - fromState.theta) * latest;
         this.state.camera.distance =
           fromState.distance + (toState.distance - fromState.distance) * latest;
       },
@@ -90,7 +94,7 @@ export class CameraController {
 
   public frame(
     elements: Element[],
-    options: { padding?: number; duration?: number } = {},
+    options: { padding?: number; duration?: number } = {}
   ) {
     if (elements.length === 0) return;
 
@@ -100,7 +104,9 @@ export class CameraController {
 
     for (const el of elements) {
       if (el.position) {
-        box.expandByPoint(new THREE.Vector3(el.position.x, el.position.y, el.position.z));
+        box.expandByPoint(
+          new THREE.Vector3(el.position.x, el.position.y, el.position.z)
+        );
       }
     }
 
@@ -121,7 +127,7 @@ export class CameraController {
         target: { x: center.x, y: center.y, z: center.z },
         distance: distance,
       },
-      { duration },
+      { duration }
     );
   }
 }

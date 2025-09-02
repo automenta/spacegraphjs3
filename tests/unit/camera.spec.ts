@@ -45,14 +45,14 @@ describe('CameraController', () => {
     await vi.advanceTimersByTimeAsync(500);
 
     // State should be halfway to the target
-    const checkIsClose = (val: number, target: number) => expect(Math.abs(val - target)).toBeLessThan(0.1);
+    const checkIsClose = (val: number, target: number) =>
+      expect(Math.abs(val - target)).toBeLessThan(0.1);
     checkIsClose(state.camera!.target.x, 5);
     checkIsClose(state.camera!.target.y, 5);
     checkIsClose(state.camera!.target.z, 5);
     checkIsClose(state.camera!.distance, 7.5);
     checkIsClose(state.camera!.phi, 0.5);
     checkIsClose(state.camera!.theta, 0.5);
-
 
     // Advance time to the end
     await vi.advanceTimersByTimeAsync(500);

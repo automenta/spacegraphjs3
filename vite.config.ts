@@ -21,6 +21,11 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    exclude: ['**/node_modules/**', '**/dist/**', '**/tests/visual/**', '**/tests/unit/interaction.spec.ts'],
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/tests/visual/**',
+      '**/tests/unit/interaction.spec.ts',
+    ],
   },
 });

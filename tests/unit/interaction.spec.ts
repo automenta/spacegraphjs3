@@ -8,10 +8,15 @@ test.beforeEach(async ({ page }) => {
   await page.waitForTimeout(1000); // Small buffer for rendering and layout to settle
 });
 
-test('drags the background to pan the camera and updates state', async ({ page }) => {
+test('drags the background to pan the camera and updates state', async ({
+  page,
+}) => {
   const initialCameraPosition = await page.evaluate(() => {
     const graph = (window as any).graph;
-    return { x: graph.state.camera.position.x, y: graph.state.camera.position.y };
+    return {
+      x: graph.state.camera.position.x,
+      y: graph.state.camera.position.y,
+    };
   });
 
   await page.mouse.move(200, 200);
@@ -23,7 +28,10 @@ test('drags the background to pan the camera and updates state', async ({ page }
 
   const finalCameraPosition = await page.evaluate(() => {
     const graph = (window as any).graph;
-    return { x: graph.state.camera.position.x, y: graph.state.camera.position.y };
+    return {
+      x: graph.state.camera.position.x,
+      y: graph.state.camera.position.y,
+    };
   });
 
   expect(finalCameraPosition.x).not.toBeCloseTo(initialCameraPosition.x);
@@ -57,7 +65,9 @@ test('scrolls to zoom the camera and updates state', async ({ page }) => {
   expect(zoomedOutCameraZoom).toBeLessThan(zoomedInCameraZoom);
 });
 
-test('hovers over an element and updates hoveredElementId', async ({ page }) => {
+test('hovers over an element and updates hoveredElementId', async ({
+  page,
+}) => {
   const canvas = await page.$('canvas');
   const boundingBox = await canvas!.boundingBox();
   const centerX = boundingBox!.x + boundingBox!.width / 2;
@@ -82,7 +92,9 @@ test('hovers over an element and updates hoveredElementId', async ({ page }) => 
   expect(hoveredId).toBeNull();
 });
 
-test('clicks an element to select it and deselects on background click', async ({ page }) => {
+test('clicks an element to select it and deselects on background click', async ({
+  page,
+}) => {
   const canvas = await page.$('canvas');
   const boundingBox = await canvas!.boundingBox();
   const centerX = boundingBox!.x + boundingBox!.width / 2;

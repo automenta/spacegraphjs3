@@ -1,12 +1,12 @@
-import globals from "globals";
-import pluginJs from "@eslint/js";
-import tseslint from "typescript-eslint";
-import prettier from "eslint-config-prettier";
+import globals from 'globals';
+import pluginJs from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import prettier from 'eslint-config-prettier';
 
 export default [
   // Base configuration for all files
   {
-    ignores: ["dist", ".eslintrc.cjs"],
+    ignores: ['dist', '.eslintrc.cjs'],
   },
   // Recommended JS and TS configurations
   pluginJs.configs.recommended,
@@ -15,12 +15,12 @@ export default [
 
   // Configuration for ES Modules (.js, .mjs, .ts)
   {
-    files: ["**/*.{js,mjs,ts}"],
+    files: ['**/*.{js,mjs,ts}'],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
         ecmaVersion: 2020,
-        sourceType: "module",
+        sourceType: 'module',
       },
       globals: {
         ...globals.browser,
@@ -30,20 +30,20 @@ export default [
 
   // Configuration for CommonJS Modules (.cjs)
   {
-    files: ["**/*.cjs"],
+    files: ['**/*.cjs'],
     languageOptions: {
       globals: {
         ...globals.node, // Node.js globals for CJS files
       },
       parserOptions: {
-        sourceType: "commonjs",
+        sourceType: 'commonjs',
       },
     },
     rules: {
       // Allow require() in CJS files
-      "@typescript-eslint/no-require-imports": "off",
+      '@typescript-eslint/no-require-imports': 'off',
       // Turn off no-undef for CJS files as globals.node covers it
-      "no-undef": "off",
+      'no-undef': 'off',
     },
   },
 
@@ -51,7 +51,7 @@ export default [
   {
     rules: {
       // Re-apply no-explicit-any to be off
-      "@typescript-eslint/no-explicit-any": "off",
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
 ];

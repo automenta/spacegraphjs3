@@ -6,116 +6,133 @@ import { Spec } from './types';
 const MAX_INSTANCES = 100000;
 
 export class InstancedRenderer {
-    private scene: THREE.Scene;
-    private state: Store<Spec>;
-    public instancedMesh: THREE.InstancedMesh;
-    private idToIndex: Map<string, number> = new Map();
-    private indexToId: Map<number, string> = new Map();
-    private dummy = new THREE.Object3D();
+  private scene: THREE.Scene;
+  private state: Store<Spec>;
+  public instancedMesh: THREE.InstancedMesh;
+  private idToIndex: Map<string, number> = new Map();
+  private indexToId: Map<number, string> = new Map();
+  private dummy = new THREE.Object3D();
 
-    constructor(scene: THREE.Scene, state: Store<Spec>) {
-        this.scene = scene;
-        this.state = state;
+  constructor(scene: THREE.Scene, state: Store<Spec>) {
+    this.scene = scene;
+    this.state = state;
 
-        this.init();
-    }
+    this.init();
+  }
 
-    private init() {
-        const geometry = new THREE.SphereGeometry(0.5, 16, 16);
-        // @ts-ignore
-        geometry.computeBoundsTree();
-        const material = new THREE.MeshBasicMaterial();
-        this.instancedMesh = new THREE.InstancedMesh(geometry, material, MAX_INSTANCES);
-        this.instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-        this.instancedMesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(MAX_INSTANCES * 3), 3);
-        this.instancedMesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
-        this.scene.add(this.instancedMesh);
+  /**
+   * Initialize the instanced mesh and set up the effects to update it.
+   */
+  private init() {
+    const geometry = new THREE.SphereGeometry(0.5, 16, 16);
+    // @ts-expect-error - computeBoundsTree is not in the type definition
+    geometry.computeBoundsTree();
+    const material = new THREE.MeshBasicMaterial();
+    this.instancedMesh = new THREE.InstancedMesh(
+      geometry,
+      material,
+      MAX_INSTANCES
+    );
+    this.instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    this.instancedMesh.instanceColor = new THREE.InstancedBufferAttribute(
+      new Float32Array(MAX_INSTANCES * 3),
+      3
+    );
+    this.instancedMesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
+    this.scene.add(this.instancedMesh);
 
-        createEffect(() => {
-            const nodes = this.state.data?.nodes || [];
+    createEffect(() => {
+      const nodes = this.state.data?.nodes || [];
 
-            this.idToIndex.clear();
-            this.indexToId.clear();
+      this.idToIndex.clear();
+      this.indexToId.clear();
 
-            nodes.forEach((node, i) => {
-                this.idToIndex.set(node.id, i);
-                this.indexToId.set(i, node.id);
-            });
+      nodes.forEach((node, i) => {
+        this.idToIndex.set(node.id, i);
+        this.indexToId.set(i, node.id);
+      });
 
-            this.instancedMesh.count = nodes.length;
-            this.updateAllInstances();
-        });
+      this.instancedMesh.count = nodes.length;
+      this.updateAllInstances();
+    });
 
-        createEffect(() => {
-            // This effect tracks changes to individual node properties
-            this.state.data?.nodes.forEach(node => {
-                const index = this.idToIndex.get(node.id);
-                if (index !== undefined) {
-                    this.updateInstance(index, node);
-                }
-            });
-            this.instancedMesh.instanceMatrix.needsUpdate = true;
-            this.instancedMesh.instanceColor!.needsUpdate = true;
-        });
-
-        createEffect(() => {
-            // This effect specifically tracks interaction state changes for colors
-            this.state.interaction.hoveredElementId;
-            this.state.interaction.selectedElementIds;
-            this.updateAllInstances();
-        });
-    }
-
-    private updateAllInstances() {
-        const nodes = this.state.data?.nodes || [];
-        nodes.forEach((node, i) => {
-            const index = this.idToIndex.get(node.id);
-            if (index !== undefined) {
-                this.updateInstance(index, node);
-            }
-        });
-        this.instancedMesh.instanceMatrix.needsUpdate = true;
-        this.instancedMesh.instanceColor!.needsUpdate = true;
-    }
-
-    private updateInstance(index: number, node: any) {
-        // Update position
-        this.dummy.position.set(
-            node.position?.x ?? 0,
-            node.position?.y ?? 0,
-            node.position?.z ?? 0,
-        );
-        this.dummy.updateMatrix();
-        this.instancedMesh.setMatrixAt(index, this.dummy.matrix);
-
-        // Update color
-        const hoveredId = this.state.interaction.hoveredElementId;
-        const selectedIds = this.state.interaction.selectedElementIds;
-        let color = new THREE.Color(node.color || '#ffffff');
-
-        if (hoveredId === node.id) {
-            const hoverStyle = this.state.style['node:hover']?.color;
-            color = new THREE.Color(hoverStyle || '#ffff00');
+    createEffect(() => {
+      // This effect tracks changes to individual node properties
+      this.state.data?.nodes.forEach((node) => {
+        const index = this.idToIndex.get(node.id);
+        if (index !== undefined) {
+          this.updateInstance(index, node);
         }
-        if (selectedIds.includes(node.id)) {
-            const selectedStyle = this.state.style['node:selected']?.color;
-            color = new THREE.Color(selectedStyle || '#00ff00');
-        }
-        this.instancedMesh.setColorAt(index, color);
-    }
+      });
+      this.instancedMesh.instanceMatrix.needsUpdate = true;
+      this.instancedMesh.instanceColor!.needsUpdate = true;
+    });
 
-    public getNodeId(instanceId: number): string | undefined {
-        return this.indexToId.get(instanceId);
-    }
+    createEffect(() => {
+      // This effect specifically tracks interaction state changes for colors
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      this.state.interaction.hoveredElementId;
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      this.state.interaction.selectedElementIds;
+      this.updateAllInstances();
+    });
+  }
 
-    public dispose() {
-        this.instancedMesh.geometry.dispose();
-        (this.instancedMesh.material as THREE.Material).dispose();
-        this.scene.remove(this.instancedMesh);
-        // @ts-ignore
-        if (this.instancedMesh.geometry.boundsTree) {
-            // @ts-ignore
-            this.instancedMesh.geometry.disposeBoundsTree();
-        }
+  private updateAllInstances() {
+    const nodes = this.state.data?.nodes || [];
+    nodes.forEach((node) => {
+      const index = this.idToIndex.get(node.id);
+      if (index !== undefined) {
+        this.updateInstance(index, node);
+      }
+    });
+    this.instancedMesh.instanceMatrix.needsUpdate = true;
+    this.instancedMesh.instanceColor!.needsUpdate = true;
+  }
+
+  /**
+   * Update the position and color of a single instance.
+   * @param index - The index of the instance to update.
+   * @param node - The node data.
+   */
+  private updateInstance(index: number, node: any) {
+    // Update position
+    this.dummy.position.set(
+      node.position?.x ?? 0,
+      node.position?.y ?? 0,
+      node.position?.z ?? 0
+    );
+    this.dummy.updateMatrix();
+    this.instancedMesh.setMatrixAt(index, this.dummy.matrix);
+
+    // Update color
+    const hoveredId = this.state.interaction.hoveredElementId;
+    const selectedIds = this.state.interaction.selectedElementIds;
+    let color = new THREE.Color(node.color || '#ffffff');
+
+    if (hoveredId === node.id) {
+      const hoverStyle = this.state.style['node:hover']?.color;
+      color = new THREE.Color(hoverStyle || '#ffff00');
     }
+    if (selectedIds.includes(node.id)) {
+      const selectedStyle = this.state.style['node:selected']?.color;
+      color = new THREE.Color(selectedStyle || '#00ff00');
+    }
+    this.instancedMesh.setColorAt(index, color);
+  }
+
+  public getNodeId(instanceId: number): string | undefined {
+    return this.indexToId.get(instanceId);
+  }
+
+  public dispose() {
+    this.instancedMesh.geometry.dispose();
+    (this.instancedMesh.material as THREE.Material).dispose();
+    this.scene.remove(this.instancedMesh);
+    // @ts-expect-error - boundsTree is not in the type definition
+    if (this.instancedMesh.geometry.boundsTree) {
+      // @ts-expect-error - disposeBoundsTree is not in the type definition
+      this.instancedMesh.geometry.disposeBoundsTree();
+    }
+  }
 }

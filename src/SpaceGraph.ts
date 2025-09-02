@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createRoot, createEffect } from 'solid-js';
+import { createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { createState } from './createState';
 import { Spec } from './types';
@@ -7,20 +7,9 @@ import { LayoutController } from './LayoutController';
 import { CameraController } from './CameraController';
 import { InteractionController } from './InteractionController';
 import { InstancedRenderer } from './InstancedRenderer';
-import { EventEmitter } from './EventEmitter';
 import { HUDController } from './HUDController';
 
 export class SpaceGraph {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public static registerType(name: string, component: any) {
-    console.warn(`SpaceGraph.registerType('${name}', ...) is not yet implemented.`);
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public static registerLayout(name: string, component: any) {
-    console.warn(`SpaceGraph.registerLayout('${name}', ...) is not yet implemented.`);
-  }
-
   private container: HTMLElement;
   public state: Store<Spec>;
   private updateState: (spec: Partial<Spec>) => void;
@@ -33,7 +22,7 @@ export class SpaceGraph {
   private instancedRenderer: InstancedRenderer;
   private hudController: HUDController;
   private dispose: () => void;
-  private events: EventEmitter;
+  private eventListeners: Map<string, ((...args: any[]) => void)[]> = new Map();
 
   constructor(containerSelector: string, initialSpec: Spec) {
     const container = document.querySelector(containerSelector);
@@ -44,21 +33,24 @@ export class SpaceGraph {
 
     // The createRoot ensures all SolidJS reactivity is disposed of properly
     this.dispose = createRoot((dispose) => {
-      this.events = new EventEmitter();
-
+      // Create the reactive state using a SolidJS store
       const { state, updateState } = createState(initialSpec);
       this.state = state;
       this.updateState = updateState;
 
+      // Initialize the three.js renderer and scene
       this.initRenderer();
       this.initScene();
 
+      // Create the instanced renderer for nodes
       this.instancedRenderer = new InstancedRenderer(this.scene, this.state);
 
-      const emit = this.events.emit.bind(this.events);
-      this._initControllers(emit);
+      // Initialize all the controllers that manage different parts of the application
+      this._initControllers((eventName: string, ...args: any[]) =>
+        this.emit(eventName, ...args)
+      );
 
-
+      // Set up the animation loop and resize handler
       window.addEventListener('resize', this.handleResize);
       this.animate();
 
@@ -66,12 +58,35 @@ export class SpaceGraph {
     });
   }
 
+  private emit(eventName: string, ...args: any[]) {
+    const listeners = this.eventListeners.get(eventName);
+    if (listeners) {
+      listeners.forEach((listener) => listener(...args));
+    }
+  }
+
   public on(eventName: string, listener: (...args: any[]) => void) {
-    return this.events.on(eventName, listener);
+    if (!this.eventListeners.has(eventName)) {
+      this.eventListeners.set(eventName, []);
+    }
+    this.eventListeners.get(eventName)!.push(listener);
+
+    return () => {
+      const listeners = this.eventListeners.get(eventName);
+      if (listeners) {
+        const index = listeners.indexOf(listener);
+        if (index > -1) {
+          listeners.splice(index, 1);
+        }
+      }
+    };
   }
 
   public getElement(id: string) {
-    return this.state.data?.nodes?.find(n => n.id === id) || this.state.data?.edges?.find(e => e.id === id);
+    return (
+      this.state.data?.nodes?.find((n) => n.id === id) ||
+      this.state.data?.edges?.find((e) => e.id === id)
+    );
   }
 
   // Public getters for controllers
@@ -83,26 +98,36 @@ export class SpaceGraph {
     return this.cameraController;
   }
 
+  /**
+   * Initialize all the controllers that manage different parts of the application.
+   * @param emit - The event emitter function.
+   */
   private _initControllers(emit: (eventName: string, ...args: any[]) => void) {
     this.layoutController = new LayoutController(this.state, emit);
     this.layoutController.init();
-    this.cameraController = new CameraController(this.state, emit, this.threeCamera);
-    this.interactionController = new InteractionController(
-      this,
-      this.renderer!.domElement,
+    this.cameraController = new CameraController(
       this.state,
-      this.updateState,
-      this.threeCamera,
-      this.scene,
-      this.instancedRenderer,
       emit,
+      this.threeCamera
     );
-    this.hudController = new HUDController(this.container, this.state, (command) => this.execute(command));
+    this.interactionController = new InteractionController({
+      rendererEl: this.renderer!.domElement,
+      state: this.state,
+      updateState: this.updateState,
+      threeCamera: this.threeCamera,
+      instancedRenderer: this.instancedRenderer,
+      emit,
+      getElement: this.getElement.bind(this),
+    });
+    this.hudController = new HUDController(this.container, this.state);
   }
 
   private initRenderer() {
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+    this.renderer.setSize(
+      this.container.clientWidth,
+      this.container.clientHeight
+    );
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.container.appendChild(this.renderer.domElement);
   }
@@ -138,22 +163,8 @@ export class SpaceGraph {
     this.renderer.render(this.scene, this.threeCamera); // Use threeCamera
   };
 
-  public execute(command: string) {
-    console.warn(
-      'Warning: The execute method uses `new Function()` to run arbitrary code, which can be a security risk if the input is not properly sanitized. Use with caution.',
-    );
-    try {
-      // A "safe" eval context.
-      const func = new Function('graph', `with(graph) { ${command} }`);
-      func(this);
-    } catch (e) {
-      console.error(`REPL Error: ${e}`);
-    }
-  }
-
   public destroy() {
     this.dispose(); // Dispose SolidJS root and all effects
-    this.events.dispose();
     this.interactionController.dispose();
     this.layoutController.dispose();
     this.instancedRenderer.dispose();

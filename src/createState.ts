@@ -8,55 +8,66 @@ export function createState(initialSpec: Spec) {
     interaction: {
       hoveredElementId: null as string | null,
       selectedElementIds: [] as string[],
+      ...initialSpec.interaction,
     },
   });
 
   const updateState = (spec: Partial<Spec>) => {
     setState(
       produce((s) => {
-        // Deep merge for nested objects like 'layout' or 'style'
+        // Shallow merge for top-level properties
         for (const key in spec) {
           if (key === 'data') continue;
-
-          // Handle interaction specifically to ensure type safety
-          if (key === 'interaction') {
-            if (spec.interaction) {
-              s.interaction = { ...s.interaction, ...spec.interaction };
+          const k = key as keyof Spec;
+          if (
+            k === 'interaction' ||
+            k === 'camera' ||
+            k === 'layout' ||
+            k === 'style'
+          ) {
+            if (spec[k]) {
+              s[k] = { ...s[k], ...spec[k] } as any;
             }
-            continue;
-          }
-
-          const specValue = spec[key as keyof Partial<Spec>];
-          const sValue = s[key as keyof Spec];
-
-          if (typeof sValue === 'object' && sValue !== null && typeof specValue === 'object' && specValue !== null) {
-            // If both are objects, deep merge
-            Object.assign(sValue, specValue);
-          } else if (specValue !== undefined) {
-            // Otherwise, directly assign if specValue is not undefined
-            s[key as keyof Spec] = specValue as any; // Use any for direct assignment to handle various types
+          } else {
+            (s as any)[k] = spec[k];
           }
         }
 
-        if (s.data && s.data.nodes && spec.data?.nodes) { // Added s.data.nodes check
-          const nodeMap = new Map(s.data.nodes.map((n: import("./types").Element) => [n.id, n]));
-          
-          for (const updatedNode of spec.data.nodes) {
-            if (updatedNode.delete) {
-              nodeMap.delete(updatedNode.id);
-            } else {
-              const existingNode = nodeMap.get(updatedNode.id);
-              if (existingNode) {
-                Object.assign(existingNode, updatedNode);
+        // Handle data updates
+        if (spec.data) {
+          if (spec.data.nodes) {
+            const nodeMap = new Map(s.data?.nodes?.map((n) => [n.id, n]));
+            for (const updatedNode of spec.data.nodes) {
+              if ((updatedNode as any).delete) {
+                nodeMap.delete(updatedNode.id);
               } else {
-                nodeMap.set(updatedNode.id, updatedNode);
+                const existingNode = nodeMap.get(updatedNode.id);
+                if (existingNode) {
+                  Object.assign(existingNode, updatedNode);
+                } else {
+                  nodeMap.set(updatedNode.id, updatedNode);
+                }
               }
             }
+            s.data!.nodes = Array.from(nodeMap.values());
           }
-          s.data.nodes = Array.from(nodeMap.values());
+          if (spec.data.edges) {
+            const edgeMap = new Map(s.data?.edges?.map((e) => [e.id, e]));
+            for (const updatedEdge of spec.data.edges) {
+              if ((updatedEdge as any).delete) {
+                edgeMap.delete(updatedEdge.id);
+              } else {
+                const existingEdge = edgeMap.get(updatedEdge.id);
+                if (existingEdge) {
+                  Object.assign(existingEdge, updatedEdge);
+                } else {
+                  edgeMap.set(updatedEdge.id, updatedEdge);
+                }
+              }
+            }
+            s.data!.edges = Array.from(edgeMap.values());
+          }
         }
-        
-        // (Edge update logic would go here)
       })
     );
   };

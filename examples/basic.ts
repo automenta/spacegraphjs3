@@ -33,7 +33,10 @@ const initialSpec: Spec = {
   },
   style: {
     'node:hover': { color: '#ffff00' },
-    'node:selected': { color: '#ffffff', glow: { color: '#ffffff', strength: 1.5 } },
+    'node:selected': {
+      color: '#ffffff',
+      glow: { color: '#ffffff', strength: 1.5 },
+    },
   },
 };
 

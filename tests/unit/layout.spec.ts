@@ -16,7 +16,12 @@ describe('LayoutController', () => {
           edges: [{ id: 'e1', source: 'n1', target: 'n2' }],
         },
         layout: { type: 'force-directed' },
-        camera: { target: { x: 0, y: 0, z: 0 }, phi: 0, theta: 0, distance: 10 },
+        camera: {
+          target: { x: 0, y: 0, z: 0 },
+          phi: 0,
+          theta: 0,
+          distance: 10,
+        },
         interaction: { hoveredElementId: null, selectedElementIds: [] },
       };
 
@@ -29,8 +34,8 @@ describe('LayoutController', () => {
 
       layoutController.tick(300);
 
-      const node1 = state.data.nodes.find(n => n.id === 'n1');
-      const node2 = state.data.nodes.find(n => n.id === 'n2');
+      const node1 = state.data.nodes.find((n) => n.id === 'n1');
+      const node2 = state.data.nodes.find((n) => n.id === 'n2');
 
       expect(node1?.position?.x).not.toBeCloseTo(0);
       expect(node1?.position?.y).not.toBeCloseTo(0);
@@ -53,7 +58,12 @@ describe('LayoutController', () => {
           edges: [{ id: 'e1', source: 'n1', target: 'n2' }],
         },
         layout: { type: 'force-directed' },
-        camera: { target: { x: 0, y: 0, z: 0 }, phi: 0, theta: 0, distance: 10 },
+        camera: {
+          target: { x: 0, y: 0, z: 0 },
+          phi: 0,
+          theta: 0,
+          distance: 10,
+        },
         interaction: { hoveredElementId: null, selectedElementIds: [] },
       };
 
@@ -67,16 +77,19 @@ describe('LayoutController', () => {
       layoutController.tick(150);
 
       layoutController.pause();
-      const pos1_paused_x = state.data.nodes.find(n => n.id === 'n1')?.position?.x;
+      const pos1_paused_x = state.data.nodes.find((n) => n.id === 'n1')
+        ?.position?.x;
 
       layoutController.tick(150);
-      const pos1_after_pause_x = state.data.nodes.find(n => n.id === 'n1')?.position?.x;
+      const pos1_after_pause_x = state.data.nodes.find((n) => n.id === 'n1')
+        ?.position?.x;
 
       expect(pos1_after_pause_x).toBeCloseTo(pos1_paused_x!);
 
       layoutController.resume();
       layoutController.tick(150);
-      const pos1_after_resume_x = state.data.nodes.find(n => n.id === 'n1')?.position?.x;
+      const pos1_after_resume_x = state.data.nodes.find((n) => n.id === 'n1')
+        ?.position?.x;
 
       expect(pos1_after_resume_x).not.toBeCloseTo(pos1_after_pause_x!);
 
