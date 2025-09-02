@@ -1,0 +1,35 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "Declarative, high-performance library for creating interactive 2D/3D visualizations. The library functions as an intelligent orchestrator, translating a declarative `Spec` into a live scene by managing a suite of best-in-class tools for rendering, interaction, and physics.",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "test": "vitest",
+    "test:visual": "playwright test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/automenta/spacegraphjs3.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/automenta/spacegraphjs3/issues"
+  },
+  "homepage": "https://github.com/automenta/spacegraphjs3#readme",
+  "dependencies": {
+    "solid-js": "^1.9.9",
+    "three": "^0.179.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/three": "^0.179.0",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.4",
+    "vite-plugin-solid": "^2.11.8",
+    "vitest": "^3.2.4"
+  }
+}
