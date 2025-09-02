@@ -22,6 +22,9 @@ if (container) {
 
   const graph = new SpaceGraph(container, initialSpec);
 
+  // Expose the graph instance for testing purposes
+  (window as any).graph = graph;
+
   console.log('SpaceGraph instance created:', graph);
 } else {
   console.error('Container element not found.');
