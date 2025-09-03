@@ -58,28 +58,33 @@ export class InteractionLogic {
     dragPlane: THREE.Plane,
     rendererEl: HTMLElement,
     threeCamera: THREE.PerspectiveCamera,
-    state: Store<Spec>
+    updateState: (spec: Partial<Spec>) => void
   ) {
     const pointer = new THREE.Vector2();
     const raycaster = new THREE.Raycaster();
 
+    // Convert screen coordinates to normalized device coordinates
     const { width, height } = rendererEl.getBoundingClientRect();
     pointer.x = (vx / width) * 2 - 1;
     pointer.y = -(vy / height) * 2 + 1;
 
+    // Find intersection with the drag plane
     raycaster.setFromCamera(pointer, threeCamera);
-
     const intersection = new THREE.Vector3();
     raycaster.ray.intersectPlane(dragPlane, intersection);
 
-    const element = state.data.nodes.find((n) => n.id === draggedElementId);
+    // Create the update payload for the reactive state
+    const newPosition = {
+      x: intersection.x,
+      y: intersection.y,
+      z: intersection.z,
+    };
 
-    if (element) {
-      element.position = {
-        x: intersection.x,
-        y: intersection.y,
-        z: intersection.z,
-      };
-    }
+    // Update the state using the provided function
+    updateState({
+      data: {
+        nodes: [{ id: draggedElementId, position: newPosition }],
+      },
+    });
   }
 }

@@ -24,10 +24,15 @@ describe('CameraController', () => {
       interaction: { hoveredElementId: null, selectedElementIds: [] },
     };
 
-    const { state } = createState(initialSpec);
+    const { state, updateState } = createState(initialSpec);
     const mockEmit = vi.fn();
     const mockCamera = new THREE.PerspectiveCamera();
-    const cameraController = new CameraController(state, mockEmit, mockCamera);
+    const cameraController = new CameraController(
+      state,
+      updateState,
+      mockEmit,
+      mockCamera
+    );
 
     const target = {
       target: { x: 10, y: 10, z: 10 },

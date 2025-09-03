@@ -108,7 +108,7 @@ export class InteractionController {
               this.dragPlane,
               this.rendererEl,
               this.threeCamera,
-              this.state
+              this.updateState
             );
           } else {
             // It's a background drag (pan/orbit)

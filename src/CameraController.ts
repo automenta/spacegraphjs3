@@ -6,15 +6,18 @@ import { createEffect } from 'solid-js';
 
 export class CameraController {
   private state: Store<Spec>;
+  private updateState: (spec: Partial<Spec>) => void;
   private emit: (eventName: string, ...args: any[]) => void;
   private threeCamera: THREE.PerspectiveCamera;
 
   constructor(
     state: Store<Spec>,
+    updateState: (spec: Partial<Spec>) => void,
     emit: (eventName: string, ...args: any[]) => void,
     threeCamera: THREE.PerspectiveCamera
   ) {
     this.state = state;
+    this.updateState = updateState;
     this.emit = emit;
     this.threeCamera = threeCamera;
 
@@ -42,6 +45,11 @@ export class CameraController {
     });
   }
 
+  /**
+   * Animates the camera to a new state.
+   * @param targetState - The target camera state.
+   * @param options - Animation options like duration and easing.
+   */
   public flyTo(
     targetState: Partial<CameraSpec>,
     options: { duration?: number; ease?: (t: number) => number } = {}
@@ -72,19 +80,28 @@ export class CameraController {
       onUpdate: (latest) => {
         if (!this.state.camera) return;
 
-        // Interpolate each property and update the reactive state
-        this.state.camera.target.x =
-          fromState.target.x + (toState.target.x - fromState.target.x) * latest;
-        this.state.camera.target.y =
-          fromState.target.y + (toState.target.y - fromState.target.y) * latest;
-        this.state.camera.target.z =
-          fromState.target.z + (toState.target.z - fromState.target.z) * latest;
-        this.state.camera.phi =
-          fromState.phi + (toState.phi - fromState.phi) * latest;
-        this.state.camera.theta =
+        // Interpolate each property
+        const newTarget = {
+          x: fromState.target.x + (toState.target.x - fromState.target.x) * latest,
+          y: fromState.target.y + (toState.target.y - fromState.target.y) * latest,
+          z: fromState.target.z + (toState.target.z - fromState.target.z) * latest,
+        };
+        const newPhi = fromState.phi + (toState.phi - fromState.phi) * latest;
+        const newTheta =
           fromState.theta + (toState.theta - fromState.theta) * latest;
-        this.state.camera.distance =
+        const newDistance =
           fromState.distance + (toState.distance - fromState.distance) * latest;
+
+        // Update the state using the update function
+        this.updateState({
+          camera: {
+            ...this.state.camera,
+            target: newTarget,
+            phi: newPhi,
+            theta: newTheta,
+            distance: newDistance,
+          },
+        });
       },
       onComplete: () => {
         this.emit('camera:animation:end');
@@ -92,6 +109,11 @@ export class CameraController {
     });
   }
 
+  /**
+   * Calculates the required camera state to frame the given elements and then flies to it.
+   * @param elements - The elements to frame.
+   * @param options - Framing options like padding and duration.
+   */
   public frame(
     elements: Element[],
     options: { padding?: number; duration?: number } = {}

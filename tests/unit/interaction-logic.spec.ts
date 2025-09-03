@@ -52,8 +52,7 @@ describe('InteractionLogic', () => {
   });
 
   describe('handleNodeDrag', () => {
-    it('should update a node position based on ray-plane intersection', () => {
-      const state = createMockState();
+    it('should call updateState with the new node position', () => {
       const draggedElementId = 'n1';
 
       // Drag plane is facing the camera, at z=0
@@ -70,15 +69,18 @@ describe('InteractionLogic', () => {
         dragPlane,
         mockRendererEl,
         mockThreeCamera,
-        state
+        mockUpdateState
       );
 
       // The ray from the center of the screen is straight down the Z axis.
       // It will intersect the plane at (0, 0, 0).
-      const draggedNode = state.data.nodes.find((n) => n.id === 'n1');
-      expect(draggedNode.position.x).toBeCloseTo(0);
-      expect(draggedNode.position.y).toBeCloseTo(0);
-      expect(draggedNode.position.z).toBeCloseTo(0);
+      expect(mockUpdateState).toHaveBeenCalledOnce();
+      const { data } = mockUpdateState.mock.calls[0][0];
+      const updatedNode = data.nodes[0];
+      expect(updatedNode.id).toBe(draggedElementId);
+      expect(updatedNode.position.x).toBeCloseTo(0);
+      expect(updatedNode.position.y).toBeCloseTo(0);
+      expect(updatedNode.position.z).toBeCloseTo(0);
     });
   });
 

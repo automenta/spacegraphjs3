@@ -119,6 +119,7 @@ export class SpaceGraph {
     this.layoutController.init();
     this.cameraController = new CameraController(
       this.state,
+      this.updateState,
       emit,
       this.threeCamera
     );
