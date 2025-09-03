@@ -24,7 +24,12 @@ export class EdgeRenderer {
     this.lineSegments = new THREE.LineSegments(this.geometry, this.material);
     this.scene.add(this.lineSegments);
 
-    createEffect(() => this.updateEdges());
+    createEffect(() => {
+      // Depend on nodes and edges
+      this.state.data?.nodes;
+      this.state.data?.edges;
+      this.updateEdges();
+    });
 
     onCleanup(() => this.dispose());
   }

@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
+const projectRootDir = resolve(__dirname);
+
 export default defineConfig({
   build: {
     lib: {
@@ -8,21 +10,19 @@ export default defineConfig({
       name: 'SpaceGraph',
       fileName: 'spacegraph',
     },
-    rollupOptions: {
-      external: ['three', 'solid-js'],
-      output: {
-        globals: {
-          three: 'THREE',
-          'solid-js': 'Solid',
-        },
-      },
-    },
   },
   test: {
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./tests/setup.ts'],
     exclude: ['**/node_modules/**', '**/dist/**', '**/tests/visual/**'],
+    deps: {
+      optimizer: {
+        web: {
+          include: ['three', 'three-mesh-bvh', 'd3-force-3d'],
+        },
+      },
+    },
   },
   resolve: {
     conditions: ['browser'],

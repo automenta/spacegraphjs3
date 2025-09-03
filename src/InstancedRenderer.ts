@@ -50,7 +50,11 @@ export class InstancedRenderer {
     this.instancedMesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
     this.scene.add(this.instancedMesh);
 
-    createEffect(() => this.updateNodeMappings());
+    createEffect(() => {
+      // Depend on nodes
+      this.state.data?.nodes;
+      this.updateNodeMappings();
+    });
 
     createEffect(() => {
       // This effect tracks changes to individual node properties

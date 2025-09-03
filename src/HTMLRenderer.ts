@@ -13,7 +13,11 @@ export class HTMLRenderer {
     this.cssScene = cssScene;
     this.state = state;
 
-    createEffect(() => this.updateHTMLNodes());
+    createEffect(() => {
+      // Depend on nodes
+      this.state.data?.nodes;
+      this.updateHTMLNodes();
+    });
 
     onCleanup(() => this.dispose());
   }
