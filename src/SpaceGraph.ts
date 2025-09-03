@@ -10,7 +10,8 @@ import { Spec } from './types';
 import { LayoutController } from './LayoutController';
 import { CameraController } from './CameraController';
 import { InteractionController } from './InteractionController';
-import { InstancedRenderer } from './InstancedRenderer';
+import { IRenderer } from './IRenderer';
+import { BasicRenderer } from './BasicRenderer';
 import { EdgeRenderer } from './EdgeRenderer';
 import { HTMLRenderer } from './HTMLRenderer';
 import { HUDController } from './HUDController';
@@ -27,7 +28,7 @@ export class SpaceGraph {
   public layoutController: LayoutController;
   private cameraController: CameraController; // New controller
   private interactionController: InteractionController;
-  private instancedRenderer: InstancedRenderer;
+  private nodeRenderer: IRenderer;
   private edgeRenderer: EdgeRenderer;
   private htmlRenderer: HTMLRenderer;
   private hudController: HUDController;
@@ -52,8 +53,8 @@ export class SpaceGraph {
       this.initRenderers();
       this.initScenes();
 
-      // Create the instanced renderer for nodes
-      this.instancedRenderer = new InstancedRenderer(this.scene, this.state);
+      // Create the node renderer
+      this.nodeRenderer = new BasicRenderer(this.scene, this.state);
       this.edgeRenderer = new EdgeRenderer(this.scene, this.state);
       this.htmlRenderer = new HTMLRenderer(this.cssScene, this.state);
 
@@ -128,7 +129,7 @@ export class SpaceGraph {
       state: this.state,
       updateState: this.updateState,
       threeCamera: this.threeCamera,
-      instancedRenderer: this.instancedRenderer,
+      nodeRenderer: this.nodeRenderer,
       emit,
       getElement: this.getElement.bind(this),
     });
@@ -208,7 +209,7 @@ export class SpaceGraph {
     this.dispose(); // Dispose SolidJS root and all effects
     this.interactionController.dispose();
     this.layoutController.dispose();
-    this.instancedRenderer.dispose();
+    this.nodeRenderer.dispose();
     this.edgeRenderer.dispose();
     this.htmlRenderer.dispose();
     this.hudController.dispose();

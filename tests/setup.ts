@@ -1,3 +1,8 @@
+// Mock SolidJS devtools global to prevent errors in test environment
+if (typeof globalThis !== 'undefined') {
+  (globalThis as any)._$SolidDev = { registerGraph: () => {} };
+}
+
 import * as THREE from 'three';
 import {
   acceleratedRaycast,

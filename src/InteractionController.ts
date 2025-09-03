@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { createGesture, Gesture } from '@use-gesture/vanilla';
 import { Store } from 'solid-js/store';
 import { Spec, Element } from './types';
-import { InstancedRenderer } from './InstancedRenderer';
+import { IRenderer } from './IRenderer';
 import { InteractionLogic } from './InteractionLogic';
 import {
   acceleratedRaycast,
@@ -23,7 +23,7 @@ export class InteractionController {
   private state: Store<Spec>;
   private updateState: (spec: Partial<Spec>) => void;
   private threeCamera: THREE.PerspectiveCamera;
-  private instancedRenderer: InstancedRenderer;
+  private nodeRenderer: IRenderer;
   private emit: (eventName: string, ...args: any[]) => void;
   private getElement: (id: string) => Element | undefined;
   private gesture: Gesture;
@@ -39,7 +39,7 @@ export class InteractionController {
     state,
     updateState,
     threeCamera,
-    instancedRenderer,
+    nodeRenderer,
     emit,
     getElement,
   }: {
@@ -47,7 +47,7 @@ export class InteractionController {
     state: Store<Spec>;
     updateState: (spec: Partial<Spec>) => void;
     threeCamera: THREE.PerspectiveCamera;
-    instancedRenderer: InstancedRenderer;
+    nodeRenderer: IRenderer;
     emit: (eventName: string, ...args: any[]) => void;
     getElement: (id: string) => Element | undefined;
   }) {
@@ -55,7 +55,7 @@ export class InteractionController {
     this.state = state;
     this.updateState = updateState;
     this.threeCamera = threeCamera;
-    this.instancedRenderer = instancedRenderer;
+    this.nodeRenderer = nodeRenderer;
     this.emit = emit;
     this.getElement = getElement;
 
@@ -203,24 +203,18 @@ export class InteractionController {
   }
 
   private _getHoveredElementId(x: number, y: number): string | null {
-    if (!this.instancedRenderer.instancedMesh) return null;
-
     const { width, height } = this.rendererEl.getBoundingClientRect();
     this.pointer.x = (x / width) * 2 - 1;
     this.pointer.y = -(y / height) * 2 + 1;
 
     this.raycaster.setFromCamera(this.pointer, this.threeCamera);
-    const intersects = this.raycaster.intersectObjects([
-      this.instancedRenderer.instancedMesh,
-    ]);
+    const intersects = this.raycaster.intersectObjects(
+      this.nodeRenderer.getRaycastableObjects()
+    );
 
     if (intersects.length > 0) {
       const intersection = intersects[0];
-      if (intersection.instanceId !== undefined) {
-        return (
-          this.instancedRenderer.getNodeId(intersection.instanceId) ?? null
-        );
-      }
+      return this.nodeRenderer.getNodeIdFromIntersection(intersection);
     }
     return null;
   }

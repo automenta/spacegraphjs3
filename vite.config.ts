@@ -24,4 +24,7 @@ export default defineConfig({
     setupFiles: ['./tests/setup.ts'],
     exclude: ['**/node_modules/**', '**/dist/**', '**/tests/visual/**'],
   },
+  resolve: {
+    conditions: ['browser'],
+  },
 });
