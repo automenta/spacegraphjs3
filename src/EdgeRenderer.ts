@@ -45,7 +45,6 @@ export class EdgeRenderer {
     const nodeMap = new Map(nodes.map((node) => [node.id, node]));
     const vertices: number[] = [];
     const colors: number[] = [];
-    const defaultColor = new THREE.Color(0xaaaaaa);
 
     for (const edge of edges) {
       const sourceNode = nodeMap.get(edge.source);
@@ -68,7 +67,7 @@ export class EdgeRenderer {
           targetNode.position.z
         );
 
-        const color = new THREE.Color(edge.color || defaultColor);
+        const color = new THREE.Color(edge.color || 0xaaaaaa);
         colors.push(color.r, color.g, color.b);
         colors.push(color.r, color.g, color.b);
       }

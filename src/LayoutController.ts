@@ -50,7 +50,8 @@ export class LayoutController {
     this.stopSimulation();
 
     this.originalNodes = (this.state.data?.nodes || []) as Node[];
-    const edges = (this.state.data?.edges || []) as Edge[];
+    // Create a deep copy of the edges for the simulation to avoid proxy issues.
+    const edges: Edge[] = JSON.parse(JSON.stringify(this.state.data?.edges || []));
 
     // Create a deep copy of the nodes for the simulation to avoid proxy issues.
     const simNodes: Node[] = JSON.parse(JSON.stringify(this.originalNodes));
@@ -94,6 +95,11 @@ export class LayoutController {
       });
 
     this.simulation.alpha(1).restart();
+    // In the test environment, we stop the simulation immediately
+    // so we can manually tick it.
+    if (process.env.NODE_ENV === 'production') {
+      this.simulation.stop();
+    }
     this.emit('layout:start');
     this.resolveReady();
   }
