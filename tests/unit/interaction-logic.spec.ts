@@ -6,7 +6,7 @@ import { Spec } from '../../src/types';
 
 // Mock factory for the state
 const createMockState = (): Store<Spec> => {
-  const [state, setState] = createStore<Spec>({
+  const [state] = createStore<Spec>({
     camera: {
       target: { x: 0, y: 0, z: 0 },
       phi: Math.PI / 2,

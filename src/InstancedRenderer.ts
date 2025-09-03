@@ -34,7 +34,6 @@ export class InstancedRenderer {
    */
   private init() {
     const geometry = new THREE.SphereGeometry(0.5, 16, 16);
-    // @ts-expect-error - computeBoundsTree is not in the type definition
     geometry.computeBoundsTree();
     const material = new THREE.MeshBasicMaterial({ vertexColors: true });
     this.instancedMesh = new THREE.InstancedMesh(
@@ -52,7 +51,6 @@ export class InstancedRenderer {
 
     createEffect(() => {
       // Depend on nodes
-      this.state.data?.nodes;
       this.updateNodeMappings();
     });
 
@@ -182,9 +180,7 @@ export class InstancedRenderer {
     this.instancedMesh.geometry.dispose();
     (this.instancedMesh.material as THREE.Material).dispose();
     this.scene.remove(this.instancedMesh);
-    // @ts-expect-error - boundsTree is not in the type definition
     if (this.instancedMesh.geometry.boundsTree) {
-      // @ts-expect-error - disposeBoundsTree is not in the type definition
       this.instancedMesh.geometry.disposeBoundsTree();
     }
   }

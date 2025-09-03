@@ -4,9 +4,11 @@ import { createState } from "../../src/createState";
 import { LayoutController } from "../../src/LayoutController";
 import { Spec } from "../../src/types";
 
-vi.useFakeTimers();
-
 describe("LayoutController", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
   afterEach(() => {
     vi.useRealTimers();
   });

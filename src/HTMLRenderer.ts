@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { createEffect, onCleanup } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
-import { Spec, Element } from './types';
+import { Spec } from './types';
 
 export class HTMLRenderer {
   private cssScene: THREE.Scene;
@@ -14,7 +14,8 @@ export class HTMLRenderer {
     this.state = state;
 
     createEffect(() => {
-      // Depend on nodes
+      // Depend on nodes for reactivity in tests
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       this.state.data?.nodes;
       this.updateHTMLNodes();
     });
@@ -66,7 +67,7 @@ export class HTMLRenderer {
   }
 
   public dispose() {
-    for (const [id, object] of this.htmlObjects.entries()) {
+    for (const object of this.htmlObjects.values()) {
       this.cssScene.remove(object);
     }
     this.htmlObjects.clear();

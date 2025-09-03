@@ -23,6 +23,8 @@ export class BasicRenderer implements IRenderer {
   private init() {
     // This effect synchronizes the meshes with the nodes in the state.
     createEffect(() => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      this.state.data?.nodes; // depend on nodes for reactivity
       const nodes = this.state.data?.nodes || [];
       const currentNodeIds = new Set(nodes.map((n) => n.id));
 
@@ -43,6 +45,8 @@ export class BasicRenderer implements IRenderer {
 
     // This effect updates individual mesh properties when node data changes.
     createEffect(() => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      this.state.data?.nodes; // depend on nodes for reactivity
       this.state.data?.nodes.forEach((node) => {
         const mesh = this.nodeMeshes.get(node.id);
         if (mesh) {
@@ -75,7 +79,6 @@ export class BasicRenderer implements IRenderer {
 
   private addNodeMesh(node: Element) {
     const geometry = new THREE.SphereGeometry(0.5, 16, 16);
-    // @ts-expect-error - computeBoundsTree is not in the type definition but is added by three-mesh-bvh
     geometry.computeBoundsTree();
     const material = new THREE.MeshBasicMaterial();
     const mesh = new THREE.Mesh(geometry, material);
@@ -88,9 +91,7 @@ export class BasicRenderer implements IRenderer {
   private removeNodeMesh(nodeId: string) {
     const mesh = this.nodeMeshes.get(nodeId);
     if (mesh) {
-      // @ts-expect-error - disposeBoundsTree is not in the type definition but is added by three-mesh-bvh
       if (mesh.geometry.disposeBoundsTree) {
-        // @ts-expect-error
         mesh.geometry.disposeBoundsTree();
       }
       mesh.geometry.dispose();

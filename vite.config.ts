@@ -1,8 +1,6 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
-const projectRootDir = resolve(__dirname);
-
 export default defineConfig({
   build: {
     lib: {
@@ -17,6 +15,7 @@ export default defineConfig({
     setupFiles: ['./tests/setup.ts'],
     exclude: ['**/node_modules/**', '**/dist/**', '**/tests/visual/**'],
     deps: {
+      inline: ['solid-js'],
       optimizer: {
         web: {
           include: ['three', 'three-mesh-bvh', 'd3-force-3d'],
@@ -25,6 +24,6 @@ export default defineConfig({
     },
   },
   resolve: {
-    conditions: ['browser'],
+    conditions: ['development', 'browser'],
   },
 });

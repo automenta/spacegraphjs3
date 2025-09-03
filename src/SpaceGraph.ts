@@ -1,8 +1,5 @@
 import * as THREE from 'three';
-import {
-  CSS3DRenderer,
-  CSS3DObject,
-} from 'three/examples/jsm/renderers/CSS3DRenderer.js';
+import { CSS3DRenderer } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 import { createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { createState } from './createState';
@@ -16,8 +13,17 @@ import { EdgeRenderer } from './EdgeRenderer';
 import { HTMLRenderer } from './HTMLRenderer';
 import { HUDController } from './HUDController';
 
+/**
+ * The main class for creating and managing a SpaceGraph visualization.
+ * It orchestrates the renderer, interaction, layout, and other controllers.
+ */
 export class SpaceGraph {
   private container: HTMLElement;
+  /**
+   * The reactive state of the graph, powered by a SolidJS store.
+   * Direct modifications to this object will trigger updates in the visualization.
+   * @public
+   */
   public state: Store<Spec>;
   private updateState: (spec: Partial<Spec>) => void;
   private scene: THREE.Scene;
@@ -35,6 +41,11 @@ export class SpaceGraph {
   private dispose: () => void;
   private eventListeners: Map<string, ((...args: any[]) => void)[]> = new Map();
 
+  /**
+   * Creates a new SpaceGraph instance.
+   * @param containerSelector - The CSS selector for the container element.
+   * @param initialSpec - The initial specification for the graph.
+   */
   constructor(containerSelector: string, initialSpec: Spec) {
     const container = document.querySelector(containerSelector);
     if (!container) {
@@ -78,6 +89,12 @@ export class SpaceGraph {
     }
   }
 
+  /**
+   * Registers an event listener.
+   * @param eventName - The name of the event to listen for.
+   * @param listener - The callback function to execute when the event is fired.
+   * @returns A function that removes the event listener when called.
+   */
   public on(eventName: string, listener: (...args: any[]) => void) {
     if (!this.eventListeners.has(eventName)) {
       this.eventListeners.set(eventName, []);
@@ -95,6 +112,11 @@ export class SpaceGraph {
     };
   }
 
+  /**
+   * Retrieves a node or edge by its ID.
+   * @param id - The unique identifier of the element.
+   * @returns The element's reactive state proxy, or undefined if not found.
+   */
   public getElement(id: string) {
     return (
       this.state.data?.nodes?.find((n) => n.id === id) ||
@@ -102,11 +124,16 @@ export class SpaceGraph {
     );
   }
 
-  // Public getters for controllers
+  /**
+   * Provides access to the layout controller for manual operations.
+   */
   public get layout() {
     return this.layoutController;
   }
 
+  /**
+   * Provides access to the camera controller for manual operations like `flyTo`.
+   */
   public get camera() {
     return this.cameraController;
   }
@@ -183,6 +210,11 @@ export class SpaceGraph {
     this.scene.add(this.threeCamera); // Add camera to scene
   }
 
+  /**
+   * Updates the graph with a new (partial) specification.
+   * Changes are merged into the existing state, and the visualization updates reactively.
+   * @param spec - A partial `Spec` object with the properties to update.
+   */
   public update(spec: Partial<Spec>) {
     this.updateState(spec);
   }
@@ -205,6 +237,10 @@ export class SpaceGraph {
     this.cssRenderer.render(this.cssScene, this.threeCamera);
   };
 
+  /**
+   * Cleans up all resources, including SolidJS effects, Three.js objects,
+   * and event listeners, to prevent memory leaks.
+   */
   public destroy() {
     this.dispose(); // Dispose SolidJS root and all effects
     this.interactionController.dispose();

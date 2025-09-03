@@ -11,11 +11,8 @@ import {
 } from 'three-mesh-bvh';
 
 // Add the bvh properties to the THREE.Raycaster
-// @ts-expect-error - Linter doesn't like this, but it's the way the library is meant to be used.
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
-// @ts-expect-error - Linter doesn't like this, but it's the way the library is meant to be used.
 THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
-// @ts-expect-error - Linter doesn't like this, but it's the way the library is meant to be used.
 THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 
 export class InteractionController {
@@ -67,7 +64,6 @@ export class InteractionController {
    */
   private initInteraction() {
     this.raycaster = new THREE.Raycaster();
-    // @ts-expect-error - firstHitOnly is not in the type definition
     this.raycaster.firstHitOnly = true;
     this.pointer = new THREE.Vector2();
 

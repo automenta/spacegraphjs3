@@ -25,8 +25,10 @@ export class EdgeRenderer {
     this.scene.add(this.lineSegments);
 
     createEffect(() => {
-      // Depend on nodes and edges
+      // Depend on nodes and edges for reactivity in tests
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       this.state.data?.nodes;
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       this.state.data?.edges;
       this.updateEdges();
     });
