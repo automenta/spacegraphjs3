@@ -36,39 +36,58 @@ export function createState(initialSpec: Spec) {
         // Handle data updates
         if (spec.data) {
           if (spec.data.nodes) {
-            const nodeMap = new Map(s.data?.nodes?.map((n) => [n.id, n]));
-            for (const updatedNode of spec.data.nodes) {
-              if ((updatedNode as any).delete) {
-                nodeMap.delete(updatedNode.id);
-              } else {
-                const existingNode = nodeMap.get(updatedNode.id);
-                if (existingNode) {
-                  Object.assign(existingNode, updatedNode);
-                } else {
-                  nodeMap.set(updatedNode.id, updatedNode);
+            const existingNodeMap = new Map(s.data?.nodes?.map((n) => [n.id, n]));
+            const updatedNodeMap = new Map(spec.data.nodes.map(n => [n.id, n]));
+
+            // Filter out deleted nodes and update existing ones
+            s.data!.nodes = s.data!.nodes!.filter(node => {
+              const updatedNode = updatedNodeMap.get(node.id);
+              if (updatedNode) {
+                if (!(updatedNode as any).delete) {
+                  // Mutate existing node properties directly
+                  Object.assign(node, updatedNode);
+                  if (updatedNode.position) {
+                    Object.assign(node.position!, updatedNode.position);
+                  }
+                  return true; // Keep existing and updated node
                 }
+                return false; // Delete node
+              }
+              return true; // Keep existing node if not in updated spec
+            });
+
+            // Add new nodes
+            for (const updatedNode of spec.data.nodes) {
+              if (!(updatedNode as any).delete && !existingNodeMap.has(updatedNode.id)) {
+                s.data!.nodes!.push(updatedNode);
               }
             }
-            s.data!.nodes = Array.from(nodeMap.values());
           }
           if (spec.data.edges) {
-            const edgeMap = new Map(s.data?.edges?.map((e) => [e.id, e]));
-            for (const updatedEdge of spec.data.edges) {
-              if ((updatedEdge as any).delete) {
-                edgeMap.delete(updatedEdge.id);
-              } else {
-                const existingEdge = edgeMap.get(updatedEdge.id);
-                if (existingEdge) {
-                  Object.assign(existingEdge, updatedEdge);
-                } else {
-                  edgeMap.set(updatedEdge.id, updatedEdge);
+            const existingEdgeMap = new Map(s.data?.edges?.map((e) => [e.id, e]));
+            const updatedEdgeMap = new Map(spec.data.edges.map(e => [e.id, e]));
+
+            // Filter out deleted edges and update existing ones
+            s.data!.edges = s.data!.edges!.filter(edge => {
+              const updatedEdge = updatedEdgeMap.get(edge.id);
+              if (updatedEdge) {
+                if (!(updatedEdge as any).delete) {
+                  Object.assign(edge, updatedEdge);
+                  return true; // Keep existing and updated edge
                 }
+                return false; // Delete edge
+              }
+              return true; // Keep existing edge if not in updated spec
+            });
+
+            // Add new edges
+            for (const updatedEdge of spec.data.edges) {
+              if (!(updatedEdge as any).delete && !existingEdgeMap.has(updatedEdge.id)) {
+                s.data!.edges!.push(updatedEdge);
               }
             }
-            s.data!.edges = Array.from(edgeMap.values());
           }
-        }
-      })
+        })
     );
   };
 

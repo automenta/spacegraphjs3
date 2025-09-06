@@ -8,7 +8,7 @@ import { LayoutController } from './LayoutController';
 import { CameraController } from './CameraController';
 import { InteractionController } from './InteractionController';
 import { IRenderer } from './IRenderer';
-import { BasicRenderer } from './BasicRenderer';
+import { NodeRenderer } from './renderers/NodeRenderer';
 import { EdgeRenderer } from './EdgeRenderer';
 import { HTMLRenderer } from './HTMLRenderer';
 import { HUDController } from './HUDController';
@@ -34,12 +34,16 @@ export class SpaceGraph {
   public layoutController: LayoutController;
   private cameraController: CameraController; // New controller
   private interactionController: InteractionController;
-  private nodeRenderer: IRenderer;
+  private nodeRenderer: NodeRenderer;
   private edgeRenderer: EdgeRenderer;
   private htmlRenderer: HTMLRenderer;
   private hudController: HUDController;
   private dispose: () => void;
   private eventListeners: Map<string, ((...args: any[]) => void)[]> = new Map();
+
+  public static registerType(typeName: string, ActorClass: any) {
+    NodeRenderer.registerType(typeName, ActorClass);
+  }
 
   /**
    * Creates a new SpaceGraph instance.
@@ -65,7 +69,7 @@ export class SpaceGraph {
       this.initScenes();
 
       // Create the node renderer
-      this.nodeRenderer = new BasicRenderer(this.scene, this.state);
+      this.nodeRenderer = new NodeRenderer(this.scene, this.state);
       this.edgeRenderer = new EdgeRenderer(this.scene, this.state);
       this.htmlRenderer = new HTMLRenderer(this.cssScene, this.state);
 
