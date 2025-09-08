@@ -1,5 +1,9 @@
 // src/types.ts
 
+export type DeepPartial<T> = {
+  [P in keyof T]?: DeepPartial<T[P]>;
+};
+
 export interface Element {
   id: string;
   type: string;
@@ -7,14 +11,32 @@ export interface Element {
   data?: Record<string, any>;
   position?: { x: number; y: number; z: number; };
   color?: string;
-  delete?: boolean;
+}
+
+export interface HtmlElement extends Element {
+    content?: string;
+    className?: string;
 }
 
 export interface Edge {
   id: string;
   source: string;
   target: string;
-  delete?: boolean;
+  color?: string;
+}
+
+export interface SpecUpdate {
+    data?: {
+        nodes?: (DeepPartial<Element> & { id: string })[];
+        edges?: (DeepPartial<Edge> & { id: string })[];
+    };
+    style?: DeepPartial<StyleSpec>;
+    layout?: DeepPartial<LayoutSpec>;
+    camera?: DeepPartial<CameraSpec>;
+    interaction?: DeepPartial<{
+        hoveredElementId: string | null;
+        selectedElementIds: string[];
+    }>;
 }
 
 export interface CameraSpec {
@@ -26,6 +48,10 @@ export interface CameraSpec {
 
 export interface NodeStyle {
   color?: string;
+  glow?: {
+      color: string;
+      strength: number;
+  }
 }
 
 export type StyleSpec = {
@@ -40,18 +66,17 @@ export interface ForceDirectedLayoutSpec {
   linkStrength?: number;
 }
 
-export type LayoutSpec = ForceDirectedLayoutSpec; // Add more layout types here in the future
+export type LayoutSpec = ForceDirectedLayoutSpec;
 
 export interface Spec {
-  data?: {
-    nodes?: Element[];
-    edges?: Edge[];
+  data: {
+    nodes: Element[];
+    edges: Edge[];
   };
-  style?: StyleSpec;
-  layout?: LayoutSpec;
-  camera?: CameraSpec;
+  style: StyleSpec;
+  layout: LayoutSpec;
+  camera: CameraSpec;
   interaction: {
-    // Made non-optional
     hoveredElementId: string | null;
     selectedElementIds: string[];
   };

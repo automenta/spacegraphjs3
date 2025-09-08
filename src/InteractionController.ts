@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { createGesture, Gesture } from '@use-gesture/vanilla';
+import { Gesture } from '@use-gesture/vanilla';
 import { Store } from 'solid-js/store';
-import { Spec, Element } from './types';
+import { Spec, Element, SpecUpdate } from './types';
 import { IRenderer } from './IRenderer';
 import { InteractionLogic } from './InteractionLogic';
 import {
@@ -18,18 +18,17 @@ THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 export class InteractionController {
   private rendererEl: HTMLElement;
   private state: Store<Spec>;
-  private updateState: (spec: Partial<Spec>) => void;
+  private updateState: (spec: SpecUpdate) => void;
   private threeCamera: THREE.PerspectiveCamera;
   private nodeRenderer: IRenderer;
   private emit: (eventName: string, ...args: any[]) => void;
   private getElement: (id: string) => Element | undefined;
-  private gesture: Gesture;
-  private raycaster: THREE.Raycaster;
-  private pointer: THREE.Vector2;
+  private gesture!: Gesture;
+  private raycaster!: THREE.Raycaster;
+  private pointer!: THREE.Vector2;
   private lastHoveredId: string | null = null;
   private draggedElementId: string | null = null;
   private dragPlane = new THREE.Plane();
-  private dragStartOffset = new THREE.Vector3();
 
   constructor({
     rendererEl,
@@ -42,7 +41,7 @@ export class InteractionController {
   }: {
     rendererEl: HTMLElement;
     state: Store<Spec>;
-    updateState: (spec: Partial<Spec>) => void;
+    updateState: (spec: SpecUpdate) => void;
     threeCamera: THREE.PerspectiveCamera;
     nodeRenderer: IRenderer;
     emit: (eventName: string, ...args: any[]) => void;
@@ -59,24 +58,21 @@ export class InteractionController {
     this.initInteraction();
   }
 
-  /**
-   * Initialize the gesture and raycaster for interaction.
-   */
   private initInteraction() {
     this.raycaster = new THREE.Raycaster();
     this.raycaster.firstHitOnly = true;
     this.pointer = new THREE.Vector2();
 
-    this.gesture = createGesture(
+    this.gesture = new Gesture(this.rendererEl,
       {
-        onDragStart: ({ event }) => {
+        onDragStart: (state: any) => {
+          const { event } = state;
           const { clientX, clientY } = event as PointerEvent;
           this.draggedElementId = this._getHoveredElementId(clientX, clientY);
 
           if (this.draggedElementId) {
             const element = this.getElement(this.draggedElementId);
             if (element?.position) {
-              // Create a plane that is parallel to the camera and passes through the dragged object
               this.threeCamera.getWorldDirection(this.dragPlane.normal);
               this.dragPlane.setFromNormalAndCoplanarPoint(
                 this.dragPlane.normal,
@@ -86,17 +82,15 @@ export class InteractionController {
                   element.position.z
                 )
               );
-
-              // Inform layout engine to pin the node
               this.emit('layout:pin', [this.draggedElementId]);
             }
           }
         },
-        onDrag: ({ movement: [mx, my], event, xy: [vx, vy], active }) => {
+        onDrag: (state: any) => {
+          const { movement: [mx, my], event, xy: [vx, vy], active } = state;
           if (!active || !this.state.camera) return;
 
           if (this.draggedElementId) {
-            // It's a node drag
             InteractionLogic.handleNodeDrag(
               vx,
               vy,
@@ -107,7 +101,6 @@ export class InteractionController {
               this.updateState
             );
           } else {
-            // It's a background drag (pan/orbit)
             const e = event as PointerEvent;
             if (e.buttons === 2) {
               InteractionLogic.handleOrbit(mx, my, this.state, this.updateState);
@@ -124,24 +117,24 @@ export class InteractionController {
         },
         onDragEnd: () => {
           if (this.draggedElementId) {
-            // Inform layout engine to unpin the node
             this.emit('layout:unpin', [this.draggedElementId]);
             this.draggedElementId = null;
           }
         },
-        onWheel: ({ movement: [, my] }) => {
+        onWheel: (state: any) => {
+          const { movement: [, my] } = state;
           if (this.state.camera) {
             const zoomSpeed = 0.1;
             const newDistance = this.state.camera.distance + my * zoomSpeed;
             this.updateState({
               camera: {
-                ...this.state.camera,
                 distance: Math.max(0.1, newDistance),
               },
             });
           }
         },
-        onPointerMove: ({ event }) => {
+        onPointerMove: (state: any) => {
+          const { event } = state;
           const { clientX, clientY } = event as PointerEvent;
           const hoveredId = this._getHoveredElementId(clientX, clientY);
 
@@ -159,12 +152,12 @@ export class InteractionController {
 
           this.updateState({
             interaction: {
-              ...this.state.interaction,
               hoveredElementId: hoveredId ?? null,
             },
           });
         },
-        onClick: ({ event }) => {
+        onClick: (state: any) => {
+          const { event } = state;
           const { clientX, clientY } = event as PointerEvent;
           const clickedId = this._getHoveredElementId(clientX, clientY);
 
@@ -179,7 +172,6 @@ export class InteractionController {
 
             this.updateState({
               interaction: {
-                ...this.state.interaction,
                 selectedElementIds: newSelectedIds,
               },
             });
@@ -187,14 +179,13 @@ export class InteractionController {
             this.emit('background:click', { domEvent: event });
             this.updateState({
               interaction: {
-                ...this.state.interaction,
                 selectedElementIds: [],
               },
             });
           }
         },
       },
-      { domTarget: this.rendererEl, eventOptions: { passive: false } }
+      { eventOptions: { passive: false } }
     );
   }
 

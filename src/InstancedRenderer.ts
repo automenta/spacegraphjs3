@@ -10,14 +10,14 @@
 import * as THREE from 'three';
 import { createEffect, on } from 'solid-js';
 import { Store } from 'solid-js/store';
-import { Spec } from './types';
+import { Spec, Element } from './types';
 
 const MAX_INSTANCES = 100000;
 
 export class InstancedRenderer {
   private scene: THREE.Scene;
   private state: Store<Spec>;
-  public instancedMesh: THREE.InstancedMesh;
+  public instancedMesh!: THREE.InstancedMesh;
   private idToIndex: Map<string, number> = new Map();
   private indexToId: Map<number, string> = new Map();
   private dummy = new THREE.Object3D();
@@ -34,7 +34,7 @@ export class InstancedRenderer {
    */
   private init() {
     const geometry = new THREE.SphereGeometry(0.5, 16, 16);
-    geometry.computeBoundsTree();
+    (geometry as any).computeBoundsTree();
     const material = new THREE.MeshBasicMaterial({ vertexColors: true });
     this.instancedMesh = new THREE.InstancedMesh(
       geometry,
@@ -50,23 +50,26 @@ export class InstancedRenderer {
     this.scene.add(this.instancedMesh);
 
     createEffect(() => {
-      // Depend on nodes
       this.updateNodeMappings();
     });
 
     createEffect(() => {
-      // This effect tracks changes to individual node properties
-      this.state.data?.nodes.forEach((node) => {
+      this.state.data?.nodes?.forEach((node) => {
         const index = this.idToIndex.get(node.id);
         if (index !== undefined) {
           this.updateInstance(index, node);
         }
       });
-      this.instancedMesh.instanceMatrix.needsUpdate = true;
-      this.instancedMesh.instanceColor!.needsUpdate = true;
+      if (this.instancedMesh.instanceMatrix) {
+        this.instancedMesh.instanceMatrix.needsUpdate = true;
+      }
+      if (this.instancedMesh.instanceColor) {
+        this.instancedMesh.instanceColor.needsUpdate = true;
+      }
     });
 
     createEffect(
+        // @ts-ignore
       on(
         () => [
           this.state.interaction.hoveredElementId,
@@ -74,18 +77,16 @@ export class InstancedRenderer {
         ],
         ([next, prev]) => {
           const [nextHovered, nextSelected] = next;
-          const [prevHovered, prevSelected] = prev || [null, []];
+          const prevHovered = prev ? prev[0] : null;
+          const prevSelected = prev ? prev[1] : [];
 
-          // Determine which nodes' styles have changed
           const changedIds = new Set<string>();
 
-          // Hover changes
           if (nextHovered !== prevHovered) {
             if (prevHovered) changedIds.add(prevHovered);
             if (nextHovered) changedIds.add(nextHovered);
           }
 
-          // Selection changes
           const allSelected = new Set([...prevSelected, ...nextSelected]);
           for (const id of allSelected) {
             const wasSelected = prevSelected.includes(id);
@@ -95,16 +96,19 @@ export class InstancedRenderer {
             }
           }
 
-          // Update only the instances for the nodes that changed
           for (const id of changedIds) {
             const index = this.idToIndex.get(id);
-            const node = this.state.data?.nodes.find((n) => n.id === id);
+            const node = this.state.data?.nodes?.find((n) => n.id === id);
             if (index !== undefined && node) {
               this.updateInstance(index, node);
             }
           }
-          this.instancedMesh.instanceMatrix.needsUpdate = true;
-          this.instancedMesh.instanceColor!.needsUpdate = true;
+          if (this.instancedMesh.instanceMatrix) {
+            this.instancedMesh.instanceMatrix.needsUpdate = true;
+          }
+          if (this.instancedMesh.instanceColor) {
+            this.instancedMesh.instanceColor.needsUpdate = true;
+          }
         },
         { defer: true }
       )
@@ -134,17 +138,15 @@ export class InstancedRenderer {
         this.updateInstance(index, node);
       }
     });
-    this.instancedMesh.instanceMatrix.needsUpdate = true;
-    this.instancedMesh.instanceColor!.needsUpdate = true;
+    if (this.instancedMesh.instanceMatrix) {
+      this.instancedMesh.instanceMatrix.needsUpdate = true;
+    }
+    if (this.instancedMesh.instanceColor) {
+      this.instancedMesh.instanceColor.needsUpdate = true;
+    }
   }
 
-  /**
-   * Update the position and color of a single instance.
-   * @param index - The index of the instance to update.
-   * @param node - The node data.
-   */
-  public updateInstance(index: number, node: any) {
-    // Update position
+  public updateInstance(index: number, node: Element) {
     this.dummy.position.set(
       node.position?.x ?? 0,
       node.position?.y ?? 0,
@@ -153,15 +155,13 @@ export class InstancedRenderer {
     this.dummy.updateMatrix();
     this.instancedMesh.setMatrixAt(index, this.dummy.matrix);
 
-    // Update color
     const hoveredId = this.state.interaction.hoveredElementId;
     const selectedIds = this.state.interaction.selectedElementIds;
-    let finalColor: string | number = node.color || '#ffffff'; // Default color
+    let finalColor: string | number = node.color || '#ffffff';
 
     const isSelected = selectedIds.includes(node.id);
     const isHovered = hoveredId === node.id;
 
-    // Apply styles with precedence: selected > hover > default
     if (isSelected) {
       finalColor =
         this.state.style['node:selected']?.color || finalColor;
@@ -177,11 +177,15 @@ export class InstancedRenderer {
   }
 
   public dispose() {
-    this.instancedMesh.geometry.dispose();
-    (this.instancedMesh.material as THREE.Material).dispose();
+    if (this.instancedMesh.geometry) {
+      this.instancedMesh.geometry.dispose();
+    }
+    if(this.instancedMesh.material) {
+        (this.instancedMesh.material as THREE.Material).dispose();
+    }
     this.scene.remove(this.instancedMesh);
-    if (this.instancedMesh.geometry.boundsTree) {
-      this.instancedMesh.geometry.disposeBoundsTree();
+    if ((this.instancedMesh.geometry as any)?.boundsTree) {
+      (this.instancedMesh.geometry as any).disposeBoundsTree();
     }
   }
 }

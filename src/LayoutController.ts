@@ -16,7 +16,7 @@ export class LayoutController {
   private setState: (fn: (prevState: Spec) => Spec) => void;
   private simulation: Simulation<Node, Edge> | null = null;
   public ready: Promise<void>;
-  private resolveReady: () => void;
+  private resolveReady!: () => void;
   private emit: (eventName: string, ...args: any[]) => void;
   private paused = false;
   private disposeEffect?: () => void;

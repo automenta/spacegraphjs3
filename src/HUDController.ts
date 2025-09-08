@@ -5,7 +5,7 @@ import { Spec } from './types';
 export class HUDController {
   private state: Store<Spec>;
   private hudContainer: HTMLDivElement;
-  public statsContainer: HTMLDivElement;
+  public statsContainer!: HTMLDivElement;
 
   constructor(container: HTMLElement, state: Store<Spec>) {
     this.state = state;
