@@ -59,11 +59,9 @@ export class LayoutController {
       }
     });
 
-    // Create a deep copy of the edges for the simulation to avoid proxy issues.
-    const edges: Edge[] = JSON.parse(JSON.stringify(this.state.data?.edges || []));
-
-    // Create a deep copy of the nodes for the simulation to avoid proxy issues.
-    const simNodes: Node[] = JSON.parse(JSON.stringify(this.originalNodes));
+    // Create a shallow copy of the nodes and edges for the simulation, stripping the proxy.
+    const edges: Edge[] = (this.state.data?.edges || []).map(e => ({...e}));
+    const simNodes: Node[] = this.originalNodes.map(n => ({...n}));
 
     // Initialize positions for d3.
     simNodes.forEach((node) => {

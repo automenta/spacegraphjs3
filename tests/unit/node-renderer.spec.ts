@@ -15,8 +15,7 @@ describe('NodeRenderer and SphereElementActor', () => {
 
   beforeEach(() => {
     scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-    scene.add(camera); // Add camera to scene
+    // No camera added to the scene in the test setup anymore
     createRoot((_dispose) => {
       const { state: s, updateState: u } = createState({
         data: { nodes: [], edges: [] },
@@ -30,7 +29,7 @@ describe('NodeRenderer and SphereElementActor', () => {
   });
 
   it('should add and remove sphere nodes based on state changes', async () => {
-    expect(scene.children.length).toBe(1); // Camera initially
+    expect(scene.children.length).toBe(0); // No objects initially
 
     updateState({
       data: {
@@ -40,8 +39,8 @@ describe('NodeRenderer and SphereElementActor', () => {
       },
     });
 
-    expect(scene.children.length).toBe(2); // 1 node + camera
-    let mesh = scene.children[1] as THREE.Mesh; // Get the node, not the camera
+    expect(scene.children.length).toBe(1); // 1 node
+    let mesh = scene.children[0] as THREE.Mesh;
     expect(mesh).toBeInstanceOf(THREE.Mesh);
     expect(mesh.userData.nodeId).toBe('n1');
 
@@ -54,7 +53,7 @@ describe('NodeRenderer and SphereElementActor', () => {
       },
     });
 
-    expect(scene.children.length).toBe(3); // 2 nodes + camera
+    expect(scene.children.length).toBe(2); // 2 nodes
     mesh = scene.children.find(c => c.userData.nodeId === 'n2') as THREE.Mesh;
     expect(mesh).toBeInstanceOf(THREE.Mesh);
     expect(mesh.userData.nodeId).toBe('n2');
@@ -67,7 +66,7 @@ describe('NodeRenderer and SphereElementActor', () => {
       },
     });
 
-    expect(scene.children.length).toBe(2); // 1 node (n1 removed) + camera
+    expect(scene.children.length).toBe(1); // 1 node (n1 removed)
     expect(scene.children.find(c => c.userData.nodeId === 'n1')).toBeUndefined();
 
     dispose();
@@ -82,7 +81,7 @@ describe('NodeRenderer and SphereElementActor', () => {
       },
     });
     await Promise.resolve(); // Wait for SolidJS effects to flush
-    expect(scene.children.length).toBe(2); // 1 node + camera
+    expect(scene.children.length).toBe(1); // 1 node
     let mesh = scene.children.find(c => c.userData.nodeId === 'n1') as THREE.Mesh;
     let material = mesh.material as THREE.MeshBasicMaterial;
 

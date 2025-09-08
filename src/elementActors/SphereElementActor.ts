@@ -45,10 +45,12 @@ export class SphereElementActor extends BaseElementActor {
     }
     console.log(`updateVisuals: threeObject material for ${this.elementState.id}`, (this.threeObject as THREE.Mesh).material);
 
-    // Use untrack to access elementState properties without creating new dependencies
-    const position = untrack(() => this.elementState.position);
-    const color = untrack(() => this.elementState.color);
-    console.log(`updateVisuals for ${this.elementState.id}: position`, position);
+    // Access properties directly to establish reactive dependencies
+    const position = this.elementState.position;
+    const color = this.elementState.color;
+    const hoveredId = this.graphState.interaction.hoveredElementId;
+    const selectedIds = this.graphState.interaction.selectedElementIds;
+    const id = this.elementState.id;
 
     // Update position
     this.threeObject.position.set(
@@ -58,18 +60,16 @@ export class SphereElementActor extends BaseElementActor {
     );
 
     // Update color based on state (default, hover, select)
-    const hoveredId = untrack(() => this.graphState.interaction.hoveredElementId);
-    const selectedIds = untrack(() => this.graphState.interaction.selectedElementIds);
     let finalColor = color || '#ffffff'; // Default color
 
-    const isSelected = selectedIds.includes(untrack(() => this.elementState.id));
-    const isHovered = hoveredId === untrack(() => this.elementState.id);
+    const isSelected = selectedIds.includes(id);
+    const isHovered = hoveredId === id;
 
     // Apply styles with precedence: selected > hover > default
     if (isSelected) {
-      finalColor = untrack(() => this.graphState.style?.['node:selected']?.color) || finalColor;
+      finalColor = this.graphState.style?.['node:selected']?.color || finalColor;
     } else if (isHovered) {
-      finalColor = untrack(() => this.graphState.style?.['node:hover']?.color) || finalColor;
+      finalColor = this.graphState.style?.['node:hover']?.color || finalColor;
     }
 
     (this.threeObject.material as THREE.MeshBasicMaterial).color.set(finalColor);

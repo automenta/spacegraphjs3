@@ -87,7 +87,8 @@ export function createState(initialSpec: Spec) {
               }
             }
           }
-        })
+        }
+      })
     );
   };
 

@@ -56,5 +56,8 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "overrides": {
+    "three": "^0.179.0"
+  }
 }

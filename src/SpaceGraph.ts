@@ -148,7 +148,7 @@ export class SpaceGraph {
    */
   private _initControllers(emit: (eventName: string, ...args: any[]) => void) {
     this.layoutController = new LayoutController(this.state, emit);
-    this.layoutController.init();
+    createEffect(() => this.layoutController.init());
     this.cameraController = new CameraController(
       this.state,
       this.updateState,
