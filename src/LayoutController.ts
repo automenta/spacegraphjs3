@@ -1,5 +1,5 @@
-import { onCleanup } from 'solid-js';
-import { Store } from 'solid-js/store';
+import { createRoot } from 'solid-js';
+import { Store, produce } from 'solid-js/store';
 import {
   forceSimulation,
   forceManyBody,
@@ -13,34 +13,38 @@ import { Spec, Element, Edge } from './types';
 interface Node extends Element, d3.SimulationNodeDatum {}
 
 export class LayoutController {
-  private state: Store<Spec>;
+  private setState: (fn: (prevState: Spec) => Spec) => void;
   private simulation: Simulation<Node, Edge> | null = null;
   public ready: Promise<void>;
   private resolveReady: () => void;
   private emit: (eventName: string, ...args: any[]) => void;
-  private originalNodes: Node[] = [];
   private paused = false;
+  private disposeEffect?: () => void;
+  private state: Store<Spec>;
 
   constructor(
     state: Store<Spec>,
+    setState: (fn: (prevState: Spec) => Spec) => void,
     emit: (eventName: string, ...args: any[]) => void
   ) {
     this.ready = new Promise((resolve) => {
       this.resolveReady = resolve;
     });
     this.state = state;
+    this.setState = setState;
     this.emit = emit;
-
-    onCleanup(() => this.stopSimulation());
   }
 
   public init() {
-    const layoutType = this.state.layout?.type ?? 'force-directed';
-    if (layoutType === 'force-directed') {
-      this.initForceSimulation();
-    } else {
-      this.stopSimulation();
-    }
+    this.disposeEffect = createRoot((dispose) => {
+      const layoutType = this.state.layout?.type ?? 'force-directed';
+      if (layoutType === 'force-directed') {
+        this.initForceSimulation();
+      } else {
+        this.stopSimulation();
+      }
+      return dispose;
+    });
   }
 
   /**
@@ -49,28 +53,18 @@ export class LayoutController {
   private initForceSimulation() {
     this.stopSimulation();
 
-    this.originalNodes = (this.state.data?.nodes || []) as Node[];
+    // IMPORTANT: Deep copy nodes and edges to prevent d3 from mutating the reactive state directly.
+    const simNodes: Node[] = JSON.parse(JSON.stringify(this.state.data?.nodes || []));
+    const simEdges: Edge[] = JSON.parse(JSON.stringify(this.state.data?.edges || []));
 
-    // Ensure all original nodes have a position object for reactivity.
-    this.originalNodes.forEach((node) => {
-      if (!node.position) {
-        // @ts-expect-error - Position is created here if it doesn't exist.
-        node.position = { x: 0, y: 0, z: 0 };
-      }
-    });
-
-    // Create a shallow copy of the nodes and edges for the simulation, stripping the proxy.
-    const edges: Edge[] = (this.state.data?.edges || []).map(e => ({...e}));
-    const simNodes: Node[] = this.originalNodes.map(n => ({...n}));
-
-    // Initialize positions for d3.
+    // Initialize positions for d3 if they don't exist.
     simNodes.forEach((node) => {
       node.x = node.position?.x ?? 0;
       node.y = node.position?.y ?? 0;
       node.z = node.position?.z ?? 0;
     });
 
-    const layoutSpec = this.state.layout as import('./types').ForceDirectedLayoutSpec;
+    const layoutSpec = (this.state.layout || {}) as import('./types').ForceDirectedLayoutSpec;
     const charge = layoutSpec.charge ?? -50;
     const linkDistance = layoutSpec.linkDistance ?? 50;
     const linkStrength = layoutSpec.linkStrength ?? 1;
@@ -80,23 +74,28 @@ export class LayoutController {
       .force('center', forceCenter())
       .force(
         'link',
-        forceLink<Node, Edge>(edges)
+        forceLink<Node, Edge>(simEdges)
           .id((d: Node) => d.id)
           .distance(linkDistance)
           .strength(linkStrength)
       )
       .on('tick', () => {
-        // On each tick, update the positions of the original reactive nodes.
-        this.simulation?.nodes().forEach((simNode, i) => {
-          const originalNode = this.originalNodes[i];
-          if (!originalNode.position) {
-            // @ts-expect-error - Position is created here if it doesn't exist.
-            originalNode.position = { x: 0, y: 0, z: 0 };
-          }
-          originalNode.position.x = simNode.x!;
-          originalNode.position.y = simNode.y!;
-          originalNode.position.z = simNode.z!;
-        });
+        if (this.paused) return;
+        // On each tick, update the positions using the setState function
+        this.setState(
+          produce((s) => {
+            const stateNodeMap = new Map(s.data!.nodes!.map(n => [n.id, n]));
+            this.simulation?.nodes().forEach((simNode) => {
+              const stateNode = stateNodeMap.get(simNode.id);
+              if (stateNode) {
+                if (!stateNode.position) stateNode.position = { x: 0, y: 0, z: 0 };
+                stateNode.position.x = simNode.x!;
+                stateNode.position.y = simNode.y!;
+                stateNode.position.z = simNode.z!;
+              }
+            });
+          })
+        );
         this.emit('layout:tick');
       })
       .on('end', () => {
@@ -104,8 +103,6 @@ export class LayoutController {
       });
 
     this.simulation.alpha(1).restart();
-    // In the test environment, we stop the simulation immediately
-    // so we can manually tick it.
     if (process.env.NODE_ENV === 'test') {
       this.simulation.stop();
     }
@@ -134,10 +131,6 @@ export class LayoutController {
     if (this.simulation) this.simulation.alpha(1).restart();
   }
 
-  /**
-   * Pins nodes in the layout simulation, fixing their position.
-   * @param nodeIds - An array of node IDs to pin.
-   */
   public pinNodes(nodeIds: string[]) {
     if (!this.simulation) return;
     this.simulation.nodes().forEach((node) => {
@@ -149,10 +142,6 @@ export class LayoutController {
     });
   }
 
-  /**
-   * Unpins nodes in the layout simulation, allowing them to move freely.
-   * @param nodeIds - An array of node IDs to unpin.
-   */
   public unpinNodes(nodeIds: string[]) {
     if (!this.simulation) return;
     this.simulation.nodes().forEach((node) => {
@@ -162,11 +151,13 @@ export class LayoutController {
         node.fz = null;
       }
     });
-    // Reheat the simulation slightly to incorporate the unpinned node
     this.reheat();
   }
 
   public dispose() {
+    if (this.disposeEffect) {
+      this.disposeEffect();
+    }
     this.stopSimulation();
   }
 
@@ -175,17 +166,6 @@ export class LayoutController {
       for (let i = 0; i < iterations; i++) {
         this.simulation.tick();
       }
-      // Manually update positions for tests
-      this.simulation.nodes().forEach((simNode, i) => {
-        const originalNode = this.originalNodes[i];
-          if (!originalNode.position) {
-            // @ts-expect-error - Position is created here if it doesn't exist.
-            originalNode.position = { x: 0, y: 0, z: 0 };
-        }
-          originalNode.position.x = simNode.x!;
-          originalNode.position.y = simNode.y!;
-          originalNode.position.z = simNode.z!;
-      });
       this.emit('layout:tick');
     }
   }

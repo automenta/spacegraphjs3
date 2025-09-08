@@ -58,10 +58,11 @@ describe('NodeRenderer and SphereElementActor', () => {
     expect(mesh).toBeInstanceOf(THREE.Mesh);
     expect(mesh.userData.nodeId).toBe('n2');
 
+    // To remove a node with a merging updater, we mark it for deletion
     updateState({
       data: {
         nodes: [
-          { id: 'n2', type: 'sphere', position: { x: 1, y: 1, z: 1 }, color: '#00ff00' },
+          { id: 'n1', delete: true },
         ],
       },
     });

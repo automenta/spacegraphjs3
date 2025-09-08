@@ -26,6 +26,7 @@ export class SpaceGraph {
    */
   public state: Store<Spec>;
   private updateState: (spec: Partial<Spec>) => void;
+  private setState: (fn: (prevState: Spec) => Spec) => void;
   private scene: THREE.Scene;
   private cssScene: THREE.Scene;
   private threeCamera: THREE.PerspectiveCamera; // Renamed from 'camera'
@@ -60,9 +61,10 @@ export class SpaceGraph {
     // The createRoot ensures all SolidJS reactivity is disposed of properly
     this.dispose = createRoot((dispose) => {
       // Create the reactive state using a SolidJS store
-      const { state, updateState } = createState(initialSpec);
+      const { state, updateState, setState } = createState(initialSpec);
       this.state = state;
       this.updateState = updateState;
+      this.setState = setState;
 
       // Initialize the three.js renderer and scene
       this.initRenderers();
@@ -147,8 +149,8 @@ export class SpaceGraph {
    * @param emit - The event emitter function.
    */
   private _initControllers(emit: (eventName: string, ...args: any[]) => void) {
-    this.layoutController = new LayoutController(this.state, emit);
-    createEffect(() => this.layoutController.init());
+    this.layoutController = new LayoutController(this.state, this.setState, emit);
+    this.layoutController.init();
     this.cameraController = new CameraController(
       this.state,
       this.updateState,

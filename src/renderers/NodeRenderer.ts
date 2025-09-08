@@ -1,4 +1,4 @@
-import { createEffect, createMemo } from 'solid-js';
+import { createEffect, createMemo, createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { Spec, Element } from '../types';
 import { IRenderer } from '../IRenderer';
@@ -21,12 +21,16 @@ export class NodeRenderer implements IRenderer {
   private state: Store<Spec>;
   private elementActors: Map<string, BaseElementActor> = new Map();
   private static registeredElementTypes: Map<string, ElementActorConstructor> = new Map();
+  private disposeEffect?: () => void;
 
   constructor(scene: THREE.Scene, state: Store<Spec>) {
     this.scene = scene;
     this.state = state;
 
-    this.init();
+    this.disposeEffect = createRoot((dispose) => {
+      this.init();
+      return dispose;
+    });
   }
 
   /**
@@ -109,6 +113,9 @@ export class NodeRenderer implements IRenderer {
   }
 
   public dispose(): void {
+    if (this.disposeEffect) {
+      this.disposeEffect();
+    }
     // Create a copy of the keys to avoid issues with modifying the map while iterating.
     const nodeIds = Array.from(this.elementActors.keys());
     for (const nodeId of nodeIds) {

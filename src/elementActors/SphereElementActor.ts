@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createEffect, untrack } from 'solid-js';
+import { createEffect, createRoot, untrack } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { Element, Spec } from '../types';
 import { BaseElementActor } from './BaseElementActor';
@@ -21,36 +21,35 @@ export class SphereElementActor extends BaseElementActor {
     geometry.computeBoundsTree();
     const material = new THREE.MeshBasicMaterial();
     this.threeObject = new THREE.Mesh(geometry, material);
-    console.log(`SphereElementActor init: threeObject`, this.threeObject);
     this.threeObject.userData.nodeId = this.elementState.id; // Store ID for raycasting
     this.scene.add(this.threeObject);
 
-    this.disposeEffect = createEffect(() => {
-      // Depend on the elementState and graphState objects directly
-      this.elementState; // Depend on the entire element state object
-      this.graphState.interaction.hoveredElementId;
-      this.graphState.interaction.selectedElementIds;
+    // All reactive effects should be created within a `createRoot` context.
+    // The returned `dispose` function is stored to be called when the actor is destroyed.
+    this.disposeEffect = createRoot((dispose) => {
+      createEffect(() => {
+        // By accessing properties of the state, we create reactive dependencies.
+        // SolidJS will automatically re-run this effect when any of these properties change.
+        const position = this.elementState.position;
+        const color = this.elementState.color;
+        const hoveredId = this.graphState.interaction.hoveredElementId;
+        const selectedIds = this.graphState.interaction.selectedElementIds;
+        const id = this.elementState.id;
 
-      this.updateVisuals();
+        // Untrack the updateVisuals call to avoid circular dependencies.
+        // We only want to re-run when the specific properties above change.
+        untrack(() => this.updateVisuals(position, color, hoveredId, selectedIds, id));
+      });
+
+      return dispose;
     });
-
-    // Initial update
-    this.updateVisuals();
   }
 
-  private updateVisuals(): void {
+  private updateVisuals(position, color, hoveredId, selectedIds, id): void {
     if (!this.threeObject) {
       console.warn(`updateVisuals: threeObject is null for ${this.elementState.id}`);
       return;
     }
-    console.log(`updateVisuals: threeObject material for ${this.elementState.id}`, (this.threeObject as THREE.Mesh).material);
-
-    // Access properties directly to establish reactive dependencies
-    const position = this.elementState.position;
-    const color = this.elementState.color;
-    const hoveredId = this.graphState.interaction.hoveredElementId;
-    const selectedIds = this.graphState.interaction.selectedElementIds;
-    const id = this.elementState.id;
 
     // Update position
     this.threeObject.position.set(
@@ -76,6 +75,9 @@ export class SphereElementActor extends BaseElementActor {
   }
 
   public dispose(): void {
+    if (this.disposeEffect) {
+      this.disposeEffect();
+    }
     if (this.threeObject) {
       if ((this.threeObject as THREE.Mesh).geometry.disposeBoundsTree) {
         (this.threeObject as THREE.Mesh).geometry.disposeBoundsTree();

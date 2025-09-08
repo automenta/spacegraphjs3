@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createEffect, onCleanup } from 'solid-js';
+import { createEffect, createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 import { Spec } from './types';
@@ -8,25 +8,29 @@ export class HTMLRenderer {
   private cssScene: THREE.Scene;
   private state: Store<Spec>;
   private htmlObjects: Map<string, CSS3DObject> = new Map();
+  private disposeEffect?: () => void;
 
   constructor(cssScene: THREE.Scene, state: Store<Spec>) {
     this.cssScene = cssScene;
     this.state = state;
 
-    createEffect(() => {
-      // Depend on nodes for reactivity in tests
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-      this.state.data?.nodes;
-      this.updateHTMLNodes();
+    this.disposeEffect = createRoot((dispose) => {
+      createEffect(() => {
+        // This effect will run whenever the nodes array changes.
+        this.updateHTMLNodes();
+      });
+      return dispose;
     });
-
-    onCleanup(() => this.dispose());
   }
 
-  public updateHTMLNodes() {
-    const htmlNodes = (this.state.data?.nodes || []).filter(
-      (node) => node.type === 'html'
-    );
+  public updateHTMLNodes(htmlNodes?) {
+    // If htmlNodes are not passed, get them from the state.
+    // This supports both reactive calls (from createEffect) and manual calls (from tests).
+    if (!htmlNodes) {
+      htmlNodes = (this.state.data?.nodes || []).filter(
+        (node) => node.type === 'html'
+      );
+    }
 
     // Remove old objects
     const currentNodeIds = new Set(htmlNodes.map((n) => n.id));
@@ -47,6 +51,7 @@ export class HTMLRenderer {
         element.innerHTML = node.content || '';
         element.className = node.className || 'spacegraph-html-node';
         object = new CSS3DObject(element);
+        object.userData.nodeId = node.id;
         this.htmlObjects.set(node.id, object);
         this.cssScene.add(object);
       } else {
@@ -67,6 +72,9 @@ export class HTMLRenderer {
   }
 
   public dispose() {
+    if (this.disposeEffect) {
+      this.disposeEffect();
+    }
     for (const object of this.htmlObjects.values()) {
       this.cssScene.remove(object);
     }

@@ -1,14 +1,15 @@
 import * as THREE from 'three';
-import { createEffect, onCleanup } from 'solid-js';
+import { createEffect, createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { Spec } from './types';
 
 export class EdgeRenderer {
   private scene: THREE.Scene;
   private state: Store<Spec>;
-  public lineSegments: THREE.LineSegments | null = null;
+  public lineSegments: THREE.LineSegments;
   private material: THREE.LineBasicMaterial;
   private geometry: THREE.BufferGeometry;
+  private disposeEffect?: () => void;
 
   constructor(scene: THREE.Scene, state: Store<Spec>) {
     this.scene = scene;
@@ -24,21 +25,21 @@ export class EdgeRenderer {
     this.lineSegments = new THREE.LineSegments(this.geometry, this.material);
     this.scene.add(this.lineSegments);
 
-    createEffect(() => {
-      // Depend on nodes and edges for reactivity in tests
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-      this.state.data?.nodes;
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-      this.state.data?.edges;
-      this.updateEdges();
+    this.disposeEffect = createRoot((dispose) => {
+      createEffect(() => {
+        this.updateEdges();
+      });
+      return dispose;
     });
-
-    onCleanup(() => this.dispose());
   }
 
-  public updateEdges() {
-    const nodes = this.state.data?.nodes;
-    const edges = this.state.data?.edges;
+  public updateEdges(nodes?, edges?) {
+    if (!nodes) {
+      nodes = this.state.data?.nodes;
+    }
+    if (!edges) {
+      edges = this.state.data?.edges;
+    }
 
     if (!nodes || !edges || !this.lineSegments) {
       this.geometry.setAttribute(
@@ -74,7 +75,7 @@ export class EdgeRenderer {
           targetNode.position.z
         );
 
-        const color = new THREE.Color(edge.color || 0xaaaaaa);
+        const color = new THREE.Color(edge.color || '#aaaaaa');
         colors.push(color.r, color.g, color.b);
         colors.push(color.r, color.g, color.b);
       }
@@ -89,16 +90,15 @@ export class EdgeRenderer {
       new THREE.Float32BufferAttribute(colors, 3)
     );
 
-    if (this.geometry.attributes.position) {
-      this.geometry.attributes.position.needsUpdate = true;
-    }
-    if (this.geometry.attributes.color) {
-      this.geometry.attributes.color.needsUpdate = true;
-    }
+    this.geometry.attributes.position.needsUpdate = true;
+    this.geometry.attributes.color.needsUpdate = true;
     this.geometry.computeBoundingSphere();
   }
 
   public dispose() {
+    if (this.disposeEffect) {
+      this.disposeEffect();
+    }
     if (this.lineSegments) {
       this.scene.remove(this.lineSegments);
     }
