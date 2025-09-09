@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Gesture } from '@use-gesture/vanilla';
 import { Store } from 'solid-js/store';
-import { Spec, Element, SpecUpdate } from './types';
+import { Spec, GraphElement, SpecUpdate } from './types';
 import { IRenderer } from './IRenderer';
 import { InteractionLogic } from './InteractionLogic';
 import {
@@ -22,7 +22,7 @@ export class InteractionController {
   private threeCamera: THREE.PerspectiveCamera;
   private nodeRenderer: IRenderer;
   private emit: (eventName: string, ...args: any[]) => void;
-  private getElement: (id: string) => Element | undefined;
+  private getElement: (id: string) => GraphElement | undefined;
   private gesture!: Gesture;
   private raycaster!: THREE.Raycaster;
   private pointer!: THREE.Vector2;
@@ -45,7 +45,7 @@ export class InteractionController {
     threeCamera: THREE.PerspectiveCamera;
     nodeRenderer: IRenderer;
     emit: (eventName: string, ...args: any[]) => void;
-    getElement: (id: string) => Element | undefined;
+    getElement: (id: string) => GraphElement | undefined;
   }) {
     this.rendererEl = rendererEl;
     this.state = state;

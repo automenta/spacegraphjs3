@@ -1,6 +1,7 @@
+import * as THREE from 'three';
 import { createEffect, createMemo, createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
-import { Spec, Element } from '../types';
+import { Spec, GraphElement } from '../types';
 import { IRenderer } from '../IRenderer';
 import { BaseElementActor } from '../elementActors/BaseElementActor';
 import { SphereElementActor } from '../elementActors/SphereElementActor';
@@ -8,7 +9,7 @@ import { SphereElementActor } from '../elementActors/SphereElementActor';
 // Define a type for the ElementActor constructor
 type ElementActorConstructor = new (
   scene: THREE.Scene,
-  elementState: Store<Element>,
+  elementState: Store<GraphElement>,
   graphState: Store<Spec>
 ) => BaseElementActor;
 
@@ -69,7 +70,7 @@ export class NodeRenderer implements IRenderer {
     });
   }
 
-  private addElementActor(node: Element) {
+  private addElementActor(node: GraphElement) {
     const ActorClass = NodeRenderer.registeredElementTypes.get(node.type);
     if (!ActorClass) {
       console.warn(`No ElementActor registered for type: ${node.type}. Skipping node ${node.id}.`);
@@ -80,7 +81,7 @@ export class NodeRenderer implements IRenderer {
     // This allows the actor to react to changes in its own elementState
     const elementStateProxy = this.state.data!.nodes!.find(n => n.id === node.id)!;
 
-    const actor = new ActorClass(this.scene, elementStateProxy as Store<Element>, this.state);
+    const actor = new ActorClass(this.scene, elementStateProxy as Store<GraphElement>, this.state);
     actor.init();
     this.elementActors.set(node.id, actor);
   }

@@ -3,11 +3,10 @@ import { CSS3DRenderer } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 import { createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { createState } from './createState';
-import { Spec } from './types';
+import { Spec, SpecUpdate } from './types';
 import { LayoutController } from './LayoutController';
 import { CameraController } from './CameraController';
 import { InteractionController } from './InteractionController';
-import { IRenderer } from './IRenderer';
 import { NodeRenderer } from './renderers/NodeRenderer';
 import { EdgeRenderer } from './EdgeRenderer';
 import { HTMLRenderer } from './HTMLRenderer';
@@ -24,21 +23,21 @@ export class SpaceGraph {
    * Direct modifications to this object will trigger updates in the visualization.
    * @public
    */
-  public state: Store<Spec>;
-  private updateState: (spec: Partial<Spec>) => void;
-  private setState: (fn: (prevState: Spec) => Spec) => void;
-  private scene: THREE.Scene;
-  private cssScene: THREE.Scene;
-  private threeCamera: THREE.PerspectiveCamera; // Renamed from 'camera'
+  public state!: Store<Spec>;
+  private updateState!: (spec: SpecUpdate) => void;
+  private setState!: (fn: (prevState: Spec) => Spec) => void;
+  private scene!: THREE.Scene;
+  private cssScene!: THREE.Scene;
+  private threeCamera!: THREE.PerspectiveCamera; // Renamed from 'camera'
   private renderer: THREE.WebGLRenderer | null = null;
   private cssRenderer: CSS3DRenderer | null = null;
-  public layoutController: LayoutController;
-  private cameraController: CameraController; // New controller
-  private interactionController: InteractionController;
-  private nodeRenderer: NodeRenderer;
-  private edgeRenderer: EdgeRenderer;
-  private htmlRenderer: HTMLRenderer;
-  private hudController: HUDController;
+  public layoutController!: LayoutController;
+  private cameraController!: CameraController; // New controller
+  private interactionController!: InteractionController;
+  private nodeRenderer!: NodeRenderer;
+  private edgeRenderer!: EdgeRenderer;
+  private htmlRenderer!: HTMLRenderer;
+  private hudController!: HUDController;
   private dispose: () => void;
   private eventListeners: Map<string, ((...args: any[]) => void)[]> = new Map();
 
@@ -123,11 +122,8 @@ export class SpaceGraph {
    * @param id - The unique identifier of the element.
    * @returns The element's reactive state proxy, or undefined if not found.
    */
-  public getElement(id: string) {
-    return (
-      this.state.data?.nodes?.find((n) => n.id === id) ||
-      this.state.data?.edges?.find((e) => e.id === id)
-    );
+  public getElement(id:string) {
+    return this.state.data?.nodes?.find((n) => n.id === id);
   }
 
   /**
@@ -221,7 +217,7 @@ export class SpaceGraph {
    * Changes are merged into the existing state, and the visualization updates reactively.
    * @param spec - A partial `Spec` object with the properties to update.
    */
-  public update(spec: Partial<Spec>) {
+  public update(spec: SpecUpdate) {
     this.updateState(spec);
   }
 

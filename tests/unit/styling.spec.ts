@@ -21,6 +21,8 @@ const createMockState = (): Store<Spec> => {
       'node:hover': { color: '#0000ff' }, // Blue
       'node:selected': { color: '#ffff00' }, // Yellow
     },
+    layout: { type: 'force-directed' },
+    camera: { target: { x: 0, y: 0, z: 0 }, phi: 0, theta: 0, distance: 10 },
   });
   return state;
 };

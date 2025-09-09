@@ -15,6 +15,9 @@ describe('CameraController', () => {
 
   it('should animate camera state with flyTo', async () => {
     const initialSpec: Spec = {
+      data: { nodes: [], edges: [] },
+      style: {},
+      layout: { type: 'force-directed' },
       camera: {
         target: { x: 0, y: 0, z: 0 },
         phi: 0,

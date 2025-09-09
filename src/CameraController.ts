@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Store } from 'solid-js/store';
 import { animate } from 'popmotion';
-import { Spec, CameraSpec, Element } from './types';
+import { Spec, CameraSpec, GraphElement } from './types';
 import { createEffect } from 'solid-js';
 
 export class CameraController {
@@ -115,7 +115,7 @@ export class CameraController {
    * @param options - Framing options like padding and duration.
    */
   public frame(
-    elements: Element[],
+    elements: GraphElement[],
     options: { padding?: number; duration?: number } = {}
   ) {
     if (elements.length === 0) return;

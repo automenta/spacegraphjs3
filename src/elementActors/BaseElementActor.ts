@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { Store } from 'solid-js/store';
-import { Element, Spec } from '../types';
+import { GraphElement, Spec } from '../types';
 
 /**
  * Base class for all Element Actors.
@@ -9,14 +9,14 @@ import { Element, Spec } from '../types';
  */
 export abstract class BaseElementActor {
   protected scene: THREE.Scene;
-  protected elementState: Store<Element>;
+  protected elementState: Store<GraphElement>;
   protected graphState: Store<Spec>;
   protected threeObject: THREE.Object3D | null = null;
   protected disposeEffect: (() => void) | null = null;
 
   constructor(
     scene: THREE.Scene,
-    elementState: Store<Element>,
+    elementState: Store<GraphElement>,
     graphState: Store<Spec>
   ) {
     this.scene = scene;

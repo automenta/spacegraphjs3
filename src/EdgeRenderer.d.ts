@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { Store } from 'solid-js/store';
-import { Spec } from './types';
+import { GraphElement, Edge, Spec } from './types';
 export declare class EdgeRenderer {
     private scene;
     private state;
@@ -9,6 +9,6 @@ export declare class EdgeRenderer {
     private geometry;
     private disposeEffect?;
     constructor(scene: THREE.Scene, state: Store<Spec>);
-    updateEdges(nodes?: any, edges?: any): void;
+    updateEdges(nodes?: GraphElement[], edges?: Edge[]): void;
     dispose(): void;
 }

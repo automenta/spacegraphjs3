@@ -1,5 +1,5 @@
 import { createStore, produce, SetStoreFunction } from 'solid-js/store';
-import { Spec, Element, Edge, SpecUpdate } from './types';
+import { Spec, SpecUpdate } from './types';
 
 // A more controlled deep merge that handles array updates by ID
 function deepMerge(target: any, source: any) {
@@ -33,8 +33,8 @@ function deepMerge(target: any, source: any) {
 
 
 export function createState(initialSpec: Spec) {
-  // Establish a default spec structure
-  const initialState: Spec = {
+  // Establish a default spec structure and merge the initial spec into it
+  const defaults: Spec = {
     data: {
       nodes: [],
       edges: [],
@@ -51,10 +51,11 @@ export function createState(initialSpec: Spec) {
         theta: 0,
         distance: 10,
     },
-    ...initialSpec,
   };
 
-  const [state, setState] = createStore<Spec>(initialState);
+  deepMerge(defaults, initialSpec);
+
+  const [state, setState] = createStore<Spec>(defaults);
 
   const updateState = (spec: SpecUpdate) => {
     setState(

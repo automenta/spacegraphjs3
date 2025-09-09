@@ -9,12 +9,15 @@ const createMockState = (): [Store<Spec>, (spec: Partial<Spec>) => void] => {
       nodes: [{ id: 'n1', type: 'sphere' }],
       edges: [],
     },
+    style: {},
+    layout: { type: 'force-directed' },
     camera: {
       target: { x: 0, y: 0, z: 0 },
       phi: 1.57,
       theta: 1.57,
       distance: 10,
     },
+    interaction: { hoveredElementId: null, selectedElementIds: [] },
   });
   return [state, setState];
 };
@@ -37,11 +40,11 @@ describe('HUDController', () => {
     expect(statsContainer.innerHTML).toContain('Distance: 10.00');
 
     // Update state and check for reactive update by calling updateStats again
-    setState({ camera: { distance: 20 } });
+    setState({ camera: { ...state.camera, distance: 20 } });
     hudController.updateStats();
     expect(statsContainer.innerHTML).toContain('Distance: 20.00');
 
-    setState({ data: { nodes: [...state.data.nodes, { id: 'n2', type: 'sphere' }] } });
+    setState({ data: { ...state.data, nodes: [...state.data.nodes, { id: 'n2', type: 'sphere' }] } });
     hudController.updateStats();
     expect(statsContainer.innerHTML).toContain('Nodes: 2');
   });

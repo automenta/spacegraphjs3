@@ -21,6 +21,8 @@ const createMockState = (): Store<Spec> => {
       hoveredElementId: null,
       selectedElementIds: [],
     },
+    style: {},
+    layout: { type: 'force-directed' },
   });
   return state;
 };

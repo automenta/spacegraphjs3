@@ -6,11 +6,12 @@ import {
   forceCenter,
   forceLink,
   Simulation,
+  SimulationNodeDatum,
 } from 'd3-force-3d';
-import { Spec, Element, Edge } from './types';
+import { Spec, GraphElement, Edge } from './types';
 
-// Extend the d3-force Node type to include our Element properties
-interface Node extends Element, d3.SimulationNodeDatum {}
+// Extend the d3-force Node type to include our GraphElement properties
+interface Node extends GraphElement, SimulationNodeDatum {}
 
 export class LayoutController {
   private setState: (fn: (prevState: Spec) => Spec) => void;
@@ -70,8 +71,8 @@ export class LayoutController {
     const linkStrength = layoutSpec.linkStrength ?? 1;
 
     this.simulation = forceSimulation<Node, Edge>(simNodes)
-      .force('charge', forceManyBody().strength(charge))
-      .force('center', forceCenter())
+      .force('charge', forceManyBody<Node>().strength(charge))
+      .force('center', forceCenter<Node>())
       .force(
         'link',
         forceLink<Node, Edge>(simEdges)
@@ -103,7 +104,7 @@ export class LayoutController {
       });
 
     this.simulation.alpha(1).restart();
-    if (process.env.NODE_ENV === 'test') {
+    if (import.meta.env.MODE === 'test') {
       this.simulation.stop();
     }
     this.emit('layout:start');

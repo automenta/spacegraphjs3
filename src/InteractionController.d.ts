@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { Store } from 'solid-js/store';
-import { Spec, Element, SpecUpdate } from './types';
+import { Spec, GraphElement, SpecUpdate } from './types';
 import { IRenderer } from './IRenderer';
 export declare class InteractionController {
     private rendererEl;
@@ -23,7 +23,7 @@ export declare class InteractionController {
         threeCamera: THREE.PerspectiveCamera;
         nodeRenderer: IRenderer;
         emit: (eventName: string, ...args: any[]) => void;
-        getElement: (id: string) => Element | undefined;
+        getElement: (id: string) => GraphElement | undefined;
     });
     private initInteraction;
     private _getHoveredElementId;

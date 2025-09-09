@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 import { Store } from 'solid-js/store';
-import { Spec } from './types';
+import { Spec, SpecUpdate } from './types';
 
 export class InteractionLogic {
   public static handlePan(
     mx: number,
     my: number,
     state: Store<Spec>,
-    updateState: (spec: Partial<Spec>) => void,
+    updateState: (spec: SpecUpdate) => void,
     threeCamera: THREE.PerspectiveCamera
   ) {
     if (!state.camera) return;
@@ -39,7 +39,7 @@ export class InteractionLogic {
     mx: number,
     my: number,
     state: Store<Spec>,
-    updateState: (spec: Partial<Spec>) => void
+    updateState: (spec: SpecUpdate) => void
   ) {
     if (!state.camera) return;
     const rotateSpeed = 0.005;
@@ -58,7 +58,7 @@ export class InteractionLogic {
     dragPlane: THREE.Plane,
     rendererEl: HTMLElement,
     threeCamera: THREE.PerspectiveCamera,
-    updateState: (spec: Partial<Spec>) => void
+    updateState: (spec: SpecUpdate) => void
   ) {
     const pointer = new THREE.Vector2();
     const raycaster = new THREE.Raycaster();

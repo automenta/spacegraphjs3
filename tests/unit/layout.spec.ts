@@ -29,7 +29,10 @@ describe('LayoutController', () => {
           ],
           edges: [{ id: 'e1', source: 'n1', target: 'n2' }],
         },
-        layout: { type: 'force-directed' }
+        layout: { type: 'force-directed' },
+        style: {},
+        camera: { target: { x: 0, y: 0, z: 0 }, phi: 0, theta: 0, distance: 10 },
+        interaction: { hoveredElementId: null, selectedElementIds: [] },
       };
 
       const { state, setState } = createState(initialSpec);
@@ -56,9 +59,12 @@ describe('LayoutController', () => {
           edges: [],
         },
         layout: { type: 'force-directed' },
+        style: {},
+        camera: { target: { x: 0, y: 0, z: 0 }, phi: 0, theta: 0, distance: 10 },
+        interaction: { hoveredElementId: null, selectedElementIds: [] },
       };
 
-      const { state, updateState, setState } = createState(initialSpec);
+      const { state, setState } = createState(initialSpec);
       const layoutController = new LayoutController(state, setState, () => {});
       layoutController.init();
 

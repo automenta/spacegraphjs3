@@ -10,7 +10,7 @@
 import * as THREE from 'three';
 import { createEffect, on } from 'solid-js';
 import { Store } from 'solid-js/store';
-import { Spec, Element } from './types';
+import { Spec, GraphElement } from './types';
 
 const MAX_INSTANCES = 100000;
 
@@ -69,16 +69,15 @@ export class InstancedRenderer {
     });
 
     createEffect(
-        // @ts-ignore
       on(
         () => [
           this.state.interaction.hoveredElementId,
-          [...this.state.interaction.selectedElementIds],
+          this.state.interaction.selectedElementIds,
         ],
-        ([next, prev]) => {
-          const [nextHovered, nextSelected] = next;
-          const prevHovered = prev ? prev[0] : null;
-          const prevSelected = prev ? prev[1] : [];
+        (next, prev) => {
+          const [nextHovered, nextSelected] = next as [string | null, string[]];
+          const prevHovered = prev ? (prev as [string | null, string[]])[0] : null;
+          const prevSelected = prev ? (prev as [string | null, string[]])[1] : [];
 
           const changedIds = new Set<string>();
 
@@ -87,12 +86,14 @@ export class InstancedRenderer {
             if (nextHovered) changedIds.add(nextHovered);
           }
 
-          const allSelected = new Set([...prevSelected, ...nextSelected]);
-          for (const id of allSelected) {
-            const wasSelected = prevSelected.includes(id);
-            const isSelected = nextSelected.includes(id);
-            if (wasSelected !== isSelected) {
-              changedIds.add(id);
+          if (Array.isArray(prevSelected) && Array.isArray(nextSelected)) {
+            const allSelected = new Set([...prevSelected, ...nextSelected]);
+            for (const id of allSelected) {
+              const wasSelected = prevSelected.includes(id);
+              const isSelected = nextSelected.includes(id);
+              if (wasSelected !== isSelected) {
+                changedIds.add(id);
+              }
             }
           }
 
@@ -146,7 +147,7 @@ export class InstancedRenderer {
     }
   }
 
-  public updateInstance(index: number, node: Element) {
+  public updateInstance(index: number, node: GraphElement) {
     this.dummy.position.set(
       node.position?.x ?? 0,
       node.position?.y ?? 0,

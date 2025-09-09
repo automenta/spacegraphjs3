@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { Store } from 'solid-js/store';
-import { Spec, CameraSpec, Element } from './types';
+import { Spec, CameraSpec, GraphElement } from './types';
 export declare class CameraController {
     private state;
     private updateState;
@@ -21,7 +21,7 @@ export declare class CameraController {
      * @param elements - The elements to frame.
      * @param options - Framing options like padding and duration.
      */
-    frame(elements: Element[], options?: {
+    frame(elements: GraphElement[], options?: {
         padding?: number;
         duration?: number;
     }): void;

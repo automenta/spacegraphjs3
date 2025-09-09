@@ -8,7 +8,7 @@
  */
 import * as THREE from 'three';
 import { Store } from 'solid-js/store';
-import { Spec, Element } from './types';
+import { Spec, GraphElement } from './types';
 export declare class InstancedRenderer {
     private scene;
     private state;
@@ -23,7 +23,7 @@ export declare class InstancedRenderer {
     private init;
     updateNodeMappings(): void;
     updateAllInstances(): void;
-    updateInstance(index: number, node: Element): void;
+    updateInstance(index: number, node: GraphElement): void;
     getNodeId(instanceId: number): string | undefined;
     dispose(): void;
 }

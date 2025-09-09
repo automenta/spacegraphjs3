@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { Store } from 'solid-js/store';
-import { Element, Spec } from '../types';
+import { GraphElement, Spec } from '../types';
 /**
  * Base class for all Element Actors.
  * An ElementActor is responsible for creating and managing the Three.js object
@@ -8,11 +8,11 @@ import { Element, Spec } from '../types';
  */
 export declare abstract class BaseElementActor {
     protected scene: THREE.Scene;
-    protected elementState: Store<Element>;
+    protected elementState: Store<GraphElement>;
     protected graphState: Store<Spec>;
     protected threeObject: THREE.Object3D | null;
     protected disposeEffect: (() => void) | null;
-    constructor(scene: THREE.Scene, elementState: Store<Element>, graphState: Store<Spec>);
+    constructor(scene: THREE.Scene, elementState: Store<GraphElement>, graphState: Store<Spec>);
     /**
      * Initializes the actor, creates its Three.js object, and sets up reactive effects.
      */

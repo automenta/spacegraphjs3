@@ -15,7 +15,7 @@ describe('EdgeRenderer', () => {
   beforeEach(() => {
     scene = new THREE.Scene();
     createRoot((_dispose) => {
-      const { state: s, updateState: u } = createState({
+      const spec: Spec = {
         data: {
           nodes: [
             { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } },
@@ -27,7 +27,12 @@ describe('EdgeRenderer', () => {
             { id: 'e2', source: 'n1', target: 'n3' },
           ],
         },
-      });
+        style: {},
+        layout: { type: 'force-directed' },
+        camera: { target: { x: 0, y: 0, z: 0 }, phi: 0, theta: 0, distance: 10 },
+        interaction: { hoveredElementId: null, selectedElementIds: [] },
+      };
+      const { state: s, updateState: u } = createState(spec);
       state = s;
       updateState = u;
       edgeRenderer = new EdgeRenderer(scene, state);

@@ -4,7 +4,7 @@ export type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
 };
 
-export interface Element {
+export interface GraphElement {
   id: string;
   type: string;
   pinning?: { x: number; y: number; z: number } | string;
@@ -13,7 +13,7 @@ export interface Element {
   color?: string;
 }
 
-export interface HtmlElement extends Element {
+export interface HtmlElement extends GraphElement {
     content?: string;
     className?: string;
 }
@@ -27,7 +27,7 @@ export interface Edge {
 
 export interface SpecUpdate {
     data?: {
-        nodes?: (DeepPartial<Element> & { id: string })[];
+        nodes?: (DeepPartial<GraphElement> & { id: string })[];
         edges?: (DeepPartial<Edge> & { id: string })[];
     };
     style?: DeepPartial<StyleSpec>;
@@ -70,7 +70,7 @@ export type LayoutSpec = ForceDirectedLayoutSpec;
 
 export interface Spec {
   data: {
-    nodes: Element[];
+    nodes: GraphElement[];
     edges: Edge[];
   };
   style: StyleSpec;

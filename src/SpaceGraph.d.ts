@@ -1,5 +1,5 @@
 import { Store } from 'solid-js/store';
-import { Spec } from './types';
+import { Spec, SpecUpdate } from './types';
 import { LayoutController } from './LayoutController';
 import { CameraController } from './CameraController';
 /**
@@ -50,7 +50,7 @@ export declare class SpaceGraph {
      * @param id - The unique identifier of the element.
      * @returns The element's reactive state proxy, or undefined if not found.
      */
-    getElement(id: string): import("./types").Element | import("./types").Edge | undefined;
+    getElement(id: string): import("./types").GraphElement | undefined;
     /**
      * Provides access to the layout controller for manual operations.
      */
@@ -71,7 +71,7 @@ export declare class SpaceGraph {
      * Changes are merged into the existing state, and the visualization updates reactively.
      * @param spec - A partial `Spec` object with the properties to update.
      */
-    update(spec: Partial<Spec>): void;
+    update(spec: SpecUpdate): void;
     private handleResize;
     private animate;
     /**

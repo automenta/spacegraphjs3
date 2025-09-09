@@ -1,8 +1,9 @@
+import * as THREE from 'three';
 import { Store } from 'solid-js/store';
-import { Spec, Element } from '../types';
+import { Spec, GraphElement } from '../types';
 import { IRenderer } from '../IRenderer';
 import { BaseElementActor } from '../elementActors/BaseElementActor';
-type ElementActorConstructor = new (scene: THREE.Scene, elementState: Store<Element>, graphState: Store<Spec>) => BaseElementActor;
+type ElementActorConstructor = new (scene: THREE.Scene, elementState: Store<GraphElement>, graphState: Store<Spec>) => BaseElementActor;
 /**
  * Manages the rendering of all nodes in the graph using ElementActors.
  * It instantiates the correct actor based on the node's type and orchestrates their lifecycle.

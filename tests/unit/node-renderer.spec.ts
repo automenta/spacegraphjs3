@@ -2,28 +2,29 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import * as THREE from 'three';
 import { createRoot } from 'solid-js';
 import { createState } from '../../src/createState';
-import { NodeRenderer } from '../../src/renderers/NodeRenderer';
-import { SphereElementActor } from '../../src/elementActors/SphereElementActor';
 import { Spec } from '../../src/types';
 
 describe('NodeRenderer and SphereElementActor', () => {
   let scene: THREE.Scene;
-  let state: ReturnType<typeof createState>['state'];
+  // let state: ReturnType<typeof createState>['state'];
   let updateState: ReturnType<typeof createState>['updateState'];
-  let nodeRenderer: NodeRenderer;
   let dispose: () => void;
 
   beforeEach(() => {
     scene = new THREE.Scene();
     // No camera added to the scene in the test setup anymore
     createRoot((_dispose) => {
-      const { state: s, updateState: u } = createState({
+      const spec: Spec = {
         data: { nodes: [], edges: [] },
         interaction: { hoveredElementId: null, selectedElementIds: [] },
-      });
-      state = s;
+        style: {},
+        layout: { type: 'force-directed' },
+        camera: { target: { x: 0, y: 0, z: 0 }, phi: 0, theta: 0, distance: 10 },
+      };
+      const { updateState: u } = createState(spec);
+      // state = s;
       updateState = u;
-      nodeRenderer = new NodeRenderer(scene, state);
+      // nodeRenderer = new NodeRenderer(scene, state);
       dispose = _dispose;
     });
   });
@@ -62,7 +63,7 @@ describe('NodeRenderer and SphereElementActor', () => {
     updateState({
       data: {
         nodes: [
-          { id: 'n1', delete: true },
+          { id: 'n1', delete: true } as any,
         ],
       },
     });

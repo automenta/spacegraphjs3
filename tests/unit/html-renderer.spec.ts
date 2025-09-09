@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { createRoot } from 'solid-js';
 import { createState } from '../../src/createState';
 import { HTMLRenderer } from '../../src/HTMLRenderer';
-import { Spec, Element, HtmlElement, SpecUpdate } from '../../src/types';
+import { Spec, GraphElement, HtmlElement, SpecUpdate, DeepPartial } from '../../src/types';
 import { CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer';
 
 describe('HTMLRenderer', () => {
@@ -11,7 +11,7 @@ describe('HTMLRenderer', () => {
   let state: ReturnType<typeof createState>['state'];
   let updateState: ReturnType<typeof createState>['updateState'];
   let dispose: () => void;
-  const initialSphereNode: Element = { id: 'sphere1', type: 'sphere', position: { x: 4, y: 5, z: 6 } };
+  const initialSphereNode: GraphElement = { id: 'sphere1', type: 'sphere', position: { x: 4, y: 5, z: 6 } };
   const initialHtmlNode: HtmlElement = {
     id: 'html1',
     type: 'html',
@@ -66,7 +66,7 @@ describe('HTMLRenderer', () => {
               id: 'html1',
               position: { x: 10, y: 20, z: 30 },
               content: '<h2>Updated</h2>',
-            },
+            } as DeepPartial<HtmlElement> & { id: string },
           ],
         },
       };

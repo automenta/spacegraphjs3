@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { createEffect, createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
-import { Spec } from './types';
+import { GraphElement, Edge, Spec } from './types';
 
 export class EdgeRenderer {
   private scene: THREE.Scene;
@@ -33,14 +33,7 @@ export class EdgeRenderer {
     });
   }
 
-  public updateEdges(nodes?, edges?) {
-    if (!nodes) {
-      nodes = this.state.data?.nodes;
-    }
-    if (!edges) {
-      edges = this.state.data?.edges;
-    }
-
+  public updateEdges(nodes: GraphElement[] = this.state.data.nodes, edges: Edge[] = this.state.data.edges) {
     if (!nodes || !edges || !this.lineSegments) {
       this.geometry.setAttribute(
         'position',
@@ -50,7 +43,7 @@ export class EdgeRenderer {
       return;
     }
 
-    const nodeMap = new Map(nodes.map((node) => [node.id, node]));
+    const nodeMap = new Map(nodes.map((node: GraphElement) => [node.id, node]));
     const vertices: number[] = [];
     const colors: number[] = [];
 
