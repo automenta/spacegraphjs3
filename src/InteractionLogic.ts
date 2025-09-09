@@ -51,6 +51,99 @@ export class InteractionLogic {
     });
   }
 
+  public static handleKeyZoom(
+    state: Store<Spec>,
+    updateState: (spec: SpecUpdate) => void,
+    direction: 'in' | 'out',
+    zoomSpeed: number
+  ) {
+    if (!state.camera) return;
+    const newDistance =
+      direction === 'in'
+        ? state.camera.distance - zoomSpeed
+        : state.camera.distance + zoomSpeed;
+    updateState({
+      camera: {
+        distance: Math.max(0.1, newDistance),
+      },
+    });
+  }
+
+  public static handleKeyOrbit(
+    state: Store<Spec>,
+    updateState: (spec: SpecUpdate) => void,
+    direction: 'left' | 'right' | 'up' | 'down',
+    orbitSpeed: number
+  ) {
+    if (!state.camera) return;
+    let newTheta = state.camera.theta;
+    let newPhi = state.camera.phi;
+
+    switch (direction) {
+      case 'left':
+        newTheta += orbitSpeed;
+        break;
+      case 'right':
+        newTheta -= orbitSpeed;
+        break;
+      case 'up':
+        newPhi -= orbitSpeed;
+        break;
+      case 'down':
+        newPhi += orbitSpeed;
+        break;
+    }
+
+    newPhi = Math.max(0.1, Math.min(Math.PI - 0.1, newPhi));
+    updateState({
+      camera: { ...state.camera, theta: newTheta, phi: newPhi },
+    });
+  }
+
+  public static handleKeyPan(
+    state: Store<Spec>,
+    updateState: (spec: SpecUpdate) => void,
+    direction: 'forward' | 'backward' | 'left' | 'right',
+    panSpeed: number,
+    threeCamera: THREE.PerspectiveCamera
+  ) {
+    if (!state.camera) return;
+
+    const right = new THREE.Vector3().setFromMatrixColumn(
+      threeCamera.matrix,
+      0
+    );
+    const up = new THREE.Vector3().setFromMatrixColumn(threeCamera.matrix, 1);
+    const forward = new THREE.Vector3();
+    threeCamera.getWorldDirection(forward);
+    const panOffset = new THREE.Vector3();
+
+    switch (direction) {
+      case 'left':
+        panOffset.copy(right).multiplyScalar(-panSpeed);
+        break;
+      case 'right':
+        panOffset.copy(right).multiplyScalar(panSpeed);
+        break;
+      case 'forward':
+        panOffset.copy(forward).multiplyScalar(panSpeed);
+        break;
+      case 'backward':
+        panOffset.copy(forward).multiplyScalar(-panSpeed);
+        break;
+    }
+
+    const newTarget = {
+      x: state.camera.target.x + panOffset.x,
+      y: state.camera.target.y + panOffset.y,
+      z: state.camera.target.z + panOffset.z,
+    };
+
+    updateState({
+      camera: { ...state.camera, target: newTarget },
+    });
+  }
+
   public static handleNodeDrag(
     vx: number,
     vy: number,

@@ -34,6 +34,14 @@ const initialSpec: Spec = {
     theta: 0.1,
     distance: 15,
   },
+  controls: {
+    keyboard: {
+      enabled: true,
+      panSpeed: 0.1,
+      zoomSpeed: 0.1,
+      orbitSpeed: 0.02,
+    },
+  },
   interaction: {
     hoveredElementId: null,
     selectedElementIds: [],
@@ -62,6 +70,11 @@ console.log(`
   - graph.camera.flyTo({ distance: 5 }, { duration: 1000 })
   - graph.update({ style: { 'node:selected': { color: '#ff00ff' } } })
   - const nodes = graph.state.data.nodes; graph.camera.frame(nodes)
+
+  Keyboard Controls:
+  - Pan: W, A, S, D
+  - Orbit: Arrow Keys
+  - Zoom: + (or =) / -
 `);
 
 // 4. Use the new event system to react to graph events.

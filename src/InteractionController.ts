@@ -63,6 +63,8 @@ export class InteractionController {
     this.raycaster.firstHitOnly = true;
     this.pointer = new THREE.Vector2();
 
+    window.addEventListener('keydown', this.handleKeyDown);
+
     this.gesture = new Gesture(this.rendererEl,
       {
         onDragStart: (state: any) => {
@@ -206,9 +208,55 @@ export class InteractionController {
     return null;
   }
 
+  private handleKeyDown = (event: KeyboardEvent) => {
+    if (!this.state.controls.keyboard.enabled) return;
+    const { panSpeed, zoomSpeed, orbitSpeed } = this.state.controls.keyboard;
+
+    switch (event.key) {
+      // Zoom
+      case '=':
+      case '+':
+        InteractionLogic.handleKeyZoom(this.state, this.updateState, 'in', zoomSpeed);
+        break;
+      case '-':
+      case '_':
+        InteractionLogic.handleKeyZoom(this.state, this.updateState, 'out', zoomSpeed);
+        break;
+
+      // Pan
+      case 'w':
+        InteractionLogic.handleKeyPan(this.state, this.updateState, 'forward', panSpeed, this.threeCamera);
+        break;
+      case 's':
+        InteractionLogic.handleKeyPan(this.state, this.updateState, 'backward', panSpeed, this.threeCamera);
+        break;
+      case 'a':
+        InteractionLogic.handleKeyPan(this.state, this.updateState, 'left', panSpeed, this.threeCamera);
+        break;
+      case 'd':
+        InteractionLogic.handleKeyPan(this.state, this.updateState, 'right', panSpeed, this.threeCamera);
+        break;
+
+      // Orbit
+      case 'ArrowUp':
+        InteractionLogic.handleKeyOrbit(this.state, this.updateState, 'up', orbitSpeed);
+        break;
+      case 'ArrowDown':
+        InteractionLogic.handleKeyOrbit(this.state, this.updateState, 'down', orbitSpeed);
+        break;
+      case 'ArrowLeft':
+        InteractionLogic.handleKeyOrbit(this.state, this.updateState, 'left', orbitSpeed);
+        break;
+      case 'ArrowRight':
+        InteractionLogic.handleKeyOrbit(this.state, this.updateState, 'right', orbitSpeed);
+        break;
+    }
+  };
+
   public dispose() {
     if (this.gesture) {
       this.gesture.destroy();
     }
+    window.removeEventListener('keydown', this.handleKeyDown);
   }
 }

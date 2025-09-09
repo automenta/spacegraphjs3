@@ -33,6 +33,7 @@ export interface SpecUpdate {
     style?: DeepPartial<StyleSpec>;
     layout?: DeepPartial<LayoutSpec>;
     camera?: DeepPartial<CameraSpec>;
+    controls?: DeepPartial<ControlsSpec>;
     interaction?: DeepPartial<{
         hoveredElementId: string | null;
         selectedElementIds: string[];
@@ -68,6 +69,15 @@ export interface ForceDirectedLayoutSpec {
 
 export type LayoutSpec = ForceDirectedLayoutSpec;
 
+export interface ControlsSpec {
+  keyboard: {
+    enabled: boolean;
+    panSpeed: number;
+    zoomSpeed: number;
+    orbitSpeed: number;
+  };
+}
+
 export interface Spec {
   data: {
     nodes: GraphElement[];
@@ -76,6 +86,7 @@ export interface Spec {
   style: StyleSpec;
   layout: LayoutSpec;
   camera: CameraSpec;
+  controls: ControlsSpec;
   interaction: {
     hoveredElementId: string | null;
     selectedElementIds: string[];
