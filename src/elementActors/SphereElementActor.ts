@@ -35,7 +35,7 @@ export class SphereElementActor extends BaseElementActor {
         const hoveredId = this.graphState.interaction.hoveredElementId;
         const selectedIds = this.graphState.interaction.selectedElementIds;
 
-        untrack(() => this.updateVisuals(elementState, hoveredId, selectedIds));
+        this.updateVisuals(elementState, hoveredId, selectedIds);
       });
 
       return dispose;

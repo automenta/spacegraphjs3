@@ -48,10 +48,8 @@ export class NodeRenderer implements IRenderer {
     // Register default types
     NodeRenderer.registerType('sphere', SphereElementActor);
 
-    const reactiveNodes = createMemo(() => this.state.data?.nodes || []);
-
     createEffect(() => {
-      const nodes = reactiveNodes(); // Depend on the reactive nodes memo
+      const nodes = this.state.data?.nodes || [];
       const currentNodeIds = new Set(nodes.map((n) => n.id));
 
       // Add new actors for new nodes.

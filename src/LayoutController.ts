@@ -104,9 +104,6 @@ export class LayoutController {
       });
 
     this.simulation.alpha(1).restart();
-    if (import.meta.env.MODE === 'test') {
-      this.simulation.stop();
-    }
     this.emit('layout:start');
     this.resolveReady();
   }
