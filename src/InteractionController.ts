@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import { THREE } from './utils/three';
 import { Gesture } from '@use-gesture/vanilla';
 import { Store } from 'solid-js/store';
 import { Spec, GraphElement, SpecUpdate } from './types';

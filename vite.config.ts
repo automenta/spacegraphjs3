@@ -13,12 +13,12 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./tests/setup.ts'],
-    exclude: ['**/node_modules/**', '**/dist/**', '**/tests/visual/**'],
+    exclude: ['**/node_modules/**', '**/dist/**', '**/tests/visual/**', '**/e2e/**'],
     deps: {
       inline: ['solid-js'],
       optimizer: {
         web: {
-          include: ['three', 'three-mesh-bvh', 'd3-force-3d'],
+          include: ['three-mesh-bvh', 'd3-force-3d'],
         },
       },
     },

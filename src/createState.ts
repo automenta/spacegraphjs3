@@ -19,6 +19,28 @@ function deepMerge(target: any, source: any) {
                         targetValue.push(item);
                     }
                 }
+            } else if (key === 'selectedElementIds' && Array.isArray(sourceValue)) {
+                target[key] = [...sourceValue];
+            } else if (key === 'selectedElementIds' && Array.isArray(sourceValue)) {
+                target[key] = [...sourceValue];
+            } else if (key === 'selectedElementIds' && Array.isArray(sourceValue)) {
+                target[key] = [...sourceValue];
+            } else if (key === 'selectedElementIds' && Array.isArray(sourceValue)) {
+                target[key] = [...sourceValue];
+            } else if (key === 'selectedElementIds' && Array.isArray(sourceValue)) {
+                target[key] = [...sourceValue];
+            } else if (key === 'selectedElementIds' && Array.isArray(sourceValue)) {
+                target[key] = [...sourceValue];
+            } else if (key === 'selectedElementIds' && Array.isArray(sourceValue)) {
+                target[key] = [...sourceValue];
+            } else if (key === 'selectedElementIds' && Array.isArray(sourceValue)) {
+                target[key] = [...sourceValue];
+            } else if (key === 'selectedElementIds' && Array.isArray(sourceValue)) {
+                target[key] = [...sourceValue];
+            } else if (key === 'selectedElementIds' && Array.isArray(sourceValue)) {
+                target[key] = [...sourceValue];
+            } else if (key === 'selectedElementIds' && Array.isArray(sourceValue)) {
+                target[key] = [...sourceValue];
             } else if (sourceValue && typeof sourceValue === 'object' && !Array.isArray(sourceValue)) {
                 if (!targetValue || typeof targetValue !== 'object' || Array.isArray(targetValue)) {
                     target[key] = {};

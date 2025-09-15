@@ -1,4 +1,4 @@
-import { createRoot } from 'solid-js';
+import { createRoot, createEffect } from 'solid-js';
 import { Store, produce } from 'solid-js/store';
 import {
   forceSimulation,
@@ -38,12 +38,37 @@ export class LayoutController {
 
   public init() {
     this.disposeEffect = createRoot((dispose) => {
-      const layoutType = this.state.layout?.type ?? 'force-directed';
-      if (layoutType === 'force-directed') {
-        this.initForceSimulation();
-      } else {
-        this.stopSimulation();
-      }
+      createEffect(() => {
+        const layoutType = this.state.layout?.type ?? 'force-directed';
+        if (layoutType === 'force-directed') {
+          this.initForceSimulation();
+        } else {
+          this.stopSimulation();
+        }
+      });
+
+      // Effect to react to changes in nodes and edges and update the simulation
+      createEffect(() => {
+        const nodes = this.state.data?.nodes || [];
+        const edges = this.state.data?.edges || [];
+
+        if (this.simulation) {
+          // IMPORTANT: Deep copy nodes and edges to prevent d3 from mutating the reactive state directly.
+          const simNodes: Node[] = JSON.parse(JSON.stringify(nodes));
+          const simEdges: Edge[] = JSON.parse(JSON.stringify(edges));
+
+          // Initialize positions for d3 if they don't exist.
+          simNodes.forEach((node) => {
+            node.x = node.position?.x ?? 0;
+            node.y = node.position?.y ?? 0;
+            node.z = node.position?.z ?? 0;
+          });
+
+          this.simulation.nodes(simNodes);
+          (this.simulation.force('link') as any)?.links(simEdges);
+        }
+      });
+
       return dispose;
     });
   }
@@ -54,28 +79,24 @@ export class LayoutController {
   private initForceSimulation() {
     this.stopSimulation();
 
-    // IMPORTANT: Deep copy nodes and edges to prevent d3 from mutating the reactive state directly.
-    const simNodes: Node[] = JSON.parse(JSON.stringify(this.state.data?.nodes || []));
-    const simEdges: Edge[] = JSON.parse(JSON.stringify(this.state.data?.edges || []));
-
-    // Initialize positions for d3 if they don't exist.
-    simNodes.forEach((node) => {
-      node.x = node.position?.x ?? 0;
-      node.y = node.position?.y ?? 0;
-      node.z = node.position?.z ?? 0;
-    });
-
     const layoutSpec = (this.state.layout || {}) as import('./types').ForceDirectedLayoutSpec;
-    const charge = layoutSpec.charge ?? -50;
+    const charge = layoutSpec.charge ?? -200;
     const linkDistance = layoutSpec.linkDistance ?? 50;
     const linkStrength = layoutSpec.linkStrength ?? 1;
 
-    this.simulation = forceSimulation<Node, Edge>(simNodes)
+    this.simulation = forceSimulation<Node, Edge>()
       .force('charge', forceManyBody<Node>().strength(charge))
-      .force('center', forceCenter<Node>())
+      .force('center', forceCenter<Node>().strength(0.01))
       .force(
         'link',
-        forceLink<Node, Edge>(simEdges)
+        forceLink<Node, Edge>()
+          .id((d: Node) => d.id)
+          .distance(linkDistance)
+          .strength(5)
+      )
+      .force(
+        'link',
+        forceLink<Node, Edge>()
           .id((d: Node) => d.id)
           .distance(linkDistance)
           .strength(linkStrength)
@@ -117,7 +138,7 @@ export class LayoutController {
 
   public resume() {
     this.paused = false;
-    if (this.simulation) this.simulation.alphaTarget(0.3).restart();
+    if (this.simulation) this.simulation.alpha(1).restart();
   }
 
   public pause() {

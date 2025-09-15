@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import { THREE } from '../utils/three';
 import { createEffect, createMemo, createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { Spec, GraphElement } from '../types';

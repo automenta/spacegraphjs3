@@ -1,7 +1,6 @@
-import * as THREE from 'three';
 import { createEffect, createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
-import { CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
+import { THREE, CSS3DObject } from './utils/three';
 import { Spec, HtmlElement } from './types';
 
 export class HTMLRenderer {

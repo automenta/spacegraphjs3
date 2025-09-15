@@ -1,5 +1,5 @@
-import * as THREE from 'three';
-import { createEffect, createRoot, untrack } from 'solid-js';
+import { THREE } from '../utils/three';
+import { createEffect, createRoot, untrack, createMemo, createSignal } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { Element, Spec, NodeStyle } from '../types';
 import { BaseElementActor } from './BaseElementActor';
@@ -9,6 +9,8 @@ import { BaseElementActor } from './BaseElementActor';
  */
 export class SphereElementActor extends BaseElementActor {
   private elementId: string;
+  private _selectedIds: () => string[];
+  private setSelectedIds: (ids: string[]) => void;
 
   constructor(
     scene: THREE.Scene,
@@ -17,6 +19,7 @@ export class SphereElementActor extends BaseElementActor {
   ) {
     super(scene, elementState, graphState);
     this.elementId = elementState.id;
+    [this._selectedIds, this.setSelectedIds] = createSignal<string[]>([]);
   }
 
   public init(): void {
@@ -29,23 +32,33 @@ export class SphereElementActor extends BaseElementActor {
 
     this.disposeEffect = createRoot((dispose) => {
       createEffect(() => {
+        // Update the local signal when the store's selectedIds change
+        this.setSelectedIds([...this.graphState.interaction.selectedElementIds]);
+      });
+
+      createEffect(() => {
         const elementState = this.graphState.data.nodes.find(n => n.id === this.elementId);
         if (!elementState) return;
 
         const hoveredId = this.graphState.interaction.hoveredElementId;
-        const selectedIds = this.graphState.interaction.selectedElementIds;
+        const selectedIds = this._selectedIds();
 
-        this.updateVisuals(elementState, hoveredId, selectedIds);
+        const isElementSelected = createMemo(() => selectedIds.includes(this.elementId));
+        const isElementHovered = createMemo(() => hoveredId === this.elementId);
+
+        this.updateVisuals(elementState, isElementHovered(), isElementSelected());
       });
 
       return dispose;
     });
   }
 
+
+
   private updateVisuals(
     elementState: Element,
-    hoveredId: string | null,
-    selectedIds: string[]
+    isElementHovered: boolean,
+    isElementSelected: boolean
   ): void {
     if (!this.threeObject) return;
     const mesh = this.threeObject as THREE.Mesh<any, THREE.MeshBasicMaterial>;
@@ -56,22 +69,21 @@ export class SphereElementActor extends BaseElementActor {
       elementState.position?.z ?? 0
     );
 
-    let finalColor = elementState.color || '#ffffff';
-    const isSelected = selectedIds.includes(this.elementId);
-    const isHovered = hoveredId === this.elementId;
+    let finalColor = new THREE.Color(elementState.color || '#ffffff'); // Start with default color
 
-    let style: NodeStyle | undefined;
-    if (isSelected) {
-      style = this.graphState.style['node:selected'];
-    } else if (isHovered) {
-      style = this.graphState.style['node:hover'];
+    if (isElementSelected) {
+      const selectedColor = this.graphState.style['node:selected']?.color;
+      if (selectedColor) {
+        finalColor.set(selectedColor);
+      }
+    } else if (isElementHovered) {
+      const hoveredColor = this.graphState.style['node:hover']?.color;
+      if (hoveredColor) {
+        finalColor.set(hoveredColor);
+      }
     }
 
-    if (style?.color) {
-        finalColor = style.color;
-    }
-
-    mesh.material.color.set(finalColor);
+    mesh.material.color.copy(finalColor);
   }
 
   public dispose(): void {
