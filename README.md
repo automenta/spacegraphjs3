@@ -155,8 +155,33 @@ The event system fires in response to user actions. The payload is designed for 
 
 The library's decoupled nature makes it highly extensible.
 
-- `SpaceGraph.registerType(name, ElementActorClass)`: Registers a new class responsible for creating and managing the Three.js objects for a custom element type. This class will be given the element's state proxy and is expected to react to its changes.
-- `SpaceGraph.registerLayout(name, LayoutEngineClass)`: Registers a new layout algorithm. The engine will be given access to the reactive node/edge arrays and is expected to mutate their position properties.
+- **Custom Node Actors**: `SpaceGraph.registerType(name, ElementActorClass)` registers a new class responsible for creating and managing the Three.js objects for a custom element type. This is ideal for complex nodes with unique behaviors. The actor is given the element's state proxy and is expected to react to its changes.
+
+- **Custom Instanced Geometries**: For high-performance rendering of many similar nodes, you can register a custom `THREE.BufferGeometry` with `SpaceGraph.registerInstancedType(name, geometry)`. When the number of nodes of that `type` exceeds the `instancingThreshold`, the library will automatically use the `InstancedRenderer` with your custom geometry.
+
+- **Custom Layouts**: `SpaceGraph.registerLayout(name, LayoutEngineClass)` registers a new layout algorithm. The engine is given access to the reactive node/edge arrays and is expected to mutate their position properties.
+
+### **8. Performance: Automatic Scaling**
+
+SpaceGraphJS is designed for both small, simple diagrams and large, complex networks. To achieve this, it employs a two-pronged rendering strategy that automatically adapts to the size of the graph.
+
+- **Default Renderer (`NodeRenderer`)**: For smaller graphs, this renderer creates individual `THREE.Object3D` instances for each node. This approach is highly flexible and ideal for rich, heterogeneous scenes where each node might have unique behavior (managed by its `ElementActor`).
+
+- **High-Performance Renderer (`InstancedRenderer`)**: When the number of nodes exceeds a certain threshold, the library automatically switches to a high-performance `InstancedRenderer`. This renderer uses `THREE.InstancedMesh` to draw many thousands of nodes in a single draw call, dramatically improving performance. It also uses `three-mesh-bvh` to accelerate raycasting, ensuring that interactions like hovering and clicking remain fluid even with massive graphs.
+
+This switching is seamless and requires no manual intervention. You can, however, control the threshold at which this switch occurs via the `performance` property in the `Spec`:
+
+```javascript
+const graph = new SpaceGraph('#container', {
+  // ... other spec properties
+  performance: {
+    // Switch to the instanced renderer when there are more than 200 nodes.
+    instancingThreshold: 200,
+  },
+});
+```
+
+This dual-renderer architecture provides the best of both worlds: the flexibility of individual objects for small graphs and the raw power of instancing for large ones.
 
 This specification provides a clear blueprint that directly maps to the synergistic implementation plan, resulting in a library that is powerful, performant, and intuitive to use.
 

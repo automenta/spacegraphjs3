@@ -34,6 +34,7 @@ export interface SpecUpdate {
   layout?: DeepPartial<LayoutSpec>;
   camera?: DeepPartial<CameraSpec>;
   controls?: DeepPartial<ControlsSpec>;
+  performance?: DeepPartial<PerformanceSpec>;
   interaction?: DeepPartial<{
     hoveredElementId: string | null;
     selectedElementIds: string[];
@@ -78,6 +79,10 @@ export interface ControlsSpec {
   };
 }
 
+export interface PerformanceSpec {
+  instancingThreshold: number;
+}
+
 export interface Spec {
   data: {
     nodes: GraphElement[];
@@ -87,6 +92,7 @@ export interface Spec {
   layout: LayoutSpec;
   camera: CameraSpec;
   controls: ControlsSpec;
+  performance: PerformanceSpec;
   interaction: {
     hoveredElementId: string | null;
     selectedElementIds: string[];

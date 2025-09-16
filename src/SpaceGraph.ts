@@ -6,7 +6,9 @@ import { Spec, SpecUpdate } from './types';
 import { LayoutController } from './LayoutController';
 import { CameraController } from './CameraController';
 import { InteractionController } from './InteractionController';
+import { IRenderer } from './IRenderer';
 import { NodeRenderer } from './renderers/NodeRenderer';
+import { InstancedRenderer } from './InstancedRenderer';
 import { EdgeRenderer } from './EdgeRenderer';
 import { HTMLRenderer } from './HTMLRenderer';
 import { HUDController } from './HUDController';
@@ -33,22 +35,21 @@ export class SpaceGraph {
   public layoutController!: LayoutController;
   private cameraController!: CameraController; // New controller
   private interactionController!: InteractionController;
-  private nodeRenderer!: NodeRenderer;
+  private nodeRenderer!: IRenderer;
   private edgeRenderer!: EdgeRenderer;
   private htmlRenderer!: HTMLRenderer;
   private hudController!: HUDController;
   private dispose: () => void;
   private eventListeners: Map<string, ((...args: any[]) => void)[]> = new Map();
 
-  public static registerType(typeName: string, ActorClass: any) {
+  public static registerType(typeName:string, ActorClass: any) {
     NodeRenderer.registerType(typeName, ActorClass);
   }
 
-  /**
-   * Creates a new SpaceGraph instance.
-   * @param containerSelector - The CSS selector for the container element.
-   * @param initialSpec - The initial specification for the graph.
-   */
+  public static registerInstancedType(typeName: string, geometry: THREE.BufferGeometry) {
+    InstancedRenderer.registerInstancedType(typeName, geometry);
+  }
+
   constructor(containerSelector: string, initialSpec: Spec) {
     const container = document.querySelector(containerSelector);
     if (!container) {
@@ -56,29 +57,78 @@ export class SpaceGraph {
     }
     this.container = container as HTMLElement;
 
-    // The createRoot ensures all SolidJS reactivity is disposed of properly
     this.dispose = createRoot((dispose) => {
-      // Create the reactive state using a SolidJS store
       const { state, updateState, setState } = createState(initialSpec);
       this.state = state;
       this.updateState = updateState;
       this.setState = setState;
 
-      // Initialize the three.js renderer and scene
       this.initRenderers();
       this.initScenes();
 
-      // Create the node renderer
-      this.nodeRenderer = new NodeRenderer(this.scene, this.state);
       this.edgeRenderer = new EdgeRenderer(this.scene, this.state);
       this.htmlRenderer = new HTMLRenderer(this.cssScene, this.state);
+      this.hudController = new HUDController(this.container, this.state);
 
-      // Initialize all the controllers that manage different parts of the application
-      this._initControllers((eventName: string, ...args: any[]) =>
-        this.emit(eventName, ...args)
+      this.cameraController = new CameraController(
+        this.state,
+        this.updateState,
+        this.emit.bind(this),
+        this.threeCamera
       );
 
-      // Set up the animation loop and resize handler
+      this.layoutController = new LayoutController(
+        this.state,
+        this.setState,
+        this.emit.bind(this)
+      );
+      this.layoutController.init();
+
+      // Start with the default renderer
+      this.nodeRenderer = new NodeRenderer(this.scene, this.state);
+
+      this.interactionController = new InteractionController({
+        rendererEl: this.renderer!.domElement,
+        state: this.state,
+        updateState: this.updateState,
+        threeCamera: this.threeCamera,
+        nodeRenderer: this.nodeRenderer,
+        emit: this.emit.bind(this),
+        getElement: this.getElement.bind(this),
+      });
+
+      // Dynamic Renderer Switching
+      createEffect(() => {
+        const nodeCount = this.state.data?.nodes?.length ?? 0;
+        const threshold = this.state.performance?.instancingThreshold ?? 100;
+        const shouldUseInstanced = nodeCount > threshold;
+
+        let currentRendererType = 'none';
+        if (this.nodeRenderer) {
+          currentRendererType =
+            this.nodeRenderer instanceof InstancedRenderer
+              ? 'instanced'
+              : 'default';
+        }
+
+        if (
+          (shouldUseInstanced && currentRendererType !== 'instanced') ||
+          (!shouldUseInstanced && currentRendererType !== 'default')
+        ) {
+          if (this.nodeRenderer) {
+            this.nodeRenderer.dispose();
+          }
+
+          this.nodeRenderer = shouldUseInstanced
+            ? new InstancedRenderer(this.scene, this.state)
+            : new NodeRenderer(this.scene, this.state);
+
+          this.interactionController.setNodeRenderer(this.nodeRenderer);
+        }
+      });
+
+      this.initEventListeners();
+
       window.addEventListener('resize', this.handleResize);
       this.animate();
 
@@ -143,31 +193,7 @@ export class SpaceGraph {
    * Initialize all the controllers that manage different parts of the application.
    * @param emit - The event emitter function.
    */
-  private _initControllers(emit: (eventName: string, ...args: any[]) => void) {
-    this.layoutController = new LayoutController(
-      this.state,
-      this.setState,
-      emit
-    );
-    this.layoutController.init();
-    this.cameraController = new CameraController(
-      this.state,
-      this.updateState,
-      emit,
-      this.threeCamera
-    );
-    this.interactionController = new InteractionController({
-      rendererEl: this.renderer!.domElement,
-      state: this.state,
-      updateState: this.updateState,
-      threeCamera: this.threeCamera,
-      nodeRenderer: this.nodeRenderer,
-      emit,
-      getElement: this.getElement.bind(this),
-    });
-    this.hudController = new HUDController(this.container, this.state);
-
-    // Wire up events between controllers
+  private initEventListeners() {
     this.on('layout:pin', (nodeIds: string[]) => {
       this.layoutController.pinNodes(nodeIds);
     });

@@ -4,16 +4,6 @@ import { Store } from 'solid-js/store';
 import { Spec, GraphElement, SpecUpdate } from './types';
 import { IRenderer } from './IRenderer';
 import { InteractionLogic } from './InteractionLogic';
-import {
-  acceleratedRaycast,
-  computeBoundsTree,
-  disposeBoundsTree,
-} from 'three-mesh-bvh';
-
-// Add the bvh properties to the THREE.Raycaster
-THREE.Mesh.prototype.raycast = acceleratedRaycast;
-THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
-THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 
 export class InteractionController {
   private rendererEl: HTMLElement;
@@ -219,6 +209,10 @@ export class InteractionController {
       return this.nodeRenderer.getNodeIdFromIntersection(intersection);
     }
     return null;
+  }
+
+  public setNodeRenderer(nodeRenderer: IRenderer) {
+    this.nodeRenderer = nodeRenderer;
   }
 
   private handleKeyDown = (event: KeyboardEvent) => {

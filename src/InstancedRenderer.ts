@@ -11,17 +11,29 @@ import * as THREE from 'three';
 import { createEffect, on, createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { Spec, GraphElement } from './types';
+import { IRenderer } from './IRenderer';
 
 const MAX_INSTANCES = 100000;
 
-export class InstancedRenderer {
+export class InstancedRenderer implements IRenderer {
+  private static registeredGeometries: Map<string, THREE.BufferGeometry> = new Map();
+
   private scene: THREE.Scene;
   private state: Store<Spec>;
-  public instancedMesh!: THREE.InstancedMesh;
-  private idToIndex: Map<string, number> = new Map();
-  private indexToId: Map<number, string> = new Map();
+  public instancedMeshes: Map<string, THREE.InstancedMesh> = new Map();
+  private typeToIdMaps: Map<
+    string,
+    { idToIndex: Map<string, number>; indexToId: Map<number, string> }
+  > = new Map();
   private dummy = new THREE.Object3D();
   private _dispose: () => void;
+
+  public static registerInstancedType(
+    typeName: string,
+    geometry: THREE.BufferGeometry
+  ) {
+    InstancedRenderer.registeredGeometries.set(typeName, geometry);
+  }
 
   constructor(scene: THREE.Scene, state: Store<Spec>) {
     this.scene = scene;
@@ -33,78 +45,92 @@ export class InstancedRenderer {
     });
   }
 
-  /**
-   * Initialize the instanced mesh and set up the effects to update it.
-   */
   private init() {
-    const geometry = new THREE.SphereGeometry(0.5, 16, 16);
-    (geometry as any).computeBoundsTree();
-    const material = new THREE.MeshBasicMaterial({ vertexColors: true });
-    this.instancedMesh = new THREE.InstancedMesh(
+    // Register a default sphere geometry if no types are registered
+    if (InstancedRenderer.registeredGeometries.size === 0) {
+      InstancedRenderer.registerInstancedType(
+        'sphere',
+        new THREE.SphereGeometry(0.5, 16, 16)
+      );
+    }
+
+    // Create InstancedMesh for each registered geometry type
+    for (const [
+      typeName,
       geometry,
-      material,
-      MAX_INSTANCES
-    );
-    this.instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    this.instancedMesh.instanceColor = new THREE.InstancedBufferAttribute(
-      new Float32Array(MAX_INSTANCES * 3),
-      3
-    );
-    this.instancedMesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
-    this.scene.add(this.instancedMesh);
+    ] of InstancedRenderer.registeredGeometries.entries()) {
+      geometry.computeBoundsTree();
+      const material = new THREE.MeshBasicMaterial({ vertexColors: true });
+      const mesh = new THREE.InstancedMesh(geometry, material, MAX_INSTANCES);
+      mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      mesh.instanceColor = new THREE.InstancedBufferAttribute(
+        new Float32Array(MAX_INSTANCES * 3),
+        3
+      );
+      mesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
+      mesh.userData.typeName = typeName; // Store typeName for raycasting
+      this.scene.add(mesh);
+      this.instancedMeshes.set(typeName, mesh);
+      this.typeToIdMaps.set(typeName, {
+        idToIndex: new Map(),
+        indexToId: new Map(),
+      });
+    }
 
-    createEffect(
-      on(
-        () => this.state.data?.nodes,
-        () => this.updateNodeMappings()
-      )
-    );
+    // Effect for updating all instances when nodes change
+    createEffect(() => {
+      const nodes = this.state.data?.nodes || [];
+      const nodesByType = new Map<string, GraphElement[]>();
 
+      // Group nodes by their type
+      for (const node of nodes) {
+        if (!nodesByType.has(node.type)) {
+          nodesByType.set(node.type, []);
+        }
+        nodesByType.get(node.type)!.push(node);
+      }
+
+      // Update each InstancedMesh
+      for (const [typeName, mesh] of this.instancedMeshes.entries()) {
+        const typedNodes = nodesByType.get(typeName) || [];
+        const idMaps = this.typeToIdMaps.get(typeName)!;
+
+        idMaps.idToIndex.clear();
+        idMaps.indexToId.clear();
+
+        typedNodes.forEach((node, i) => {
+          idMaps.idToIndex.set(node.id, i);
+          idMaps.indexToId.set(i, node.id);
+          this.updateInstance(mesh, idMaps, i, node);
+        });
+
+        mesh.count = typedNodes.length;
+        mesh.instanceMatrix.needsUpdate = true;
+        if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+      }
+    });
+
+    // Effect for updating instances on interaction changes (hover, select)
     createEffect(
       on(
         () => [
           this.state.interaction.hoveredElementId,
           this.state.interaction.selectedElementIds,
         ],
-        (next, prev) => {
-          const [nextHovered, nextSelected] = next as [string | null, string[]];
-          const prevHovered = prev
-            ? (prev as [string | null, string[]])[0]
-            : null;
-          const prevSelected = prev
-            ? (prev as [string | null, string[]])[1]
-            : [];
-
-          const changedIds = new Set<string>();
-
-          if (nextHovered !== prevHovered) {
-            if (prevHovered) changedIds.add(prevHovered);
-            if (nextHovered) changedIds.add(nextHovered);
-          }
-
-          if (Array.isArray(prevSelected) && Array.isArray(nextSelected)) {
-            const allSelected = new Set([...prevSelected, ...nextSelected]);
-            for (const id of allSelected) {
-              const wasSelected = prevSelected.includes(id);
-              const isSelected = nextSelected.includes(id);
-              if (wasSelected !== isSelected) {
-                changedIds.add(id);
+        () => {
+          // This is a simplified update, re-coloring all instances of affected meshes
+          // A more optimized version would track changes more granularly
+          for (const [typeName, mesh] of this.instancedMeshes.entries()) {
+            const nodes =
+              this.state.data?.nodes?.filter((n) => n.type === typeName) || [];
+            const idMaps = this.typeToIdMaps.get(typeName)!;
+            nodes.forEach((node) => {
+              const index = idMaps.idToIndex.get(node.id);
+              if (index !== undefined) {
+                this.updateInstance(mesh, idMaps, index, node);
               }
-            }
-          }
-
-          for (const id of changedIds) {
-            const index = this.idToIndex.get(id);
-            const node = this.state.data?.nodes?.find((n) => n.id === id);
-            if (index !== undefined && node) {
-              this.updateInstance(index, node);
-            }
-          }
-          if (this.instancedMesh.instanceMatrix) {
-            this.instancedMesh.instanceMatrix.needsUpdate = true;
-          }
-          if (this.instancedMesh.instanceColor) {
-            this.instancedMesh.instanceColor.needsUpdate = true;
+            });
+            if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
           }
         },
         { defer: true }
@@ -112,77 +138,71 @@ export class InstancedRenderer {
     );
   }
 
-  public updateNodeMappings() {
-    const nodes = this.state.data?.nodes || [];
-
-    this.idToIndex.clear();
-    this.indexToId.clear();
-
-    nodes.forEach((node, i) => {
-      this.idToIndex.set(node.id, i);
-      this.indexToId.set(i, node.id);
-    });
-
-    this.instancedMesh.count = nodes.length;
-    this.updateAllInstances();
-  }
-
-  public updateAllInstances() {
-    const nodes = this.state.data?.nodes || [];
-    nodes.forEach((node) => {
-      const index = this.idToIndex.get(node.id);
-      if (index !== undefined) {
-        this.updateInstance(index, node);
-      }
-    });
-    if (this.instancedMesh.instanceMatrix) {
-      this.instancedMesh.instanceMatrix.needsUpdate = true;
-    }
-    if (this.instancedMesh.instanceColor) {
-      this.instancedMesh.instanceColor.needsUpdate = true;
-    }
-  }
-
-  public updateInstance(index: number, node: GraphElement) {
+  private updateInstance(
+    mesh: THREE.InstancedMesh,
+    idMaps: { idToIndex: Map<string, number>; indexToId: Map<number, string> },
+    index: number,
+    node: GraphElement
+  ) {
+    // Update matrix for position
     this.dummy.position.set(
       node.position?.x ?? 0,
       node.position?.y ?? 0,
       node.position?.z ?? 0
     );
     this.dummy.updateMatrix();
-    this.instancedMesh.setMatrixAt(index, this.dummy.matrix);
+    mesh.setMatrixAt(index, this.dummy.matrix);
 
-    const hoveredId = this.state.interaction.hoveredElementId;
-    const selectedIds = this.state.interaction.selectedElementIds;
+    // Update color based on state
+    const { hoveredElementId, selectedElementIds } = this.state.interaction;
     let finalColor: string | number = node.color || '#ffffff';
+    const isSelected = selectedElementIds.includes(node.id);
+    const isHovered = hoveredElementId === node.id;
 
-    const isSelected = selectedIds.includes(node.id);
-    const isHovered = hoveredId === node.id;
-
-    if (isSelected) {
-      finalColor = this.state.style['node:selected']?.color || finalColor;
-    } else if (isHovered) {
-      finalColor = this.state.style['node:hover']?.color || finalColor;
+    if (isSelected && this.state.style['node:selected']?.color) {
+      finalColor = this.state.style['node:selected'].color;
+    } else if (isHovered && this.state.style['node:hover']?.color) {
+      finalColor = this.state.style['node:hover'].color;
     }
 
-    this.instancedMesh.setColorAt(index, new THREE.Color(finalColor));
+    mesh.setColorAt(index, new THREE.Color(finalColor));
   }
 
-  public getNodeId(instanceId: number): string | undefined {
-    return this.indexToId.get(instanceId);
+  // --- IRenderer Implementation ---
+  public getRaycastableObjects(): THREE.Object3D[] {
+    return Array.from(this.instancedMeshes.values());
+  }
+
+  public getNodeIdFromIntersection(
+    intersection: THREE.Intersection
+  ): string | null {
+    if (intersection.instanceId === undefined) return null;
+
+    const mesh = intersection.object as THREE.InstancedMesh;
+    const typeName = mesh.userData.typeName;
+    if (!typeName) return null;
+
+    const idMaps = this.typeToIdMaps.get(typeName);
+    if (!idMaps) return null;
+
+    return idMaps.indexToId.get(intersection.instanceId) ?? null;
   }
 
   public dispose() {
     this._dispose(); // Dispose of the SolidJS root and all its effects
-    if (this.instancedMesh.geometry) {
-      this.instancedMesh.geometry.dispose();
+    for (const mesh of this.instancedMeshes.values()) {
+      if (mesh.geometry) {
+        mesh.geometry.dispose();
+      }
+      if (mesh.material) {
+        (mesh.material as THREE.Material).dispose();
+      }
+      this.scene.remove(mesh);
+      if ((mesh.geometry as any)?.boundsTree) {
+        (mesh.geometry as any).disposeBoundsTree();
+      }
     }
-    if (this.instancedMesh.material) {
-      (this.instancedMesh.material as THREE.Material).dispose();
-    }
-    this.scene.remove(this.instancedMesh);
-    if ((this.instancedMesh.geometry as any)?.boundsTree) {
-      (this.instancedMesh.geometry as any).disposeBoundsTree();
-    }
+    this.instancedMeshes.clear();
+    this.typeToIdMaps.clear();
   }
 }

@@ -34,36 +34,37 @@ describe('InstancedRenderer Styling', () => {
 
     // Initial state check
     await new Promise((r) => setTimeout(r, 0));
+    const sphereMesh = renderer.instancedMeshes.get('sphere')!;
     const defaultColorN1 = new THREE.Color();
-    renderer.instancedMesh.getColorAt(0, defaultColorN1);
+    sphereMesh.getColorAt(0, defaultColorN1);
     expect(defaultColorN1.getHexString()).toBe('ff0000');
 
     // Test hover
     updateState({ interaction: { hoveredElementId: 'n1' } });
     await new Promise((r) => setTimeout(r, 0));
     const hoverColorN1 = new THREE.Color();
-    renderer.instancedMesh.getColorAt(0, hoverColorN1);
+    sphereMesh.getColorAt(0, hoverColorN1);
     expect(hoverColorN1.getHexString()).toBe('0000ff');
 
     // Test selection (should override hover)
     updateState({ interaction: { selectedElementIds: ['n1'] } });
     await new Promise((r) => setTimeout(r, 0));
     const selectedColorN1 = new THREE.Color();
-    renderer.instancedMesh.getColorAt(0, selectedColorN1);
+    sphereMesh.getColorAt(0, selectedColorN1);
     expect(selectedColorN1.getHexString()).toBe('ffff00');
 
     // Test un-hovering a selected node (should remain selected color)
     updateState({ interaction: { hoveredElementId: null } });
     await new Promise((r) => setTimeout(r, 0));
     const unhoverSelectedColorN1 = new THREE.Color();
-    renderer.instancedMesh.getColorAt(0, unhoverSelectedColorN1);
+    sphereMesh.getColorAt(0, unhoverSelectedColorN1);
     expect(unhoverSelectedColorN1.getHexString()).toBe('ffff00');
 
     // Test un-selecting (should go back to default color)
     updateState({ interaction: { selectedElementIds: [] } });
     await new Promise((r) => setTimeout(r, 0));
     const finalColorN1 = new THREE.Color();
-    renderer.instancedMesh.getColorAt(0, finalColorN1);
+    sphereMesh.getColorAt(0, finalColorN1);
     expect(finalColorN1.getHexString()).toBe('ff0000');
   });
 });
