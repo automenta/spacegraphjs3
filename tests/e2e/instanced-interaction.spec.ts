@@ -4,10 +4,10 @@ test.describe('Instanced Renderer Interaction', () => {
   test.beforeEach(async ({ page }) => {
     page.on('console', msg => console.log('PAGE LOG:', msg.text()));
     await page.goto('/instanced-interaction.html');
+    await page.waitForSelector('canvas');
     // Wait for the graph to be initialized
-    await page.waitForFunction(() => (window as any).graph);
+    await page.waitForFunction(() => (window as any).graph?.isInitialized === true);
     // And for the layout to stabilize
-    await page.waitForTimeout(1000);
   });
 
   test('should correctly handle hover interaction', async ({ page }) => {

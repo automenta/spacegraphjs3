@@ -13,6 +13,19 @@ export interface GraphElement {
   color?: string;
 }
 
+// Extend the d3-force Node type to include our GraphElement properties
+export interface Node extends GraphElement {
+  x?: number;
+  y?: number;
+  z?: number;
+  vx?: number;
+  vy?: number;
+  vz?: number;
+  fx?: number | null;
+  fy?: number | null;
+  fz?: number | null;
+}
+
 export interface HtmlElement extends GraphElement {
   content?: string;
   className?: string;
@@ -20,8 +33,8 @@ export interface HtmlElement extends GraphElement {
 
 export interface Edge {
   id: string;
-  source: string;
-  target: string;
+  source: string | Node;
+  target: string | Node;
   color?: string;
 }
 

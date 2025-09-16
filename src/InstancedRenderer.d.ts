@@ -8,22 +8,21 @@
  */
 import * as THREE from 'three';
 import { Store } from 'solid-js/store';
-import { Spec, GraphElement } from './types';
-export declare class InstancedRenderer {
-  private scene;
-  private state;
-  instancedMesh: THREE.InstancedMesh;
-  private idToIndex;
-  private indexToId;
-  private dummy;
-  constructor(scene: THREE.Scene, state: Store<Spec>);
-  /**
-   * Initialize the instanced mesh and set up the effects to update it.
-   */
-  private init;
-  updateNodeMappings(): void;
-  updateAllInstances(): void;
-  updateInstance(index: number, node: GraphElement): void;
-  getNodeId(instanceId: number): string | undefined;
-  dispose(): void;
+import { Spec } from './types';
+import { IRenderer } from './IRenderer';
+export declare class InstancedRenderer implements IRenderer {
+    private static registeredGeometries;
+    private scene;
+    private state;
+    instancedMeshes: Map<string, THREE.InstancedMesh>;
+    private typeToIdMaps;
+    private dummy;
+    private _dispose;
+    static registerInstancedType(typeName: string, geometry: THREE.BufferGeometry): void;
+    constructor(scene: THREE.Scene, state: Store<Spec>);
+    private init;
+    private updateInstance;
+    getRaycastableObjects(): THREE.Object3D[];
+    getNodeIdFromIntersection(intersection: THREE.Intersection): string | null;
+    dispose(): void;
 }

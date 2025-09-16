@@ -3,7 +3,7 @@
   "version": "3.1.0",
   "description": "Declarative, high-performance library for creating interactive 2D/3D visualizations.",
   "main": "./dist/spacegraph.umd.cjs",
-  "module": "./dist/spacegraph.js",
+  "module": "./dist/spacegraph.es.js",
   "types": "./dist/index.d.ts",
   "type": "module",
   "scripts": {
@@ -35,11 +35,12 @@
   "homepage": "https://github.com/automenta/spacegraphjs3#readme",
   "dependencies": {
     "@use-gesture/vanilla": "^10.3.1",
-    "d3-force-3d": "^3.0.6",
+    "d3-force-3d": "^2.1.0",
     "popmotion": "^11.0.5",
     "solid-js": "^1.9.9",
     "three": "^0.179.0",
-    "three-mesh-bvh": "^0.9.1"
+    "three-mesh-bvh": "^0.9.1",
+    "tslib": "^2.6.2"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",

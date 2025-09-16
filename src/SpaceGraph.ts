@@ -1,5 +1,5 @@
 import { THREE, CSS3DRenderer } from './utils/three';
-import { createRoot } from 'solid-js';
+import { createRoot, createEffect } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { createState } from './createState';
 import { Spec, SpecUpdate } from './types';
@@ -41,6 +41,7 @@ export class SpaceGraph {
   private hudController!: HUDController;
   private dispose: () => void;
   private eventListeners: Map<string, ((...args: any[]) => void)[]> = new Map();
+  public isInitialized: boolean = false;
 
   public static registerType(typeName:string, ActorClass: any) {
     NodeRenderer.registerType(typeName, ActorClass);
@@ -131,6 +132,8 @@ export class SpaceGraph {
 
       window.addEventListener('resize', this.handleResize);
       this.animate();
+
+      this.isInitialized = true; // Set to true after successful initialization
 
       return dispose;
     });

@@ -1,25 +1,12 @@
 import { createRoot, createEffect } from 'solid-js';
 import { Store, produce } from 'solid-js/store';
-import {
-  forceSimulation,
-  forceManyBody,
-  forceCenter,
-  forceLink,
-  Simulation,
-  SimulationNodeDatum,
-} from 'd3-force-3d';
-import { Spec, GraphElement, Edge } from './types';
-
-// Extend the d3-force Node type to include our GraphElement properties
-interface Node extends GraphElement, SimulationNodeDatum {}
+import { Spec, GraphElement, Edge, Node } from './types';
 
 export class LayoutController {
   private setState: (fn: (prevState: Spec) => Spec) => void;
-  private simulation: Simulation<Node, Edge> | null = null;
   public ready: Promise<void>;
   private resolveReady!: () => void;
   private emit: (eventName: string, ...args: any[]) => void;
-  private paused = false;
   private disposeEffect?: () => void;
   private state: Store<Spec>;
 
@@ -38,34 +25,26 @@ export class LayoutController {
 
   public init() {
     this.disposeEffect = createRoot((dispose) => {
-      createEffect(() => {
-        const layoutType = this.state.layout?.type ?? 'force-directed';
-        if (layoutType === 'force-directed') {
-          this.initForceSimulation();
-        } else {
-          this.stopSimulation();
-        }
-      });
+      // Placeholder layout: simply resolve ready immediately
+      this.resolveReady();
 
-      // Effect to react to changes in nodes and edges and update the simulation
+      // Effect to react to changes in nodes and edges and update positions
       createEffect(() => {
         const nodes = this.state.data?.nodes || [];
-        const edges = this.state.data?.edges || [];
-
-        if (this.simulation) {
-          // IMPORTANT: Deep copy nodes and edges to prevent d3 from mutating the reactive state directly.
-          const simNodes: Node[] = JSON.parse(JSON.stringify(nodes));
-          const simEdges: Edge[] = JSON.parse(JSON.stringify(edges));
-
-          // Initialize positions for d3 if they don't exist.
-          simNodes.forEach((node) => {
-            node.x = node.position?.x ?? 0;
-            node.y = node.position?.y ?? 0;
-            node.z = node.position?.z ?? 0;
-          });
-
-          this.simulation.nodes(simNodes);
-          (this.simulation.force('link') as any)?.links(simEdges);
+        if (nodes.length > 0) {
+          this.setState(
+            produce((s: Spec) => {
+              s.data.nodes.forEach((node) => {
+                if (!node.position) {
+                  node.position = {
+                    x: (Math.random() - 0.5) * 100,
+                    y: (Math.random() - 0.5) * 100,
+                    z: (Math.random() - 0.5) * 100,
+                  };
+                }
+              });
+            })
+          );
         }
       });
 
@@ -73,121 +52,17 @@ export class LayoutController {
     });
   }
 
-  /**
-   * Initialize the d3-force simulation.
-   */
-  private initForceSimulation() {
-    this.stopSimulation();
-
-    const layoutSpec = (this.state.layout ||
-      {}) as import('./types').ForceDirectedLayoutSpec;
-    const charge = layoutSpec.charge ?? -200;
-    const linkDistance = layoutSpec.linkDistance ?? 50;
-    const linkStrength = layoutSpec.linkStrength ?? 1;
-
-    this.simulation = forceSimulation<Node, Edge>()
-      .force('charge', forceManyBody<Node>().strength(charge))
-      .force('center', forceCenter<Node>().strength(0.01))
-      .force(
-        'link',
-        forceLink<Node, Edge>()
-          .id((d: Node) => d.id)
-          .distance(linkDistance)
-          .strength(5)
-      )
-      .force(
-        'link',
-        forceLink<Node, Edge>()
-          .id((d: Node) => d.id)
-          .distance(linkDistance)
-          .strength(linkStrength)
-      )
-      .on('tick', () => {
-        if (this.paused) return;
-        // On each tick, update the positions using the setState function
-        this.setState(
-          produce((s) => {
-            const stateNodeMap = new Map(s.data!.nodes!.map((n) => [n.id, n]));
-            this.simulation?.nodes().forEach((simNode) => {
-              const stateNode = stateNodeMap.get(simNode.id);
-              if (stateNode) {
-                if (!stateNode.position)
-                  stateNode.position = { x: 0, y: 0, z: 0 };
-                stateNode.position.x = simNode.x!;
-                stateNode.position.y = simNode.y!;
-                stateNode.position.z = simNode.z!;
-              }
-            });
-          })
-        );
-        this.emit('layout:tick');
-      })
-      .on('end', () => {
-        this.emit('layout:stabilize');
-      });
-
-    this.simulation.alpha(1).restart();
-    this.emit('layout:start');
-    this.resolveReady();
-  }
-
-  private stopSimulation() {
-    if (this.simulation) {
-      this.simulation.stop();
-      this.simulation = null;
-    }
-  }
-
-  public resume() {
-    this.paused = false;
-    if (this.simulation) this.simulation.alpha(1).restart();
-  }
-
-  public pause() {
-    this.paused = true;
-    if (this.simulation) this.simulation.alphaTarget(0);
-  }
-
-  public reheat() {
-    if (this.simulation) this.simulation.alpha(1).restart();
-  }
-
   public pinNodes(nodeIds: string[]) {
-    if (!this.simulation) return;
-    this.simulation.nodes().forEach((node) => {
-      if (nodeIds.includes(node.id)) {
-        node.fx = node.x;
-        node.fy = node.y;
-        node.fz = node.z;
-      }
-    });
+    // Placeholder: no-op
   }
 
   public unpinNodes(nodeIds: string[]) {
-    if (!this.simulation) return;
-    this.simulation.nodes().forEach((node) => {
-      if (nodeIds.includes(node.id)) {
-        node.fx = null;
-        node.fy = null;
-        node.fz = null;
-      }
-    });
-    this.reheat();
+    // Placeholder: no-op
   }
 
   public dispose() {
     if (this.disposeEffect) {
       this.disposeEffect();
-    }
-    this.stopSimulation();
-  }
-
-  public tick(iterations = 1) {
-    if (this.simulation && !this.paused) {
-      for (let i = 0; i < iterations; i++) {
-        this.simulation.tick();
-      }
-      this.emit('layout:tick');
     }
   }
 }

@@ -7,7 +7,8 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'SpaceGraph',
-      fileName: 'spacegraph',
+      fileName: (format) => `spacegraph.${format}.js`,
+      formats: ['es', 'umd'],
     },
   },
   test: {
@@ -32,5 +33,8 @@ export default defineConfig({
     },
     dedupe: ['three'],
     conditions: ['development', 'browser'],
+  },
+  optimizeDeps: {
+    include: ['tslib', 'solid-js'],
   },
 });

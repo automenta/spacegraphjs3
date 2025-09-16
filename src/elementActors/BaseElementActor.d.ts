@@ -7,26 +7,22 @@ import { GraphElement, Spec } from '../types';
  * for a single graph element (node or edge) and reacting to its state changes.
  */
 export declare abstract class BaseElementActor {
-  protected scene: THREE.Scene;
-  protected elementState: Store<GraphElement>;
-  protected graphState: Store<Spec>;
-  protected threeObject: THREE.Object3D | null;
-  protected disposeEffect: (() => void) | null;
-  constructor(
-    scene: THREE.Scene,
-    elementState: Store<GraphElement>,
-    graphState: Store<Spec>
-  );
-  /**
-   * Initializes the actor, creates its Three.js object, and sets up reactive effects.
-   */
-  abstract init(): void;
-  /**
-   * Returns the Three.js object managed by this actor for raycasting.
-   */
-  getRaycastableObject(): THREE.Object3D | null;
-  /**
-   * Cleans up all resources, including Three.js objects and SolidJS effects.
-   */
-  dispose(): void;
+    protected scene: THREE.Scene;
+    protected elementState: Store<GraphElement>;
+    protected graphState: Store<Spec>;
+    protected threeObject: THREE.Object3D | null;
+    protected disposeEffect: (() => void) | null;
+    constructor(scene: THREE.Scene, elementState: Store<GraphElement>, graphState: Store<Spec>);
+    /**
+     * Initializes the actor, creates its Three.js object, and sets up reactive effects.
+     */
+    abstract init(): void;
+    /**
+     * Returns the Three.js object managed by this actor for raycasting.
+     */
+    getRaycastableObject(): THREE.Object3D | null;
+    /**
+     * Cleans up all resources, including Three.js objects and SolidJS effects.
+     */
+    dispose(): void;
 }

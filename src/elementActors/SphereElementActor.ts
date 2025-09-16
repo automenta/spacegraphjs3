@@ -1,7 +1,7 @@
 import { THREE } from '../utils/three';
 import { createEffect, createRoot, createMemo } from 'solid-js';
 import { Store } from 'solid-js/store';
-import { Element, Spec } from '../types';
+import { GraphElement, Spec } from '../types';
 import { BaseElementActor } from './BaseElementActor';
 
 /**
@@ -12,7 +12,7 @@ export class SphereElementActor extends BaseElementActor {
 
   constructor(
     scene: THREE.Scene,
-    elementState: Element,
+    elementState: Store<GraphElement>,
     graphState: Store<Spec>
   ) {
     super(scene, elementState, graphState);
@@ -52,7 +52,7 @@ export class SphereElementActor extends BaseElementActor {
   }
 
   private updateVisuals(
-    elementState: Element,
+    elementState: GraphElement,
     isElementHovered: boolean,
     isElementSelected: boolean
   ): void {

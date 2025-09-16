@@ -50,7 +50,7 @@ try {
       },
     },
     layout: {
-      type: 'force-directed',
+      type: 'none',
     },
     camera: {
       target: { x: 0, y: 0, z: 0 },
@@ -77,8 +77,7 @@ try {
 
   // Expose graph to window for easy debugging and testing
   (window as any).graph = graph;
-} catch (e) {
-  console.error('Error creating SpaceGraph instance:', e);
+  console.log('SpaceGraph instance created for instanced interaction test');
+} catch (e: any) {
+  console.error('Error creating SpaceGraph instance:', e.message, e.stack);
 }
-
-console.log('SpaceGraph instance created for instanced interaction test');

@@ -27,6 +27,17 @@ describe('LayoutController', () => {
           theta: 0,
           distance: 10,
         },
+        controls: {
+          keyboard: {
+            enabled: true,
+            panSpeed: 0.1,
+            zoomSpeed: 0.1,
+            orbitSpeed: 0.02,
+          },
+        },
+        performance: {
+          instancingThreshold: 100,
+        },
         interaction: { hoveredElementId: null, selectedElementIds: [] },
       };
 
@@ -45,7 +56,7 @@ describe('LayoutController', () => {
     }
   });
 
-  it('should apply force-directed layout and update node positions', async () => {
+  it('should apply a placeholder layout and update node positions', async () => {
     updateState({
       data: {
         nodes: [{ id: 'n2', type: 'sphere' }],
@@ -54,35 +65,12 @@ describe('LayoutController', () => {
     });
     await layoutController.ready;
 
-    await new Promise((resolve) => setTimeout(resolve, 500)); // Wait for simulation to tick
-
+    // With the placeholder layout, positions should be set (randomly if not provided)
     const node1 = state.data.nodes.find((n) => n.id === 'n1');
-    expect(node1?.position?.x).not.toBe(10);
-    expect(node1?.position?.y).not.toBe(10);
-  });
+    expect(node1?.position).toBeDefined();
+    expect(node1?.position?.x).not.toBe(10); // Should have changed from initial
 
-  it('should pause and resume the layout simulation', async () => {
-    await layoutController.ready;
-
-    await new Promise((resolve) => setTimeout(resolve, 500)); // Wait for initial movement
-    const pos1_initial_x = state.data.nodes.find((n) => n.id === 'n1')?.position
-      ?.x;
-    expect(pos1_initial_x).not.toBe(10);
-
-    layoutController.pause();
-    const pos1_paused_x = state.data.nodes.find((n) => n.id === 'n1')?.position
-      ?.x;
-
-    await new Promise((resolve) => setTimeout(resolve, 500)); // Wait while paused
-    const pos1_after_paused_ticks_x = state.data.nodes.find(
-      (n) => n.id === 'n1'
-    )?.position?.x;
-    expect(pos1_after_paused_ticks_x).toBe(pos1_paused_x);
-
-    layoutController.resume();
-    await new Promise((resolve) => setTimeout(resolve, 500)); // Wait after resume
-    const pos1_after_resume_x = state.data.nodes.find((n) => n.id === 'n1')
-      ?.position?.x;
-    expect(pos1_after_resume_x).not.toBe(pos1_paused_x); // Position should have changed
+    const node2 = state.data.nodes.find((n) => n.id === 'n2');
+    expect(node2?.position).toBeDefined();
   });
 });

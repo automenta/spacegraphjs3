@@ -17,6 +17,17 @@ const createMockState = (): [Store<Spec>, (spec: Partial<Spec>) => void] => {
       theta: 1.57,
       distance: 10,
     },
+    controls: {
+      keyboard: {
+        enabled: true,
+        panSpeed: 0.1,
+        zoomSpeed: 0.1,
+        orbitSpeed: 0.02,
+      },
+    },
+    performance: {
+      instancingThreshold: 100,
+    },
     interaction: { hoveredElementId: null, selectedElementIds: [] },
   });
   return [state, setState];

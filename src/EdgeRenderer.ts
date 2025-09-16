@@ -51,8 +51,11 @@ export class EdgeRenderer {
     const colors: number[] = [];
 
     for (const edge of edges) {
-      const sourceNode = nodeMap.get(edge.source);
-      const targetNode = nodeMap.get(edge.target);
+      const sourceId = String(typeof edge.source === 'object' ? edge.source.id : edge.source);
+      const targetId = String(typeof edge.target === 'object' ? edge.target.id : edge.target);
+
+      const sourceNode = nodeMap.get(sourceId);
+      const targetNode = nodeMap.get(targetId);
 
       if (
         sourceNode &&

@@ -1,39 +1,30 @@
-import * as THREE from 'three';
+import { THREE } from './utils/three';
 import { Store } from 'solid-js/store';
 import { Spec, CameraSpec, GraphElement } from './types';
 export declare class CameraController {
-  private state;
-  private updateState;
-  private emit;
-  private threeCamera;
-  constructor(
-    state: Store<Spec>,
-    updateState: (spec: Partial<Spec>) => void,
-    emit: (eventName: string, ...args: any[]) => void,
-    threeCamera: THREE.PerspectiveCamera
-  );
-  /**
-   * Animates the camera to a new state.
-   * @param targetState - The target camera state.
-   * @param options - Animation options like duration and easing.
-   */
-  flyTo(
-    targetState: Partial<CameraSpec>,
-    options?: {
-      duration?: number;
-      ease?: (t: number) => number;
-    }
-  ): void;
-  /**
-   * Calculates the required camera state to frame the given elements and then flies to it.
-   * @param elements - The elements to frame.
-   * @param options - Framing options like padding and duration.
-   */
-  frame(
-    elements: GraphElement[],
-    options?: {
-      padding?: number;
-      duration?: number;
-    }
-  ): void;
+    private state;
+    private updateState;
+    private emit;
+    private threeCamera;
+    private _dispose;
+    constructor(state: Store<Spec>, updateState: (spec: Partial<Spec>) => void, emit: (eventName: string, ...args: any[]) => void, threeCamera: THREE.PerspectiveCamera);
+    /**
+     * Animates the camera to a new state.
+     * @param targetState - The target camera state.
+     * @param options - Animation options like duration and easing.
+     */
+    flyTo(targetState: Partial<CameraSpec>, options?: {
+        duration?: number;
+        ease?: (t: number) => number;
+    }): void;
+    /**
+     * Calculates the required camera state to frame the given elements and then flies to it.
+     * @param elements - The elements to frame.
+     * @param options - Framing options like padding and duration.
+     */
+    frame(elements: GraphElement[], options?: {
+        padding?: number;
+        duration?: number;
+    }): void;
+    dispose(): void;
 }

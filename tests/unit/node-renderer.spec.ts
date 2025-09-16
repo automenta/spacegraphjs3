@@ -26,6 +26,17 @@ describe('NodeRenderer and SphereElementActor', () => {
           theta: 0,
           distance: 10,
         },
+        controls: {
+          keyboard: {
+            enabled: true,
+            panSpeed: 0.1,
+            zoomSpeed: 0.1,
+            orbitSpeed: 0.02,
+          },
+        },
+        performance: {
+          instancingThreshold: 100,
+        },
       };
       const { state: s, updateState: u } = createState(spec);
       state = s;
@@ -111,7 +122,7 @@ describe('NodeRenderer and SphereElementActor', () => {
         ],
       },
     });
-    await new Promise((r) => queueMicrotask(r)); // Wait for SolidJS effects to flush
+    await Promise.resolve(); // Wait for SolidJS effects to flush
     expect(scene.children.length).toBe(1); // 1 node
     let mesh = scene.children.find(
       (c) => c.userData.nodeId === 'n1'
@@ -127,7 +138,7 @@ describe('NodeRenderer and SphereElementActor', () => {
         nodes: [{ id: 'n1', position: { x: 10, y: 20, z: 30 } }],
       },
     });
-    await new Promise((r) => queueMicrotask(r)); // Wait for SolidJS effects to flush
+    await Promise.resolve(); // Wait for SolidJS effects to flush
     mesh = scene.children.find((c) => c.userData.nodeId === 'n1') as THREE.Mesh;
     material = mesh.material as THREE.MeshBasicMaterial;
 
@@ -141,7 +152,7 @@ describe('NodeRenderer and SphereElementActor', () => {
         nodes: [{ id: 'n1', color: '#0000ff' }],
       },
     });
-    await new Promise((r) => queueMicrotask(r)); // Wait for SolidJS effects to flush
+    await Promise.resolve(); // Wait for SolidJS effects to flush
     mesh = scene.children.find((c) => c.userData.nodeId === 'n1') as THREE.Mesh;
     material = mesh.material as THREE.MeshBasicMaterial;
 
