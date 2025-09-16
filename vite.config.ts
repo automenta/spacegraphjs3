@@ -25,13 +25,6 @@ export default defineConfig({
         inline: ['solid-js'],
       },
     },
-    deps: {
-      optimizer: {
-        web: {
-          include: ['three', 'three-mesh-bvh', 'd3-force-3d'],
-        },
-      },
-    },
   },
   resolve: {
     alias: {

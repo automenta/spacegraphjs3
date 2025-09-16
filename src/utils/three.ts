@@ -3,15 +3,8 @@ import {
   CSS3DRenderer,
   CSS3DObject,
 } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
-import {
-  acceleratedRaycast,
-  computeBoundsTree,
-  disposeBoundsTree,
-} from 'three-mesh-bvh';
 
-// Add the bvh properties to the THREE objects
-THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
-THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
-THREE.Mesh.prototype.raycast = acceleratedRaycast;
+// This file should only export THREE and related utilities.
+// The monkey-patching for three-mesh-bvh should be done in the application entry point.
 
 export { THREE, CSS3DRenderer, CSS3DObject };

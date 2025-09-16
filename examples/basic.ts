@@ -1,5 +1,16 @@
+import * as THREE from 'three';
+import {
+  acceleratedRaycast,
+  computeBoundsTree,
+  disposeBoundsTree,
+} from 'three-mesh-bvh';
 import { SpaceGraph } from '../src';
 import { Spec } from '../src/types';
+
+// Add the bvh properties to the THREE objects
+THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
+THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
+THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 // 1. Define the initial state of the graph.
 const initialSpec: Spec = {
