@@ -9,28 +9,19 @@ export default defineConfig({
       name: 'SpaceGraph',
       fileName: 'spacegraph',
     },
-  },
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./tests/setup.ts'],
-    exclude: [
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/tests/visual/**',
-      '**/e2e/**',
-    ],
-    server: {
-      deps: {
-        inline: ['solid-js'],
-      },
+    rollupOptions: {
+      external: ['three', 'solid-js', 'solid-js/store', '@use-gesture/vanilla', 'd3-force-3d', 'popmotion', 'three-mesh-bvh', 'tslib'],
     },
   },
   resolve: {
     alias: {
       three: path.resolve(__dirname, 'node_modules/three'),
+      tslib: path.resolve(__dirname, 'node_modules/tslib'),
     },
-    dedupe: ['three'],
+    dedupe: ['three', 'tslib'],
     conditions: ['development', 'browser'],
+  },
+  optimizeDeps: {
+    include: ['tslib'],
   },
 });

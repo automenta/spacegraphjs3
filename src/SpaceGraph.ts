@@ -1,5 +1,5 @@
 import { THREE, CSS3DRenderer } from './utils/three';
-import { createRoot } from 'solid-js';
+import { createRoot, createEffect } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { createState } from './createState';
 import { Spec, SpecUpdate } from './types';

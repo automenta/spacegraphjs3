@@ -10,7 +10,9 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+    "importHelpers": true,
+    "importsNotUsedAsValues": "remove"
   },
   "include": ["src/**/*", "tests/**/*"],
   "exclude": ["node_modules"]
