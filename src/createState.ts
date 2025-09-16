@@ -1,97 +1,56 @@
 import { createStore, produce, SetStoreFunction } from 'solid-js/store';
 import { Spec, SpecUpdate } from './types';
+import { deepMerge } from './utils/deepMerge';
 
-// A more controlled deep merge that handles array updates by ID
-function deepMerge(target: any, source: any) {
-  for (const key in source) {
-    if (Object.prototype.hasOwnProperty.call(source, key)) {
-      const sourceValue = source[key];
-      const targetValue = target[key];
-
-      if (key === 'selectedElementIds' && Array.isArray(sourceValue)) {
-        // Always create a new array for selectedElementIds to ensure reactivity.
-        target[key] = [...sourceValue];
-      } else if (Array.isArray(sourceValue) && Array.isArray(targetValue)) {
-        // Handle node/edge array updates by ID.
-        // This is a simplified merge; a real implementation might need more
-        // robust logic for additions, removals, and updates.
-        const targetMap = new Map(
-          targetValue.map((item: any) => [item.id, item])
-        );
-        for (const item of sourceValue) {
-          const existingItem = targetMap.get(item.id);
-          if (existingItem) {
-            // Merge into existing item
-            deepMerge(existingItem, item);
-          } else {
-            // Add new item
-            targetValue.push(item);
-          }
-        }
-      } else if (
-        sourceValue &&
-        typeof sourceValue === 'object' &&
-        !Array.isArray(sourceValue)
-      ) {
-        // Recurse for nested objects
-        if (
-          !targetValue ||
-          typeof targetValue !== 'object' ||
-          Array.isArray(targetValue)
-        ) {
-          target[key] = {};
-        }
-        deepMerge(target[key], sourceValue);
-      } else if (sourceValue !== undefined) {
-        // Overwrite primitive values
-        target[key] = sourceValue;
-      }
-    }
-  }
-}
-
+/**
+ * Creates the reactive state management object for the SpaceGraph.
+ * This includes the central state store and functions to update it.
+ *
+ * @param initialSpec - The initial configuration and data for the graph.
+ * @returns An object containing the reactive `state`, an `updateState` function
+ *          for applying partial updates, and the raw `setState` function from SolidJS.
+ */
 export function createState(initialSpec: Spec) {
-  // Establish a default spec structure and merge the initial spec into it
+  // 1. Define the default structure for the specification.
   const defaults: Spec = {
-    data: {
-      nodes: [],
-      edges: [],
-    },
-    interaction: {
-      hoveredElementId: null,
-      selectedElementIds: [],
-    },
+    data: { nodes: [], edges: [] },
+    interaction: { hoveredElementId: null, selectedElementIds: [] },
     style: {},
     layout: { type: 'force-directed' },
-    camera: {
-      target: { x: 0, y: 0, z: 0 },
-      phi: 0,
-      theta: 0,
-      distance: 10,
-    },
+    camera: { target: { x: 0, y: 0, z: 0 }, phi: 0, theta: 0, distance: 10 },
   };
 
-  deepMerge(defaults, initialSpec);
+  // 2. Deep merge the user-provided initial spec into the defaults.
+  const initialState = deepMerge(defaults, initialSpec);
 
-  const [state, setState] = createStore<Spec>(defaults);
+  // 3. Create the SolidJS store.
+  const [state, setState] = createStore<Spec>(initialState);
 
-  const updateState = (spec: SpecUpdate) => {
+  /**
+   * Applies a partial update to the state. This function uses `produce`
+   * from `solid-js/store` to apply immutable updates efficiently.
+   *
+   * @param specUpdate - The partial specification of what to change.
+   */
+  const updateState = (specUpdate: SpecUpdate) => {
     setState(
       produce((s) => {
-        deepMerge(s, spec);
+        // Use the same deep merge utility to apply the updates.
+        deepMerge(s, specUpdate);
 
-        // Handle deletions, which are not covered by the merge
-        if (spec.data?.nodes) {
+        // Handle explicit deletions for nodes and edges, which `deepMerge` doesn't cover.
+        // An item marked with `delete: true` will be removed from the array.
+        if (specUpdate.data?.nodes) {
           const deleteIds = new Set(
-            spec.data.nodes.filter((n) => (n as any).delete).map((n) => n.id)
+            specUpdate.data.nodes.filter((n) => (n as any).delete).map((n) => n.id)
           );
           if (deleteIds.size > 0) {
             s.data.nodes = s.data.nodes.filter((n) => !deleteIds.has(n.id));
           }
         }
-        if (spec.data?.edges) {
+        if (specUpdate.data?.edges) {
           const deleteIds = new Set(
-            spec.data.edges.filter((e) => (e as any).delete).map((e) => e.id)
+            specUpdate.data.edges.filter((e) => (e as any).delete).map((e) => e.id)
           );
           if (deleteIds.size > 0) {
             s.data.edges = s.data.edges.filter((e) => !deleteIds.has(e.id));
@@ -101,5 +60,6 @@ export function createState(initialSpec: Spec) {
     );
   };
 
+  // 4. Return the state and its update functions.
   return { state, updateState, setState: setState as SetStoreFunction<Spec> };
 }

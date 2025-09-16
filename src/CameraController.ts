@@ -1,4 +1,4 @@
-import { THREE } from './utils/three';
+import * as THREE from 'three';
 import { Store } from 'solid-js/store';
 import { animate } from 'popmotion';
 import { Spec, CameraSpec, GraphElement } from './types';

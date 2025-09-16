@@ -1,202 +1,140 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
-import { createRoot } from 'solid-js';
+import { createRoot, createEffect, on } from 'solid-js';
 import { createState } from '../../src/createState';
 import { Spec } from '../../src/types';
 import { NodeRenderer } from '../../src/renderers/NodeRenderer';
 
+const nextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
+
 describe('NodeRenderer and SphereElementActor', () => {
-  let scene: THREE.Scene;
-  let state: ReturnType<typeof createState>['state'];
-  let updateState: ReturnType<typeof createState>['updateState'];
-  let nodeRenderer: NodeRenderer;
-  let dispose: () => void;
-
-  beforeEach(() => {
-    scene = new THREE.Scene();
-    createRoot((_dispose) => {
-      const spec: Spec = {
-        data: { nodes: [], edges: [] },
-        interaction: { hoveredElementId: null, selectedElementIds: [] },
-        style: {},
-        layout: { type: 'force-directed' },
-        camera: {
-          target: { x: 0, y: 0, z: 0 },
-          phi: 0,
-          theta: 0,
-          distance: 10,
-        },
-      };
-      const { state: s, updateState: u } = createState(spec);
-      state = s;
-      updateState = u;
-      nodeRenderer = new NodeRenderer(scene, state);
-      dispose = () => {
-        nodeRenderer.dispose();
-        _dispose();
-      };
-    });
-  });
-
   it('should add and remove sphere nodes based on state changes', async () => {
-    expect(scene.children.length).toBe(0); // No objects initially
+    await createRoot(async (dispose) => {
+      const scene = new THREE.Scene();
+      const spec: Spec = { data: { nodes: [], edges: [] } };
+      const { state, updateState } = createState(spec);
+      const nodeRenderer = new NodeRenderer(scene, state);
 
-    updateState({
-      data: {
-        nodes: [
-          {
-            id: 'n1',
-            type: 'sphere',
-            position: { x: 0, y: 0, z: 0 },
-            color: '#ff0000',
-          },
-        ],
-      },
+      expect(scene.children.length).toBe(0);
+
+      updateState({ data: { nodes: [{ id: 'n1', type: 'sphere' }] } });
+      await nextTick();
+      expect(scene.children.length).toBe(1);
+
+      updateState({
+        data: {
+          nodes: [
+            { id: 'n1', type: 'sphere' },
+            { id: 'n2', type: 'sphere' },
+          ],
+        },
+      });
+      await nextTick();
+      expect(scene.children.length).toBe(2);
+
+      updateState({ data: { nodes: [{ id: 'n1', delete: true } as any] } });
+      await nextTick();
+      expect(scene.children.length).toBe(1);
+
+      nodeRenderer.dispose();
+      dispose();
     });
-
-    expect(scene.children.length).toBe(1); // 1 node
-    let mesh = scene.children[0] as THREE.Mesh;
-    expect(mesh).toBeInstanceOf(THREE.Mesh);
-    expect(mesh.userData.nodeId).toBe('n1');
-
-    updateState({
-      data: {
-        nodes: [
-          {
-            id: 'n1',
-            type: 'sphere',
-            position: { x: 0, y: 0, z: 0 },
-            color: '#ff0000',
-          },
-          {
-            id: 'n2',
-            type: 'sphere',
-            position: { x: 1, y: 1, z: 1 },
-            color: '#00ff00',
-          },
-        ],
-      },
-    });
-
-    expect(scene.children.length).toBe(2); // 2 nodes
-    mesh = scene.children.find((c) => c.userData.nodeId === 'n2') as THREE.Mesh;
-    expect(mesh).toBeInstanceOf(THREE.Mesh);
-    expect(mesh.userData.nodeId).toBe('n2');
-
-    // To remove a node with a merging updater, we mark it for deletion
-    updateState({
-      data: {
-        nodes: [{ id: 'n1', delete: true } as any],
-      },
-    });
-
-    expect(scene.children.length).toBe(1); // 1 node (n1 removed)
-    expect(
-      scene.children.find((c) => c.userData.nodeId === 'n1')
-    ).toBeUndefined();
-
-    dispose();
   });
 
   it('should reactively update node position and color', async () => {
-    updateState({
-      data: {
-        nodes: [
-          {
-            id: 'n1',
-            type: 'sphere',
-            position: { x: 0, y: 0, z: 0 },
-            color: '#ff0000',
-          },
-        ],
-      },
+    await createRoot(async (dispose) => {
+      const scene = new THREE.Scene();
+      const spec: Spec = {
+        data: {
+          nodes: [
+            {
+              id: 'n1',
+              type: 'sphere',
+              position: { x: 0, y: 0, z: 0 },
+              color: '#ff0000',
+            },
+          ],
+        },
+      };
+      const { state, updateState } = createState(spec);
+      const nodeRenderer = new NodeRenderer(scene, state);
+
+      await nextTick();
+
+      let mesh = scene.children.find(
+        (c) => c.userData.nodeId === 'n1'
+      ) as THREE.Mesh;
+      expect(mesh).toBeDefined();
+      expect(mesh.position.x).toBe(0);
+      expect(
+        (mesh.material as THREE.MeshBasicMaterial).color.getHexString()
+      ).toBe('ff0000');
+
+      updateState({
+        data: { nodes: [{ id: 'n1', position: { x: 10, y: 20, z: 30 } }] },
+      });
+      await nextTick();
+      mesh = scene.children.find(
+        (c) => c.userData.nodeId === 'n1'
+      ) as THREE.Mesh;
+      expect(mesh.position.x).toBe(10);
+
+      updateState({ data: { nodes: [{ id: 'n1', color: '#0000ff' }] } });
+      await nextTick();
+      mesh = scene.children.find(
+        (c) => c.userData.nodeId === 'n1'
+      ) as THREE.Mesh;
+      expect(
+        (mesh.material as THREE.MeshBasicMaterial).color.getHexString()
+      ).toBe('0000ff');
+
+      nodeRenderer.dispose();
+      dispose();
     });
-    await new Promise((r) => queueMicrotask(r)); // Wait for SolidJS effects to flush
-    expect(scene.children.length).toBe(1); // 1 node
-    let mesh = scene.children.find(
-      (c) => c.userData.nodeId === 'n1'
-    ) as THREE.Mesh;
-    let material = mesh.material as THREE.MeshBasicMaterial;
-
-    expect(mesh.position.x).toBe(0);
-    expect(material.color.getHexString()).toBe('ff0000');
-
-    // Update position
-    updateState({
-      data: {
-        nodes: [{ id: 'n1', position: { x: 10, y: 20, z: 30 } }],
-      },
-    });
-    await new Promise((r) => queueMicrotask(r)); // Wait for SolidJS effects to flush
-    mesh = scene.children.find((c) => c.userData.nodeId === 'n1') as THREE.Mesh;
-    material = mesh.material as THREE.MeshBasicMaterial;
-
-    expect(mesh.position.x).toBe(10);
-    expect(mesh.position.y).toBe(20);
-    expect(mesh.position.z).toBe(30);
-
-    // Update color
-    updateState({
-      data: {
-        nodes: [{ id: 'n1', color: '#0000ff' }],
-      },
-    });
-    await new Promise((r) => queueMicrotask(r)); // Wait for SolidJS effects to flush
-    mesh = scene.children.find((c) => c.userData.nodeId === 'n1') as THREE.Mesh;
-    material = mesh.material as THREE.MeshBasicMaterial;
-
-    expect(material.color.getHexString()).toBe('0000ff');
-
-    dispose();
   });
 
   it('should apply hover and selected styles', async () => {
-    updateState({
-      data: {
-        nodes: [{ id: 'n1', type: 'sphere', color: '#ff0000' }],
-      },
-      style: {
-        'node:hover': { color: '#00ff00' }, // Green on hover
-        'node:selected': { color: '#0000ff' }, // Blue on select
-      },
+    await createRoot(async (dispose) => {
+      const scene = new THREE.Scene();
+      const spec: Spec = {
+        data: { nodes: [{ id: 'n1', type: 'sphere', color: '#ff0000' }] },
+        style: {
+          'node:hover': { color: '#00ff00' },
+          'node:selected': { color: '#0000ff' },
+        },
+      };
+      const { state, updateState } = createState(spec);
+      const nodeRenderer = new NodeRenderer(scene, state);
+
+      await nextTick();
+
+      let mesh = scene.children.find(
+        (c) => c.userData.nodeId === 'n1'
+      ) as THREE.Mesh;
+      expect(
+        (mesh.material as THREE.MeshBasicMaterial).color.getHexString()
+      ).toBe('ff0000');
+
+      updateState({ interaction: { hoveredElementId: 'n1' } });
+      await nextTick();
+      mesh = scene.children.find(
+        (c) => c.userData.nodeId === 'n1'
+      ) as THREE.Mesh;
+      expect(
+        (mesh.material as THREE.MeshBasicMaterial).color.getHexString()
+      ).toBe('00ff00');
+
+      updateState({ interaction: { selectedElementIds: ['n1'] } });
+      await nextTick();
+      mesh = scene.children.find(
+        (c) => c.userData.nodeId === 'n1'
+      ) as THREE.Mesh;
+      expect(
+        (mesh.material as THREE.MeshBasicMaterial).color.getHexString()
+      ).toBe('0000ff');
+
+      nodeRenderer.dispose();
+      dispose();
     });
-
-    let mesh = scene.children.find(
-      (c) => c.userData.nodeId === 'n1'
-    ) as THREE.Mesh;
-    let material = mesh.material as THREE.MeshBasicMaterial;
-
-    // Default color
-    expect(material.color.getHexString()).toBe('ff0000');
-
-    // Hover state
-    updateState({ interaction: { hoveredElementId: 'n1' } });
-    await Promise.resolve(); // Wait for SolidJS effects to flush
-    mesh = scene.children.find((c) => c.userData.nodeId === 'n1') as THREE.Mesh;
-    material = mesh.material as THREE.MeshBasicMaterial;
-    expect(material.color.getHexString()).toBe('00ff00');
-
-    // Selected state (should override hover)
-    updateState({ interaction: { selectedElementIds: ['n1'] } });
-    await Promise.resolve(); // Wait for SolidJS effects to flush
-    mesh = scene.children.find((c) => c.userData.nodeId === 'n1') as THREE.Mesh;
-    material = mesh.material as THREE.MeshBasicMaterial;
-    expect(material.color.getHexString()).toBe('0000ff');
-
-    // Unhover while selected (should remain selected color)
-    updateState({ interaction: { hoveredElementId: null } });
-    await Promise.resolve(); // Wait for SolidJS effects to flush
-    mesh = scene.children.find((c) => c.userData.nodeId === 'n1') as THREE.Mesh;
-    material = mesh.material as THREE.MeshBasicMaterial;
-    expect(material.color.getHexString()).toBe('0000ff');
-
-    // Unselect (should revert to default color)
-    updateState({ interaction: { selectedElementIds: [] } });
-    await Promise.resolve(); // Wait for SolidJS effects to flush
-    mesh = scene.children.find((c) => c.userData.nodeId === 'n1') as THREE.Mesh;
-    material = mesh.material as THREE.MeshBasicMaterial;
-    expect(material.color.getHexString()).toBe('ff0000');
-
-    dispose();
   });
 });

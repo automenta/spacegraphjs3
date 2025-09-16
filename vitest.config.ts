@@ -11,10 +11,5 @@ export default defineConfig({
       '**/tests/visual/**',
       '**/e2e/**',
     ],
-    server: {
-      deps: {
-        inline: ['solid-js'],
-      },
-    },
   },
 });

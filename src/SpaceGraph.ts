@@ -1,4 +1,4 @@
-import { THREE, CSS3DRenderer } from './utils/three';
+import * as THREE from 'three';
 import { createRoot, createEffect } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { createState } from './createState';
@@ -12,6 +12,8 @@ import { InstancedRenderer } from './InstancedRenderer';
 import { EdgeRenderer } from './EdgeRenderer';
 import { HTMLRenderer } from './HTMLRenderer';
 import { HUDController } from './HUDController';
+import { RenderingManager } from './RenderingManager';
+import { EventManager } from './EventManager';
 
 /**
  * The main class for creating and managing a SpaceGraph visualization.
@@ -27,11 +29,6 @@ export class SpaceGraph {
   public state!: Store<Spec>;
   private updateState!: (spec: SpecUpdate) => void;
   private setState!: (fn: (prevState: Spec) => Spec) => void;
-  private scene!: THREE.Scene;
-  private cssScene!: THREE.Scene;
-  private threeCamera!: THREE.PerspectiveCamera; // Renamed from 'camera'
-  private renderer: THREE.WebGLRenderer | null = null;
-  private cssRenderer: CSS3DRenderer | null = null;
   public layoutController!: LayoutController;
   private cameraController!: CameraController; // New controller
   private interactionController!: InteractionController;
@@ -39,8 +36,9 @@ export class SpaceGraph {
   private edgeRenderer!: EdgeRenderer;
   private htmlRenderer!: HTMLRenderer;
   private hudController!: HUDController;
+  private renderingManager!: RenderingManager;
+  private eventManager!: EventManager;
   private dispose: () => void;
-  private eventListeners: Map<string, ((...args: any[]) => void)[]> = new Map();
 
   public static registerType(typeName:string, ActorClass: any) {
     NodeRenderer.registerType(typeName, ActorClass);
@@ -56,19 +54,16 @@ export class SpaceGraph {
       throw new Error(`Container element '${containerSelector}' not found.`);
     }
     this.container = container as HTMLElement;
+    this.eventManager = new EventManager();
 
     // The `createRoot` ensures that all SolidJS reactivity is properly disposed of
     // when the `destroy` method is called.
     this.dispose = createRoot((dispose) => {
       this.initReactiveState(initialSpec);
-      this.initRenderers();
-      this.initScenes();
+      this.renderingManager = new RenderingManager(this.container);
       this.initControllers();
       this.initDynamicRenderer();
       this.initEventListeners();
-
-      window.addEventListener('resize', this.handleResize);
-      this.animate();
 
       // Return the dispose function so it can be called later in `destroy()`
       return dispose;
@@ -89,38 +84,42 @@ export class SpaceGraph {
    * Sets up the main controllers for layout, camera, interaction, etc.
    */
   private initControllers() {
+    const scene = this.renderingManager.getScene();
+    const cssScene = this.renderingManager.getCssScene();
+    const camera = this.renderingManager.getCamera();
+
     // These renderers are simple and don't have complex state,
     // so they can be initialized directly.
-    this.edgeRenderer = new EdgeRenderer(this.scene, this.state);
-    this.htmlRenderer = new HTMLRenderer(this.cssScene, this.state);
+    this.edgeRenderer = new EdgeRenderer(scene, this.state);
+    this.htmlRenderer = new HTMLRenderer(cssScene, this.state);
     this.hudController = new HUDController(this.container, this.state);
 
     // The main controllers have more complex logic and dependencies.
     this.cameraController = new CameraController(
       this.state,
       this.updateState,
-      this.emit.bind(this),
-      this.threeCamera
+      this.eventManager.emit.bind(this.eventManager),
+      camera
     );
 
     this.layoutController = new LayoutController(
       this.state,
       this.setState,
-      this.emit.bind(this)
+      this.eventManager.emit.bind(this.eventManager)
     );
     this.layoutController.init();
 
     // The NodeRenderer is initialized here, and will be dynamically replaced
     // by the InstancedRenderer if the node count exceeds the threshold.
-    this.nodeRenderer = new NodeRenderer(this.scene, this.state);
+    this.nodeRenderer = new NodeRenderer(scene, this.state);
 
     this.interactionController = new InteractionController({
-      rendererEl: this.renderer!.domElement,
+      rendererEl: this.renderingManager.getRendererDomElement(),
       state: this.state,
       updateState: this.updateState,
-      threeCamera: this.threeCamera,
+      threeCamera: camera,
       nodeRenderer: this.nodeRenderer,
-      emit: this.emit.bind(this),
+      emit: this.eventManager.emit.bind(this.eventManager),
       getElement: this.getElement.bind(this),
     });
   }
@@ -130,6 +129,7 @@ export class SpaceGraph {
    * and instanced node renderers based on the number of nodes.
    */
   private initDynamicRenderer() {
+    const scene = this.renderingManager.getScene();
     createEffect(() => {
       const nodeCount = this.state.data?.nodes?.length ?? 0;
       const threshold = this.state.performance?.instancingThreshold ?? 100;
@@ -142,21 +142,14 @@ export class SpaceGraph {
 
       if (shouldUseInstanced && currentRendererType !== 'instanced') {
         if (this.nodeRenderer) this.nodeRenderer.dispose();
-        this.nodeRenderer = new InstancedRenderer(this.scene, this.state);
+        this.nodeRenderer = new InstancedRenderer(scene, this.state);
         this.interactionController.setNodeRenderer(this.nodeRenderer);
       } else if (!shouldUseInstanced && currentRendererType !== 'default') {
         if (this.nodeRenderer) this.nodeRenderer.dispose();
-        this.nodeRenderer = new NodeRenderer(this.scene, this.state);
+        this.nodeRenderer = new NodeRenderer(scene, this.state);
         this.interactionController.setNodeRenderer(this.nodeRenderer);
       }
     });
-  }
-
-  private emit(eventName: string, ...args: any[]) {
-    const listeners = this.eventListeners.get(eventName);
-    if (listeners) {
-      listeners.forEach((listener) => listener(...args));
-    }
   }
 
   /**
@@ -166,20 +159,7 @@ export class SpaceGraph {
    * @returns A function that removes the event listener when called.
    */
   public on(eventName: string, listener: (...args: any[]) => void) {
-    if (!this.eventListeners.has(eventName)) {
-      this.eventListeners.set(eventName, []);
-    }
-    this.eventListeners.get(eventName)!.push(listener);
-
-    return () => {
-      const listeners = this.eventListeners.get(eventName);
-      if (listeners) {
-        const index = listeners.indexOf(listener);
-        if (index > -1) {
-          listeners.splice(index, 1);
-        }
-      }
-    };
+    return this.eventManager.on(eventName, listener);
   }
 
   /**
@@ -207,54 +187,14 @@ export class SpaceGraph {
 
   /**
    * Initialize all the controllers that manage different parts of the application.
-   * @param emit - The event emitter function.
    */
   private initEventListeners() {
-    this.on('layout:pin', (nodeIds: string[]) => {
+    this.eventManager.on('layout:pin', (nodeIds: string[]) => {
       this.layoutController.pinNodes(nodeIds);
     });
-    this.on('layout:unpin', (nodeIds: string[]) => {
+    this.eventManager.on('layout:unpin', (nodeIds: string[]) => {
       this.layoutController.unpinNodes(nodeIds);
     });
-  }
-
-  private initRenderers() {
-    // Initialize WebGL Renderer
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    this.renderer.setSize(
-      this.container.clientWidth,
-      this.container.clientHeight
-    );
-    this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.container.appendChild(this.renderer.domElement);
-
-    // Initialize CSS3D Renderer
-    this.cssRenderer = new CSS3DRenderer();
-    this.cssRenderer.setSize(
-      this.container.clientWidth,
-      this.container.clientHeight
-    );
-    this.cssRenderer.domElement.style.position = 'absolute';
-    this.cssRenderer.domElement.style.top = '0';
-    this.cssRenderer.domElement.style.pointerEvents = 'none'; // Initially, let webgl handle events
-    this.container.appendChild(this.cssRenderer.domElement);
-
-    // Ensure container is positioned relatively to anchor the absolute CSS renderer
-    if (getComputedStyle(this.container).position === 'static') {
-      this.container.style.position = 'relative';
-    }
-  }
-
-  private initScenes() {
-    this.scene = new THREE.Scene();
-    this.cssScene = new THREE.Scene();
-    this.threeCamera = new THREE.PerspectiveCamera(
-      75,
-      this.container.clientWidth / this.container.clientHeight,
-      0.1,
-      1000
-    );
-    this.scene.add(this.threeCamera); // Add camera to scene
   }
 
   /**
@@ -265,24 +205,6 @@ export class SpaceGraph {
   public update(spec: SpecUpdate) {
     this.updateState(spec);
   }
-
-  private handleResize = () => {
-    if (!this.renderer || !this.cssRenderer) return;
-    const width = this.container.clientWidth;
-    const height = this.container.clientHeight;
-
-    this.threeCamera.aspect = width / height;
-    this.threeCamera.updateProjectionMatrix();
-    this.renderer.setSize(width, height);
-    this.cssRenderer.setSize(width, height);
-  };
-
-  private animate = () => {
-    if (!this.renderer || !this.cssRenderer) return;
-    requestAnimationFrame(this.animate);
-    this.renderer.render(this.scene, this.threeCamera);
-    this.cssRenderer.render(this.cssScene, this.threeCamera);
-  };
 
   /**
    * Cleans up all resources, including SolidJS effects, Three.js objects,
@@ -296,21 +218,7 @@ export class SpaceGraph {
     this.edgeRenderer.dispose();
     this.htmlRenderer.dispose();
     this.hudController.dispose();
-
-    window.removeEventListener('resize', this.handleResize);
-
-    if (this.renderer) {
-      this.renderer.dispose();
-      if (this.renderer.domElement.parentNode === this.container) {
-        this.container.removeChild(this.renderer.domElement);
-      }
-      this.renderer = null;
-    }
-    if (this.cssRenderer) {
-      if (this.cssRenderer.domElement.parentNode === this.container) {
-        this.container.removeChild(this.cssRenderer.domElement);
-      }
-      this.cssRenderer = null;
-    }
+    this.renderingManager.dispose();
+    this.eventManager.dispose();
   }
 }

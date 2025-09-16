@@ -1,4 +1,4 @@
-import { THREE } from '../utils/three';
+import * as THREE from 'three';
 import { createEffect, createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { Spec, GraphElement } from '../types';
@@ -49,11 +49,14 @@ export class NodeRenderer implements IRenderer {
   }
 
   private init() {
+    console.log('NodeRenderer: init');
     // Register default types
     NodeRenderer.registerType('sphere', SphereElementActor);
 
     createEffect(() => {
+      console.log('NodeRenderer: createEffect triggered');
       const nodes = this.state.data?.nodes || [];
+      console.log(`NodeRenderer: Processing ${nodes.length} nodes`);
       const currentNodeIds = new Set(nodes.map((n) => n.id));
 
       // Add new actors for new nodes.
@@ -73,6 +76,7 @@ export class NodeRenderer implements IRenderer {
   }
 
   private addElementActor(node: GraphElement) {
+    console.log(`NodeRenderer: Adding actor for node ${node.id}`);
     const ActorClass = NodeRenderer.registeredElementTypes.get(node.type);
     if (!ActorClass) {
       console.warn(
