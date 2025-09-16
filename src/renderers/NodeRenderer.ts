@@ -1,5 +1,5 @@
 import { THREE } from '../utils/three';
-import { createEffect, createRoot, on } from 'solid-js';
+import { createEffect, createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { Spec, GraphElement } from '../types';
 import { IRenderer } from '../IRenderer';
@@ -21,7 +21,8 @@ export class NodeRenderer implements IRenderer {
   private scene: THREE.Scene;
   private state: Store<Spec>;
   private elementActors: Map<string, BaseElementActor> = new Map();
-  private static registeredElementTypes: Map<string, ElementActorConstructor> = new Map();
+  private static registeredElementTypes: Map<string, ElementActorConstructor> =
+    new Map();
   private disposeEffect?: () => void;
 
   constructor(scene: THREE.Scene, state: Store<Spec>) {
@@ -40,7 +41,10 @@ export class NodeRenderer implements IRenderer {
    * @param typeName - The name of the element type (e.g., 'sphere', 'html').
    * @param ActorClass - The ElementActor class responsible for rendering this type.
    */
-  public static registerType(typeName: string, ActorClass: ElementActorConstructor) {
+  public static registerType(
+    typeName: string,
+    ActorClass: ElementActorConstructor
+  ) {
     NodeRenderer.registeredElementTypes.set(typeName, ActorClass);
   }
 
@@ -71,15 +75,23 @@ export class NodeRenderer implements IRenderer {
   private addElementActor(node: GraphElement) {
     const ActorClass = NodeRenderer.registeredElementTypes.get(node.type);
     if (!ActorClass) {
-      console.warn(`No ElementActor registered for type: ${node.type}. Skipping node ${node.id}.`);
+      console.warn(
+        `No ElementActor registered for type: ${node.type}. Skipping node ${node.id}.`
+      );
       return;
     }
 
     // Create a reactive proxy for the individual node state
     // This allows the actor to react to changes in its own elementState
-    const elementStateProxy = this.state.data!.nodes!.find(n => n.id === node.id)!;
+    const elementStateProxy = this.state.data!.nodes!.find(
+      (n) => n.id === node.id
+    )!;
 
-    const actor = new ActorClass(this.scene, elementStateProxy as Store<GraphElement>, this.state);
+    const actor = new ActorClass(
+      this.scene,
+      elementStateProxy as Store<GraphElement>,
+      this.state
+    );
     actor.init();
     this.elementActors.set(node.id, actor);
   }
@@ -106,7 +118,9 @@ export class NodeRenderer implements IRenderer {
     return raycastableObjects;
   }
 
-  public getNodeIdFromIntersection(intersection: THREE.Intersection): string | null {
+  public getNodeIdFromIntersection(
+    intersection: THREE.Intersection
+  ): string | null {
     // Retrieve the nodeId stored in the mesh's userData.
     return intersection.object.userData.nodeId ?? null;
   }

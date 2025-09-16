@@ -32,12 +32,14 @@ export class SphereElementActor extends BaseElementActor {
         this.graphState.interaction.selectedElementIds.includes(this.elementId)
       );
 
-      const isHovered = createMemo(() =>
-        this.graphState.interaction.hoveredElementId === this.elementId
+      const isHovered = createMemo(
+        () => this.graphState.interaction.hoveredElementId === this.elementId
       );
 
       createEffect(() => {
-        const elementState = this.graphState.data.nodes.find(n => n.id === this.elementId);
+        const elementState = this.graphState.data.nodes.find(
+          (n) => n.id === this.elementId
+        );
         if (!elementState) {
           // Node has been removed, actor will be disposed soon.
           return;
@@ -48,8 +50,6 @@ export class SphereElementActor extends BaseElementActor {
       return dispose;
     });
   }
-
-
 
   private updateVisuals(
     elementState: Element,

@@ -1,10 +1,25 @@
 declare module 'd3-force-3d' {
-  export function forceSimulation<N extends SimulationNodeDatum>(nodes?: N[]): Simulation<N, undefined>;
-  export function forceManyBody<N extends SimulationNodeDatum>(): Force<N, undefined>;
-  export function forceCenter<N extends SimulationNodeDatum>(x?: number, y?: number, z?: number): Force<N, undefined>;
-  export function forceLink<N extends SimulationNodeDatum, E extends SimulationLinkDatum<N>>(links?: E[]): Force<N, E>;
+  export function forceSimulation<N extends SimulationNodeDatum>(
+    nodes?: N[]
+  ): Simulation<N, undefined>;
+  export function forceManyBody<N extends SimulationNodeDatum>(): Force<
+    N,
+    undefined
+  >;
+  export function forceCenter<N extends SimulationNodeDatum>(
+    x?: number,
+    y?: number,
+    z?: number
+  ): Force<N, undefined>;
+  export function forceLink<
+    N extends SimulationNodeDatum,
+    E extends SimulationLinkDatum<N>,
+  >(links?: E[]): Force<N, E>;
 
-  export interface Simulation<N extends SimulationNodeDatum, E extends SimulationLinkDatum<N> | undefined> {
+  export interface Simulation<
+    N extends SimulationNodeDatum,
+    E extends SimulationLinkDatum<N> | undefined,
+  > {
     restart(): this;
     stop(): this;
     tick(iterations?: number): this;
@@ -48,7 +63,10 @@ declare module 'd3-force-3d' {
     index?: number;
   }
 
-  export interface Force<N extends SimulationNodeDatum, E extends SimulationLinkDatum<N> | undefined> {
+  export interface Force<
+    N extends SimulationNodeDatum,
+    E extends SimulationLinkDatum<N> | undefined,
+  > {
     (alpha: number): void;
     initialize?(nodes: N[], random: () => number): void;
     links?(links: E[]): this;

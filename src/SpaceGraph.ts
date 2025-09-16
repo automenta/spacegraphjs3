@@ -121,7 +121,7 @@ export class SpaceGraph {
    * @param id - The unique identifier of the element.
    * @returns The element's reactive state proxy, or undefined if not found.
    */
-  public getElement(id:string) {
+  public getElement(id: string) {
     return this.state.data?.nodes?.find((n) => n.id === id);
   }
 
@@ -144,7 +144,11 @@ export class SpaceGraph {
    * @param emit - The event emitter function.
    */
   private _initControllers(emit: (eventName: string, ...args: any[]) => void) {
-    this.layoutController = new LayoutController(this.state, this.setState, emit);
+    this.layoutController = new LayoutController(
+      this.state,
+      this.setState,
+      emit
+    );
     this.layoutController.init();
     this.cameraController = new CameraController(
       this.state,

@@ -10,20 +10,20 @@ import * as THREE from 'three';
 import { Store } from 'solid-js/store';
 import { Spec, GraphElement } from './types';
 export declare class InstancedRenderer {
-    private scene;
-    private state;
-    instancedMesh: THREE.InstancedMesh;
-    private idToIndex;
-    private indexToId;
-    private dummy;
-    constructor(scene: THREE.Scene, state: Store<Spec>);
-    /**
-     * Initialize the instanced mesh and set up the effects to update it.
-     */
-    private init;
-    updateNodeMappings(): void;
-    updateAllInstances(): void;
-    updateInstance(index: number, node: GraphElement): void;
-    getNodeId(instanceId: number): string | undefined;
-    dispose(): void;
+  private scene;
+  private state;
+  instancedMesh: THREE.InstancedMesh;
+  private idToIndex;
+  private indexToId;
+  private dummy;
+  constructor(scene: THREE.Scene, state: Store<Spec>);
+  /**
+   * Initialize the instanced mesh and set up the effects to update it.
+   */
+  private init;
+  updateNodeMappings(): void;
+  updateAllInstances(): void;
+  updateInstance(index: number, node: GraphElement): void;
+  getNodeId(instanceId: number): string | undefined;
+  dispose(): void;
 }

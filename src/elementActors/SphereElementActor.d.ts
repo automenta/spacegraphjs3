@@ -6,9 +6,13 @@ import { BaseElementActor } from './BaseElementActor';
  * An ElementActor for rendering sphere nodes.
  */
 export declare class SphereElementActor extends BaseElementActor {
-    private elementId;
-    constructor(scene: THREE.Scene, elementState: GraphElement, graphState: Store<Spec>);
-    init(): void;
-    private updateVisuals;
-    dispose(): void;
+  private elementId;
+  constructor(
+    scene: THREE.Scene,
+    elementState: GraphElement,
+    graphState: Store<Spec>
+  );
+  init(): void;
+  private updateVisuals;
+  dispose(): void;
 }

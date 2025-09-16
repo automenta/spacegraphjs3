@@ -9,13 +9,13 @@ export interface GraphElement {
   type: string;
   pinning?: { x: number; y: number; z: number } | string;
   data?: Record<string, any>;
-  position?: { x: number; y: number; z: number; };
+  position?: { x: number; y: number; z: number };
   color?: string;
 }
 
 export interface HtmlElement extends GraphElement {
-    content?: string;
-    className?: string;
+  content?: string;
+  className?: string;
 }
 
 export interface Edge {
@@ -26,18 +26,18 @@ export interface Edge {
 }
 
 export interface SpecUpdate {
-    data?: {
-        nodes?: (DeepPartial<GraphElement> & { id: string })[];
-        edges?: (DeepPartial<Edge> & { id: string })[];
-    };
-    style?: DeepPartial<StyleSpec>;
-    layout?: DeepPartial<LayoutSpec>;
-    camera?: DeepPartial<CameraSpec>;
-    controls?: DeepPartial<ControlsSpec>;
-    interaction?: DeepPartial<{
-        hoveredElementId: string | null;
-        selectedElementIds: string[];
-    }>;
+  data?: {
+    nodes?: (DeepPartial<GraphElement> & { id: string })[];
+    edges?: (DeepPartial<Edge> & { id: string })[];
+  };
+  style?: DeepPartial<StyleSpec>;
+  layout?: DeepPartial<LayoutSpec>;
+  camera?: DeepPartial<CameraSpec>;
+  controls?: DeepPartial<ControlsSpec>;
+  interaction?: DeepPartial<{
+    hoveredElementId: string | null;
+    selectedElementIds: string[];
+  }>;
 }
 
 export interface CameraSpec {
@@ -50,9 +50,9 @@ export interface CameraSpec {
 export interface NodeStyle {
   color?: string;
   glow?: {
-      color: string;
-      strength: number;
-  }
+    color: string;
+    strength: number;
+  };
 }
 
 export type StyleSpec = {

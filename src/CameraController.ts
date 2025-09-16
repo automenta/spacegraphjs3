@@ -90,9 +90,15 @@ export class CameraController {
 
         // Interpolate each property
         const newTarget = {
-          x: fromState.target.x + (toState.target.x - fromState.target.x) * latest,
-          y: fromState.target.y + (toState.target.y - fromState.target.y) * latest,
-          z: fromState.target.z + (toState.target.z - fromState.target.z) * latest,
+          x:
+            fromState.target.x +
+            (toState.target.x - fromState.target.x) * latest,
+          y:
+            fromState.target.y +
+            (toState.target.y - fromState.target.y) * latest,
+          z:
+            fromState.target.z +
+            (toState.target.z - fromState.target.z) * latest,
         };
         const newPhi = fromState.phi + (toState.phi - fromState.phi) * latest;
         const newTheta =

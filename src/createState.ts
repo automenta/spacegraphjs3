@@ -15,7 +15,9 @@ function deepMerge(target: any, source: any) {
         // Handle node/edge array updates by ID.
         // This is a simplified merge; a real implementation might need more
         // robust logic for additions, removals, and updates.
-        const targetMap = new Map(targetValue.map((item: any) => [item.id, item]));
+        const targetMap = new Map(
+          targetValue.map((item: any) => [item.id, item])
+        );
         for (const item of sourceValue) {
           const existingItem = targetMap.get(item.id);
           if (existingItem) {
@@ -26,9 +28,17 @@ function deepMerge(target: any, source: any) {
             targetValue.push(item);
           }
         }
-      } else if (sourceValue && typeof sourceValue === 'object' && !Array.isArray(sourceValue)) {
+      } else if (
+        sourceValue &&
+        typeof sourceValue === 'object' &&
+        !Array.isArray(sourceValue)
+      ) {
         // Recurse for nested objects
-        if (!targetValue || typeof targetValue !== 'object' || Array.isArray(targetValue)) {
+        if (
+          !targetValue ||
+          typeof targetValue !== 'object' ||
+          Array.isArray(targetValue)
+        ) {
           target[key] = {};
         }
         deepMerge(target[key], sourceValue);
@@ -39,7 +49,6 @@ function deepMerge(target: any, source: any) {
     }
   }
 }
-
 
 export function createState(initialSpec: Spec) {
   // Establish a default spec structure and merge the initial spec into it
@@ -55,10 +64,10 @@ export function createState(initialSpec: Spec) {
     style: {},
     layout: { type: 'force-directed' },
     camera: {
-        target: { x: 0, y: 0, z: 0 },
-        phi: 0,
-        theta: 0,
-        distance: 10,
+      target: { x: 0, y: 0, z: 0 },
+      phi: 0,
+      theta: 0,
+      distance: 10,
     },
   };
 
@@ -72,17 +81,21 @@ export function createState(initialSpec: Spec) {
         deepMerge(s, spec);
 
         // Handle deletions, which are not covered by the merge
-        if(spec.data?.nodes) {
-            const deleteIds = new Set(spec.data.nodes.filter(n => (n as any).delete).map(n => n.id));
-            if (deleteIds.size > 0) {
-                s.data.nodes = s.data.nodes.filter(n => !deleteIds.has(n.id));
-            }
+        if (spec.data?.nodes) {
+          const deleteIds = new Set(
+            spec.data.nodes.filter((n) => (n as any).delete).map((n) => n.id)
+          );
+          if (deleteIds.size > 0) {
+            s.data.nodes = s.data.nodes.filter((n) => !deleteIds.has(n.id));
+          }
         }
-        if(spec.data?.edges) {
-            const deleteIds = new Set(spec.data.edges.filter(e => (e as any).delete).map(e => e.id));
-            if (deleteIds.size > 0) {
-                s.data.edges = s.data.edges.filter(e => !deleteIds.has(e.id));
-            }
+        if (spec.data?.edges) {
+          const deleteIds = new Set(
+            spec.data.edges.filter((e) => (e as any).delete).map((e) => e.id)
+          );
+          if (deleteIds.size > 0) {
+            s.data.edges = s.data.edges.filter((e) => !deleteIds.has(e.id));
+          }
         }
       })
     );

@@ -33,7 +33,10 @@ export class EdgeRenderer {
     });
   }
 
-  public updateEdges(nodes: GraphElement[] = this.state.data.nodes, edges: Edge[] = this.state.data.edges) {
+  public updateEdges(
+    nodes: GraphElement[] = this.state.data.nodes,
+    edges: Edge[] = this.state.data.edges
+  ) {
     if (!nodes || !edges || !this.lineSegments) {
       this.geometry.setAttribute(
         'position',

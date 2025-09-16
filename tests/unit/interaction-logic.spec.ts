@@ -89,7 +89,13 @@ describe('InteractionLogic', () => {
   describe('handlePan', () => {
     it('should calculate the correct pan when camera is not rotated', () => {
       const state = createMockState();
-      InteractionLogic.handlePan(100, 50, state, mockUpdateState, mockThreeCamera);
+      InteractionLogic.handlePan(
+        100,
+        50,
+        state,
+        mockUpdateState,
+        mockThreeCamera
+      );
 
       expect(mockUpdateState).toHaveBeenCalledOnce();
       const { camera: newCameraState } = mockUpdateState.mock.calls[0][0];
@@ -103,7 +109,13 @@ describe('InteractionLogic', () => {
       mockThreeCamera.rotation.y = Math.PI / 2;
       mockThreeCamera.updateMatrixWorld(true);
 
-      InteractionLogic.handlePan(100, 0, state, mockUpdateState, mockThreeCamera);
+      InteractionLogic.handlePan(
+        100,
+        0,
+        state,
+        mockUpdateState,
+        mockThreeCamera
+      );
 
       expect(mockUpdateState).toHaveBeenCalledOnce();
       const { camera: newCameraState } = mockUpdateState.mock.calls[0][0];

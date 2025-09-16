@@ -79,7 +79,8 @@ export class LayoutController {
   private initForceSimulation() {
     this.stopSimulation();
 
-    const layoutSpec = (this.state.layout || {}) as import('./types').ForceDirectedLayoutSpec;
+    const layoutSpec = (this.state.layout ||
+      {}) as import('./types').ForceDirectedLayoutSpec;
     const charge = layoutSpec.charge ?? -200;
     const linkDistance = layoutSpec.linkDistance ?? 50;
     const linkStrength = layoutSpec.linkStrength ?? 1;
@@ -106,11 +107,12 @@ export class LayoutController {
         // On each tick, update the positions using the setState function
         this.setState(
           produce((s) => {
-            const stateNodeMap = new Map(s.data!.nodes!.map(n => [n.id, n]));
+            const stateNodeMap = new Map(s.data!.nodes!.map((n) => [n.id, n]));
             this.simulation?.nodes().forEach((simNode) => {
               const stateNode = stateNodeMap.get(simNode.id);
               if (stateNode) {
-                if (!stateNode.position) stateNode.position = { x: 0, y: 0, z: 0 };
+                if (!stateNode.position)
+                  stateNode.position = { x: 0, y: 0, z: 0 };
                 stateNode.position.x = simNode.x!;
                 stateNode.position.y = simNode.y!;
                 stateNode.position.z = simNode.z!;

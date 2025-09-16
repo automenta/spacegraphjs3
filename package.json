@@ -10,6 +10,7 @@
     "dev": "vite",
     "build": "vite build && tsc --emitDeclarationOnly",
     "test": "cross-env NODE_ENV=test vitest",
+    "test:e2e": "playwright test",
     "lint": "eslint .",
     "format": "prettier --write ."
   },

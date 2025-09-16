@@ -53,7 +53,12 @@ export class InstancedRenderer {
     this.instancedMesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
     this.scene.add(this.instancedMesh);
 
-    createEffect(on(() => this.state.data?.nodes, () => this.updateNodeMappings()));
+    createEffect(
+      on(
+        () => this.state.data?.nodes,
+        () => this.updateNodeMappings()
+      )
+    );
 
     createEffect(
       on(
@@ -63,8 +68,12 @@ export class InstancedRenderer {
         ],
         (next, prev) => {
           const [nextHovered, nextSelected] = next as [string | null, string[]];
-          const prevHovered = prev ? (prev as [string | null, string[]])[0] : null;
-          const prevSelected = prev ? (prev as [string | null, string[]])[1] : [];
+          const prevHovered = prev
+            ? (prev as [string | null, string[]])[0]
+            : null;
+          const prevSelected = prev
+            ? (prev as [string | null, string[]])[1]
+            : [];
 
           const changedIds = new Set<string>();
 
@@ -151,8 +160,7 @@ export class InstancedRenderer {
     const isHovered = hoveredId === node.id;
 
     if (isSelected) {
-      finalColor =
-        this.state.style['node:selected']?.color || finalColor;
+      finalColor = this.state.style['node:selected']?.color || finalColor;
     } else if (isHovered) {
       finalColor = this.state.style['node:hover']?.color || finalColor;
     }
@@ -169,8 +177,8 @@ export class InstancedRenderer {
     if (this.instancedMesh.geometry) {
       this.instancedMesh.geometry.dispose();
     }
-    if(this.instancedMesh.material) {
-        (this.instancedMesh.material as THREE.Material).dispose();
+    if (this.instancedMesh.material) {
+      (this.instancedMesh.material as THREE.Material).dispose();
     }
     this.scene.remove(this.instancedMesh);
     if ((this.instancedMesh.geometry as any)?.boundsTree) {

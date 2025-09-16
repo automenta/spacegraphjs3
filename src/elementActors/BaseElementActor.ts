@@ -48,9 +48,13 @@ export abstract class BaseElementActor {
       }
       if ((this.threeObject as THREE.Mesh).material) {
         if (Array.isArray((this.threeObject as THREE.Mesh).material)) {
-          ((this.threeObject as THREE.Mesh).material as THREE.Material[]).forEach(m => m.dispose());
+          (
+            (this.threeObject as THREE.Mesh).material as THREE.Material[]
+          ).forEach((m) => m.dispose());
         } else {
-          ((this.threeObject as THREE.Mesh).material as THREE.Material).dispose();
+          (
+            (this.threeObject as THREE.Mesh).material as THREE.Material
+          ).dispose();
         }
       }
       this.threeObject = null;

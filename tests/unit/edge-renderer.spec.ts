@@ -29,7 +29,12 @@ describe('EdgeRenderer', () => {
         },
         style: {},
         layout: { type: 'force-directed' },
-        camera: { target: { x: 0, y: 0, z: 0 }, phi: 0, theta: 0, distance: 10 },
+        camera: {
+          target: { x: 0, y: 0, z: 0 },
+          phi: 0,
+          theta: 0,
+          distance: 10,
+        },
         interaction: { hoveredElementId: null, selectedElementIds: [] },
       };
       const { state: s, updateState: u } = createState(spec);
@@ -50,9 +55,13 @@ describe('EdgeRenderer', () => {
 
     const positions = positionAttribute.array;
     // Edge 1: n1 -> n2
-    expect(positions.slice(0, 6)).toEqual(new Float32Array([0, 0, 0, 10, 0, 0]));
+    expect(positions.slice(0, 6)).toEqual(
+      new Float32Array([0, 0, 0, 10, 0, 0])
+    );
     // Edge 2: n1 -> n3
-    expect(positions.slice(6, 12)).toEqual(new Float32Array([0, 0, 0, 0, 10, 0]));
+    expect(positions.slice(6, 12)).toEqual(
+      new Float32Array([0, 0, 0, 0, 10, 0])
+    );
     dispose();
   });
 

@@ -44,7 +44,12 @@ describe('HUDController', () => {
     hudController.updateStats();
     expect(statsContainer.innerHTML).toContain('Distance: 20.00');
 
-    setState({ data: { ...state.data, nodes: [...state.data.nodes, { id: 'n2', type: 'sphere' }] } });
+    setState({
+      data: {
+        ...state.data,
+        nodes: [...state.data.nodes, { id: 'n2', type: 'sphere' }],
+      },
+    });
     hudController.updateStats();
     expect(statsContainer.innerHTML).toContain('Nodes: 2');
   });

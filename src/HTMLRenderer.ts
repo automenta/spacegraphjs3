@@ -58,7 +58,10 @@ export class HTMLRenderer {
         if (object.element.innerHTML !== (node.content || '')) {
           object.element.innerHTML = node.content || '';
         }
-        if (object.element.className !== (node.className || 'spacegraph-html-node')) {
+        if (
+          object.element.className !==
+          (node.className || 'spacegraph-html-node')
+        ) {
           object.element.className = node.className || 'spacegraph-html-node';
         }
       }

@@ -65,7 +65,8 @@ export class InteractionController {
 
     window.addEventListener('keydown', this.handleKeyDown);
 
-    this.gesture = new Gesture(this.rendererEl,
+    this.gesture = new Gesture(
+      this.rendererEl,
       {
         onDragStart: (state: any) => {
           const { event } = state;
@@ -89,7 +90,12 @@ export class InteractionController {
           }
         },
         onDrag: (state: any) => {
-          const { movement: [mx, my], event, xy: [vx, vy], active } = state;
+          const {
+            movement: [mx, my],
+            event,
+            xy: [vx, vy],
+            active,
+          } = state;
           if (!active || !this.state.camera) return;
 
           if (this.draggedElementId) {
@@ -105,7 +111,12 @@ export class InteractionController {
           } else {
             const e = event as PointerEvent;
             if (e.buttons === 2) {
-              InteractionLogic.handleOrbit(mx, my, this.state, this.updateState);
+              InteractionLogic.handleOrbit(
+                mx,
+                my,
+                this.state,
+                this.updateState
+              );
             } else {
               InteractionLogic.handlePan(
                 mx,
@@ -124,7 +135,9 @@ export class InteractionController {
           }
         },
         onWheel: (state: any) => {
-          const { movement: [, my] } = state;
+          const {
+            movement: [, my],
+          } = state;
           if (this.state.camera) {
             const zoomSpeed = 0.1;
             const newDistance = this.state.camera.distance + my * zoomSpeed;
@@ -216,39 +229,93 @@ export class InteractionController {
       // Zoom
       case '=':
       case '+':
-        InteractionLogic.handleKeyZoom(this.state, this.updateState, 'in', zoomSpeed);
+        InteractionLogic.handleKeyZoom(
+          this.state,
+          this.updateState,
+          'in',
+          zoomSpeed
+        );
         break;
       case '-':
       case '_':
-        InteractionLogic.handleKeyZoom(this.state, this.updateState, 'out', zoomSpeed);
+        InteractionLogic.handleKeyZoom(
+          this.state,
+          this.updateState,
+          'out',
+          zoomSpeed
+        );
         break;
 
       // Pan
       case 'w':
-        InteractionLogic.handleKeyPan(this.state, this.updateState, 'forward', panSpeed, this.threeCamera);
+        InteractionLogic.handleKeyPan(
+          this.state,
+          this.updateState,
+          'forward',
+          panSpeed,
+          this.threeCamera
+        );
         break;
       case 's':
-        InteractionLogic.handleKeyPan(this.state, this.updateState, 'backward', panSpeed, this.threeCamera);
+        InteractionLogic.handleKeyPan(
+          this.state,
+          this.updateState,
+          'backward',
+          panSpeed,
+          this.threeCamera
+        );
         break;
       case 'a':
-        InteractionLogic.handleKeyPan(this.state, this.updateState, 'left', panSpeed, this.threeCamera);
+        InteractionLogic.handleKeyPan(
+          this.state,
+          this.updateState,
+          'left',
+          panSpeed,
+          this.threeCamera
+        );
         break;
       case 'd':
-        InteractionLogic.handleKeyPan(this.state, this.updateState, 'right', panSpeed, this.threeCamera);
+        InteractionLogic.handleKeyPan(
+          this.state,
+          this.updateState,
+          'right',
+          panSpeed,
+          this.threeCamera
+        );
         break;
 
       // Orbit
       case 'ArrowUp':
-        InteractionLogic.handleKeyOrbit(this.state, this.updateState, 'up', orbitSpeed);
+        InteractionLogic.handleKeyOrbit(
+          this.state,
+          this.updateState,
+          'up',
+          orbitSpeed
+        );
         break;
       case 'ArrowDown':
-        InteractionLogic.handleKeyOrbit(this.state, this.updateState, 'down', orbitSpeed);
+        InteractionLogic.handleKeyOrbit(
+          this.state,
+          this.updateState,
+          'down',
+          orbitSpeed
+        );
         break;
       case 'ArrowLeft':
-        InteractionLogic.handleKeyOrbit(this.state, this.updateState, 'left', orbitSpeed);
+        InteractionLogic.handleKeyOrbit(
+          this.state,
+          this.updateState,
+          'left',
+          orbitSpeed
+        );
         break;
       case 'ArrowRight':
-        InteractionLogic.handleKeyOrbit(this.state, this.updateState, 'right', orbitSpeed);
+        InteractionLogic.handleKeyOrbit(
+          this.state,
+          this.updateState,
+          'right',
+          orbitSpeed
+        );
         break;
     }
   };
