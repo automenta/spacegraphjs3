@@ -57,82 +57,98 @@ export class SpaceGraph {
     }
     this.container = container as HTMLElement;
 
+    // The `createRoot` ensures that all SolidJS reactivity is properly disposed of
+    // when the `destroy` method is called.
     this.dispose = createRoot((dispose) => {
-      const { state, updateState, setState } = createState(initialSpec);
-      this.state = state;
-      this.updateState = updateState;
-      this.setState = setState;
-
+      this.initReactiveState(initialSpec);
       this.initRenderers();
       this.initScenes();
-
-      this.edgeRenderer = new EdgeRenderer(this.scene, this.state);
-      this.htmlRenderer = new HTMLRenderer(this.cssScene, this.state);
-      this.hudController = new HUDController(this.container, this.state);
-
-      this.cameraController = new CameraController(
-        this.state,
-        this.updateState,
-        this.emit.bind(this),
-        this.threeCamera
-      );
-
-      this.layoutController = new LayoutController(
-        this.state,
-        this.setState,
-        this.emit.bind(this)
-      );
-      this.layoutController.init();
-
-      // Start with the default renderer
-      this.nodeRenderer = new NodeRenderer(this.scene, this.state);
-
-      this.interactionController = new InteractionController({
-        rendererEl: this.renderer!.domElement,
-        state: this.state,
-        updateState: this.updateState,
-        threeCamera: this.threeCamera,
-        nodeRenderer: this.nodeRenderer,
-        emit: this.emit.bind(this),
-        getElement: this.getElement.bind(this),
-      });
-
-      // Dynamic Renderer Switching
-      createEffect(() => {
-        const nodeCount = this.state.data?.nodes?.length ?? 0;
-        const threshold = this.state.performance?.instancingThreshold ?? 100;
-        const shouldUseInstanced = nodeCount > threshold;
-
-        let currentRendererType = 'none';
-        if (this.nodeRenderer) {
-          currentRendererType =
-            this.nodeRenderer instanceof InstancedRenderer
-              ? 'instanced'
-              : 'default';
-        }
-
-        if (
-          (shouldUseInstanced && currentRendererType !== 'instanced') ||
-          (!shouldUseInstanced && currentRendererType !== 'default')
-        ) {
-          if (this.nodeRenderer) {
-            this.nodeRenderer.dispose();
-          }
-
-          this.nodeRenderer = shouldUseInstanced
-            ? new InstancedRenderer(this.scene, this.state)
-            : new NodeRenderer(this.scene, this.state);
-
-          this.interactionController.setNodeRenderer(this.nodeRenderer);
-        }
-      });
-
+      this.initControllers();
+      this.initDynamicRenderer();
       this.initEventListeners();
 
       window.addEventListener('resize', this.handleResize);
       this.animate();
 
+      // Return the dispose function so it can be called later in `destroy()`
       return dispose;
+    });
+  }
+
+  /**
+   * Initializes the core reactive state using SolidJS.
+   */
+  private initReactiveState(initialSpec: Spec) {
+    const { state, updateState, setState } = createState(initialSpec);
+    this.state = state;
+    this.updateState = updateState;
+    this.setState = setState;
+  }
+
+  /**
+   * Sets up the main controllers for layout, camera, interaction, etc.
+   */
+  private initControllers() {
+    // These renderers are simple and don't have complex state,
+    // so they can be initialized directly.
+    this.edgeRenderer = new EdgeRenderer(this.scene, this.state);
+    this.htmlRenderer = new HTMLRenderer(this.cssScene, this.state);
+    this.hudController = new HUDController(this.container, this.state);
+
+    // The main controllers have more complex logic and dependencies.
+    this.cameraController = new CameraController(
+      this.state,
+      this.updateState,
+      this.emit.bind(this),
+      this.threeCamera
+    );
+
+    this.layoutController = new LayoutController(
+      this.state,
+      this.setState,
+      this.emit.bind(this)
+    );
+    this.layoutController.init();
+
+    // The NodeRenderer is initialized here, and will be dynamically replaced
+    // by the InstancedRenderer if the node count exceeds the threshold.
+    this.nodeRenderer = new NodeRenderer(this.scene, this.state);
+
+    this.interactionController = new InteractionController({
+      rendererEl: this.renderer!.domElement,
+      state: this.state,
+      updateState: this.updateState,
+      threeCamera: this.threeCamera,
+      nodeRenderer: this.nodeRenderer,
+      emit: this.emit.bind(this),
+      getElement: this.getElement.bind(this),
+    });
+  }
+
+  /**
+   * Sets up the reactive effect that automatically switches between the default
+   * and instanced node renderers based on the number of nodes.
+   */
+  private initDynamicRenderer() {
+    createEffect(() => {
+      const nodeCount = this.state.data?.nodes?.length ?? 0;
+      const threshold = this.state.performance?.instancingThreshold ?? 100;
+      const shouldUseInstanced = nodeCount > threshold;
+
+      const currentRendererType =
+        this.nodeRenderer instanceof InstancedRenderer
+          ? 'instanced'
+          : 'default';
+
+      if (shouldUseInstanced && currentRendererType !== 'instanced') {
+        if (this.nodeRenderer) this.nodeRenderer.dispose();
+        this.nodeRenderer = new InstancedRenderer(this.scene, this.state);
+        this.interactionController.setNodeRenderer(this.nodeRenderer);
+      } else if (!shouldUseInstanced && currentRendererType !== 'default') {
+        if (this.nodeRenderer) this.nodeRenderer.dispose();
+        this.nodeRenderer = new NodeRenderer(this.scene, this.state);
+        this.interactionController.setNodeRenderer(this.nodeRenderer);
+      }
     });
   }
 

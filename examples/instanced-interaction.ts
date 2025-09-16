@@ -26,9 +26,9 @@ for (let i = 0; i < NUM_NODES_X; i++) {
       id,
       type: 'sphere',
       position: {
-        x: (i - NUM_NODES_X / 2) * SPACING,
-        y: (j - NUM_NODES_Y / 2) * SPACING,
-        z: 0,
+        x: (i - NUM_NODES_X / 2) * SPACING + (Math.random() - 0.5) * 0.1,
+        y: (j - NUM_NODES_Y / 2) * SPACING + (Math.random() - 0.5) * 0.1,
+        z: (Math.random() - 0.5) * 0.1,
       },
       color: '#ffffff', // Start with white
     });
@@ -51,6 +51,8 @@ try {
     },
     layout: {
       type: 'force-directed',
+      charge: -30,
+      linkDistance: 1,
     },
     camera: {
       target: { x: 0, y: 0, z: 0 },
