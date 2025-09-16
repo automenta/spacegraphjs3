@@ -35,13 +35,12 @@ export class LayoutController {
           this.setState(
             produce((s: Spec) => {
               s.data.nodes.forEach((node) => {
-                if (!node.position) {
-                  node.position = {
-                    x: (Math.random() - 0.5) * 100,
-                    y: (Math.random() - 0.5) * 100,
-                    z: (Math.random() - 0.5) * 100,
-                  };
-                }
+                // Always apply a new random position for this placeholder layout
+                node.position = {
+                  x: (Math.random() - 0.5) * 100,
+                  y: (Math.random() - 0.5) * 100,
+                  z: (Math.random() - 0.5) * 100,
+                };
               });
             })
           );

@@ -1,7 +1,18 @@
 import { THREE, CSS3DRenderer } from './utils/three';
+import {
+  acceleratedRaycast,
+  computeBoundsTree,
+  disposeBoundsTree,
+} from 'three-mesh-bvh';
 import { createRoot, createEffect } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { createState } from './createState';
+
+// Add the bvh properties to the THREE objects
+THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
+THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
+THREE.Mesh.prototype.raycast = acceleratedRaycast;
+
 import { Spec, SpecUpdate } from './types';
 import { LayoutController } from './LayoutController';
 import { CameraController } from './CameraController';
@@ -84,19 +95,6 @@ export class SpaceGraph {
         this.emit.bind(this)
       );
       this.layoutController.init();
-
-      // Start with the default renderer
-      this.nodeRenderer = new NodeRenderer(this.scene, this.state);
-
-      this.interactionController = new InteractionController({
-        rendererEl: this.renderer!.domElement,
-        state: this.state,
-        updateState: this.updateState,
-        threeCamera: this.threeCamera,
-        nodeRenderer: this.nodeRenderer,
-        emit: this.emit.bind(this),
-        getElement: this.getElement.bind(this),
-      });
 
       // Dynamic Renderer Switching
       createEffect(() => {

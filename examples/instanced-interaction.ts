@@ -1,14 +1,5 @@
-import * as THREE from 'three';
-import {
-  acceleratedRaycast,
-  computeBoundsTree,
-  disposeBoundsTree,
-} from 'three-mesh-bvh';
 import { SpaceGraph } from '../src/index';
-import { GraphElement } from '../src/types';
-
-// Add the bvh properties to the THREE objects
-THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
+import { GraphElement } from '../src/types';eometry.prototype.computeBoundsTree = computeBoundsTree;
 THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
