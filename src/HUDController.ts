@@ -1,4 +1,8 @@
-import { createEffect, onCleanup } from 'solid-js';
+import { createEffect } from 'solid-js';
+import { Store } from 'solid-js/store';
+import { Spec } from './types';
+
+import { createEffect, createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { Spec } from './types';
 
@@ -6,6 +10,7 @@ export class HUDController {
   private state: Store<Spec>;
   private hudContainer: HTMLDivElement;
   public statsContainer!: HTMLDivElement;
+  private _dispose: () => void;
 
   constructor(container: HTMLElement, state: Store<Spec>) {
     this.state = state;
@@ -21,9 +26,10 @@ export class HUDController {
     this.hudContainer.style.fontSize = '12px';
     container.appendChild(this.hudContainer);
 
-    this.initStatsDisplay();
-
-    onCleanup(() => this.dispose());
+    this._dispose = createRoot((dispose) => {
+      this.initStatsDisplay();
+      return dispose;
+    });
   }
 
   private initStatsDisplay() {
@@ -63,6 +69,7 @@ export class HUDController {
   }
 
   public dispose() {
+    this._dispose(); // Dispose of the SolidJS root and all its effects
     if (this.hudContainer.parentElement) {
       this.hudContainer.parentElement.removeChild(this.hudContainer);
     }

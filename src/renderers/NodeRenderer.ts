@@ -1,5 +1,5 @@
 import { THREE } from '../utils/three';
-import { createEffect, createMemo, createRoot } from 'solid-js';
+import { createEffect, createRoot, on } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { Spec, GraphElement } from '../types';
 import { IRenderer } from '../IRenderer';

@@ -113,7 +113,6 @@ export class InteractionLogic {
       threeCamera.matrix,
       0
     );
-    const up = new THREE.Vector3().setFromMatrixColumn(threeCamera.matrix, 1);
     const forward = new THREE.Vector3();
     threeCamera.getWorldDirection(forward);
     const panOffset = new THREE.Vector3();

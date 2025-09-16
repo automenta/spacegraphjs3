@@ -2,13 +2,14 @@ import { THREE } from './utils/three';
 import { Store } from 'solid-js/store';
 import { animate } from 'popmotion';
 import { Spec, CameraSpec, GraphElement } from './types';
-import { createEffect } from 'solid-js';
+import { createEffect, createRoot } from 'solid-js';
 
 export class CameraController {
   private state: Store<Spec>;
   private updateState: (spec: Partial<Spec>) => void;
   private emit: (eventName: string, ...args: any[]) => void;
   private threeCamera: THREE.PerspectiveCamera;
+  private _dispose: () => void;
 
   constructor(
     state: Store<Spec>,
@@ -21,27 +22,34 @@ export class CameraController {
     this.emit = emit;
     this.threeCamera = threeCamera;
 
-    // Effect to sync Three.js camera with reactive state
-    createEffect(() => {
-      const cameraState = this.state.camera;
-      if (cameraState) {
-        // Calculate position from spherical coordinates (phi, theta, distance)
-        const phi = cameraState.phi;
-        const theta = cameraState.theta;
-        const distance = cameraState.distance;
-        const target = cameraState.target;
+    this._dispose = createRoot((dispose) => {
+      // Effect to sync Three.js camera with reactive state
+      createEffect(() => {
+        const cameraState = this.state.camera;
+        if (cameraState) {
+          // Calculate position from spherical coordinates (phi, theta, distance)
+          const phi = cameraState.phi;
+          const theta = cameraState.theta;
+          const distance = cameraState.distance;
+          const target = cameraState.target;
 
-        const x = distance * Math.sin(phi) * Math.sin(theta);
-        const y = distance * Math.cos(phi);
-        const z = distance * Math.sin(phi) * Math.cos(theta);
+          const x = distance * Math.sin(phi) * Math.sin(theta);
+          const y = distance * Math.cos(phi);
+          const z = distance * Math.sin(phi) * Math.cos(theta);
 
-        this.threeCamera.position.set(target.x + x, target.y + y, target.z + z);
+          this.threeCamera.position.set(
+            target.x + x,
+            target.y + y,
+            target.z + z
+          );
 
-        this.threeCamera.lookAt(
-          new THREE.Vector3(target.x, target.y, target.z)
-        );
-        this.threeCamera.updateProjectionMatrix();
-      }
+          this.threeCamera.lookAt(
+            new THREE.Vector3(target.x, target.y, target.z)
+          );
+          this.threeCamera.updateProjectionMatrix();
+        }
+      });
+      return dispose;
     });
   }
 
@@ -151,5 +159,9 @@ export class CameraController {
       },
       { duration }
     );
+  }
+
+  public dispose() {
+    this._dispose();
   }
 }

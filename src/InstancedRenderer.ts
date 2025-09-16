@@ -8,7 +8,7 @@
  */
 
 import * as THREE from 'three';
-import { createEffect, on } from 'solid-js';
+import { createEffect, on, createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { Spec, GraphElement } from './types';
 
@@ -21,12 +21,16 @@ export class InstancedRenderer {
   private idToIndex: Map<string, number> = new Map();
   private indexToId: Map<number, string> = new Map();
   private dummy = new THREE.Object3D();
+  private _dispose: () => void;
 
   constructor(scene: THREE.Scene, state: Store<Spec>) {
     this.scene = scene;
     this.state = state;
 
-    this.init();
+    this._dispose = createRoot((dispose) => {
+      this.init();
+      return dispose;
+    });
   }
 
   /**
@@ -49,24 +53,7 @@ export class InstancedRenderer {
     this.instancedMesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
     this.scene.add(this.instancedMesh);
 
-    createEffect(() => {
-      this.updateNodeMappings();
-    });
-
-    createEffect(() => {
-      this.state.data?.nodes?.forEach((node) => {
-        const index = this.idToIndex.get(node.id);
-        if (index !== undefined) {
-          this.updateInstance(index, node);
-        }
-      });
-      if (this.instancedMesh.instanceMatrix) {
-        this.instancedMesh.instanceMatrix.needsUpdate = true;
-      }
-      if (this.instancedMesh.instanceColor) {
-        this.instancedMesh.instanceColor.needsUpdate = true;
-      }
-    });
+    createEffect(on(() => this.state.data?.nodes, () => this.updateNodeMappings()));
 
     createEffect(
       on(
@@ -178,6 +165,7 @@ export class InstancedRenderer {
   }
 
   public dispose() {
+    this._dispose(); // Dispose of the SolidJS root and all its effects
     if (this.instancedMesh.geometry) {
       this.instancedMesh.geometry.dispose();
     }

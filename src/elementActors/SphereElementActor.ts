@@ -1,7 +1,7 @@
 import { THREE } from '../utils/three';
-import { createEffect, createRoot, untrack, createMemo, createSignal } from 'solid-js';
+import { createEffect, createRoot, createMemo } from 'solid-js';
 import { Store } from 'solid-js/store';
-import { Element, Spec, NodeStyle } from '../types';
+import { Element, Spec } from '../types';
 import { BaseElementActor } from './BaseElementActor';
 
 /**
@@ -9,8 +9,6 @@ import { BaseElementActor } from './BaseElementActor';
  */
 export class SphereElementActor extends BaseElementActor {
   private elementId: string;
-  private _selectedIds: () => string[];
-  private setSelectedIds: (ids: string[]) => void;
 
   constructor(
     scene: THREE.Scene,
@@ -19,7 +17,6 @@ export class SphereElementActor extends BaseElementActor {
   ) {
     super(scene, elementState, graphState);
     this.elementId = elementState.id;
-    [this._selectedIds, this.setSelectedIds] = createSignal<string[]>([]);
   }
 
   public init(): void {
@@ -31,22 +28,21 @@ export class SphereElementActor extends BaseElementActor {
     this.scene.add(this.threeObject);
 
     this.disposeEffect = createRoot((dispose) => {
-      createEffect(() => {
-        // Update the local signal when the store's selectedIds change
-        this.setSelectedIds([...this.graphState.interaction.selectedElementIds]);
-      });
+      const isSelected = createMemo(() =>
+        this.graphState.interaction.selectedElementIds.includes(this.elementId)
+      );
+
+      const isHovered = createMemo(() =>
+        this.graphState.interaction.hoveredElementId === this.elementId
+      );
 
       createEffect(() => {
         const elementState = this.graphState.data.nodes.find(n => n.id === this.elementId);
-        if (!elementState) return;
-
-        const hoveredId = this.graphState.interaction.hoveredElementId;
-        const selectedIds = this._selectedIds();
-
-        const isElementSelected = createMemo(() => selectedIds.includes(this.elementId));
-        const isElementHovered = createMemo(() => hoveredId === this.elementId);
-
-        this.updateVisuals(elementState, isElementHovered(), isElementSelected());
+        if (!elementState) {
+          // Node has been removed, actor will be disposed soon.
+          return;
+        }
+        this.updateVisuals(elementState, isHovered(), isSelected());
       });
 
       return dispose;
@@ -69,7 +65,7 @@ export class SphereElementActor extends BaseElementActor {
       elementState.position?.z ?? 0
     );
 
-    let finalColor = new THREE.Color(elementState.color || '#ffffff'); // Start with default color
+    const finalColor = new THREE.Color(elementState.color || '#ffffff'); // Start with default color
 
     if (isElementSelected) {
       const selectedColor = this.graphState.style['node:selected']?.color;

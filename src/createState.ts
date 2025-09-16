@@ -3,54 +3,41 @@ import { Spec, SpecUpdate } from './types';
 
 // A more controlled deep merge that handles array updates by ID
 function deepMerge(target: any, source: any) {
-    for (const key in source) {
-        if (Object.prototype.hasOwnProperty.call(source, key)) {
-            const sourceValue = source[key];
-            const targetValue = target[key];
+  for (const key in source) {
+    if (Object.prototype.hasOwnProperty.call(source, key)) {
+      const sourceValue = source[key];
+      const targetValue = target[key];
 
-            if (Array.isArray(sourceValue) && Array.isArray(targetValue)) {
-                // Handle node/edge array updates
-                const targetMap = new Map(targetValue.map((item: any) => [item.id, item]));
-                for (const item of sourceValue) {
-                    const existingItem = targetMap.get(item.id);
-                    if (existingItem) {
-                        deepMerge(existingItem, item);
-                    } else {
-                        targetValue.push(item);
-                    }
-                }
-            } else if (key === 'selectedElementIds' && Array.isArray(sourceValue)) {
-                target[key] = [...sourceValue];
-            } else if (key === 'selectedElementIds' && Array.isArray(sourceValue)) {
-                target[key] = [...sourceValue];
-            } else if (key === 'selectedElementIds' && Array.isArray(sourceValue)) {
-                target[key] = [...sourceValue];
-            } else if (key === 'selectedElementIds' && Array.isArray(sourceValue)) {
-                target[key] = [...sourceValue];
-            } else if (key === 'selectedElementIds' && Array.isArray(sourceValue)) {
-                target[key] = [...sourceValue];
-            } else if (key === 'selectedElementIds' && Array.isArray(sourceValue)) {
-                target[key] = [...sourceValue];
-            } else if (key === 'selectedElementIds' && Array.isArray(sourceValue)) {
-                target[key] = [...sourceValue];
-            } else if (key === 'selectedElementIds' && Array.isArray(sourceValue)) {
-                target[key] = [...sourceValue];
-            } else if (key === 'selectedElementIds' && Array.isArray(sourceValue)) {
-                target[key] = [...sourceValue];
-            } else if (key === 'selectedElementIds' && Array.isArray(sourceValue)) {
-                target[key] = [...sourceValue];
-            } else if (key === 'selectedElementIds' && Array.isArray(sourceValue)) {
-                target[key] = [...sourceValue];
-            } else if (sourceValue && typeof sourceValue === 'object' && !Array.isArray(sourceValue)) {
-                if (!targetValue || typeof targetValue !== 'object' || Array.isArray(targetValue)) {
-                    target[key] = {};
-                }
-                deepMerge(target[key], sourceValue);
-            } else if (sourceValue !== undefined) {
-                target[key] = sourceValue;
-            }
+      if (key === 'selectedElementIds' && Array.isArray(sourceValue)) {
+        // Always create a new array for selectedElementIds to ensure reactivity.
+        target[key] = [...sourceValue];
+      } else if (Array.isArray(sourceValue) && Array.isArray(targetValue)) {
+        // Handle node/edge array updates by ID.
+        // This is a simplified merge; a real implementation might need more
+        // robust logic for additions, removals, and updates.
+        const targetMap = new Map(targetValue.map((item: any) => [item.id, item]));
+        for (const item of sourceValue) {
+          const existingItem = targetMap.get(item.id);
+          if (existingItem) {
+            // Merge into existing item
+            deepMerge(existingItem, item);
+          } else {
+            // Add new item
+            targetValue.push(item);
+          }
         }
+      } else if (sourceValue && typeof sourceValue === 'object' && !Array.isArray(sourceValue)) {
+        // Recurse for nested objects
+        if (!targetValue || typeof targetValue !== 'object' || Array.isArray(targetValue)) {
+          target[key] = {};
+        }
+        deepMerge(target[key], sourceValue);
+      } else if (sourceValue !== undefined) {
+        // Overwrite primitive values
+        target[key] = sourceValue;
+      }
     }
+  }
 }
 
 

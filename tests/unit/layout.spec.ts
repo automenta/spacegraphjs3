@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach, vi, beforeEach } from 'vitest';
+import { describe, it, expect, afterEach, beforeEach } from 'vitest';
 import { createRoot } from 'solid-js';
 import { createState } from '../../src/createState';
 import { LayoutController } from '../../src/LayoutController';
@@ -60,21 +60,21 @@ describe('LayoutController', () => {
       await layoutController.ready;
 
       await new Promise(resolve => setTimeout(resolve, 500)); // Wait for initial movement
-      let pos1_initial_x = state.data.nodes.find((n) => n.id === 'n1')?.position?.x;
+      const pos1_initial_x = state.data.nodes.find((n) => n.id === 'n1')?.position?.x;
       expect(pos1_initial_x).not.toBe(10);
 
       layoutController.pause();
       const pos1_paused_x = state.data.nodes.find((n) => n.id === 'n1')?.position?.x;
 
       await new Promise(resolve => setTimeout(resolve, 500)); // Wait while paused
-      let pos1_after_paused_ticks_x = state.data.nodes.find(
+      const pos1_after_paused_ticks_x = state.data.nodes.find(
         (n) => n.id === 'n1',
       )?.position?.x;
       expect(pos1_after_paused_ticks_x).toBe(pos1_paused_x);
 
       layoutController.resume();
       await new Promise(resolve => setTimeout(resolve, 500)); // Wait after resume
-      let pos1_after_resume_x = state.data.nodes.find(
+      const pos1_after_resume_x = state.data.nodes.find(
         (n) => n.id === 'n1',
       )?.position?.x;
       expect(pos1_after_resume_x).not.toBe(pos1_paused_x); // Position should have changed
