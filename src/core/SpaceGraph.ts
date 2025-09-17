@@ -173,7 +173,14 @@ export class SpaceGraph {
    * Cleans up all resources, including SolidJS effects, Three.js objects,
    * and event listeners, to prevent memory leaks.
    */
+  private isDestroyed = false;
+
   public destroy() {
+    if (this.isDestroyed) {
+      return;
+    }
+    this.isDestroyed = true;
+
     this.dispose(); // Dispose SolidJS root and all effects
     for (const plugin of this.plugins) {
       if (plugin.dispose) {
@@ -182,5 +189,6 @@ export class SpaceGraph {
     }
     this.renderingManager.dispose();
     this.eventManager.dispose();
+    this.dataManager.dispose();
   }
 }

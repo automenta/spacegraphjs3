@@ -56,4 +56,9 @@ export class DataManager {
   public getElement(id: string): NodeSpec | EdgeSpec | undefined {
     return this.getNode(id) || this.getEdge(id);
   }
+
+  public dispose(): void {
+    this.nodes.clear();
+    this.edges.clear();
+  }
 }
