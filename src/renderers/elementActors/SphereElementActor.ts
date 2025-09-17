@@ -28,7 +28,20 @@ export class SphereElementActor extends BaseElementActor {
 
     const geometry = new THREE.SphereGeometry(0.5, 16, 16);
     geometry.computeBoundsTree();
-    const material = new THREE.MeshBasicMaterial();
+
+    // Safely set the initial color.
+    const initialColor = new THREE.Color();
+    try {
+      initialColor.set(this.elementState.color || '#ffffff');
+    } catch (error) {
+      console.warn(
+        `Invalid initial color for node ${this.elementState.id}:`,
+        this.elementState.color,
+      );
+      initialColor.set('#ff00ff'); // Fallback to magenta for visibility.
+    }
+
+    const material = new THREE.MeshBasicMaterial({ color: initialColor });
     const mainMesh = new THREE.Mesh(geometry, material);
     mainMesh.userData.nodeId = this.elementId; // For raycasting
     group.add(mainMesh);
@@ -95,7 +108,7 @@ export class SphereElementActor extends BaseElementActor {
         `Invalid color specified for node ${elementState.id}:`,
         elementState.color,
       );
-      finalColor.set('#ffffff'); // Fallback to white on error
+      finalColor.set('#ff00ff'); // Fallback to magenta for visibility.
     }
 
     const selectedStyle = this.graphState.style['node:selected'];

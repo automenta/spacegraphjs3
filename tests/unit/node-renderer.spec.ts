@@ -65,23 +65,25 @@ describe('NodeRenderer', () => {
       (nodeRenderer.elementActors.get('n1') as SphereElementActor)?.update();
       await nextTick();
 
-      let mesh = scene.children.find((c) => c.userData.nodeId === 'n1') as THREE.Mesh;
-      expect(mesh).toBeDefined();
-      expect(mesh.position.x).toBe(0);
+      let group = scene.children.find((c) => c.userData.nodeId === 'n1') as THREE.Group;
+      let mesh = group.children[0] as THREE.Mesh;
+      expect(group).toBeDefined();
+      expect(group.position.x).toBe(0);
       expect((mesh.material as THREE.MeshBasicMaterial).color.getHexString()).toBe('ff0000');
 
       // Update position
       setState('data', 'nodes', (n) => n.id === 'n1', 'position', { x: 10, y: 20, z: 30 });
       (nodeRenderer.elementActors.get('n1') as SphereElementActor)?.update();
       await nextTick();
-      mesh = scene.children.find((c) => c.userData.nodeId === 'n1') as THREE.Mesh;
-      expect(mesh.position.x).toBe(10);
+      group = scene.children.find((c) => c.userData.nodeId === 'n1') as THREE.Group;
+      expect(group.position.x).toBe(10);
 
       // Update color
       setState('data', 'nodes', (n) => n.id === 'n1', 'color', '#0000ff');
       (nodeRenderer.elementActors.get('n1') as SphereElementActor)?.update();
       await nextTick();
-      mesh = scene.children.find((c) => c.userData.nodeId === 'n1') as THREE.Mesh;
+      group = scene.children.find((c) => c.userData.nodeId === 'n1') as THREE.Group;
+      mesh = group.children[0] as THREE.Mesh;
       expect((mesh.material as THREE.MeshBasicMaterial).color.getHexString()).toBe('0000ff');
 
       nodeRenderer.dispose();
@@ -107,21 +109,24 @@ describe('NodeRenderer', () => {
       (nodeRenderer.elementActors.get('n1') as SphereElementActor)?.update();
       await nextTick();
 
-      let mesh = scene.children.find((c) => c.userData.nodeId === 'n1') as THREE.Mesh;
+      let group = scene.children.find((c) => c.userData.nodeId === 'n1') as THREE.Group;
+      let mesh = group.children[0] as THREE.Mesh;
       expect((mesh.material as THREE.MeshBasicMaterial).color.getHexString()).toBe('ff0000');
 
       // Hover
       setState('interaction', 'hoveredElementId', 'n1');
       (nodeRenderer.elementActors.get('n1') as SphereElementActor)?.update();
       await nextTick();
-      mesh = scene.children.find((c) => c.userData.nodeId === 'n1') as THREE.Mesh;
+      group = scene.children.find((c) => c.userData.nodeId === 'n1') as THREE.Group;
+      mesh = group.children[0] as THREE.Mesh;
       expect((mesh.material as THREE.MeshBasicMaterial).color.getHexString()).toBe('00ff00');
 
       // Select
       setState('interaction', 'selectedElementIds', ['n1']);
       (nodeRenderer.elementActors.get('n1') as SphereElementActor)?.update();
       await nextTick();
-      mesh = scene.children.find((c) => c.userData.nodeId === 'n1') as THREE.Mesh;
+      group = scene.children.find((c) => c.userData.nodeId === 'n1') as THREE.Group;
+      mesh = group.children[0] as THREE.Mesh;
       expect((mesh.material as THREE.MeshBasicMaterial).color.getHexString()).toBe('0000ff');
 
       nodeRenderer.dispose();

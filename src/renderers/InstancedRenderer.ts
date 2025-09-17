@@ -140,7 +140,7 @@ export class InstancedRenderer implements IRenderer {
     mesh: THREE.InstancedMesh,
     idMaps: { idToIndex: Map<string, number>; indexToId: Map<number, string> },
     index: number,
-    node: GraphElement,
+    node: NodeSpec,
   ) {
     // Update matrix for position
     this.dummy.position.set(
@@ -164,7 +164,16 @@ export class InstancedRenderer implements IRenderer {
       finalColor = this.state.style['node:hover'].color;
     }
 
-    mesh.setColorAt(index, new THREE.Color(finalColor));
+    try {
+      mesh.setColorAt(index, new THREE.Color(finalColor));
+    } catch (error) {
+      console.warn(
+        `Invalid color specified for instanced node ${node.id}:`,
+        finalColor,
+      );
+      mesh.setColorAt(index, new THREE.Color('#ff00ff')); // Fallback to magenta
+    }
+
     if (mesh.instanceColor) {
       mesh.instanceColor.needsUpdate = true;
     }

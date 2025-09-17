@@ -78,7 +78,7 @@ describe('InteractionLogic', () => {
       // It will intersect the plane at (0, 0, 0).
       expect(mockUpdateState).toHaveBeenCalledOnce();
       const { data } = mockUpdateState.mock.calls[0][0];
-      const updatedNode = data.nodes[0];
+      const updatedNode = data.nodes.update[0];
       expect(updatedNode.id).toBe(draggedElementId);
       expect(updatedNode.position.x).toBeCloseTo(0);
       expect(updatedNode.position.y).toBeCloseTo(0);

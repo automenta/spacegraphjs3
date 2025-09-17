@@ -64,10 +64,22 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     const raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(pointer, camera);
 
-    const intersects = raycaster.intersectObjects(nodeRenderer.getRaycastableObjects(), true);
+    const raycastableObjects = nodeRenderer.getRaycastableObjects();
+    const allIntersects: THREE.Intersection[] = [];
 
-    if (intersects.length > 0) {
-      const elementId = nodeRenderer.getNodeIdFromIntersection(intersects[0]);
+    for (const object of raycastableObjects) {
+      const intersects = raycaster.intersectObject(object);
+      if (intersects.length > 0) {
+        allIntersects.push(...intersects);
+      }
+    }
+
+    if (allIntersects.length > 0) {
+      allIntersects.sort((a, b) => a.distance - b.distance);
+      const closestIntersection = allIntersects[0];
+      const elementId = nodeRenderer.getNodeIdFromIntersection(
+        closestIntersection,
+      );
       if (elementId) {
         return this.graph.dataManager.getElement(elementId);
       }

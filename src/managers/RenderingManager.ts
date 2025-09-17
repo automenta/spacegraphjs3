@@ -87,22 +87,31 @@ export class RenderingManager {
     createEffect(() => {
       const nodeCount = this.graph.state.data?.nodes?.length ?? 0;
       const threshold = this.graph.state.performance?.instancingThreshold ?? 100;
-      // TODO: Re-enable instanced rendering once performance issues are resolved.
-      // The InstancedRenderer is currently a work-in-progress and causes timeouts.
-      const shouldUseInstanced = false; // nodeCount > threshold;
+      const shouldUseInstanced = nodeCount > threshold;
 
-      const needsUpdate = !this.nodeRenderer; // Always use NodeRenderer for now
+      const needsUpdate =
+        !this.nodeRenderer ||
+        (shouldUseInstanced && !(this.nodeRenderer instanceof InstancedRenderer)) ||
+        (!shouldUseInstanced && this.nodeRenderer instanceof InstancedRenderer);
 
       if (needsUpdate) {
         if (this.nodeRenderer) {
           this.nodeRenderer.dispose();
         }
-        // Always use the non-instanced renderer until the instanced one is fixed.
-        this.nodeRenderer = new NodeRenderer(
-          this.scene,
-          this.graph.state,
-          SpaceGraph.getElementActorRegistry(),
-        );
+
+        if (shouldUseInstanced) {
+          this.nodeRenderer = new InstancedRenderer(
+            this.scene,
+            this.graph.state,
+            SpaceGraph.getInstancedGeometryRegistry(),
+          );
+        } else {
+          this.nodeRenderer = new NodeRenderer(
+            this.scene,
+            this.graph.state,
+            SpaceGraph.getElementActorRegistry(),
+          );
+        }
       }
     });
   }
