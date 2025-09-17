@@ -34,6 +34,7 @@ describe('LayoutPlugin', () => {
     cleanup();
   });
 
+
   it('should pause and resume the layout simulation', async () => {
     const spec: Spec = {
       data: {

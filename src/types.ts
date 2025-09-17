@@ -79,7 +79,11 @@ export interface ForceDirectedLayoutSpec {
   linkStrength?: number;
 }
 
-export type LayoutSpec = ForceDirectedLayoutSpec;
+export interface RandomLayoutSpec {
+  type: 'random';
+}
+
+export type LayoutSpec = ForceDirectedLayoutSpec | RandomLayoutSpec;
 
 export interface ControlsSpec {
   keyboard: {
