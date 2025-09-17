@@ -29,7 +29,9 @@ export class NodeRenderer implements IRenderer {
   }
 
   public updateNodes() {
-    const nodes = this.state.data?.nodes || [];
+    const nodes = (this.state.data?.nodes || []).filter(
+      (node) => node.type !== 'html'
+    );
     const currentNodeIds = new Set(nodes.map((n) => n.id));
 
     // Add new actors for new nodes.
