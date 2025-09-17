@@ -66,17 +66,31 @@ export class SpaceGraph {
   private dispose: () => void;
 
   constructor(containerSelector: string, initialSpec: Spec, plugins: ISpaceGraphPlugin[] = []) {
-    this.container = this.initContainer(containerSelector);
+    try {
+      this.container = this.initContainer(containerSelector);
 
-    this.dispose = createRoot((dispose) => {
-      this.initReactiveState(initialSpec);
-      this.initManagers();
-      this.initPlugins(plugins);
-      return dispose;
-    });
+      this.dispose = createRoot((dispose) => {
+        this.initReactiveState(initialSpec);
+        this.initManagers();
+        this.initPlugins(plugins);
+        return dispose;
+      });
 
-    this.scene = this.renderingManager.getScene();
-    this.camera = this.renderingManager.getCamera();
+      this.scene = this.renderingManager.getScene();
+      this.camera = this.renderingManager.getCamera();
+    } catch (error) {
+      console.error('Failed to initialize SpaceGraph:', error);
+      // If the container exists, display the error in it.
+      if (this.container) {
+        this.container.innerHTML = `<div style="color: red; padding: 20px; font-family: monospace;">
+          <h2>Failed to initialize</h2>
+          <p>${(error as Error).message}</p>
+          <pre>${(error as Error).stack}</pre>
+        </div>`;
+      }
+      // Re-throw the error to allow the caller to handle it.
+      throw error;
+    }
   }
 
   private initContainer(containerSelector: string): HTMLElement {
@@ -112,7 +126,11 @@ export class SpaceGraph {
   private initPlugins(plugins: ISpaceGraphPlugin[] = []) {
     this.plugins = plugins;
     for (const plugin of this.plugins) {
-      plugin.init(this);
+      try {
+        plugin.init(this);
+      } catch (error) {
+        console.error(`Error initializing plugin:`, error);
+      }
     }
   }
 

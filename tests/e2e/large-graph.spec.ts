@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './utils';
 
 test('large graph visual test', async ({ page }) => {
   // Given

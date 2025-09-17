@@ -9,7 +9,7 @@ type D3Link = EdgeSpec;
 
 export class D3ForceLayout implements ILayoutEngine {
   private graph!: SpaceGraph;
-  private simulation!: Simulation<D3Node, D3Link>;
+  public simulation!: Simulation<D3Node, D3Link>;
 
   public init(graph: SpaceGraph): void {
     this.graph = graph;
@@ -21,9 +21,19 @@ export class D3ForceLayout implements ILayoutEngine {
     });
 
     createEffect(() => {
+      const nodes = this.graph.state.data?.nodes ?? [];
+      const edges = this.graph.state.data?.edges ?? [];
+      const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+
+      const links = edges.map((e) => ({
+        ...e,
+        source: nodeMap.get(e.source)!,
+        target: nodeMap.get(e.target)!,
+      }));
+
       const linkForce = this.simulation.force('link');
       if (linkForce && 'links' in linkForce) {
-        (linkForce as Force<D3Node, D3Link>).links!((this.graph.state.data?.edges ?? []) as D3Link[]);
+        (linkForce as Force<D3Node, D3Link>).links!(links as any);
         this.reheat();
       }
     });
@@ -36,9 +46,7 @@ export class D3ForceLayout implements ILayoutEngine {
       .numDimensions(3)
       .force(
         'link',
-        forceLink<D3Node, D3Link>()
-          .id((d) => d.id)
-          .links(state.data?.edges ?? [])
+        forceLink<D3Node, D3Link>().id((d) => d.id)
       )
       .force('charge', forceManyBody())
       .force('center', forceCenter())

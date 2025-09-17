@@ -1,4 +1,4 @@
-import { createGesture, dragAction, hoverAction, wheelAction } from '@use-gesture/vanilla';
+import { Gesture } from '@use-gesture/vanilla';
 import * as THREE from 'three';
 import { ISpaceGraphPlugin } from '../core/plugin';
 import { SpaceGraph } from '../core/SpaceGraph';
@@ -21,15 +21,33 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     this.rendererEl = this.graph.renderingManager.getRendererDomElement();
     this.dragPlane = new THREE.Plane();
 
-    const Gesture = createGesture([dragAction, hoverAction, wheelAction]);
-    this.gesture = new Gesture(this.rendererEl, {
-      onDrag: (state: DragState) => this.onDrag(state),
-      onHover: (state: HoverState) => this.onHover(state),
-      onWheel: (state: WheelState) => this.onWheel(state),
-    });
+    this.gesture = new Gesture(
+      this.rendererEl,
+      {
+        onDrag: (state: DragState) => this.onDrag(state),
+        onHover: (state: HoverState) => this.onHover(state),
+        onWheel: (state: WheelState) => this.onWheel(state),
+      },
+      {}
+    );
 
     this.boundOnClick = this.onClick.bind(this) as unknown as (event: PointerEvent) => void;
     this.rendererEl.addEventListener('click', this.boundOnClick);
+
+    this.graph.eventManager.on('element:click', ({ target, event }) => {
+      const isMultiSelect = event.metaKey || event.ctrlKey;
+      const currentSelection =
+        this.graph.state.interaction?.selectedElementIds ?? [];
+      const newSelection = isMultiSelect
+        ? currentSelection.includes(target.id)
+          ? currentSelection.filter((id) => id !== target.id)
+          : [...currentSelection, target.id]
+        : [target.id];
+
+      this.graph.updateState({
+        interaction: { selectedElementIds: newSelection },
+      });
+    });
   }
 
   private getIntersectedElement(event: MouseEvent | PointerEvent) {
@@ -114,9 +132,12 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
   private onClick(event: PointerEvent) {
     const element = this.getIntersectedElement(event);
     if (element) {
-      this.graph.eventManager.emit('element:click', { target: element });
+      this.graph.eventManager.emit('element:click', {
+        target: element,
+        event,
+      });
     } else {
-      this.graph.eventManager.emit('background:click', {});
+      this.graph.eventManager.emit('background:click', { event });
     }
   }
 

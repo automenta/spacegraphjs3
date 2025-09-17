@@ -24,6 +24,7 @@ export class RenderingManager {
   private nodeRenderer!: IRenderer;
   private edgeRenderer!: EdgeRenderer;
   private htmlRenderer!: HTMLRenderer;
+  private isLooping = true;
 
   constructor(graph: SpaceGraph, container: HTMLElement) {
     this.graph = graph;
@@ -137,12 +138,41 @@ export class RenderingManager {
   }
 
   private animate() {
+    if (!this.isLooping) return;
+
+    try {
+      this.renderer.render(this.scene, this.camera);
+      this.cssRenderer.render(this.cssScene, this.camera);
+    } catch (error) {
+      this.isLooping = false; // Stop the animation loop
+      console.error('Rendering failed:', error);
+      this.displayError(error as Error); // Display a user-friendly error
+    }
+
     requestAnimationFrame(this.animate.bind(this));
-    this.renderer.render(this.scene, this.camera);
-    this.cssRenderer.render(this.cssScene, this.camera);
+  }
+
+  private displayError(error: Error) {
+    // Clear the container
+    while (this.container.firstChild) {
+      this.container.removeChild(this.container.firstChild);
+    }
+
+    // Create and style the error message
+    const errorElement = document.createElement('div');
+    errorElement.style.color = 'red';
+    errorElement.style.padding = '20px';
+    errorElement.style.fontFamily = 'monospace';
+    errorElement.innerHTML = `
+      <h2>Something went wrong</h2>
+      <p>${error.message}</p>
+      <pre>${error.stack}</pre>
+    `;
+    this.container.appendChild(errorElement);
   }
 
   public dispose() {
+    this.isLooping = false;
     window.removeEventListener('resize', this.handleResize);
 
     this.renderer.dispose();

@@ -115,10 +115,10 @@ export interface ILayoutEngine {
 export type LayoutEngineClass = new () => ILayoutEngine;
 
 export type GraphEventMap = {
-  'element:click': { target: NodeSpec | EdgeSpec };
+  'element:click': { target: NodeSpec | EdgeSpec; event: PointerEvent };
   'element:hover:enter': { target: NodeSpec | EdgeSpec };
   'element:hover:leave': { target: NodeSpec | EdgeSpec };
-  'background:click': Record<string, unknown>;
+  'background:click': { event: PointerEvent };
   'layout:pin': string[];
   'layout:unpin': string[];
 };

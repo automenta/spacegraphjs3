@@ -77,11 +77,7 @@ const plugins = [
   new HUDPlugin(),
 ];
 
-try {
-  const graph = new SpaceGraph('#container', spec, plugins);
+const graph = new SpaceGraph('#container', spec, plugins);
 
-  // Expose graph to window for easy debugging and testing
-  (window as any).graph = graph;
-} catch (e) {
-  console.error('Error creating SpaceGraph instance:', e);
-}
+// Expose graph to window for easy debugging and testing
+(window as any).graph = graph;

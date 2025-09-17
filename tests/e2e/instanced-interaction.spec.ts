@@ -1,9 +1,8 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './utils';
 
 test.describe('Instanced Renderer Interaction', () => {
   test.beforeEach(async ({ page }) => {
     test.setTimeout(60000);
-    page.on('console', msg => console.log('PAGE LOG:', msg.text()));
     await page.goto('/instanced-interaction.html');
     // Wait for the graph to be initialized
     await page.waitForFunction(() => (window as any).graph);
