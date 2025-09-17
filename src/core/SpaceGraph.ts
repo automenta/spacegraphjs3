@@ -2,7 +2,12 @@ import * as THREE from 'three';
 import { createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { createState } from './createState';
-import { ElementActorClass, LayoutEngineClass, Spec, SpecUpdate, } from '../types';
+import {
+  ElementActorClass,
+  LayoutEngineClass,
+  Spec,
+  SpecUpdate,
+} from '../types';
 import { RenderingManager } from '../managers/RenderingManager';
 import { EventManager } from '../managers/EventManager';
 import { DataManager } from '../managers/DataManager';

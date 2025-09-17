@@ -66,8 +66,6 @@ describe('CameraPlugin', () => {
     // Simulate completion
     animateArgs.onComplete();
 
-    expect(mockGraph.events.emit).toHaveBeenCalledWith(
-      'camera:animation:end'
-    );
+    expect(mockGraph.events.emit).toHaveBeenCalledWith('camera:animation:end');
   });
 });

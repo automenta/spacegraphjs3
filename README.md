@@ -71,7 +71,7 @@ Defines the elements that exist in the scene.
 **The `Element` Object:**
 
 | Property  | Type                 | Description                                                            |
-|-----------|----------------------|------------------------------------------------------------------------|
+| --------- | -------------------- | ---------------------------------------------------------------------- |
 | `id`      | `string`             | **Required.** Unique identifier.                                       |
 | `type`    | `string`             | **Required.** Renderer type (e.g., `sphere`, `html`).                  |
 | `pinning` | `object` \| `string` | Position: world-space `{x,y,z}` or screen-space `'top-left'`.          |
@@ -91,7 +91,7 @@ A CSS-like `StyleSheet` that applies visual properties based on element state. T
 Defines the autonomous positioning engine.
 
 | Property | Type     | Description                                     |
-|----------|----------|-------------------------------------------------|
+| -------- | -------- | ----------------------------------------------- |
 | `type`   | `string` | Algorithm (`force-directed`, `grid`, `manual`). |
 | `...`    | `any`    | Settings specific to the chosen layout type.    |
 
@@ -110,11 +110,11 @@ Modifying this object directly is a primary feature, enabling seamless integrati
 
 - **`data`**: A reactive version of the `spec.data` object. Arrays are reactive to additions/removals, and each element
   object within them is a reactive proxy.
-    - `graph.state.data.nodes[0].position = {x: 10, y: 20, z: 0};` // The node moves.
+  - `graph.state.data.nodes[0].position = {x: 10, y: 20, z: 0};` // The node moves.
 - **`camera`**: A reactive object holding the camera's current `position`, `zoom`, etc.
 - **`interaction`**: A reactive object tracking global interaction state.
-    - `hoveredElementId: string | null`
-    - `selectedElementIds: string[]`
+  - `hoveredElementId: string | null`
+  - `selectedElementIds: string[]`
 - **`style`**, **`layout`**, **`controls`**: Reactive versions of their `Spec` counterparts.
 
 **The `Element` State Proxy:**
@@ -142,14 +142,14 @@ For actions that are not instantaneous state changes (like animations), the libr
 controllers interact with the Data Plane over time.
 
 - **`graph.camera`**:
-    - `flyTo(targetState, options)`: Animates the `graph.state.camera` properties to a new state using the animation
-      engine.
-    - `frame(elements, options)`: Calculates the required camera state to frame the given elements and then uses `flyTo`
-      to execute the move.
+  - `flyTo(targetState, options)`: Animates the `graph.state.camera` properties to a new state using the animation
+    engine.
+  - `frame(elements, options)`: Calculates the required camera state to frame the given elements and then uses `flyTo`
+    to execute the move.
 - **`graph.layout`**:
-    - `resume()`: Starts the layout simulation.
-    - `pause()`: Stops the layout simulation.
-    - `reheat()`: Adds energy back into a force-directed simulation.
+  - `resume()`: Starts the layout simulation.
+  - `pause()`: Stops the layout simulation.
+  - `reheat()`: Adds energy back into a force-directed simulation.
 
 ---
 
@@ -161,7 +161,7 @@ ecosystem.
 **`graph.on(eventName, callback)`**
 
 | Event Name            | Payload `{ target, domEvent }`                              | Description                                                                      |
-|-----------------------|-------------------------------------------------------------|----------------------------------------------------------------------------------|
+| --------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | `element:click`       | `target`: The reactive state proxy for the clicked element. | Fired on click. Allows for immediate, direct state manipulation in the callback. |
 | `element:hover:enter` | `target`: The state proxy for the hovered element.          | Fired when the cursor enters an element.                                         |
 | `...`                 | ...                                                         | Other events (`drag:start`, `background:click`, etc.) follow the same pattern.   |
@@ -239,7 +239,7 @@ The development process is the sequential construction of this plane and the int
 #### **The Core Synergy: A Curated Stack**
 
 | Category            | **Chosen Dependency**    | **Synergistic Role & Justification**                                                                                                                                                                                                                             |
-|---------------------|--------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Reactivity Core** | **SolidJS**              | **The Brain.** Provides the fine-grained reactive primitives (`signals`, `effects`) that form the Data Plane. Its non-VDOM, direct-update model is the perfect performance match for an imperative library like Three.js.                                        |
 | **3D Rendering**    | **Three.js**             | **The Body.** The imperative rendering target. Its objects (`Mesh`, `Material`) are the final expression of the state. SolidJS effects will directly manipulate these objects, creating a highly efficient bridge between declarative state and visual output.   |
 | **Interaction**     | **@use-gesture/vanilla** | **The Senses.** A headless, sophisticated gesture engine. It translates raw browser events into meaningful gestures (`drag`, `pinch`) and its sole job is to mutate signals on the Data Plane (e.g., `setCameraPosition`). It is completely unaware of Three.js. |
@@ -261,11 +261,11 @@ The development process is the sequential construction of this plane and the int
   Any change to a signal in the state is instantly and efficiently reflected in the corresponding mesh's properties (
   position, color, scale).
 - **Definition of Done:**
-    - [ ] A `Spec` object passed to the `SpaceGraph` constructor renders the correct number and type of elements.
-    - [ ] Calling `graph.update()` with a changed `Spec` (e.g., adding/removing a node, changing a color) correctly
-      updates the scene.
-    - [ ] **Unit Tests (Vitest):** The state initialization and update logic is fully tested.
-    - [ ] **Visual Tests (Playwright):** A suite of "golden image" snapshots for various static scenes passes.
+  - [ ] A `Spec` object passed to the `SpaceGraph` constructor renders the correct number and type of elements.
+  - [ ] Calling `graph.update()` with a changed `Spec` (e.g., adding/removing a node, changing a color) correctly
+        updates the scene.
+  - [ ] **Unit Tests (Vitest):** The state initialization and update logic is fully tested.
+  - [ ] **Visual Tests (Playwright):** A suite of "golden image" snapshots for various static scenes passes.
 
 #### **Phase 2: The Sensory Loop**
 
@@ -277,12 +277,12 @@ The development process is the sequential construction of this plane and the int
   `State -> Visuals -> User Input -> State`. Because the rendering is already reactive to the state, no new rendering
   logic is needed.
 - **Definition of Done:**
-    - [ ] Dragging the background updates the camera position signals, panning the view.
-    - [ ] Pinching/scrolling updates the camera zoom signal.
-    - [ ] Clicking an element updates the selection signals in the central state.
-    - [ ] The `StyleSheet` engine correctly applies `:hover` and `:selected` styles in reaction to state changes.
-    - [ ] **Visual Tests (Playwright):** Scripts simulating clicks and drags result in snapshots showing the correct
-      visual feedback (e.g., selection glows).
+  - [ ] Dragging the background updates the camera position signals, panning the view.
+  - [ ] Pinching/scrolling updates the camera zoom signal.
+  - [ ] Clicking an element updates the selection signals in the central state.
+  - [ ] The `StyleSheet` engine correctly applies `:hover` and `:selected` styles in reaction to state changes.
+  - [ ] **Visual Tests (Playwright):** Scripts simulating clicks and drags result in snapshots showing the correct
+        visual feedback (e.g., selection glows).
 
 #### **Phase 3: Autonomous Systems**
 
@@ -294,11 +294,11 @@ The development process is the sequential construction of this plane and the int
   positions, and the renderer automatically follows. The `camera.flyTo()` method can execute complex, interruptible
   animations by driving camera state signals over time.
 - **Definition of Done:**
-    - [ ] Enabling a `force-directed` layout causes nodes to move and settle into a stable configuration.
-    - [ ] Calling `camera.flyTo()` produces a smooth, animated transition to the target.
-    - [ ] Animations and physics can run concurrently without interfering with user interaction.
-    - [ ] **Visual Tests (Playwright):** Snapshots are taken after layouts stabilize to ensure deterministic results. A
-      simple animation test verifies movement.
+  - [ ] Enabling a `force-directed` layout causes nodes to move and settle into a stable configuration.
+  - [ ] Calling `camera.flyTo()` produces a smooth, animated transition to the target.
+  - [ ] Animations and physics can run concurrently without interfering with user interaction.
+  - [ ] **Visual Tests (Playwright):** Snapshots are taken after layouts stabilize to ensure deterministic results. A
+        simple animation test verifies movement.
 
 #### **Phase 4: Productionization & API Formalization**
 
@@ -311,73 +311,73 @@ public API.
 - **Architectural Outcome:** The library is transformed from a powerful internal architecture into a robust,
   distributable, and well-documented product.
 - **Definition of Done:**
-    - [ ] The public API is finalized and all internal complexity is encapsulated.
-    - [ ] The `AdvancedRenderer` path using `InstancedMesh` is implemented and automatically enabled for large graphs.
-    - [ ] Raycasting is accelerated with `three-mesh-bvh`.
-    - [ ] The `graph.destroy()` method correctly disposes of all SolidJS effects, Three.js objects, and event listeners.
-    - [ ] A full suite of API documentation, tutorials, and examples is generated and published.
-    - [ ] The final package is bundled and published to npm.
+  - [ ] The public API is finalized and all internal complexity is encapsulated.
+  - [ ] The `AdvancedRenderer` path using `InstancedMesh` is implemented and automatically enabled for large graphs.
+  - [ ] Raycasting is accelerated with `three-mesh-bvh`.
+  - [ ] The `graph.destroy()` method correctly disposes of all SolidJS effects, Three.js objects, and event listeners.
+  - [ ] A full suite of API documentation, tutorials, and examples is generated and published.
+  - [ ] The final package is bundled and published to npm.
 
 ---
 
 # Original Notes
 
 - Guidelines
-    - The library loaded by a single import, and manages its own dependencies and resources.
-    - This enables a developer to import the library in 1 line, and instantiate a SpaceGraph in another, with minimal
-      boilerplate.
-    - Forward-thinking, extensible API
+  - The library loaded by a single import, and manages its own dependencies and resources.
+  - This enables a developer to import the library in 1 line, and instantiate a SpaceGraph in another, with minimal
+    boilerplate.
+  - Forward-thinking, extensible API
 - Camera
-    - Smooth transitions, adjustable speed
+  - Smooth transitions, adjustable speed
 - Layouts
-    - Modes
-        - Force-Directed (default: tuned well for general-purpose use)
-        - Grid, Circle, Column, Row, etc...
-        - Unoverlap: moves items just far enough to not overlap or cover other objects
-    - Does not affect objects the user is interacting with
-    - Throttled if compute intensive, LERP animated between delayed iterations
+  - Modes
+    - Force-Directed (default: tuned well for general-purpose use)
+    - Grid, Circle, Column, Row, etc...
+    - Unoverlap: moves items just far enough to not overlap or cover other objects
+  - Does not affect objects the user is interacting with
+  - Throttled if compute intensive, LERP animated between delayed iterations
 - Controls: Mouse, Touch, Keyboard
-    - Drag translate, if not pinned
-    - Drag resize, if resizeable
-    - Camera
-        - AutoZoom(targets)
-        - Translate
-            - trigger: left mouse button drags background
-        - Rotate: access the side of elements, look "around the corner"
-            - trigger: right mouse button drags background
-        - Zoom: Mouse Wheel, +/- keys, etc...
+  - Drag translate, if not pinned
+  - Drag resize, if resizeable
+  - Camera
+    - AutoZoom(targets)
+    - Translate
+      - trigger: left mouse button drags background
+    - Rotate: access the side of elements, look "around the corner"
+      - trigger: right mouse button drags background
+    - Zoom: Mouse Wheel, +/- keys, etc...
 - Nodes, Edges
-    - Node Types
-        - Box, Sphere
-        - HTMLNode: renders interactive HTML surfaces, using CSS3D transforms
-        - etc...
-    - Edge Types
-        - Straight, Curved, etc...
-    - Appearance
-        - Color
-        - Icon (ex: emoji character)
-        - Name label
-        - Opacity
-    - Decorations: visibility/opacity conditions, gesture interactions
-        - Highlight frame: focused, hovered, etc...
-        - Editable Bounds frame, for precise 3D positioning / scaling / rotating
-        - Hover frame: can include text, icons, links, etc... to provide more context
-        - etc...
-    - Events: ex:`space.on(...)`
-        - Hover
-        - Focus
-        - Click
-        - AutoZoom
+  - Node Types
+    - Box, Sphere
+    - HTMLNode: renders interactive HTML surfaces, using CSS3D transforms
+    - etc...
+  - Edge Types
+    - Straight, Curved, etc...
+  - Appearance
+    - Color
+    - Icon (ex: emoji character)
+    - Name label
+    - Opacity
+  - Decorations: visibility/opacity conditions, gesture interactions
+    - Highlight frame: focused, hovered, etc...
+    - Editable Bounds frame, for precise 3D positioning / scaling / rotating
+    - Hover frame: can include text, icons, links, etc... to provide more context
+    - etc...
+  - Events: ex:`space.on(...)`
+    - Hover
+    - Focus
+    - Click
+    - AutoZoom
 - Renderer
-    - BasicRenderer
-        - Simple Scenegraph management
-    - AdvancedRenderer: high-performance
-        - Instancing
-        - Culling
-        - LOD
-        - Shader Pipeline
+  - BasicRenderer
+    - Simple Scenegraph management
+  - AdvancedRenderer: high-performance
+    - Instancing
+    - Culling
+    - LOD
+    - Shader Pipeline
 - HUD components: opacity, position, size, draggable, resizable
-    - Menubar
-    - Status bar
-        - REPL/Console
-        - Notifications
+  - Menubar
+  - Status bar
+    - REPL/Console
+    - Notifications
