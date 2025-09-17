@@ -3,6 +3,7 @@ import * as THREE from 'three';
 
 export class RenderingManager {
   public scene: THREE.Scene;
+  public cssScene: THREE.Scene;
   public camera: THREE.PerspectiveCamera;
   public container: HTMLElement;
   public renderer: any;
@@ -13,6 +14,7 @@ export class RenderingManager {
 
   constructor() {
     this.scene = new THREE.Scene();
+    this.cssScene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera();
     this.container = document.createElement('div');
     this.renderer = {

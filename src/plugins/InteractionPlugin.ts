@@ -1,33 +1,35 @@
-import { createGesture, Gestures } from '@use-gesture/vanilla';
+import { createGesture, dragAction, hoverAction, wheelAction } from '@use-gesture/vanilla';
 import * as THREE from 'three';
 import { ISpaceGraphPlugin } from '../core/plugin';
 import { SpaceGraph } from '../core/SpaceGraph';
 import { InteractionLogic } from '../InteractionLogic';
-import { DragState, WheelState, HoverState, ClickState } from '../types/use-gesture';
+import { DragState, WheelState, HoverState } from '../types/use-gesture';
 
 /**
  * A plugin that handles user interactions with the graph, such as clicking, dragging, and hovering.
  */
 export class InteractionPlugin implements ISpaceGraphPlugin {
   private graph!: SpaceGraph;
-  private gesture!: Gestures;
+  private gesture: any;
   private dragPlane!: THREE.Plane;
   private draggedElementId: string | null = null;
+  private boundOnClick!: (event: PointerEvent) => void;
+  private rendererEl!: HTMLElement;
 
   public init(graph: SpaceGraph): void {
     this.graph = graph;
-    const rendererEl = this.graph.renderingManager.getRendererDomElement();
+    this.rendererEl = this.graph.renderingManager.getRendererDomElement();
     this.dragPlane = new THREE.Plane();
 
-    this.gesture = createGesture({
-      onDrag: (state) => this.onDrag(state),
-      onHover: (state) => this.onHover(state),
-      onClick: (state) => this.onClick(state),
-      onWheel: (state) => this.onWheel(state),
-    }, {
-      target: rendererEl,
-      eventOptions: { passive: false },
+    const Gesture = createGesture([dragAction, hoverAction, wheelAction]);
+    this.gesture = new Gesture(this.rendererEl, {
+      onDrag: (state: DragState) => this.onDrag(state),
+      onHover: (state: HoverState) => this.onHover(state),
+      onWheel: (state: WheelState) => this.onWheel(state),
     });
+
+    this.boundOnClick = this.onClick.bind(this) as unknown as (event: PointerEvent) => void;
+    this.rendererEl.addEventListener('click', this.boundOnClick);
   }
 
   private getIntersectedElement(event: MouseEvent | PointerEvent) {
@@ -47,7 +49,6 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     const intersects = raycaster.intersectObjects(nodeRenderer.getRaycastableObjects(), true);
 
     if (intersects.length > 0) {
-      const intersectedObject = intersects[0].object;
       const elementId = nodeRenderer.getNodeIdFromIntersection(intersects[0]);
       if (elementId) {
         return this.graph.dataManager.getElement(elementId);
@@ -110,8 +111,8 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     }
   }
 
-  private onClick(state: ClickState) {
-    const element = this.getIntersectedElement(state.event as PointerEvent);
+  private onClick(event: PointerEvent) {
+    const element = this.getIntersectedElement(event);
     if (element) {
       this.graph.eventManager.emit('element:click', { target: element });
     } else {
@@ -121,5 +122,6 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
 
   public dispose(): void {
     this.gesture.destroy();
+    this.rendererEl.removeEventListener('click', this.boundOnClick);
   }
 }

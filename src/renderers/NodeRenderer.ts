@@ -1,10 +1,9 @@
 import * as THREE from 'three';
-import { createEffect, createRoot } from 'solid-js';
+import { createEffect } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { Spec, NodeSpec, ElementActorClass } from '../types';
 import { IRenderer } from './IRenderer';
 import { BaseElementActor } from './elementActors/BaseElementActor';
-import { SpaceGraph } from '../core/SpaceGraph';
 
 /**
  * Manages the rendering of all nodes in the graph using ElementActors.
@@ -13,7 +12,7 @@ import { SpaceGraph } from '../core/SpaceGraph';
 export class NodeRenderer implements IRenderer {
   private scene: THREE.Scene;
   private state: Store<Spec>;
-  private elementActors: Map<string, BaseElementActor> = new Map();
+  public elementActors: Map<string, BaseElementActor> = new Map();
   private elementActorRegistry: Map<string, ElementActorClass>;
   private disposeEffect?: () => void;
 
@@ -26,31 +25,30 @@ export class NodeRenderer implements IRenderer {
     this.state = state;
     this.elementActorRegistry = elementActorRegistry;
 
-    this.disposeEffect = createRoot((dispose) => {
-      this.init();
-      return dispose;
-    });
+    this.init();
   }
 
   private init() {
-    createEffect(() => {
-      const nodes = this.state.data?.nodes || [];
-      const currentNodeIds = new Set(nodes.map((n) => n.id));
+    createEffect(() => this.updateNodes());
+  }
 
-      // Add new actors for new nodes.
-      for (const node of nodes) {
-        if (!this.elementActors.has(node.id)) {
-          this.addElementActor(node);
-        }
-      }
+  public updateNodes() {
+    const nodes = this.state.data?.nodes || [];
+    const currentNodeIds = new Set(nodes.map((n) => n.id));
 
-      // Remove actors for nodes that no longer exist.
-      for (const nodeId of this.elementActors.keys()) {
-        if (!currentNodeIds.has(nodeId)) {
-          this.removeElementActor(nodeId);
-        }
+    // Add new actors for new nodes.
+    for (const node of nodes) {
+      if (!this.elementActors.has(node.id)) {
+        this.addElementActor(node);
       }
-    });
+    }
+
+    // Remove actors for nodes that no longer exist.
+    for (const nodeId of this.elementActors.keys()) {
+      if (!currentNodeIds.has(nodeId)) {
+        this.removeElementActor(nodeId);
+      }
+    }
   }
 
   private addElementActor(node: NodeSpec) {
@@ -105,9 +103,6 @@ export class NodeRenderer implements IRenderer {
   }
 
   public dispose(): void {
-    if (this.disposeEffect) {
-      this.disposeEffect();
-    }
     // Create a copy of the keys to avoid issues with modifying the map while iterating.
     const nodeIds = Array.from(this.elementActors.keys());
     for (const nodeId of nodeIds) {

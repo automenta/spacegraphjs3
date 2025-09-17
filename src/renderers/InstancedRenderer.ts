@@ -8,7 +8,7 @@
  */
 
 import * as THREE from 'three';
-import { createEffect, on, createRoot } from 'solid-js';
+import { createEffect, on } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { Spec, NodeSpec } from '../types';
 import { IRenderer } from './IRenderer';
@@ -36,10 +36,7 @@ export class InstancedRenderer implements IRenderer {
     this.state = state;
     this.instancedGeometryRegistry = instancedGeometryRegistry;
 
-    this._dispose = createRoot((dispose) => {
-      this.init();
-      return dispose;
-    });
+    this.init();
   }
 
   private init() {
@@ -69,45 +66,47 @@ export class InstancedRenderer implements IRenderer {
     }
 
     // Effect for updating all instances when nodes change
-    createEffect(() => {
-      const nodes = this.state.data?.nodes || [];
-      const nodesByType = new Map<string, GraphElement[]>();
+    createEffect(() => this.updateAllInstances());
+  }
 
-      // Group nodes by their type
-      for (const node of nodes) {
-        if (!nodesByType.has(node.type)) {
-          nodesByType.set(node.type, []);
-        }
-        nodesByType.get(node.type)!.push(node);
+  public updateAllInstances() {
+    const nodes = this.state.data?.nodes || [];
+    const nodesByType = new Map<string, NodeSpec[]>();
+
+    // Group nodes by their type
+    for (const node of nodes) {
+      if (!nodesByType.has(node.type)) {
+        nodesByType.set(node.type, []);
       }
+      nodesByType.get(node.type)!.push(node);
+    }
 
-      // Update each InstancedMesh
-      for (const [typeName, mesh] of this.instancedMeshes.entries()) {
-        const typedNodes = nodesByType.get(typeName) || [];
-        const idMaps = this.typeToIdMaps.get(typeName)!;
+    // Update each InstancedMesh
+    for (const [typeName, mesh] of this.instancedMeshes.entries()) {
+      const typedNodes = nodesByType.get(typeName) || [];
+      const idMaps = this.typeToIdMaps.get(typeName)!;
 
-        idMaps.idToIndex.clear();
-        idMaps.indexToId.clear();
+      idMaps.idToIndex.clear();
+      idMaps.indexToId.clear();
 
-        typedNodes.forEach((node, i) => {
-          idMaps.idToIndex.set(node.id, i);
-          idMaps.indexToId.set(i, node.id);
+      typedNodes.forEach((node, i) => {
+        idMaps.idToIndex.set(node.id, i);
+        idMaps.indexToId.set(i, node.id);
+        this.updateInstance(mesh, idMaps, i, node);
+      });
+
+      mesh.count = typedNodes.length;
+      mesh.instanceMatrix.needsUpdate = true;
+      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+
+      // Force an initial update of all instances
+      if (mesh.count > 0) {
+        for (let i = 0; i < mesh.count; i++) {
+          const node = typedNodes[i];
           this.updateInstance(mesh, idMaps, i, node);
-        });
-
-        mesh.count = typedNodes.length;
-        mesh.instanceMatrix.needsUpdate = true;
-        if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-
-        // Force an initial update of all instances
-        if (mesh.count > 0) {
-            for (let i = 0; i < mesh.count; i++) {
-                const node = typedNodes[i];
-                this.updateInstance(mesh, idMaps, i, node);
-            }
         }
       }
-    });
+    }
 
     // Effect for updating instances on interaction changes (hover, select)
     createEffect(
@@ -165,7 +164,6 @@ export class InstancedRenderer implements IRenderer {
       finalColor = this.state.style['node:hover'].color;
     }
 
-    console.log(`Node ${node.id} color: ${node.color}, finalColor: ${finalColor}`);
     mesh.setColorAt(index, new THREE.Color(finalColor));
     if (mesh.instanceColor) {
         mesh.instanceColor.needsUpdate = true;
@@ -193,7 +191,6 @@ export class InstancedRenderer implements IRenderer {
   }
 
   public dispose() {
-    this._dispose(); // Dispose of the SolidJS root and all its effects
     for (const mesh of this.instancedMeshes.values()) {
       if (mesh.geometry) {
         mesh.geometry.dispose();

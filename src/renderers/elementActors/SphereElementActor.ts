@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { createEffect, createRoot, createMemo } from 'solid-js';
+import { createEffect, createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
-import { Element, Spec } from '../types';
+import { Element, Spec } from '../../types';
 import { BaseElementActor } from './BaseElementActor';
 
 /**
@@ -28,27 +28,23 @@ export class SphereElementActor extends BaseElementActor {
     this.scene.add(this.threeObject);
 
     this.disposeEffect = createRoot((dispose) => {
-      const isSelected = createMemo(() =>
-        this.graphState.interaction.selectedElementIds.includes(this.elementId)
-      );
-
-      const isHovered = createMemo(
-        () => this.graphState.interaction.hoveredElementId === this.elementId
-      );
-
-      createEffect(() => {
-        const elementState = this.graphState.data.nodes.find(
-          (n) => n.id === this.elementId
-        );
-        if (!elementState) {
-          // Node has been removed, actor will be disposed soon.
-          return;
-        }
-        this.updateVisuals(elementState, isHovered(), isSelected());
-      });
-
+      createEffect(() => this.update());
       return dispose;
     });
+  }
+
+  public update(): void {
+    const isSelected = this.graphState.interaction.selectedElementIds.includes(this.elementId);
+    const isHovered = this.graphState.interaction.hoveredElementId === this.elementId;
+
+    const elementState = this.graphState.data.nodes.find(
+      (n) => n.id === this.elementId
+    );
+    if (!elementState) {
+      // Node has been removed, actor will be disposed soon.
+      return;
+    }
+    this.updateVisuals(elementState, isHovered, isSelected);
   }
 
   private updateVisuals(

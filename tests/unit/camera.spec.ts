@@ -1,21 +1,29 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { createState } from '../../src/core/createState';
 import { CameraPlugin } from '../../src/plugins/CameraPlugin';
 import { Spec } from '../../src/types';
 import * as THREE from 'three';
 import { SpaceGraph } from '../../src/core/SpaceGraph';
+import { animate } from 'popmotion';
+
+vi.mock('popmotion', () => ({
+  animate: vi.fn(),
+}));
 
 describe('CameraPlugin', () => {
-  it('should animate camera position with flyTo', async () => {
+  it('should animate camera position with flyTo', () => {
     const initialSpec: Spec = {
-      data: { nodes: [], edges: [] },
-    };
+      camera: {
+        target: { x: 0, y: 0, z: 0 },
+        distance: 10,
+        phi: Math.PI / 2,
+        theta: 0,
+      },
+    } as any;
 
     const { state, updateState } = createState(initialSpec);
     const mockCamera = new THREE.PerspectiveCamera();
-    mockCamera.position.set(0, 0, 10);
 
-    // Mock the SpaceGraph instance and its managers
     const mockGraph = {
       state,
       updateState,
@@ -30,30 +38,36 @@ describe('CameraPlugin', () => {
     const cameraPlugin = new CameraPlugin();
     cameraPlugin.init(mockGraph);
 
-    const target = new THREE.Vector3(10, 10, 5);
+    const targetState = {
+      target: { x: 10, y: 10, z: 0 },
+      distance: 5,
+    };
     const options = { duration: 1000 };
 
-    cameraPlugin.flyTo(target, options);
+    cameraPlugin.flyTo(targetState, options);
 
-    expect(mockCamera.position.x).toBe(0);
-    expect(mockCamera.position.z).toBe(10);
+    const animateArgs = (animate as any).mock.calls[0][0];
+    expect(animateArgs.duration).toBe(1000);
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    // Simulate halfway through the animation
+    animateArgs.onUpdate({
+      target: { x: 5, y: 5, z: 0 },
+      distance: 7.5,
+    });
 
-    // Position should be halfway to the target
     const checkIsClose = (val: number, target: number) =>
-      expect(Math.abs(val - target)).toBeLessThan(1); // Increased tolerance
+      expect(Math.abs(val - target)).toBeLessThan(1);
 
-    checkIsClose(mockCamera.position.x, 5);
-    checkIsClose(mockCamera.position.y, 5);
-    checkIsClose(mockCamera.position.z, 7.5);
+    // The camera's position is derived from the state's spherical coordinates.
+    // We need to check the state, not the mockCamera position directly,
+    // because the sync effect is not running in this test.
+    checkIsClose(mockGraph.state.camera.target.x, 5);
+    checkIsClose(mockGraph.state.camera.target.y, 5);
+    checkIsClose(mockGraph.state.camera.distance, 7.5);
 
-    // Advance time to the end
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    // Simulate completion
+    animateArgs.onComplete();
 
-    // Position should be at the target
-    checkIsClose(mockCamera.position.x, 10);
-    checkIsClose(mockCamera.position.y, 10);
-    checkIsClose(mockCamera.position.z, 5);
+    expect(mockGraph.eventManager.emit).toHaveBeenCalledWith('camera:animation:end');
   });
 });

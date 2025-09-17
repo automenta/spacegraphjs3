@@ -19,7 +19,8 @@ describe('LayoutPlugin', () => {
     const { graph, cleanup } = createTestGraph(spec);
     const layoutPlugin = new LayoutPlugin();
     layoutPlugin.init(graph);
-    await new Promise(resolve => setTimeout(resolve, 100));
+    layoutPlugin.updateLayoutEngine();
+    await nextTick();
 
     const initialNode1Pos = { ...graph.state.data.nodes.find((n) => n.id === 'n1')!.position };
 
@@ -47,11 +48,11 @@ describe('LayoutPlugin', () => {
     const { graph, cleanup } = createTestGraph(spec);
     const layoutPlugin = new LayoutPlugin();
     layoutPlugin.init(graph);
-    await new Promise(resolve => setTimeout(resolve, 100));
+    layoutPlugin.updateLayoutEngine();
+    await nextTick();
 
     const d3Layout = layoutPlugin.currentLayoutEngine as D3ForceLayout;
     d3Layout.tick(100); // Manually tick the simulation
-    const pos1_initial_x = graph.state.data.nodes.find((n) => n.id === 'n1')?.position?.x;
 
     d3Layout.pause();
     const pos1_paused_x = graph.state.data.nodes.find((n) => n.id === 'n1')?.position?.x;
@@ -61,6 +62,7 @@ describe('LayoutPlugin', () => {
     expect(pos1_after_paused_ticks_x).toBe(pos1_paused_x);
 
     d3Layout.resume();
+    d3Layout.reheat();
     d3Layout.tick(100); // Tick again after resume
     const pos1_after_resume_x = graph.state.data.nodes.find((n) => n.id === 'n1')?.position?.x;
     expect(pos1_after_resume_x).not.toBe(pos1_paused_x); // Position should have changed

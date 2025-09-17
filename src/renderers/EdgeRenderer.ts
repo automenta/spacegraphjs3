@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createEffect, createRoot } from 'solid-js';
+import { createEffect } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { GraphElement, Edge, Spec } from './types';
 
@@ -25,11 +25,8 @@ export class EdgeRenderer {
     this.lineSegments = new THREE.LineSegments(this.geometry, this.material);
     this.scene.add(this.lineSegments);
 
-    this.disposeEffect = createRoot((dispose) => {
-      createEffect(() => {
-        this.updateEdges();
-      });
-      return dispose;
+    createEffect(() => {
+      this.updateEdges();
     });
   }
 
@@ -92,9 +89,6 @@ export class EdgeRenderer {
   }
 
   public dispose() {
-    if (this.disposeEffect) {
-      this.disposeEffect();
-    }
     if (this.lineSegments) {
       this.scene.remove(this.lineSegments);
     }

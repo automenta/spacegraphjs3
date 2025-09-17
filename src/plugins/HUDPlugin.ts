@@ -19,17 +19,19 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     this.hudContainer.style.color = 'white';
     container.appendChild(this.hudContainer);
 
-    createEffect(() => {
-      const hudState = this.graph.state.hud;
-      if (hudState?.visible) {
-        this.hudContainer.style.display = 'block';
-        this.hudContainer.innerHTML = `
-          <div>${hudState.content}</div>
-        `;
-      } else {
-        this.hudContainer.style.display = 'none';
-      }
-    });
+    createEffect(() => this.updateHUD());
+  }
+
+  public updateHUD(): void {
+    const hudState = this.graph.state.hud;
+    if (hudState?.visible) {
+      this.hudContainer.style.display = 'block';
+      this.hudContainer.innerHTML = `
+        <div>${hudState.content}</div>
+      `;
+    } else {
+      this.hudContainer.style.display = 'none';
+    }
   }
 
   public dispose(): void {

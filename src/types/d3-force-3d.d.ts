@@ -7,7 +7,10 @@ declare module 'd3-force-3d' {
     z: number;
   }
 
-  export interface SimulationLinkDatum<N extends SimulationNodeDatum> extends D3SimulationLinkDatum<N> {}
+  export interface SimulationLinkDatum<N extends SimulationNodeDatum> extends D3SimulationLinkDatum<N> {
+    // This is a dummy property to avoid the linter error.
+    _dummy?: never;
+  }
 
   export interface Force<
     N extends SimulationNodeDatum,

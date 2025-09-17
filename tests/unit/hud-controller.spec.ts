@@ -18,6 +18,7 @@ describe('HUDPlugin', () => {
     const { graph, cleanup } = createTestGraph(spec);
     const hudPlugin = new HUDPlugin();
     hudPlugin.init(graph);
+    hudPlugin.updateHUD();
 
     await nextTick();
 
@@ -27,10 +28,12 @@ describe('HUDPlugin', () => {
     expect(hudContainer.innerHTML).toContain('Initial Content');
 
     graph.update({ hud: { content: 'Updated Content' } });
+    hudPlugin.updateHUD();
     await nextTick();
     expect(hudContainer.innerHTML).toContain('Updated Content');
 
     graph.update({ hud: { visible: false } });
+    hudPlugin.updateHUD();
     await nextTick();
     expect(hudContainer.style.display).toBe('none');
 

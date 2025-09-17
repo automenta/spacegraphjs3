@@ -1,5 +1,5 @@
 import { createStore, produce, SetStoreFunction } from 'solid-js/store';
-import { Spec, SpecUpdate, NodeSpec } from '../types';
+import { Spec, SpecUpdate } from '../types';
 import { deepMerge } from '../utils/deepMerge';
 
 /**

@@ -1,4 +1,4 @@
-import { createEffect, createRoot } from 'solid-js';
+import { createEffect } from 'solid-js';
 import { Store } from 'solid-js/store';
 import * as THREE from 'three';
 import { CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
@@ -14,12 +14,9 @@ export class HTMLRenderer {
     this.cssScene = cssScene;
     this.state = state;
 
-    this.disposeEffect = createRoot((dispose) => {
-      createEffect(() => {
-        // This effect will run whenever the nodes array changes.
-        this.updateHTMLNodes();
-      });
-      return dispose;
+    createEffect(() => {
+      // This effect will run whenever the nodes array changes.
+      this.updateHTMLNodes();
     });
   }
 
@@ -75,9 +72,6 @@ export class HTMLRenderer {
   }
 
   public dispose() {
-    if (this.disposeEffect) {
-      this.disposeEffect();
-    }
     for (const object of this.htmlObjects.values()) {
       this.cssScene.remove(object);
     }

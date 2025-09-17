@@ -13,22 +13,24 @@ export class LayoutPlugin implements ISpaceGraphPlugin {
   public init(graph: SpaceGraph): void {
     this.graph = graph;
 
-    createEffect(() => {
-      const layoutType = this.graph.state.layout?.type;
-      if (this.currentLayoutEngine) {
-        this.currentLayoutEngine.dispose();
-        this.currentLayoutEngine = null;
-      }
+    createEffect(() => this.updateLayoutEngine());
+  }
 
-      const LayoutEngineClass = SpaceGraph.getLayoutEngineRegistry().get(
-        layoutType
-      );
+  public updateLayoutEngine(): void {
+    const layoutType = this.graph.state.layout?.type;
+    if (this.currentLayoutEngine) {
+      this.currentLayoutEngine.dispose();
+      this.currentLayoutEngine = null;
+    }
 
-      if (LayoutEngineClass) {
-        this.currentLayoutEngine = new LayoutEngineClass();
-        this.currentLayoutEngine.init(this.graph);
-      }
-    });
+    const LayoutEngineClass = SpaceGraph.getLayoutEngineRegistry().get(
+      layoutType
+    );
+
+    if (LayoutEngineClass) {
+      this.currentLayoutEngine = new LayoutEngineClass();
+      this.currentLayoutEngine.init(this.graph);
+    }
   }
 
   public resume(): void {
