@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createState } from '../../src/core/createState';
-import { CameraPlugin } from '../../src/plugins/CameraPlugin';
-import { Spec } from '../../src/types';
+import { CameraPlugin } from '../../src';
+import { Spec } from '../../src';
 import * as THREE from 'three';
-import { SpaceGraph } from '../../src/core/SpaceGraph';
+import { SpaceGraph } from '../../src';
 import { animate } from 'popmotion';
 
 vi.mock('popmotion', () => ({

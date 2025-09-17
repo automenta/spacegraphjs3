@@ -8,8 +8,8 @@ export class EdgeRenderer {
   public lineSegments: THREE.LineSegments;
   private scene: THREE.Scene;
   private state: Store<Spec>;
-  private material: THREE.LineBasicMaterial;
-  private geometry: THREE.BufferGeometry;
+  private readonly material: THREE.LineBasicMaterial;
+  private readonly geometry: THREE.BufferGeometry;
   private disposeEffect?: () => void;
 
   constructor(scene: THREE.Scene, state: Store<Spec>) {

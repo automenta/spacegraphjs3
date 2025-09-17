@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { SpaceGraph } from '../../src/core/SpaceGraph';
+import { SpaceGraph } from '../../src';
 
 const error = new Error('Test rendering error');
 const mockRenderer = {

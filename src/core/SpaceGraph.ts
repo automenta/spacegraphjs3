@@ -35,11 +35,11 @@ export class SpaceGraph {
   public eventManager!: EventManager;
   public dataManager!: DataManager;
   public cameraPlugin?: CameraPlugin;
-  private container: HTMLElement;
+  private readonly container: HTMLElement;
   private updateState!: (spec: SpecUpdate) => void;
   private setState!: (fn: (prevState: Spec) => Spec) => void;
   private plugins: ISpaceGraphPlugin[] = [];
-  private dispose: () => void;
+  private readonly dispose: () => void;
   /**
    * Cleans up all resources, including SolidJS effects, Three.js objects,
    * and event listeners, to prevent memory leaks.

@@ -9,7 +9,7 @@ import { expandHex } from '../../utils/color';
  * An ElementActor for rendering sphere nodes.
  */
 export class SphereElementActor extends BaseElementActor {
-  private elementId: string;
+  private readonly elementId: string;
   private glowMesh!: THREE.Mesh;
 
   constructor(

@@ -13,12 +13,12 @@ import { InstancedRenderer } from '../renderers/InstancedRenderer';
  * It also manages the different types of renderers for nodes, edges, etc.
  */
 export class RenderingManager {
-  private container: HTMLElement;
-  private renderer: THREE.WebGLRenderer;
-  private cssRenderer: CSS2DRenderer;
-  private scene: THREE.Scene;
-  private cssScene: THREE.Scene;
-  private camera: THREE.PerspectiveCamera;
+  private readonly container: HTMLElement;
+  private readonly renderer: THREE.WebGLRenderer;
+  private readonly cssRenderer: CSS2DRenderer;
+  private readonly scene: THREE.Scene;
+  private readonly cssScene: THREE.Scene;
+  private readonly camera: THREE.PerspectiveCamera;
   private graph: SpaceGraph;
 
   private nodeRenderer!: IRenderer;

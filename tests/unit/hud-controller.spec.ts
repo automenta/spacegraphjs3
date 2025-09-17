@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { Spec } from '../../src/types';
-import { HUDPlugin } from '../../src/plugins/HUDPlugin';
+import { Spec } from '../../src';
+import { HUDPlugin } from '../../src';
 import { createTestGraph, nextTick } from './test-utils';
 
 describe('HUDPlugin', () => {

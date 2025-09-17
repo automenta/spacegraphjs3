@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import * as THREE from 'three';
 import { InstancedRenderer } from '../../src/renderers/InstancedRenderer';
 import { createState } from '../../src/core/createState';
-import { SpaceGraph } from '../../src/core/SpaceGraph';
+import { SpaceGraph } from '../../src';
 
 const createMockState = () => {
   return createState({

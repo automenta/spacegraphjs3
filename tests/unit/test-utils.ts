@@ -1,6 +1,6 @@
 import { createRoot } from 'solid-js';
-import { SpaceGraph } from '../../src/core/SpaceGraph';
-import { Spec } from '../../src/types';
+import { SpaceGraph } from '../../src';
+import { Spec } from '../../src';
 
 import { vi } from 'vitest';
 import { RenderingManager } from '../mocks/RenderingManager';
@@ -14,7 +14,7 @@ export const createTestGraph = (initialSpec: Spec) => {
   document.body.appendChild(container);
 
   let graph: SpaceGraph;
-  const dispose = createRoot((dispose) => {
+  return createRoot((dispose) => {
     const mockInitManagers = vi
       .spyOn(SpaceGraph.prototype as any, 'initManagers')
       .mockImplementation(function (this: SpaceGraph) {
@@ -37,8 +37,6 @@ export const createTestGraph = (initialSpec: Spec) => {
       },
     };
   });
-
-  return dispose;
 };
 
 export const nextTick = () => new Promise((resolve) => setTimeout(resolve, 0));

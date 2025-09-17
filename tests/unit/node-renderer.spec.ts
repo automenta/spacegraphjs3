@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import * as THREE from 'three';
 import { createStore } from 'solid-js/store';
-import { NodeSpec, Spec } from '../../src/types';
+import { NodeSpec, Spec } from '../../src';
 import { NodeRenderer } from '../../src/renderers/NodeRenderer';
 import { SphereElementActor } from '../../src/renderers/elementActors/SphereElementActor';
 import { nextTick } from './test-utils';

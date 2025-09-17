@@ -11,8 +11,8 @@ import { BaseElementActor } from './elementActors/BaseElementActor';
  */
 export class NodeRenderer implements IRenderer {
   public elementActors: Map<string, BaseElementActor> = new Map();
-  private scene: THREE.Scene;
-  private state: Store<Spec>;
+  private readonly scene: THREE.Scene;
+  private readonly state: Store<Spec>;
   private elementActorRegistry: Map<string, ElementActorClass>;
   private disposeEffect?: () => void;
 

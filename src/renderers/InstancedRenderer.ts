@@ -124,8 +124,7 @@ export class InstancedRenderer implements IRenderer {
     const idMaps = this.typeToIdMaps.get(typeName);
     if (!idMaps) return null;
 
-    const nodeId = idMaps.indexToId.get(intersection.instanceId) ?? null;
-    return nodeId;
+    return idMaps.indexToId.get(intersection.instanceId) ?? null;
   }
 
   public dispose() {

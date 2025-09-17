@@ -7,7 +7,7 @@
  * @returns The expanded 6-digit hex color.
  */
 export function expandHex(hex: string): string {
-  if (typeof hex === 'string' && hex.startsWith('#') && hex.length === 4) {
+  if (hex.length === 4 && hex.charAt(0) === '#' && true) {
     const r = hex.charAt(1);
     const g = hex.charAt(2);
     const b = hex.charAt(3);

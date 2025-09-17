@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as THREE from 'three';
 import { InteractionLogic } from '../../src/InteractionLogic';
 import { createStore, Store } from 'solid-js/store';
-import { Spec } from '../../src/types';
+import { Spec } from '../../src';
 
 // Mock factory for the state
 const createMockState = (): Store<Spec> => {

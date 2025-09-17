@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import * as THREE from 'three';
 import { createStore } from 'solid-js/store';
-import { EdgeSpec, NodeSpec, Spec } from '../../src/types';
+import { EdgeSpec, NodeSpec, Spec } from '../../src';
 import { EdgeRenderer } from '../../src/renderers/EdgeRenderer';
 import { nextTick } from './test-utils';
 import { createRoot } from 'solid-js';

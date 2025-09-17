@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import * as THREE from 'three';
 import { createStore } from 'solid-js/store';
-import { HtmlNodeSpec, Spec } from '../../src/types';
+import { HtmlNodeSpec, Spec } from '../../src';
 import { HTMLRenderer } from '../../src/renderers/HTMLRenderer';
 import { nextTick } from './test-utils';
 import { createRoot } from 'solid-js';
