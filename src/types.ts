@@ -4,32 +4,43 @@ export type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
 };
 
-export interface GraphElement {
+export interface NodeSpec {
   id: string;
   type: string;
   pinning?: { x: number; y: number; z: number } | string;
   data?: Record<string, any>;
   position?: { x: number; y: number; z: number };
   color?: string;
+  label?: string;
 }
 
-export interface HtmlElement extends GraphElement {
+export interface HtmlNodeSpec extends NodeSpec {
   content?: string;
   className?: string;
 }
 
-export interface Edge {
+export interface EdgeSpec {
   id: string;
   source: string;
   target: string;
   color?: string;
 }
 
-export interface SpecUpdate {
-  data?: {
-    nodes?: (DeepPartial<GraphElement> & { id: string })[];
-    edges?: (DeepPartial<Edge> & { id: string })[];
+export interface DataUpdate {
+  nodes?: {
+    add?: NodeSpec[];
+    update?: (DeepPartial<NodeSpec> & { id: string })[];
+    remove?: string[];
   };
+  edges?: {
+    add?: EdgeSpec[];
+    update?: (DeepPartial<EdgeSpec> & { id: string })[];
+    remove?: string[];
+  };
+}
+
+export interface SpecUpdate {
+  data?: DataUpdate;
   style?: DeepPartial<StyleSpec>;
   layout?: DeepPartial<LayoutSpec>;
   camera?: DeepPartial<CameraSpec>;
@@ -83,10 +94,39 @@ export interface PerformanceSpec {
   instancingThreshold: number;
 }
 
+import { Store } from 'solid-js/store';
+import { BaseElementActor } from './renderers/elementActors/BaseElementActor';
+import { SpaceGraph } from './core/SpaceGraph';
+
+export type ElementActorClass = new (
+  scene: THREE.Scene,
+  elementState: Store<NodeSpec>,
+  graphState: Store<Spec>
+) => BaseElementActor;
+
+export interface ILayoutEngine {
+  init(graph: SpaceGraph): void;
+  dispose(): void;
+  resume(): void;
+  pause(): void;
+  reheat(): void;
+}
+
+export type LayoutEngineClass = new () => ILayoutEngine;
+
+export type GraphEventMap = {
+  'element:click': { target: NodeSpec | EdgeSpec };
+  'element:hover:enter': { target: NodeSpec | EdgeSpec };
+  'element:hover:leave': { target: NodeSpec | EdgeSpec };
+  'background:click': Record<string, unknown>;
+  'layout:pin': string[];
+  'layout:unpin': string[];
+};
+
 export interface Spec {
   data: {
-    nodes: GraphElement[];
-    edges: Edge[];
+    nodes: NodeSpec[];
+    edges: EdgeSpec[];
   };
   style: StyleSpec;
   layout: LayoutSpec;

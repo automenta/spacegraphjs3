@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { ISpaceGraphPlugin } from '../core/plugin';
 import { SpaceGraph } from '../core/SpaceGraph';
 import { InteractionLogic } from '../InteractionLogic';
+import { DragState, WheelState, HoverState, ClickState } from '../types/use-gesture';
 
 /**
  * A plugin that handles user interactions with the graph, such as clicking, dragging, and hovering.
@@ -56,14 +57,14 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     return null;
   }
 
-  private onDrag(state: any) {
+  private onDrag(state: DragState) {
     const { event, first, last, movement: [mx, my], xy: [vx, vy], pinching } = state;
     if (pinching) return;
 
     const camera = this.graph.renderingManager.getCamera();
 
     if (first) {
-      const intersectedElement = this.getIntersectedElement(event);
+      const intersectedElement = this.getIntersectedElement(event as PointerEvent);
       if (intersectedElement && 'position' in intersectedElement) {
         this.draggedElementId = intersectedElement.id;
         // Project the drag plane
@@ -84,7 +85,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     }
   }
 
-  private onWheel(state: any) {
+  private onWheel(state: WheelState) {
     const { event, delta: [, dy] } = state;
     event.preventDefault();
     const zoomSpeed = 0.1;
@@ -92,9 +93,9 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     InteractionLogic.handleKeyZoom(this.graph.state, this.graph.updateState, direction, zoomSpeed);
   }
 
-  private onHover(state: any) {
+  private onHover(state: HoverState) {
     if (this.draggedElementId) return; // Don't hover while dragging
-    const element = this.getIntersectedElement(state.event);
+    const element = this.getIntersectedElement(state.event as MouseEvent);
     const currentHoveredId = this.graph.state.interaction?.hoveredElementId ?? null;
 
     if (element) {
@@ -109,8 +110,8 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     }
   }
 
-  private onClick(state: any) {
-    const element = this.getIntersectedElement(state.event);
+  private onClick(state: ClickState) {
+    const element = this.getIntersectedElement(state.event as PointerEvent);
     if (element) {
       this.graph.eventManager.emit('element:click', { target: element });
     } else {

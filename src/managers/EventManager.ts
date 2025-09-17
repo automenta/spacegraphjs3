@@ -1,13 +1,14 @@
 import mitt, { Emitter } from 'mitt';
+import { GraphEventMap } from '../types';
 
 /**
  * A lightweight event manager that wraps the `mitt` library.
  */
 export class EventManager {
-  private emitter: Emitter<any>;
+  private emitter: Emitter<GraphEventMap>;
 
   constructor() {
-    this.emitter = mitt();
+    this.emitter = mitt<GraphEventMap>();
   }
 
   /**
@@ -16,7 +17,10 @@ export class EventManager {
    * @param listener - The callback function to execute when the event is fired.
    * @returns A function that removes the event listener when called.
    */
-  public on(eventName: string, listener: (...args: any[]) => void) {
+  public on<Key extends keyof GraphEventMap>(
+    eventName: Key,
+    listener: (payload: GraphEventMap[Key]) => void
+  ) {
     this.emitter.on(eventName, listener);
     return () => this.emitter.off(eventName, listener);
   }
@@ -24,10 +28,13 @@ export class EventManager {
   /**
    * Emits an event.
    * @param eventName - The name of the event to emit.
-   * @param args - The arguments to pass to the event listeners.
+   * @param payload - The payload to pass to the event listeners.
    */
-  public emit(eventName: string, ...args: any[]) {
-    this.emitter.emit(eventName, ...args);
+  public emit<Key extends keyof GraphEventMap>(
+    eventName: Key,
+    payload: GraphEventMap[Key]
+  ) {
+    this.emitter.emit(eventName, payload);
   }
 
   /**

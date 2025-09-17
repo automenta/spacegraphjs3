@@ -1,17 +1,10 @@
 import * as THREE from 'three';
 import { createEffect, createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
-import { Spec, GraphElement } from '../types';
-import { IRenderer } from '../IRenderer';
+import { Spec, NodeSpec, ElementActorClass } from '../types';
+import { IRenderer } from './IRenderer';
 import { BaseElementActor } from './elementActors/BaseElementActor';
-import { SphereElementActor } from './elementActors/SphereElementActor';
-
-// Define a type for the ElementActor constructor
-type ElementActorConstructor = new (
-  scene: THREE.Scene,
-  elementState: Store<GraphElement>,
-  graphState: Store<Spec>
-) => BaseElementActor;
+import { SpaceGraph } from '../core/SpaceGraph';
 
 /**
  * Manages the rendering of all nodes in the graph using ElementActors.
@@ -21,13 +14,17 @@ export class NodeRenderer implements IRenderer {
   private scene: THREE.Scene;
   private state: Store<Spec>;
   private elementActors: Map<string, BaseElementActor> = new Map();
-  private static registeredElementTypes: Map<string, ElementActorConstructor> =
-    new Map();
+  private elementActorRegistry: Map<string, ElementActorClass>;
   private disposeEffect?: () => void;
 
-  constructor(scene: THREE.Scene, state: Store<Spec>) {
+  constructor(
+    scene: THREE.Scene,
+    state: Store<Spec>,
+    elementActorRegistry: Map<string, ElementActorClass>
+  ) {
     this.scene = scene;
     this.state = state;
+    this.elementActorRegistry = elementActorRegistry;
 
     this.disposeEffect = createRoot((dispose) => {
       this.init();
@@ -35,28 +32,9 @@ export class NodeRenderer implements IRenderer {
     });
   }
 
-  /**
-   * Registers a new element type with its corresponding ElementActor class.
-   * This allows for extending SpaceGraph with custom node rendering.
-   * @param typeName - The name of the element type (e.g., 'sphere', 'html').
-   * @param ActorClass - The ElementActor class responsible for rendering this type.
-   */
-  public static registerType(
-    typeName: string,
-    ActorClass: ElementActorConstructor
-  ) {
-    NodeRenderer.registeredElementTypes.set(typeName, ActorClass);
-  }
-
   private init() {
-    console.log('NodeRenderer: init');
-    // Register default types
-    NodeRenderer.registerType('sphere', SphereElementActor);
-
     createEffect(() => {
-      console.log('NodeRenderer: createEffect triggered');
       const nodes = this.state.data?.nodes || [];
-      console.log(`NodeRenderer: Processing ${nodes.length} nodes`);
       const currentNodeIds = new Set(nodes.map((n) => n.id));
 
       // Add new actors for new nodes.
@@ -75,9 +53,8 @@ export class NodeRenderer implements IRenderer {
     });
   }
 
-  private addElementActor(node: GraphElement) {
-    console.log(`NodeRenderer: Adding actor for node ${node.id}`);
-    const ActorClass = NodeRenderer.registeredElementTypes.get(node.type);
+  private addElementActor(node: NodeSpec) {
+    const ActorClass = this.elementActorRegistry.get(node.type);
     if (!ActorClass) {
       console.warn(
         `No ElementActor registered for type: ${node.type}. Skipping node ${node.id}.`
@@ -85,15 +62,13 @@ export class NodeRenderer implements IRenderer {
       return;
     }
 
-    // Create a reactive proxy for the individual node state
-    // This allows the actor to react to changes in its own elementState
     const elementStateProxy = this.state.data!.nodes!.find(
       (n) => n.id === node.id
     )!;
 
     const actor = new ActorClass(
       this.scene,
-      elementStateProxy as Store<GraphElement>,
+      elementStateProxy as Store<NodeSpec>,
       this.state
     );
     actor.init();

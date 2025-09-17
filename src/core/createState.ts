@@ -1,5 +1,5 @@
 import { createStore, produce, SetStoreFunction } from 'solid-js/store';
-import { Spec, SpecUpdate } from './types';
+import { Spec, SpecUpdate, NodeSpec } from '../types';
 import { deepMerge } from '../utils/deepMerge';
 
 /**
@@ -18,6 +18,8 @@ export function createState(initialSpec: Spec) {
     style: {},
     layout: { type: 'force-directed' },
     camera: { target: { x: 0, y: 0, z: 0 }, phi: 0, theta: 0, distance: 10 },
+    performance: { instancingThreshold: 100 },
+    controls: { keyboard: { enabled: true, panSpeed: 1, zoomSpeed: 1, orbitSpeed: 1 } },
   };
 
   // 2. Deep merge the user-provided initial spec into the defaults.
@@ -35,25 +37,51 @@ export function createState(initialSpec: Spec) {
   const updateState = (specUpdate: SpecUpdate) => {
     setState(
       produce((s) => {
-        // Use the same deep merge utility to apply the updates.
-        deepMerge(s, specUpdate);
-
-        // Handle explicit deletions for nodes and edges, which `deepMerge` doesn't cover.
-        // An item marked with `delete: true` will be removed from the array.
-        if (specUpdate.data?.nodes) {
-          const deleteIds = new Set(
-            specUpdate.data.nodes.filter((n) => (n as any).delete).map((n) => n.id)
-          );
-          if (deleteIds.size > 0) {
-            s.data.nodes = s.data.nodes.filter((n) => !deleteIds.has(n.id));
+        // Use deep merge for all top-level properties except 'data'
+        for (const key in specUpdate) {
+          if (key !== 'data' && key in s) {
+            deepMerge(s[key as keyof Spec], specUpdate[key as keyof SpecUpdate]);
           }
         }
-        if (specUpdate.data?.edges) {
-          const deleteIds = new Set(
-            specUpdate.data.edges.filter((e) => (e as any).delete).map((e) => e.id)
-          );
-          if (deleteIds.size > 0) {
-            s.data.edges = s.data.edges.filter((e) => !deleteIds.has(e.id));
+
+        // Handle data updates separately for fine-grained control
+        if (specUpdate.data) {
+          // Add new nodes
+          if (specUpdate.data.nodes?.add) {
+            s.data.nodes.push(...specUpdate.data.nodes.add);
+          }
+          // Update existing nodes
+          if (specUpdate.data.nodes?.update) {
+            const updates = new Map(specUpdate.data.nodes.update.map((n) => [n.id, n]));
+            for (let i = 0; i < s.data.nodes.length; i++) {
+              if (updates.has(s.data.nodes[i].id)) {
+                deepMerge(s.data.nodes[i], updates.get(s.data.nodes[i].id));
+              }
+            }
+          }
+          // Remove nodes
+          if (specUpdate.data.nodes?.remove) {
+            const removeIds = new Set(specUpdate.data.nodes.remove);
+            s.data.nodes = s.data.nodes.filter((n) => !removeIds.has(n.id));
+          }
+
+          // Add new edges
+          if (specUpdate.data.edges?.add) {
+            s.data.edges.push(...specUpdate.data.edges.add);
+          }
+          // Update existing edges
+          if (specUpdate.data.edges?.update) {
+            const updates = new Map(specUpdate.data.edges.update.map((e) => [e.id, e]));
+            for (let i = 0; i < s.data.edges.length; i++) {
+              if (updates.has(s.data.edges[i].id)) {
+                deepMerge(s.data.edges[i], updates.get(s.data.edges[i].id));
+              }
+            }
+          }
+          // Remove edges
+          if (specUpdate.data.edges?.remove) {
+            const removeIds = new Set(specUpdate.data.edges.remove);
+            s.data.edges = s.data.edges.filter((e) => !removeIds.has(e.id));
           }
         }
       })

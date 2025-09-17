@@ -1,0 +1,50 @@
+export type GestureState<T extends string> = {
+  event: PointerEvent | WheelEvent | MouseEvent;
+  xy: [number, number];
+  initial: [number, number];
+  intentional: boolean;
+  delta: [number, number];
+  offset: [number, number];
+  lastOffset: [number, number];
+  movement: [number, number];
+  velocity: [number, number];
+  distance: [number, number];
+  direction: [number, number];
+  overflow: [number, number];
+  startTime: number;
+  timeDelta: number;
+  elapsedTime: number;
+  timeStamp: number;
+  type: T;
+  target: EventTarget | undefined;
+  currentTarget: EventTarget | undefined;
+  first: boolean;
+  last: boolean;
+  active: boolean;
+  memo: any;
+  cancel: () => void;
+  canceled: boolean;
+  down: boolean;
+  buttons: number;
+  touches: number;
+  args: any;
+  ctrlKey: boolean;
+  altKey: boolean;
+  shiftKey: boolean;
+  metaKey: boolean;
+  locked: boolean;
+  dragging: boolean;
+  moving: boolean;
+  scrolling: boolean;
+  wheeling: boolean;
+  pinching: boolean;
+};
+
+export type DragState = GestureState<'drag'> & {
+  swipe: Vector2;
+  tap: boolean;
+};
+
+export type WheelState = GestureState<'wheel'>;
+export type HoverState = GestureState<'hover'>;
+export type ClickState = GestureState<'click'>;

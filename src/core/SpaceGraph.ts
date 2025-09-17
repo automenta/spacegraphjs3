@@ -2,51 +2,89 @@ import * as THREE from 'three';
 import { createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { createState } from './createState';
-import { Spec, SpecUpdate } from '../types';
+import { Spec, SpecUpdate, ElementActorClass, LayoutEngineClass } from '../types';
 import { RenderingManager } from '../managers/RenderingManager';
 import { EventManager } from '../managers/EventManager';
 import { DataManager } from '../managers/DataManager';
 import { ISpaceGraphPlugin } from './plugin';
+import { SphereElementActor } from '../renderers/elementActors/SphereElementActor';
+import { D3ForceLayout } from '../layouts/D3ForceLayout';
 
 /**
  * The main class for creating and managing a SpaceGraph visualization.
  * It orchestrates the renderer, interaction, layout, and other controllers.
  */
 export class SpaceGraph {
-  private container: HTMLElement;
-  /**
-   * The reactive state of the graph, powered by a SolidJS store.
-   * Direct modifications to this object will trigger updates in the visualization.
-   * @public
-   */
+  private static elementActorRegistry: Map<string, ElementActorClass> = new Map([
+    ['sphere', SphereElementActor],
+  ]);
+  private static layoutEngineRegistry: Map<string, LayoutEngineClass> = new Map([
+    ['force-directed', D3ForceLayout],
+  ]);
+  private static instancedGeometryRegistry: Map<string, THREE.BufferGeometry> =
+    new Map([['sphere', new THREE.SphereGeometry(0.5, 16, 16)]]);
+
+  public static registerType(name: string, actorClass: ElementActorClass) {
+    SpaceGraph.elementActorRegistry.set(name, actorClass);
+  }
+
+  public static getElementActorRegistry() {
+    return SpaceGraph.elementActorRegistry;
+  }
+
+  public static registerLayout(name: string, engineClass: LayoutEngineClass) {
+    SpaceGraph.layoutEngineRegistry.set(name, engineClass);
+  }
+
+  public static getLayoutEngineRegistry() {
+    return SpaceGraph.layoutEngineRegistry;
+  }
+
+  public static registerInstancedType(
+    name: string,
+    geometry: THREE.BufferGeometry
+  ) {
+    SpaceGraph.instancedGeometryRegistry.set(name, geometry);
+  }
+
+  public static getInstancedGeometryRegistry() {
+    return SpaceGraph.instancedGeometryRegistry;
+  }
+
   public state!: Store<Spec>;
-  public updateState!: (spec: SpecUpdate) => void;
-  public setState!: (fn: (prevState: Spec) => Spec) => void;
+  public scene: THREE.Scene;
+  public camera: THREE.PerspectiveCamera;
+
+  private container: HTMLElement;
+  private updateState!: (spec: SpecUpdate) => void;
+  private setState!: (fn: (prevState: Spec) => Spec) => void;
 
   public renderingManager!: RenderingManager;
   public eventManager!: EventManager;
   public dataManager!: DataManager;
-
   private plugins: ISpaceGraphPlugin[] = [];
   private dispose: () => void;
 
   constructor(containerSelector: string, initialSpec: Spec, plugins: ISpaceGraphPlugin[] = []) {
-    const container = document.querySelector(containerSelector);
-    if (!container) {
-      throw new Error(`Container element '${containerSelector}' not found.`);
-    }
-    this.container = container as HTMLElement;
+    this.container = this.initContainer(containerSelector);
 
-    // The `createRoot` ensures that all SolidJS reactivity is properly disposed of
-    // when the `destroy` method is called.
     this.dispose = createRoot((dispose) => {
       this.initReactiveState(initialSpec);
       this.initManagers();
       this.initPlugins(plugins);
-
-      // Return the dispose function so it can be called later in `destroy()`
       return dispose;
     });
+
+    this.scene = this.renderingManager.getScene();
+    this.camera = this.renderingManager.getCamera();
+  }
+
+  private initContainer(containerSelector: string): HTMLElement {
+    const container = document.querySelector(containerSelector);
+    if (!container) {
+      throw new Error(`Container element '${containerSelector}' not found.`);
+    }
+    return container as HTMLElement;
   }
 
   /**
@@ -71,7 +109,7 @@ export class SpaceGraph {
   /**
    * Initializes the plugins.
    */
-  private initPlugins(plugins: ISpaceGraphPlugin[]) {
+  private initPlugins(plugins: ISpaceGraphPlugin[] = []) {
     this.plugins = plugins;
     for (const plugin of this.plugins) {
       plugin.init(this);
@@ -84,7 +122,10 @@ export class SpaceGraph {
    * @param listener - The callback function to execute when the event is fired.
    * @returns A function that removes the event listener when called.
    */
-  public on(eventName: string, listener: (...args: any[]) => void) {
+  public on<Key extends keyof GraphEventMap>(
+    eventName: Key,
+    listener: (payload: GraphEventMap[Key]) => void
+  ) {
     return this.eventManager.on(eventName, listener);
   }
 
@@ -95,6 +136,10 @@ export class SpaceGraph {
    */
   public getElement(id: string) {
     return this.dataManager.getElement(id);
+  }
+
+  public getContainer(): HTMLElement {
+    return this.container;
   }
 
   /**

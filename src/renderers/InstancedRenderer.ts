@@ -10,16 +10,15 @@
 import * as THREE from 'three';
 import { createEffect, on, createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
-import { Spec, GraphElement } from './types';
+import { Spec, NodeSpec } from '../types';
 import { IRenderer } from './IRenderer';
 
 const MAX_INSTANCES = 100000;
 
 export class InstancedRenderer implements IRenderer {
-  private static registeredGeometries: Map<string, THREE.BufferGeometry> = new Map();
-
   private scene: THREE.Scene;
   private state: Store<Spec>;
+  private instancedGeometryRegistry: Map<string, THREE.BufferGeometry>;
   public instancedMeshes: Map<string, THREE.InstancedMesh> = new Map();
   private typeToIdMaps: Map<
     string,
@@ -28,16 +27,14 @@ export class InstancedRenderer implements IRenderer {
   private dummy = new THREE.Object3D();
   private _dispose: () => void;
 
-  public static registerInstancedType(
-    typeName: string,
-    geometry: THREE.BufferGeometry
+  constructor(
+    scene: THREE.Scene,
+    state: Store<Spec>,
+    instancedGeometryRegistry: Map<string, THREE.BufferGeometry>
   ) {
-    InstancedRenderer.registeredGeometries.set(typeName, geometry);
-  }
-
-  constructor(scene: THREE.Scene, state: Store<Spec>) {
     this.scene = scene;
     this.state = state;
+    this.instancedGeometryRegistry = instancedGeometryRegistry;
 
     this._dispose = createRoot((dispose) => {
       this.init();
@@ -46,20 +43,14 @@ export class InstancedRenderer implements IRenderer {
   }
 
   private init() {
-    // Register a default sphere geometry if no types are registered
-    if (InstancedRenderer.registeredGeometries.size === 0) {
-      InstancedRenderer.registerInstancedType(
-        'sphere',
-        new THREE.SphereGeometry(0.5, 16, 16)
-      );
-    }
-
     // Create InstancedMesh for each registered geometry type
     for (const [
       typeName,
       geometry,
-    ] of InstancedRenderer.registeredGeometries.entries()) {
-      geometry.computeBoundsTree();
+    ] of this.instancedGeometryRegistry.entries()) {
+      if (geometry.computeBoundsTree) {
+        geometry.computeBoundsTree();
+      }
       const material = new THREE.MeshBasicMaterial({ vertexColors: true });
       const mesh = new THREE.InstancedMesh(geometry, material, MAX_INSTANCES);
       mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -107,6 +98,14 @@ export class InstancedRenderer implements IRenderer {
         mesh.count = typedNodes.length;
         mesh.instanceMatrix.needsUpdate = true;
         if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+
+        // Force an initial update of all instances
+        if (mesh.count > 0) {
+            for (let i = 0; i < mesh.count; i++) {
+                const node = typedNodes[i];
+                this.updateInstance(mesh, idMaps, i, node);
+            }
+        }
       }
     });
 
@@ -133,7 +132,7 @@ export class InstancedRenderer implements IRenderer {
             if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
           }
         },
-        { defer: true }
+        { defer: false }
       )
     );
   }
@@ -152,6 +151,7 @@ export class InstancedRenderer implements IRenderer {
     );
     this.dummy.updateMatrix();
     mesh.setMatrixAt(index, this.dummy.matrix);
+    mesh.instanceMatrix.needsUpdate = true;
 
     // Update color based on state
     const { hoveredElementId, selectedElementIds } = this.state.interaction;
@@ -165,7 +165,11 @@ export class InstancedRenderer implements IRenderer {
       finalColor = this.state.style['node:hover'].color;
     }
 
+    console.log(`Node ${node.id} color: ${node.color}, finalColor: ${finalColor}`);
     mesh.setColorAt(index, new THREE.Color(finalColor));
+    if (mesh.instanceColor) {
+        mesh.instanceColor.needsUpdate = true;
+    }
   }
 
   // --- IRenderer Implementation ---
@@ -198,8 +202,8 @@ export class InstancedRenderer implements IRenderer {
         (mesh.material as THREE.Material).dispose();
       }
       this.scene.remove(mesh);
-      if ((mesh.geometry as any)?.boundsTree) {
-        (mesh.geometry as any).disposeBoundsTree();
+      if (mesh.geometry?.boundsTree) {
+        mesh.geometry.disposeBoundsTree();
       }
     }
     this.instancedMeshes.clear();

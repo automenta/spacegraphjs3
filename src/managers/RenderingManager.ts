@@ -45,14 +45,37 @@ export class RenderingManager {
   }
 
   private setupRenderers() {
-    this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
-    this.container.appendChild(this.renderer.domElement);
+    this._setupRenderer(this.renderer);
+    this._setupRenderer(this.cssRenderer, {
+      position: 'absolute',
+      top: '0px',
+      pointerEvents: 'none',
+    });
 
-    this.cssRenderer.setSize(this.container.clientWidth, this.container.clientHeight);
-    this.cssRenderer.domElement.style.position = 'absolute';
-    this.cssRenderer.domElement.style.top = '0px';
-    this.container.appendChild(this.cssRenderer.domElement);
+    window.addEventListener('resize', this.handleResize);
   }
+
+  private _setupRenderer(
+    renderer: THREE.WebGLRenderer | CSS2DRenderer,
+    styles?: Partial<CSSStyleDeclaration>
+  ) {
+    renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+    if (styles) {
+      Object.assign(renderer.domElement.style, styles);
+    }
+    this.container.appendChild(renderer.domElement);
+  }
+
+  private handleResize = () => {
+    const width = this.container.clientWidth;
+    const height = this.container.clientHeight;
+
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+
+    this.renderer.setSize(width, height);
+    this.cssRenderer.setSize(width, height);
+  };
 
   private initRenderers() {
     this.edgeRenderer = new EdgeRenderer(this.scene, this.graph.state);
@@ -65,23 +88,36 @@ export class RenderingManager {
       const threshold = this.graph.state.performance?.instancingThreshold ?? 100;
       const shouldUseInstanced = nodeCount > threshold;
 
-      const currentRendererType =
-        this.nodeRenderer instanceof InstancedRenderer
-          ? 'instanced'
-          : 'default';
+      const needsUpdate =
+        !this.nodeRenderer ||
+        (shouldUseInstanced && !(this.nodeRenderer instanceof InstancedRenderer)) ||
+        (!shouldUseInstanced && !(this.nodeRenderer instanceof NodeRenderer));
 
-      if (shouldUseInstanced && currentRendererType !== 'instanced') {
-        if (this.nodeRenderer) this.nodeRenderer.dispose();
-        this.nodeRenderer = new InstancedRenderer(this.scene, this.graph.state);
-      } else if (!shouldUseInstanced && currentRendererType !== 'default') {
-        if (this.nodeRenderer) this.nodeRenderer.dispose();
-        this.nodeRenderer = new NodeRenderer(this.scene, this.graph.state);
+      if (needsUpdate) {
+        if (this.nodeRenderer) {
+          this.nodeRenderer.dispose();
+        }
+        this.nodeRenderer = shouldUseInstanced
+          ? new InstancedRenderer(
+              this.scene,
+              this.graph.state,
+              SpaceGraph.getInstancedGeometryRegistry()
+            )
+          : new NodeRenderer(
+              this.scene,
+              this.graph.state,
+              SpaceGraph.getElementActorRegistry()
+            );
       }
     });
   }
 
   public getNodeRenderer(): IRenderer {
     return this.nodeRenderer;
+  }
+
+  public getScene(): THREE.Scene {
+    return this.scene;
   }
 
   public getCamera(): THREE.PerspectiveCamera {
@@ -107,6 +143,8 @@ export class RenderingManager {
   }
 
   public dispose() {
+    window.removeEventListener('resize', this.handleResize);
+
     this.renderer.dispose();
     if (this.renderer.domElement.parentNode) {
       this.renderer.domElement.parentNode.removeChild(this.renderer.domElement);
@@ -114,7 +152,9 @@ export class RenderingManager {
     if (this.cssRenderer.domElement.parentNode) {
       this.cssRenderer.domElement.parentNode.removeChild(this.cssRenderer.domElement);
     }
-    this.nodeRenderer.dispose();
+    if (this.nodeRenderer) {
+      this.nodeRenderer.dispose();
+    }
     this.edgeRenderer.dispose();
     this.htmlRenderer.dispose();
   }

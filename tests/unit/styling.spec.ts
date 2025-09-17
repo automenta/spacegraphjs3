@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
 import { InstancedRenderer } from '../../src/renderers/InstancedRenderer';
 import { createState } from '../../src/core/createState';
+import { SpaceGraph } from '../../src/core/SpaceGraph';
 
 const createMockState = () => {
   return createState({
@@ -29,7 +30,11 @@ describe('InstancedRenderer Styling', () => {
   it('should apply default, hover, and selected styles correctly', async () => {
     const scene = new THREE.Scene();
     const { state, updateState } = createMockState();
-    const renderer = new InstancedRenderer(scene, state);
+    const renderer = new InstancedRenderer(
+      scene,
+      state,
+      SpaceGraph.getInstancedGeometryRegistry()
+    );
 
     // Initial state check
     await new Promise((r) => setTimeout(r, 0));

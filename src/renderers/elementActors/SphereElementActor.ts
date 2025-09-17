@@ -21,7 +21,7 @@ export class SphereElementActor extends BaseElementActor {
 
   public init(): void {
     const geometry = new THREE.SphereGeometry(0.5, 16, 16);
-    (geometry as any).computeBoundsTree();
+    geometry.computeBoundsTree();
     const material = new THREE.MeshBasicMaterial();
     this.threeObject = new THREE.Mesh(geometry, material);
     this.threeObject.userData.nodeId = this.elementId;
@@ -57,7 +57,10 @@ export class SphereElementActor extends BaseElementActor {
     isElementSelected: boolean
   ): void {
     if (!this.threeObject) return;
-    const mesh = this.threeObject as THREE.Mesh<any, THREE.MeshBasicMaterial>;
+    const mesh = this.threeObject as THREE.Mesh<
+      THREE.SphereGeometry,
+      THREE.MeshBasicMaterial
+    >;
 
     mesh.position.set(
       elementState.position?.x ?? 0,
@@ -84,9 +87,9 @@ export class SphereElementActor extends BaseElementActor {
 
   public dispose(): void {
     if (this.threeObject) {
-      const mesh = this.threeObject as THREE.Mesh;
-      if (typeof (mesh.geometry as any).disposeBoundsTree === 'function') {
-        (mesh.geometry as any).disposeBoundsTree();
+      const mesh = this.threeObject as THREE.Mesh<THREE.SphereGeometry>;
+      if (mesh.geometry.disposeBoundsTree) {
+        mesh.geometry.disposeBoundsTree();
       }
     }
     super.dispose();
