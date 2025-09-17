@@ -12,8 +12,8 @@ describe('HUDPlugin', () => {
       },
       hud: {
         visible: true,
-        content: 'Initial Content'
-      }
+        content: 'Initial Content',
+      },
     } as any;
     const { graph, cleanup } = createTestGraph(spec);
     const hudPlugin = new HUDPlugin();

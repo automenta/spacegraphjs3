@@ -8,14 +8,14 @@ export class InteractionLogic {
     my: number,
     state: Store<Spec>,
     updateState: (spec: SpecUpdate) => void,
-    threeCamera: THREE.PerspectiveCamera
+    threeCamera: THREE.PerspectiveCamera,
   ) {
     if (!state.camera) return;
     const panSpeed = 0.001 * state.camera.distance;
 
     const right = new THREE.Vector3().setFromMatrixColumn(
       threeCamera.matrix,
-      0
+      0,
     );
     const up = new THREE.Vector3().setFromMatrixColumn(threeCamera.matrix, 1);
 
@@ -39,7 +39,7 @@ export class InteractionLogic {
     mx: number,
     my: number,
     state: Store<Spec>,
-    updateState: (spec: SpecUpdate) => void
+    updateState: (spec: SpecUpdate) => void,
   ) {
     if (!state.camera) return;
     const rotateSpeed = 0.005;
@@ -55,7 +55,7 @@ export class InteractionLogic {
     state: Store<Spec>,
     updateState: (spec: SpecUpdate) => void,
     direction: 'in' | 'out',
-    zoomSpeed: number
+    zoomSpeed: number,
   ) {
     if (!state.camera) return;
     const newDistance =
@@ -73,7 +73,7 @@ export class InteractionLogic {
     state: Store<Spec>,
     updateState: (spec: SpecUpdate) => void,
     direction: 'left' | 'right' | 'up' | 'down',
-    orbitSpeed: number
+    orbitSpeed: number,
   ) {
     if (!state.camera) return;
     let newTheta = state.camera.theta;
@@ -105,13 +105,13 @@ export class InteractionLogic {
     updateState: (spec: SpecUpdate) => void,
     direction: 'forward' | 'backward' | 'left' | 'right',
     panSpeed: number,
-    threeCamera: THREE.PerspectiveCamera
+    threeCamera: THREE.PerspectiveCamera,
   ) {
     if (!state.camera) return;
 
     const right = new THREE.Vector3().setFromMatrixColumn(
       threeCamera.matrix,
-      0
+      0,
     );
     const forward = new THREE.Vector3();
     threeCamera.getWorldDirection(forward);
@@ -150,7 +150,7 @@ export class InteractionLogic {
     dragPlane: THREE.Plane,
     rendererEl: HTMLElement,
     threeCamera: THREE.PerspectiveCamera,
-    updateState: (spec: SpecUpdate) => void
+    updateState: (spec: SpecUpdate) => void,
   ) {
     const pointer = new THREE.Vector2();
     const raycaster = new THREE.Raycaster();

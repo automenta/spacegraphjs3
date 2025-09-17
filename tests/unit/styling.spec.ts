@@ -33,7 +33,7 @@ describe('InstancedRenderer Styling', () => {
     const renderer = new InstancedRenderer(
       scene,
       state,
-      SpaceGraph.getInstancedGeometryRegistry()
+      SpaceGraph.getInstancedGeometryRegistry(),
     );
 
     // Initial state check

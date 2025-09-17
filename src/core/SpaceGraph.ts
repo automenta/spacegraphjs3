@@ -42,7 +42,7 @@ export class SpaceGraph {
 
   public static registerInstancedType(
     name: string,
-    geometry: THREE.BufferGeometry
+    geometry: THREE.BufferGeometry,
   ) {
     SpaceGraph.instancedGeometryRegistry.set(name, geometry);
   }
@@ -142,7 +142,7 @@ export class SpaceGraph {
    */
   public on<Key extends keyof GraphEventMap>(
     eventName: Key,
-    listener: (payload: GraphEventMap[Key]) => void
+    listener: (payload: GraphEventMap[Key]) => void,
   ) {
     return this.eventManager.on(eventName, listener);
   }

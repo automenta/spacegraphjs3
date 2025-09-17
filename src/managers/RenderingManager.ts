@@ -35,7 +35,7 @@ export class RenderingManager {
       75,
       this.container.clientWidth / this.container.clientHeight,
       0.1,
-      1000
+      1000,
     );
     this.renderer = new THREE.WebGLRenderer();
     this.cssRenderer = new CSS2DRenderer();
@@ -58,7 +58,7 @@ export class RenderingManager {
 
   private _setupRenderer(
     renderer: THREE.WebGLRenderer | CSS2DRenderer,
-    styles?: Partial<CSSStyleDeclaration>
+    styles?: Partial<CSSStyleDeclaration>,
   ) {
     renderer.setSize(this.container.clientWidth, this.container.clientHeight);
     if (styles) {
@@ -100,15 +100,15 @@ export class RenderingManager {
         }
         this.nodeRenderer = shouldUseInstanced
           ? new InstancedRenderer(
-              this.scene,
-              this.graph.state,
-              SpaceGraph.getInstancedGeometryRegistry()
-            )
+            this.scene,
+            this.graph.state,
+            SpaceGraph.getInstancedGeometryRegistry(),
+          )
           : new NodeRenderer(
-              this.scene,
-              this.graph.state,
-              SpaceGraph.getElementActorRegistry()
-            );
+            this.scene,
+            this.graph.state,
+            SpaceGraph.getElementActorRegistry(),
+          );
       }
     });
   }

@@ -1,4 +1,12 @@
-import { forceSimulation, Simulation, forceLink, forceManyBody, forceCenter, SimulationNodeDatum, Force } from 'd3-force-3d';
+import {
+  forceSimulation,
+  Simulation,
+  forceLink,
+  forceManyBody,
+  forceCenter,
+  SimulationNodeDatum,
+  Force,
+} from 'd3-force-3d';
 import { produce } from 'solid-js/store';
 import { createEffect } from 'solid-js';
 import { SpaceGraph } from '../core/SpaceGraph';
@@ -46,7 +54,7 @@ export class D3ForceLayout implements ILayoutEngine {
       .numDimensions(3)
       .force(
         'link',
-        forceLink<D3Node, D3Link>().id((d) => d.id)
+        forceLink<D3Node, D3Link>().id((d) => d.id),
       )
       .force('charge', forceManyBody())
       .force('center', forceCenter())
@@ -69,7 +77,7 @@ export class D3ForceLayout implements ILayoutEngine {
             stateNode.position.z = simNode.z ?? 0;
           }
         }
-      })
+      }),
     );
   }
 

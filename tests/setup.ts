@@ -8,7 +8,10 @@ import {
 
 // Mock SolidJS devtools global to prevent errors in test environment
 if (typeof globalThis !== 'undefined') {
-  (globalThis as any)._$SolidDev = { registerGraph: () => {} };
+  (globalThis as any)._$SolidDev = {
+    registerGraph: () => {
+    },
+  };
 }
 
 // Apply the monkey-patch for all tests

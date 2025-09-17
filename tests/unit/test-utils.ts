@@ -17,7 +17,7 @@ export const createTestGraph = (initialSpec: Spec) => {
   const dispose = createRoot((dispose) => {
     const mockInitManagers = vi
       .spyOn(SpaceGraph.prototype as any, 'initManagers')
-      .mockImplementation(function (this: SpaceGraph) {
+      .mockImplementation(function(this: SpaceGraph) {
         this.renderingManager = new RenderingManager() as any;
         this.dataManager = new DataManager(this);
         this.eventManager = new EventManager();

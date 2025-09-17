@@ -84,7 +84,7 @@ export function createState(initialSpec: Spec) {
             s.data.edges = s.data.edges.filter((e) => !removeIds.has(e.id));
           }
         }
-      })
+      }),
     );
   };
 

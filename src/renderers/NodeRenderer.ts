@@ -19,7 +19,7 @@ export class NodeRenderer implements IRenderer {
   constructor(
     scene: THREE.Scene,
     state: Store<Spec>,
-    elementActorRegistry: Map<string, ElementActorClass>
+    elementActorRegistry: Map<string, ElementActorClass>,
   ) {
     this.scene = scene;
     this.state = state;
@@ -55,19 +55,19 @@ export class NodeRenderer implements IRenderer {
     const ActorClass = this.elementActorRegistry.get(node.type);
     if (!ActorClass) {
       console.warn(
-        `No ElementActor registered for type: ${node.type}. Skipping node ${node.id}.`
+        `No ElementActor registered for type: ${node.type}. Skipping node ${node.id}.`,
       );
       return;
     }
 
     const elementStateProxy = this.state.data!.nodes!.find(
-      (n) => n.id === node.id
+      (n) => n.id === node.id,
     )!;
 
     const actor = new ActorClass(
       this.scene,
       elementStateProxy as Store<NodeSpec>,
-      this.state
+      this.state,
     );
     actor.init();
     this.elementActors.set(node.id, actor);
@@ -96,7 +96,7 @@ export class NodeRenderer implements IRenderer {
   }
 
   public getNodeIdFromIntersection(
-    intersection: THREE.Intersection
+    intersection: THREE.Intersection,
   ): string | null {
     // Retrieve the nodeId stored in the mesh's userData.
     return intersection.object.userData.nodeId ?? null;

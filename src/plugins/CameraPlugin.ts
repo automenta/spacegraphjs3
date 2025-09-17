@@ -37,7 +37,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
       this.threeCamera.position.set(
         target.x + x,
         target.y + y,
-        target.z + z
+        target.z + z,
       );
       this.threeCamera.lookAt(new THREE.Vector3(target.x, target.y, target.z));
       this.threeCamera.updateProjectionMatrix();
@@ -51,7 +51,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
    */
   public flyTo(
     targetState: Partial<SpecUpdate['camera']>,
-    options: { duration: number } = { duration: 1000 }
+    options: { duration: number } = { duration: 1000 },
   ) {
     const fromState = { ...this.graph.state.camera };
 
@@ -68,7 +68,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
       onComplete: () => {
         // Emit animation end event
         this.graph.eventManager.emit('camera:animation:end');
-      }
+      },
     });
   }
 
@@ -79,7 +79,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
    */
   public frame(
     elements: { position: THREE.Vector3 }[],
-    options: { duration: number } = { duration: 1000 }
+    options: { duration: number } = { duration: 1000 },
   ) {
     if (elements.length === 0) return;
 

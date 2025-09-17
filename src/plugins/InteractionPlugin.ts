@@ -28,7 +28,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
         onHover: (state: HoverState) => this.onHover(state),
         onWheel: (state: WheelState) => this.onWheel(state),
       },
-      {}
+      {},
     );
 
     this.boundOnClick = this.onClick.bind(this) as unknown as (event: PointerEvent) => void;
@@ -125,7 +125,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     } else if (currentHoveredId) {
       const oldElement = this.graph.dataManager.getElement(currentHoveredId);
       this.graph.updateState({ interaction: { hoveredElementId: null } });
-      if(oldElement) this.graph.eventManager.emit('element:hover:leave', { target: oldElement });
+      if (oldElement) this.graph.eventManager.emit('element:hover:leave', { target: oldElement });
     }
   }
 

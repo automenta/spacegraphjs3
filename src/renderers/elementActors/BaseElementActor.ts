@@ -17,7 +17,7 @@ export abstract class BaseElementActor {
   constructor(
     scene: THREE.Scene,
     elementState: Store<GraphElement>,
-    graphState: Store<Spec>
+    graphState: Store<Spec>,
   ) {
     this.scene = scene;
     this.elementState = elementState;

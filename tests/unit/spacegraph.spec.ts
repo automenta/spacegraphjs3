@@ -7,11 +7,11 @@ describe('SpaceGraph', () => {
   it('should call dispose on all managers when destroy is called', () => {
     const dataManagerDisposeSpy = vi.spyOn(
       DataManager.prototype,
-      'dispose'
+      'dispose',
     );
     const eventManagerDisposeSpy = vi.spyOn(
       EventManager.prototype,
-      'dispose'
+      'dispose',
     );
 
     const { graph, cleanup } = createTestGraph({

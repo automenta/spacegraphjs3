@@ -13,7 +13,7 @@ export class SphereElementActor extends BaseElementActor {
   constructor(
     scene: THREE.Scene,
     elementState: Element,
-    graphState: Store<Spec>
+    graphState: Store<Spec>,
   ) {
     super(scene, elementState, graphState);
     this.elementId = elementState.id;
@@ -38,7 +38,7 @@ export class SphereElementActor extends BaseElementActor {
     const isHovered = this.graphState.interaction.hoveredElementId === this.elementId;
 
     const elementState = this.graphState.data.nodes.find(
-      (n) => n.id === this.elementId
+      (n) => n.id === this.elementId,
     );
     if (!elementState) {
       // Node has been removed, actor will be disposed soon.
@@ -50,7 +50,7 @@ export class SphereElementActor extends BaseElementActor {
   private updateVisuals(
     elementState: Element,
     isElementHovered: boolean,
-    isElementSelected: boolean
+    isElementSelected: boolean,
   ): void {
     if (!this.threeObject) return;
     const mesh = this.threeObject as THREE.Mesh<
@@ -61,7 +61,7 @@ export class SphereElementActor extends BaseElementActor {
     mesh.position.set(
       elementState.position?.x ?? 0,
       elementState.position?.y ?? 0,
-      elementState.position?.z ?? 0
+      elementState.position?.z ?? 0,
     );
 
     const finalColor = new THREE.Color(elementState.color || '#ffffff'); // Start with default color

@@ -25,7 +25,7 @@ export class HTMLRenderer {
     // This supports both reactive calls (from createEffect) and manual calls (from tests).
     if (!htmlNodes) {
       htmlNodes = (this.state.data?.nodes || []).filter(
-        (node): node is HtmlElement => node.type === 'html'
+        (node): node is HtmlElement => node.type === 'html',
       );
     }
 

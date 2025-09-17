@@ -24,7 +24,7 @@ export class LayoutPlugin implements ISpaceGraphPlugin {
     }
 
     const LayoutEngineClass = SpaceGraph.getLayoutEngineRegistry().get(
-      layoutType
+      layoutType,
     );
 
     if (LayoutEngineClass) {

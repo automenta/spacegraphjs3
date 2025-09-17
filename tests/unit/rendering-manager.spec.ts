@@ -22,7 +22,8 @@ vi.mock('three', async () => {
 describe('RenderingManager Error Handling', () => {
   it('should catch rendering errors and display an error message', async () => {
     // Mock console.error for this specific test
-    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {
+    });
 
     // Mock requestAnimationFrame
     const requestAnimationFrame = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {

@@ -30,7 +30,7 @@ export class InstancedRenderer implements IRenderer {
   constructor(
     scene: THREE.Scene,
     state: Store<Spec>,
-    instancedGeometryRegistry: Map<string, THREE.BufferGeometry>
+    instancedGeometryRegistry: Map<string, THREE.BufferGeometry>,
   ) {
     this.scene = scene;
     this.state = state;
@@ -53,7 +53,7 @@ export class InstancedRenderer implements IRenderer {
       mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
       mesh.instanceColor = new THREE.InstancedBufferAttribute(
         new Float32Array(MAX_INSTANCES * 3),
-        3
+        3,
       );
       mesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
       mesh.userData.typeName = typeName; // Store typeName for raycasting
@@ -131,8 +131,8 @@ export class InstancedRenderer implements IRenderer {
             if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
           }
         },
-        { defer: false }
-      )
+        { defer: false },
+      ),
     );
   }
 
@@ -140,13 +140,13 @@ export class InstancedRenderer implements IRenderer {
     mesh: THREE.InstancedMesh,
     idMaps: { idToIndex: Map<string, number>; indexToId: Map<number, string> },
     index: number,
-    node: GraphElement
+    node: GraphElement,
   ) {
     // Update matrix for position
     this.dummy.position.set(
       node.position?.x ?? 0,
       node.position?.y ?? 0,
-      node.position?.z ?? 0
+      node.position?.z ?? 0,
     );
     this.dummy.updateMatrix();
     mesh.setMatrixAt(index, this.dummy.matrix);
@@ -166,7 +166,7 @@ export class InstancedRenderer implements IRenderer {
 
     mesh.setColorAt(index, new THREE.Color(finalColor));
     if (mesh.instanceColor) {
-        mesh.instanceColor.needsUpdate = true;
+      mesh.instanceColor.needsUpdate = true;
     }
   }
 
@@ -176,7 +176,7 @@ export class InstancedRenderer implements IRenderer {
   }
 
   public getNodeIdFromIntersection(
-    intersection: THREE.Intersection
+    intersection: THREE.Intersection,
   ): string | null {
     if (intersection.instanceId === undefined) return null;
 
