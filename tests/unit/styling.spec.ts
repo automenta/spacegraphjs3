@@ -1,8 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
-import { InstancedRenderer } from '../../src/InstancedRenderer';
-
-import { createState } from '../../src/createState';
+import { InstancedRenderer } from '../../src/renderers/InstancedRenderer';
+import { createState } from '../../src/core/createState';
 
 const createMockState = () => {
   return createState({

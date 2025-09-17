@@ -4,8 +4,12 @@ import {
   computeBoundsTree,
   disposeBoundsTree,
 } from 'three-mesh-bvh';
-import { SpaceGraph } from '../src';
+import { SpaceGraph } from '../src/core/SpaceGraph';
 import { Spec } from '../src/types';
+import { LayoutPlugin } from '../src/plugins/LayoutPlugin';
+import { CameraPlugin } from '../src/plugins/CameraPlugin';
+import { InteractionPlugin } from '../src/plugins/InteractionPlugin';
+import { HUDPlugin } from '../src/plugins/HUDPlugin';
 
 // Add the bvh properties to the THREE objects
 THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
@@ -66,10 +70,18 @@ const initialSpec: Spec = {
   },
 };
 
-// 2. Create the SpaceGraph instance.
-const graph = new SpaceGraph('#container', initialSpec);
+// 2. Define the plugins to use.
+const plugins = [
+  new LayoutPlugin(),
+  new CameraPlugin(),
+  new InteractionPlugin(),
+  new HUDPlugin(),
+];
 
-// 3. Expose the graph instance for debugging and testing via the console and the HUD REPL.
+// 3. Create the SpaceGraph instance.
+const graph = new SpaceGraph('#container', initialSpec, plugins);
+
+// 4. Expose the graph instance for debugging and testing via the console and the HUD REPL.
 (window as any).graph = graph;
 console.log(`
   SpaceGraphJS Initialized!
@@ -88,7 +100,7 @@ console.log(`
   - Zoom: + (or =) / -
 `);
 
-// 4. Use the new event system to react to graph events.
+// 5. Use the new event system to react to graph events.
 graph.on('layout:start', () => {
   console.log('Layout simulation started.');
 });

@@ -4,15 +4,17 @@ import {
   computeBoundsTree,
   disposeBoundsTree,
 } from 'three-mesh-bvh';
-import { SpaceGraph } from '../src/index';
-import { GraphElement } from '../src/types';
+import { SpaceGraph } from '../src/core/SpaceGraph';
+import { GraphElement, Spec } from '../src/types';
+import { LayoutPlugin } from '../src/plugins/LayoutPlugin';
+import { CameraPlugin } from '../src/plugins/CameraPlugin';
+import { InteractionPlugin } from '../src/plugins/InteractionPlugin';
+import { HUDPlugin } from '../src/plugins/HUDPlugin';
 
 // Add the bvh properties to the THREE objects
 THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
 THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
-
-console.log('instanced-interaction.ts script started');
 
 const NUM_NODES_X = 15;
 const NUM_NODES_Y = 15;
@@ -35,52 +37,51 @@ for (let i = 0; i < NUM_NODES_X; i++) {
   }
 }
 
+const spec: Spec = {
+  data: {
+    nodes,
+    edges: [],
+  },
+  style: {
+    'node:hover': {
+      color: '#ff0000', // Red
+    },
+    'node:selected': {
+      color: '#00ff00', // Green
+    },
+  },
+  layout: {
+    type: 'force-directed',
+    charge: -30,
+    linkDistance: 1,
+  },
+  camera: {
+    target: { x: 0, y: 0, z: 0 },
+    phi: 0,
+    theta: 0,
+    distance: 250,
+  },
+  performance: {
+    instancingThreshold: 100, // Ensure instancing is on
+  },
+  interaction: {
+    hoveredElementId: null,
+    selectedElementIds: [],
+  },
+};
+
+const plugins = [
+  new LayoutPlugin(),
+  new CameraPlugin(),
+  new InteractionPlugin(),
+  new HUDPlugin(),
+];
+
 try {
-  const graph = new SpaceGraph('#container', {
-    data: {
-      nodes,
-      edges: [],
-    },
-    style: {
-      'node:hover': {
-        color: '#ff0000', // Red
-      },
-      'node:selected': {
-        color: '#00ff00', // Green
-      },
-    },
-    layout: {
-      type: 'force-directed',
-      charge: -30,
-      linkDistance: 1,
-    },
-    camera: {
-      target: { x: 0, y: 0, z: 0 },
-      phi: 0,
-      theta: 0,
-      distance: 250,
-    },
-    controls: {
-      keyboard: {
-        enabled: false,
-        panSpeed: 10,
-        zoomSpeed: 1,
-        orbitSpeed: 1,
-      },
-    },
-    performance: {
-      instancingThreshold: 100, // Ensure instancing is on
-    },
-    interaction: {
-      hoveredElementId: null,
-      selectedElementIds: [],
-    },
-  });
+  const graph = new SpaceGraph('#container', spec, plugins);
 
   // Expose graph to window for easy debugging and testing
   (window as any).graph = graph;
 } catch (e) {
   console.error('Error creating SpaceGraph instance:', e);
 }
-
-console.log('SpaceGraph instance created for instanced interaction test');

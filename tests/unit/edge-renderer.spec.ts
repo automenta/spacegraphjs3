@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
 import { createRoot } from 'solid-js';
-import { createState } from '../../src/createState';
-import { EdgeRenderer } from '../../src/EdgeRenderer';
+import { createState } from '../../src/core/createState';
+import { EdgeRenderer } from '../../src/renderers/EdgeRenderer';
 import { Spec } from '../../src/types';
 
 const nextTick = () => new Promise((resolve) => setTimeout(resolve, 0));

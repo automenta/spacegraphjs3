@@ -5,7 +5,11 @@ import {
   disposeBoundsTree,
 } from 'three-mesh-bvh';
 import { SpaceGraph } from '../src/index';
-import { GraphElement } from '../src/types';
+import { GraphElement, Spec } from '../src/types';
+import { LayoutPlugin } from '../src/plugins/LayoutPlugin';
+import { CameraPlugin } from '../src/plugins/CameraPlugin';
+import { InteractionPlugin } from '../src/plugins/InteractionPlugin';
+import { HUDPlugin } from '../src/plugins/HUDPlugin';
 
 // Add the bvh properties to the THREE objects
 THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
@@ -28,7 +32,7 @@ for (let i = 0; i < NUM_NODES; i++) {
   });
 }
 
-const graph = new SpaceGraph('#container', {
+const spec: Spec = {
   data: {
     nodes,
     edges: [],
@@ -52,14 +56,6 @@ const graph = new SpaceGraph('#container', {
     theta: 0,
     distance: 250,
   },
-  controls: {
-    keyboard: {
-      enabled: true,
-      panSpeed: 10,
-      zoomSpeed: 1,
-      orbitSpeed: 1,
-    },
-  },
   performance: {
     instancingThreshold: 100,
   },
@@ -67,6 +63,15 @@ const graph = new SpaceGraph('#container', {
     hoveredElementId: null,
     selectedElementIds: [],
   },
-});
+};
+
+const plugins = [
+  new LayoutPlugin(),
+  new CameraPlugin(),
+  new InteractionPlugin(),
+  new HUDPlugin(),
+];
+
+const graph = new SpaceGraph('#container', spec, plugins);
 
 console.log('SpaceGraph instance with large graph created:', graph);

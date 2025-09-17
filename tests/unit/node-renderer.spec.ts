@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
 import { createRoot, createEffect, on } from 'solid-js';
-import { createState } from '../../src/createState';
+import { createState } from '../../src/core/createState';
 import { Spec } from '../../src/types';
 import { NodeRenderer } from '../../src/renderers/NodeRenderer';
 

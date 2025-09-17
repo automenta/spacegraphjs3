@@ -3,8 +3,8 @@ import { createEffect, createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { Spec, GraphElement } from '../types';
 import { IRenderer } from '../IRenderer';
-import { BaseElementActor } from '../elementActors/BaseElementActor';
-import { SphereElementActor } from '../elementActors/SphereElementActor';
+import { BaseElementActor } from './elementActors/BaseElementActor';
+import { SphereElementActor } from './elementActors/SphereElementActor';
 
 // Define a type for the ElementActor constructor
 type ElementActorConstructor = new (

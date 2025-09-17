@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
 import { createRoot } from 'solid-js';
-import { createState } from '../../src/createState';
-import { HTMLRenderer } from '../../src/HTMLRenderer';
+import { createState } from '../../src/core/createState';
+import { HTMLRenderer } from '../../src/renderers/HTMLRenderer';
 import { Spec, HtmlElement, SpecUpdate, DeepPartial } from '../../src/types';
 import { CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer';
 

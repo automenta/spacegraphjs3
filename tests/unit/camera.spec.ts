@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { createState } from '../../src/createState';
-import { CameraController } from '../../src/CameraController';
+import { createState } from '../../src/core/createState';
+import { CameraPlugin } from '../../src/plugins/CameraPlugin';
 import { Spec } from '../../src/types';
 import * as THREE from 'three';
+import { SpaceGraph } from '../../src/core/SpaceGraph';
 
-describe('CameraController', () => {
+describe('CameraPlugin', () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -13,64 +14,51 @@ describe('CameraController', () => {
     vi.useRealTimers();
   });
 
-  it('should animate camera state with flyTo', async () => {
+  it('should animate camera position with flyTo', async () => {
     const initialSpec: Spec = {
       data: { nodes: [], edges: [] },
-      style: {},
-      layout: { type: 'force-directed' },
-      camera: {
-        target: { x: 0, y: 0, z: 0 },
-        phi: 0,
-        theta: 0,
-        distance: 10,
-      },
-      interaction: { hoveredElementId: null, selectedElementIds: [] },
     };
 
     const { state, updateState } = createState(initialSpec);
-    const mockEmit = vi.fn();
     const mockCamera = new THREE.PerspectiveCamera();
-    const cameraController = new CameraController(
+    mockCamera.position.set(0, 0, 10);
+
+    // Mock the SpaceGraph instance and its managers
+    const mockGraph = {
       state,
       updateState,
-      mockEmit,
-      mockCamera
-    );
+      renderingManager: {
+        getCamera: () => mockCamera,
+      },
+    } as unknown as SpaceGraph;
 
-    const target = {
-      target: { x: 10, y: 10, z: 10 },
-      distance: 5,
-      phi: 1,
-      theta: 1,
-    };
-    const options = { duration: 1000, ease: (t: number) => t };
+    const cameraPlugin = new CameraPlugin();
+    cameraPlugin.init(mockGraph);
 
-    cameraController.flyTo(target, options);
+    const target = new THREE.Vector3(10, 10, 5);
+    const options = { duration: 1000 };
 
-    expect(state.camera?.target.x).toBe(0);
-    expect(state.camera?.distance).toBe(10);
+    cameraPlugin.flyTo(target, options);
+
+    expect(mockCamera.position.x).toBe(0);
+    expect(mockCamera.position.z).toBe(10);
 
     await vi.advanceTimersByTimeAsync(500);
 
-    // State should be halfway to the target
+    // Position should be halfway to the target
     const checkIsClose = (val: number, target: number) =>
       expect(Math.abs(val - target)).toBeLessThan(0.1);
-    checkIsClose(state.camera!.target.x, 5);
-    checkIsClose(state.camera!.target.y, 5);
-    checkIsClose(state.camera!.target.z, 5);
-    checkIsClose(state.camera!.distance, 7.5);
-    checkIsClose(state.camera!.phi, 0.5);
-    checkIsClose(state.camera!.theta, 0.5);
+
+    checkIsClose(mockCamera.position.x, 5);
+    checkIsClose(mockCamera.position.y, 5);
+    checkIsClose(mockCamera.position.z, 7.5);
 
     // Advance time to the end
     await vi.advanceTimersByTimeAsync(500);
 
-    // State should be at the target
-    checkIsClose(state.camera!.target.x, 10);
-    checkIsClose(state.camera!.target.y, 10);
-    checkIsClose(state.camera!.target.z, 10);
-    checkIsClose(state.camera!.distance, 5);
-    checkIsClose(state.camera!.phi, 1);
-    checkIsClose(state.camera!.theta, 1);
+    // Position should be at the target
+    checkIsClose(mockCamera.position.x, 10);
+    checkIsClose(mockCamera.position.y, 10);
+    checkIsClose(mockCamera.position.z, 5);
   });
 });

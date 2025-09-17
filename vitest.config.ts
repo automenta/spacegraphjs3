@@ -12,4 +12,9 @@ export default defineConfig({
       '**/e2e/**',
     ],
   },
+  server: {
+    deps: {
+      inline: ['d3-force-3d'],
+    },
+  },
 });
