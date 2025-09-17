@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { createState } from '../../src/core/createState';
 import { CameraPlugin } from '../../src/plugins/CameraPlugin';
 import { Spec } from '../../src/types';
@@ -68,6 +68,8 @@ describe('CameraPlugin', () => {
     // Simulate completion
     animateArgs.onComplete();
 
-    expect(mockGraph.eventManager.emit).toHaveBeenCalledWith('camera:animation:end');
+    expect(mockGraph.eventManager.emit).toHaveBeenCalledWith(
+      'camera:animation:end'
+    );
   });
 });

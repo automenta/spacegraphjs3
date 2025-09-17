@@ -1,4 +1,4 @@
-import { vi, afterEach, beforeEach } from 'vitest';
+import { afterEach, beforeEach, vi } from 'vitest';
 import * as THREE from 'three';
 import {
   acceleratedRaycast,
@@ -9,8 +9,7 @@ import {
 // Mock SolidJS devtools global to prevent errors in test environment
 if (typeof globalThis !== 'undefined') {
   (globalThis as any)._$SolidDev = {
-    registerGraph: () => {
-    },
+    registerGraph: () => {},
   };
 }
 

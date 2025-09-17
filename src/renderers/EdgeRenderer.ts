@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 import { createEffect } from 'solid-js';
 import { Store } from 'solid-js/store';
-import { GraphElement, Edge, Spec } from '../types';
+import { Edge, GraphElement, Spec } from '../types';
 import { expandHex } from '../utils/color';
 
 export class EdgeRenderer {
+  public lineSegments: THREE.LineSegments;
   private scene: THREE.Scene;
   private state: Store<Spec>;
-  public lineSegments: THREE.LineSegments;
   private material: THREE.LineBasicMaterial;
   private geometry: THREE.BufferGeometry;
   private disposeEffect?: () => void;
@@ -33,12 +33,12 @@ export class EdgeRenderer {
 
   public updateEdges(
     nodes: GraphElement[] = this.state.data.nodes,
-    edges: Edge[] = this.state.data.edges,
+    edges: Edge[] = this.state.data.edges
   ) {
     if (!nodes || !edges || !this.lineSegments) {
       this.geometry.setAttribute(
         'position',
-        new THREE.Float32BufferAttribute([], 3),
+        new THREE.Float32BufferAttribute([], 3)
       );
       this.geometry.attributes.position.needsUpdate = true;
       return;
@@ -61,12 +61,12 @@ export class EdgeRenderer {
         vertices.push(
           sourceNode.position.x,
           sourceNode.position.y,
-          sourceNode.position.z,
+          sourceNode.position.z
         );
         vertices.push(
           targetNode.position.x,
           targetNode.position.y,
-          targetNode.position.z,
+          targetNode.position.z
         );
 
         const color = new THREE.Color();
@@ -76,7 +76,7 @@ export class EdgeRenderer {
         } catch (error) {
           console.warn(
             `Invalid color specified for edge ${edge.id}:`,
-            edge.color,
+            edge.color
           );
           color.set('#aaaaaa'); // Fallback to grey on error
         }
@@ -87,11 +87,11 @@ export class EdgeRenderer {
 
     this.geometry.setAttribute(
       'position',
-      new THREE.Float32BufferAttribute(vertices, 3),
+      new THREE.Float32BufferAttribute(vertices, 3)
     );
     this.geometry.setAttribute(
       'color',
-      new THREE.Float32BufferAttribute(colors, 3),
+      new THREE.Float32BufferAttribute(colors, 3)
     );
 
     this.geometry.attributes.position.needsUpdate = true;

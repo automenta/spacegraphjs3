@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { Spec } from '../../src/types';
 import { HUDPlugin } from '../../src/plugins/HUDPlugin';
 import { createTestGraph, nextTick } from './test-utils';

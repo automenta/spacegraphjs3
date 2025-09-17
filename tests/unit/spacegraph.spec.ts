@@ -1,18 +1,12 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { createTestGraph } from './test-utils';
 import { DataManager } from '../../src/managers/DataManager';
 import { EventManager } from '../../src/managers/EventManager';
 
 describe('SpaceGraph', () => {
   it('should call dispose on all managers when destroy is called', () => {
-    const dataManagerDisposeSpy = vi.spyOn(
-      DataManager.prototype,
-      'dispose',
-    );
-    const eventManagerDisposeSpy = vi.spyOn(
-      EventManager.prototype,
-      'dispose',
-    );
+    const dataManagerDisposeSpy = vi.spyOn(DataManager.prototype, 'dispose');
+    const eventManagerDisposeSpy = vi.spyOn(EventManager.prototype, 'dispose');
 
     const { graph, cleanup } = createTestGraph({
       data: { nodes: [], edges: [] },
@@ -33,7 +27,6 @@ describe('SpaceGraph', () => {
     expect(dataManagerDisposeSpy).toHaveBeenCalledOnce();
     expect(eventManagerDisposeSpy).toHaveBeenCalledOnce();
     expect(renderingManagerDisposeSpy).toHaveBeenCalledOnce();
-
 
     cleanup();
   });

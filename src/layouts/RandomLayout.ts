@@ -1,7 +1,7 @@
 import { createEffect } from 'solid-js';
 import { produce } from 'solid-js/store';
 import { SpaceGraph } from '../core/SpaceGraph';
-import { ILayoutEngine, NodeSpec, EdgeSpec } from '../types';
+import { ILayoutEngine } from '../types';
 
 export class RandomLayout implements ILayoutEngine {
   private graph!: SpaceGraph;
@@ -16,34 +16,6 @@ export class RandomLayout implements ILayoutEngine {
     createEffect(() => {
       this.setRandomPositions();
     });
-  }
-
-  private setRandomPositions(): void {
-    const setState = this.graph.setState;
-    const nodes = this.graph.state.data?.nodes ?? [];
-    
-    // Only update if there are nodes without positions
-    const needsPosition = nodes.some(node => !node.position);
-    
-    if (needsPosition) {
-      setState(
-        produce((s) => {
-          for (let i = 0; i < s.data.nodes.length; i++) {
-            const node = s.data.nodes[i];
-            if (!node.position) {
-              s.data.nodes[i] = {
-                ...node,
-                position: {
-                  x: (Math.random() - 0.5) * 20,
-                  y: (Math.random() - 0.5) * 20,
-                  z: (Math.random() - 0.5) * 20,
-                },
-              };
-            }
-          }
-        }),
-      );
-    }
   }
 
   public onTick(): void {
@@ -68,5 +40,33 @@ export class RandomLayout implements ILayoutEngine {
 
   public dispose(): void {
     // Nothing to dispose
+  }
+
+  private setRandomPositions(): void {
+    const setState = this.graph.setState;
+    const nodes = this.graph.state.data?.nodes ?? [];
+
+    // Only update if there are nodes without positions
+    const needsPosition = nodes.some((node) => !node.position);
+
+    if (needsPosition) {
+      setState(
+        produce((s) => {
+          for (let i = 0; i < s.data.nodes.length; i++) {
+            const node = s.data.nodes[i];
+            if (!node.position) {
+              s.data.nodes[i] = {
+                ...node,
+                position: {
+                  x: (Math.random() - 0.5) * 20,
+                  y: (Math.random() - 0.5) * 20,
+                  z: (Math.random() - 0.5) * 20,
+                },
+              };
+            }
+          }
+        })
+      );
+    }
   }
 }

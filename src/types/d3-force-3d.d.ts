@@ -1,5 +1,8 @@
 declare module 'd3-force-3d' {
-  import { SimulationNodeDatum as D3SimulationNodeDatum, SimulationLinkDatum as D3SimulationLinkDatum } from 'd3-force';
+  import {
+    SimulationLinkDatum as D3SimulationLinkDatum,
+    SimulationNodeDatum as D3SimulationNodeDatum,
+  } from 'd3-force';
 
   export interface SimulationNodeDatum extends D3SimulationNodeDatum {
     x: number;
@@ -7,14 +10,15 @@ declare module 'd3-force-3d' {
     z: number;
   }
 
-  export interface SimulationLinkDatum<N extends SimulationNodeDatum> extends D3SimulationLinkDatum<N> {
+  export interface SimulationLinkDatum<N extends SimulationNodeDatum>
+    extends D3SimulationLinkDatum<N> {
     // This is a dummy property to avoid the linter error.
     _dummy?: never;
   }
 
   export interface Force<
     N extends SimulationNodeDatum,
-    L extends SimulationLinkDatum<N>
+    L extends SimulationLinkDatum<N>,
   > {
     (alpha: number): void;
 
@@ -27,7 +31,7 @@ declare module 'd3-force-3d' {
 
   export interface Simulation<
     N extends SimulationNodeDatum,
-    L extends SimulationLinkDatum<N>
+    L extends SimulationLinkDatum<N>,
   > {
     restart(): this;
 
@@ -62,15 +66,19 @@ declare module 'd3-force-3d' {
 
   export function forceLink<
     N extends SimulationNodeDatum,
-    L extends SimulationLinkDatum<N>
+    L extends SimulationLinkDatum<N>,
   >(links?: L[]): Force<N, L>;
 
   export function forceManyBody<N extends SimulationNodeDatum>(): Force<N, any>;
 
-  export function forceCenter<N extends SimulationNodeDatum>(x?: number, y?: number, z?: number): Force<N, any>;
+  export function forceCenter<N extends SimulationNodeDatum>(
+    x?: number,
+    y?: number,
+    z?: number
+  ): Force<N, any>;
 
   export function forceSimulation<
     N extends SimulationNodeDatum,
-    L extends SimulationLinkDatum<N>
+    L extends SimulationLinkDatum<N>,
   >(nodes?: N[]): Simulation<N, L>;
 }

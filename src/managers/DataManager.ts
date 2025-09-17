@@ -1,6 +1,6 @@
 import { createEffect } from 'solid-js';
 import { SpaceGraph } from '../core/SpaceGraph';
-import { NodeSpec, EdgeSpec } from '../types';
+import { EdgeSpec, NodeSpec } from '../types';
 
 /**
  * Manages the data part of the state, providing efficient access to nodes and edges.

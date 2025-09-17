@@ -11,6 +11,7 @@ export class RenderingManager {
   public nodeRenderer: any;
   public edgeRenderer: any;
   public htmlRenderer: any;
+  dispose = vi.fn();
 
   constructor() {
     this.scene = new THREE.Scene();
@@ -50,10 +51,14 @@ export class RenderingManager {
   }
 
   getScene = () => this.scene;
+
   getCamera = () => this.camera;
+
   getContainer = () => this.container;
+
   getRendererDomElement = () => this.renderer.domElement;
+
   getRenderer = () => this.renderer;
+
   getNodeRenderer = () => this.nodeRenderer;
-  dispose = vi.fn();
 }

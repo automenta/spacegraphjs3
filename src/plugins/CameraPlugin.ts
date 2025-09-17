@@ -24,24 +24,6 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     this.initKeyboardControls();
   }
 
-  private initKeyboardControls(): void {
-    if (!this.graph.state.controls?.keyboard?.enabled) return;
-
-    this.boundOnKeyDown = this.onKeyDown.bind(this);
-    this.boundOnKeyUp = this.onKeyUp.bind(this);
-
-    window.addEventListener('keydown', this.boundOnKeyDown);
-    window.addEventListener('keyup', this.boundOnKeyUp);
-  }
-
-  private onKeyDown(event: KeyboardEvent): void {
-    this.activeKeys.add(event.key.toLowerCase());
-  }
-
-  private onKeyUp(event: KeyboardEvent): void {
-    this.activeKeys.delete(event.key.toLowerCase());
-  }
-
   public update(): void {
     if (!this.graph.state.controls?.keyboard?.enabled) return;
 
@@ -49,45 +31,84 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     if (!controls) return;
 
     // Panning
-    if (this.activeKeys.has('w')) InteractionLogic.handleKeyPan(this.graph.state, this.graph.updateState, 'forward', controls.panSpeed, this.threeCamera);
-    if (this.activeKeys.has('s')) InteractionLogic.handleKeyPan(this.graph.state, this.graph.updateState, 'backward', controls.panSpeed, this.threeCamera);
-    if (this.activeKeys.has('a')) InteractionLogic.handleKeyPan(this.graph.state, this.graph.updateState, 'left', controls.panSpeed, this.threeCamera);
-    if (this.activeKeys.has('d')) InteractionLogic.handleKeyPan(this.graph.state, this.graph.updateState, 'right', controls.panSpeed, this.threeCamera);
+    if (this.activeKeys.has('w'))
+      InteractionLogic.handleKeyPan(
+        this.graph.state,
+        this.graph.updateState,
+        'forward',
+        controls.panSpeed,
+        this.threeCamera
+      );
+    if (this.activeKeys.has('s'))
+      InteractionLogic.handleKeyPan(
+        this.graph.state,
+        this.graph.updateState,
+        'backward',
+        controls.panSpeed,
+        this.threeCamera
+      );
+    if (this.activeKeys.has('a'))
+      InteractionLogic.handleKeyPan(
+        this.graph.state,
+        this.graph.updateState,
+        'left',
+        controls.panSpeed,
+        this.threeCamera
+      );
+    if (this.activeKeys.has('d'))
+      InteractionLogic.handleKeyPan(
+        this.graph.state,
+        this.graph.updateState,
+        'right',
+        controls.panSpeed,
+        this.threeCamera
+      );
 
     // Orbiting
-    if (this.activeKeys.has('arrowup')) InteractionLogic.handleKeyOrbit(this.graph.state, this.graph.updateState, 'up', controls.orbitSpeed);
-    if (this.activeKeys.has('arrowdown')) InteractionLogic.handleKeyOrbit(this.graph.state, this.graph.updateState, 'down', controls.orbitSpeed);
-    if (this.activeKeys.has('arrowleft')) InteractionLogic.handleKeyOrbit(this.graph.state, this.graph.updateState, 'left', controls.orbitSpeed);
-    if (this.activeKeys.has('arrowright')) InteractionLogic.handleKeyOrbit(this.graph.state, this.graph.updateState, 'right', controls.orbitSpeed);
+    if (this.activeKeys.has('arrowup'))
+      InteractionLogic.handleKeyOrbit(
+        this.graph.state,
+        this.graph.updateState,
+        'up',
+        controls.orbitSpeed
+      );
+    if (this.activeKeys.has('arrowdown'))
+      InteractionLogic.handleKeyOrbit(
+        this.graph.state,
+        this.graph.updateState,
+        'down',
+        controls.orbitSpeed
+      );
+    if (this.activeKeys.has('arrowleft'))
+      InteractionLogic.handleKeyOrbit(
+        this.graph.state,
+        this.graph.updateState,
+        'left',
+        controls.orbitSpeed
+      );
+    if (this.activeKeys.has('arrowright'))
+      InteractionLogic.handleKeyOrbit(
+        this.graph.state,
+        this.graph.updateState,
+        'right',
+        controls.orbitSpeed
+      );
 
     // Zooming
-    if (this.activeKeys.has('+') || this.activeKeys.has('=')) InteractionLogic.handleKeyZoom(this.graph.state, this.graph.updateState, 'in', controls.zoomSpeed);
-    if (this.activeKeys.has('-') || this.activeKeys.has('_')) InteractionLogic.handleKeyZoom(this.graph.state, this.graph.updateState, 'out', controls.zoomSpeed);
-  }
-
-  /**
-   * Sets up a reactive effect to keep the Three.js camera in sync with the state.
-   */
-  private syncCameraToState() {
-    createEffect(() => {
-      const cameraState = this.graph.state.camera;
-      if (!cameraState) return;
-
-      const { target, distance, phi, theta } = cameraState;
-
-      // Calculate camera position based on spherical coordinates
-      const x = distance * Math.sin(phi) * Math.cos(theta);
-      const y = distance * Math.cos(phi);
-      const z = distance * Math.sin(phi) * Math.sin(theta);
-
-      this.threeCamera.position.set(
-        target.x + x,
-        target.y + y,
-        target.z + z,
+    if (this.activeKeys.has('+') || this.activeKeys.has('='))
+      InteractionLogic.handleKeyZoom(
+        this.graph.state,
+        this.graph.updateState,
+        'in',
+        controls.zoomSpeed
       );
-      this.threeCamera.lookAt(new THREE.Vector3(target.x, target.y, target.z));
-      this.threeCamera.updateProjectionMatrix();
-    });
+    if (this.activeKeys.has('-') || this.activeKeys.has('_'))
+      InteractionLogic.handleKeyZoom(
+        this.graph.state,
+        this.graph.updateState,
+        'out',
+        controls.zoomSpeed
+      );
   }
 
   /**
@@ -97,7 +118,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
    */
   public flyTo(
     targetState: Partial<SpecUpdate['camera']>,
-    options: { duration: number } = { duration: 1000 },
+    options: { duration: number } = { duration: 1000 }
   ) {
     const fromState = { ...this.graph.state.camera };
 
@@ -125,7 +146,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
    */
   public frame(
     elements: { position: THREE.Vector3 }[],
-    options: { duration: number } = { duration: 1000 },
+    options: { duration: number } = { duration: 1000 }
   ) {
     if (elements.length === 0) return;
 
@@ -159,5 +180,44 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     if (this.boundOnKeyUp) {
       window.removeEventListener('keyup', this.boundOnKeyUp);
     }
+  }
+
+  private initKeyboardControls(): void {
+    if (!this.graph.state.controls?.keyboard?.enabled) return;
+
+    this.boundOnKeyDown = this.onKeyDown.bind(this);
+    this.boundOnKeyUp = this.onKeyUp.bind(this);
+
+    window.addEventListener('keydown', this.boundOnKeyDown);
+    window.addEventListener('keyup', this.boundOnKeyUp);
+  }
+
+  private onKeyDown(event: KeyboardEvent): void {
+    this.activeKeys.add(event.key.toLowerCase());
+  }
+
+  private onKeyUp(event: KeyboardEvent): void {
+    this.activeKeys.delete(event.key.toLowerCase());
+  }
+
+  /**
+   * Sets up a reactive effect to keep the Three.js camera in sync with the state.
+   */
+  private syncCameraToState() {
+    createEffect(() => {
+      const cameraState = this.graph.state.camera;
+      if (!cameraState) return;
+
+      const { target, distance, phi, theta } = cameraState;
+
+      // Calculate camera position based on spherical coordinates
+      const x = distance * Math.sin(phi) * Math.cos(theta);
+      const y = distance * Math.cos(phi);
+      const z = distance * Math.sin(phi) * Math.sin(theta);
+
+      this.threeCamera.position.set(target.x + x, target.y + y, target.z + z);
+      this.threeCamera.lookAt(new THREE.Vector3(target.x, target.y, target.z));
+      this.threeCamera.updateProjectionMatrix();
+    });
   }
 }

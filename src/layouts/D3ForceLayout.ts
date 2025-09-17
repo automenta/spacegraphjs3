@@ -1,23 +1,23 @@
 import {
-  forceSimulation,
-  Simulation,
+  Force,
+  forceCenter,
   forceLink,
   forceManyBody,
-  forceCenter,
+  forceSimulation,
+  Simulation,
   SimulationNodeDatum,
-  Force,
 } from 'd3-force-3d';
 import { produce } from 'solid-js/store';
 import { createEffect } from 'solid-js';
 import { SpaceGraph } from '../core/SpaceGraph';
-import { ILayoutEngine, NodeSpec, EdgeSpec } from '../types';
+import { EdgeSpec, ILayoutEngine, NodeSpec } from '../types';
 
 type D3Node = NodeSpec & SimulationNodeDatum;
 type D3Link = EdgeSpec;
 
 export class D3ForceLayout implements ILayoutEngine {
-  private graph!: SpaceGraph;
   public simulation!: Simulation<D3Node, D3Link>;
+  private graph!: SpaceGraph;
 
   public init(graph: SpaceGraph): void {
     this.graph = graph;
@@ -25,7 +25,9 @@ export class D3ForceLayout implements ILayoutEngine {
 
     createEffect(() => {
       // Create copies of nodes to avoid direct mutation of store objects
-      const nodesCopy = (this.graph.state.data?.nodes ?? []).map(node => ({ ...node }));
+      const nodesCopy = (this.graph.state.data?.nodes ?? []).map((node) => ({
+        ...node,
+      }));
       this.simulation.nodes(nodesCopy as D3Node[]);
       // this.reheat(); // Do not start the simulation automatically on init
     });
@@ -50,23 +52,6 @@ export class D3ForceLayout implements ILayoutEngine {
     });
   }
 
-  private createSimulation() {
-    // Create copies of nodes to avoid direct mutation of store objects
-    const nodesCopy = (this.graph.state.data?.nodes ?? []).map(node => ({ ...node }));
-
-    this.simulation = forceSimulation<D3Node, D3Link>(nodesCopy as D3Node[])
-      .numDimensions(3)
-      .force(
-        'link',
-        forceLink<D3Node, D3Link>().id((d) => d.id),
-      )
-      .force('charge', forceManyBody())
-      .force('center', forceCenter())
-      .stop();
-
-    this.simulation.on('tick', this.onTick.bind(this));
-  }
-
   public onTick(): void {
     const setState = this.graph.setState;
     setState(
@@ -89,7 +74,7 @@ export class D3ForceLayout implements ILayoutEngine {
           }
         }
         s.data.nodes = updatedNodes;
-      }),
+      })
     );
   }
 
@@ -114,5 +99,24 @@ export class D3ForceLayout implements ILayoutEngine {
 
   public dispose(): void {
     this.simulation.stop();
+  }
+
+  private createSimulation() {
+    // Create copies of nodes to avoid direct mutation of store objects
+    const nodesCopy = (this.graph.state.data?.nodes ?? []).map((node) => ({
+      ...node,
+    }));
+
+    this.simulation = forceSimulation<D3Node, D3Link>(nodesCopy as D3Node[])
+      .numDimensions(3)
+      .force(
+        'link',
+        forceLink<D3Node, D3Link>().id((d) => d.id)
+      )
+      .force('charge', forceManyBody())
+      .force('center', forceCenter())
+      .stop();
+
+    this.simulation.on('tick', this.onTick.bind(this));
   }
 }

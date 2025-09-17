@@ -10,17 +10,17 @@
 import * as THREE from 'three';
 import { createEffect, on } from 'solid-js';
 import { Store } from 'solid-js/store';
-import { Spec, NodeSpec } from '../types';
+import { NodeSpec, Spec } from '../types';
 import { IRenderer } from './IRenderer';
 import { expandHex } from '../utils/color';
 
 const MAX_INSTANCES = 100000;
 
 export class InstancedRenderer implements IRenderer {
+  public instancedMeshes: Map<string, THREE.InstancedMesh> = new Map();
   private scene: THREE.Scene;
   private state: Store<Spec>;
   private instancedGeometryRegistry: Map<string, THREE.BufferGeometry>;
-  public instancedMeshes: Map<string, THREE.InstancedMesh> = new Map();
   private typeToIdMaps: Map<
     string,
     { idToIndex: Map<string, number>; indexToId: Map<number, string> }
@@ -31,43 +31,13 @@ export class InstancedRenderer implements IRenderer {
   constructor(
     scene: THREE.Scene,
     state: Store<Spec>,
-    instancedGeometryRegistry: Map<string, THREE.BufferGeometry>,
+    instancedGeometryRegistry: Map<string, THREE.BufferGeometry>
   ) {
     this.scene = scene;
     this.state = state;
     this.instancedGeometryRegistry = instancedGeometryRegistry;
 
     this.init();
-  }
-
-  private init() {
-    // Create InstancedMesh for each registered geometry type
-    for (const [
-      typeName,
-      geometry,
-    ] of this.instancedGeometryRegistry.entries()) {
-      if (geometry.computeBoundsTree) {
-        geometry.computeBoundsTree();
-      }
-      const material = new THREE.MeshBasicMaterial({ vertexColors: true });
-      const mesh = new THREE.InstancedMesh(geometry, material, MAX_INSTANCES);
-      mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-      mesh.instanceColor = new THREE.InstancedBufferAttribute(
-        new Float32Array(MAX_INSTANCES * 3),
-        3,
-      );
-      mesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
-      mesh.userData.typeName = typeName; // Store typeName for raycasting
-      this.scene.add(mesh);
-      this.instancedMeshes.set(typeName, mesh);
-      this.typeToIdMaps.set(typeName, {
-        idToIndex: new Map(),
-        indexToId: new Map(),
-      });
-    }
-
-    // Effect for updating all instances when nodes change
-    createEffect(() => this.updateAllInstances());
   }
 
   public updateAllInstances() {
@@ -132,55 +102,9 @@ export class InstancedRenderer implements IRenderer {
             if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
           }
         },
-        { defer: false },
-      ),
+        { defer: false }
+      )
     );
-  }
-
-  private updateInstance(
-    mesh: THREE.InstancedMesh,
-    idMaps: { idToIndex: Map<string, number>; indexToId: Map<number, string> },
-    index: number,
-    node: NodeSpec,
-  ) {
-    // Update matrix for position
-    this.dummy.position.set(
-      node.position?.x ?? 0,
-      node.position?.y ?? 0,
-      node.position?.z ?? 0,
-    );
-    this.dummy.updateMatrix();
-    mesh.setMatrixAt(index, this.dummy.matrix);
-    mesh.instanceMatrix.needsUpdate = true;
-
-    // Update color based on state
-    const { hoveredElementId, selectedElementIds } = this.state.interaction;
-    let finalColor: string | number = node.color || '#ffffff';
-    const isSelected = selectedElementIds.includes(node.id);
-    const isHovered = hoveredElementId === node.id;
-
-    if (isSelected && this.state.style['node:selected']?.color) {
-      finalColor = this.state.style['node:selected'].color;
-    } else if (isHovered && this.state.style['node:hover']?.color) {
-      finalColor = this.state.style['node:hover'].color;
-    }
-
-    try {
-      // Ensure the color is a valid 6-digit hex code
-      const colorValue =
-        typeof finalColor === 'string' ? expandHex(finalColor) : finalColor;
-      mesh.setColorAt(index, new THREE.Color(colorValue));
-    } catch (error) {
-      console.warn(
-        `Invalid color specified for instanced node ${node.id}:`,
-        finalColor,
-      );
-      mesh.setColorAt(index, new THREE.Color('#ff00ff')); // Fallback to magenta
-    }
-
-    if (mesh.instanceColor) {
-      mesh.instanceColor.needsUpdate = true;
-    }
   }
 
   // --- IRenderer Implementation ---
@@ -189,7 +113,7 @@ export class InstancedRenderer implements IRenderer {
   }
 
   public getNodeIdFromIntersection(
-    intersection: THREE.Intersection,
+    intersection: THREE.Intersection
   ): string | null {
     if (intersection.instanceId === undefined) return null;
 
@@ -219,5 +143,81 @@ export class InstancedRenderer implements IRenderer {
     }
     this.instancedMeshes.clear();
     this.typeToIdMaps.clear();
+  }
+
+  private init() {
+    // Create InstancedMesh for each registered geometry type
+    for (const [
+      typeName,
+      geometry,
+    ] of this.instancedGeometryRegistry.entries()) {
+      if (geometry.computeBoundsTree) {
+        geometry.computeBoundsTree();
+      }
+      const material = new THREE.MeshBasicMaterial({ vertexColors: true });
+      const mesh = new THREE.InstancedMesh(geometry, material, MAX_INSTANCES);
+      mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      mesh.instanceColor = new THREE.InstancedBufferAttribute(
+        new Float32Array(MAX_INSTANCES * 3),
+        3
+      );
+      mesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
+      mesh.userData.typeName = typeName; // Store typeName for raycasting
+      this.scene.add(mesh);
+      this.instancedMeshes.set(typeName, mesh);
+      this.typeToIdMaps.set(typeName, {
+        idToIndex: new Map(),
+        indexToId: new Map(),
+      });
+    }
+
+    // Effect for updating all instances when nodes change
+    createEffect(() => this.updateAllInstances());
+  }
+
+  private updateInstance(
+    mesh: THREE.InstancedMesh,
+    idMaps: { idToIndex: Map<string, number>; indexToId: Map<number, string> },
+    index: number,
+    node: NodeSpec
+  ) {
+    // Update matrix for position
+    this.dummy.position.set(
+      node.position?.x ?? 0,
+      node.position?.y ?? 0,
+      node.position?.z ?? 0
+    );
+    this.dummy.updateMatrix();
+    mesh.setMatrixAt(index, this.dummy.matrix);
+    mesh.instanceMatrix.needsUpdate = true;
+
+    // Update color based on state
+    const { hoveredElementId, selectedElementIds } = this.state.interaction;
+    let finalColor: string | number = node.color || '#ffffff';
+    const isSelected = selectedElementIds.includes(node.id);
+    const isHovered = hoveredElementId === node.id;
+
+    if (isSelected && this.state.style['node:selected']?.color) {
+      finalColor = this.state.style['node:selected'].color;
+    } else if (isHovered && this.state.style['node:hover']?.color) {
+      finalColor = this.state.style['node:hover'].color;
+    }
+
+    try {
+      // Ensure the color is a valid 6-digit hex code
+      const colorValue =
+        typeof finalColor === 'string' ? expandHex(finalColor) : finalColor;
+      mesh.setColorAt(index, new THREE.Color(colorValue));
+    } catch (error) {
+      console.warn(
+        `Invalid color specified for instanced node ${node.id}:`,
+        finalColor
+      );
+      mesh.setColorAt(index, new THREE.Color('#ff00ff')); // Fallback to magenta
+    }
+
+    if (mesh.instanceColor) {
+      mesh.instanceColor.needsUpdate = true;
+    }
   }
 }

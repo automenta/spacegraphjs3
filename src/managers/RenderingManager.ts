@@ -35,7 +35,7 @@ export class RenderingManager {
       75,
       this.container.clientWidth / this.container.clientHeight,
       0.1,
-      1000,
+      1000
     );
     this.renderer = new THREE.WebGLRenderer();
     this.cssRenderer = new CSS2DRenderer();
@@ -43,6 +43,50 @@ export class RenderingManager {
     this.initRenderers();
     this.initDynamicNodeRenderer();
     this.animate();
+  }
+
+  public getNodeRenderer(): IRenderer {
+    return this.nodeRenderer;
+  }
+
+  public getScene(): THREE.Scene {
+    return this.scene;
+  }
+
+  public getCamera(): THREE.PerspectiveCamera {
+    return this.camera;
+  }
+
+  public getContainer(): HTMLElement {
+    return this.container;
+  }
+
+  public getRendererDomElement(): HTMLElement {
+    return this.renderer.domElement;
+  }
+
+  public getRenderer(): THREE.WebGLRenderer {
+    return this.renderer;
+  }
+
+  public dispose() {
+    this.isLooping = false;
+    window.removeEventListener('resize', this.handleResize);
+
+    this.renderer.dispose();
+    if (this.renderer.domElement.parentNode) {
+      this.renderer.domElement.parentNode.removeChild(this.renderer.domElement);
+    }
+    if (this.cssRenderer.domElement.parentNode) {
+      this.cssRenderer.domElement.parentNode.removeChild(
+        this.cssRenderer.domElement
+      );
+    }
+    if (this.nodeRenderer) {
+      this.nodeRenderer.dispose();
+    }
+    this.edgeRenderer.dispose();
+    this.htmlRenderer.dispose();
   }
 
   private setupRenderers() {
@@ -58,7 +102,7 @@ export class RenderingManager {
 
   private _setupRenderer(
     renderer: THREE.WebGLRenderer | CSS2DRenderer,
-    styles?: Partial<CSSStyleDeclaration>,
+    styles?: Partial<CSSStyleDeclaration>
   ) {
     renderer.setSize(this.container.clientWidth, this.container.clientHeight);
     if (styles) {
@@ -86,12 +130,14 @@ export class RenderingManager {
   private initDynamicNodeRenderer() {
     createEffect(() => {
       const nodeCount = this.graph.state.data?.nodes?.length ?? 0;
-      const threshold = this.graph.state.performance?.instancingThreshold ?? 100;
+      const threshold =
+        this.graph.state.performance?.instancingThreshold ?? 100;
       const shouldUseInstanced = nodeCount > threshold;
 
       const needsUpdate =
         !this.nodeRenderer ||
-        (shouldUseInstanced && !(this.nodeRenderer instanceof InstancedRenderer)) ||
+        (shouldUseInstanced &&
+          !(this.nodeRenderer instanceof InstancedRenderer)) ||
         (!shouldUseInstanced && this.nodeRenderer instanceof InstancedRenderer);
 
       if (needsUpdate) {
@@ -103,41 +149,17 @@ export class RenderingManager {
           this.nodeRenderer = new InstancedRenderer(
             this.scene,
             this.graph.state,
-            SpaceGraph.getInstancedGeometryRegistry(),
+            SpaceGraph.getInstancedGeometryRegistry()
           );
         } else {
           this.nodeRenderer = new NodeRenderer(
             this.scene,
             this.graph.state,
-            SpaceGraph.getElementActorRegistry(),
+            SpaceGraph.getElementActorRegistry()
           );
         }
       }
     });
-  }
-
-  public getNodeRenderer(): IRenderer {
-    return this.nodeRenderer;
-  }
-
-  public getScene(): THREE.Scene {
-    return this.scene;
-  }
-
-  public getCamera(): THREE.PerspectiveCamera {
-    return this.camera;
-  }
-
-  public getContainer(): HTMLElement {
-    return this.container;
-  }
-
-  public getRendererDomElement(): HTMLElement {
-    return this.renderer.domElement;
-  }
-
-  public getRenderer(): THREE.WebGLRenderer {
-    return this.renderer;
   }
 
   private animate() {
@@ -175,23 +197,5 @@ export class RenderingManager {
       <pre>${error.stack}</pre>
     `;
     this.container.appendChild(errorElement);
-  }
-
-  public dispose() {
-    this.isLooping = false;
-    window.removeEventListener('resize', this.handleResize);
-
-    this.renderer.dispose();
-    if (this.renderer.domElement.parentNode) {
-      this.renderer.domElement.parentNode.removeChild(this.renderer.domElement);
-    }
-    if (this.cssRenderer.domElement.parentNode) {
-      this.cssRenderer.domElement.parentNode.removeChild(this.cssRenderer.domElement);
-    }
-    if (this.nodeRenderer) {
-      this.nodeRenderer.dispose();
-    }
-    this.edgeRenderer.dispose();
-    this.htmlRenderer.dispose();
   }
 }

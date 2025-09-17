@@ -20,9 +20,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      'three/examples/jsm/': path.resolve(
-        './node_modules/three/examples/jsm/',
-      ),
+      'three/examples/jsm/': path.resolve('./node_modules/three/examples/jsm/'),
     },
   },
 });

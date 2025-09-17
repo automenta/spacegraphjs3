@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import * as THREE from 'three';
 import { createStore } from 'solid-js/store';
-import { Spec, NodeSpec, EdgeSpec } from '../../src/types';
+import { EdgeSpec, NodeSpec, Spec } from '../../src/types';
 import { EdgeRenderer } from '../../src/renderers/EdgeRenderer';
 import { nextTick } from './test-utils';
 import { createRoot } from 'solid-js';
@@ -33,8 +33,12 @@ describe('EdgeRenderer', () => {
       expect(positionAttribute.count).toBe(4);
 
       const positions = positionAttribute.array;
-      expect(positions.slice(0, 6)).toEqual(new Float32Array([0, 0, 0, 10, 0, 0]));
-      expect(positions.slice(6, 12)).toEqual(new Float32Array([0, 0, 0, 0, 10, 0]));
+      expect(positions.slice(0, 6)).toEqual(
+        new Float32Array([0, 0, 0, 10, 0, 0])
+      );
+      expect(positions.slice(6, 12)).toEqual(
+        new Float32Array([0, 0, 0, 0, 10, 0])
+      );
 
       edgeRenderer.dispose();
       dispose();

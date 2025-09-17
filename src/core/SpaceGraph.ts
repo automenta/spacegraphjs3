@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { createState } from './createState';
-import { Spec, SpecUpdate, ElementActorClass, LayoutEngineClass } from '../types';
+import { ElementActorClass, LayoutEngineClass, Spec, SpecUpdate, } from '../types';
 import { RenderingManager } from '../managers/RenderingManager';
 import { EventManager } from '../managers/EventManager';
 import { DataManager } from '../managers/DataManager';
@@ -17,59 +17,40 @@ import { RandomLayout } from '../layouts/RandomLayout';
  * It orchestrates the renderer, interaction, layout, and other controllers.
  */
 export class SpaceGraph {
-  private static elementActorRegistry: Map<string, ElementActorClass> = new Map([
-    ['sphere', SphereElementActor],
-  ]);
-  private static layoutEngineRegistry: Map<string, LayoutEngineClass> = new Map([
-    ['force-directed', D3ForceLayout],
-    ['random', RandomLayout],
-  ]);
+  private static elementActorRegistry: Map<string, ElementActorClass> = new Map(
+    [['sphere', SphereElementActor]]
+  );
+  private static layoutEngineRegistry: Map<string, LayoutEngineClass> = new Map(
+    [
+      ['force-directed', D3ForceLayout],
+      ['random', RandomLayout],
+    ]
+  );
   private static instancedGeometryRegistry: Map<string, THREE.BufferGeometry> =
     new Map([['sphere', new THREE.SphereGeometry(0.5, 16, 16)]]);
-
-  public static registerType(name: string, actorClass: ElementActorClass) {
-    SpaceGraph.elementActorRegistry.set(name, actorClass);
-  }
-
-  public static getElementActorRegistry() {
-    return SpaceGraph.elementActorRegistry;
-  }
-
-  public static registerLayout(name: string, engineClass: LayoutEngineClass) {
-    SpaceGraph.layoutEngineRegistry.set(name, engineClass);
-  }
-
-  public static getLayoutEngineRegistry() {
-    return SpaceGraph.layoutEngineRegistry;
-  }
-
-  public static registerInstancedType(
-    name: string,
-    geometry: THREE.BufferGeometry,
-  ) {
-    SpaceGraph.instancedGeometryRegistry.set(name, geometry);
-  }
-
-  public static getInstancedGeometryRegistry() {
-    return SpaceGraph.instancedGeometryRegistry;
-  }
-
   public state!: Store<Spec>;
   public scene: THREE.Scene;
   public camera: THREE.PerspectiveCamera;
-
-  private container: HTMLElement;
-  private updateState!: (spec: SpecUpdate) => void;
-  private setState!: (fn: (prevState: Spec) => Spec) => void;
-
   public renderingManager!: RenderingManager;
   public eventManager!: EventManager;
   public dataManager!: DataManager;
   public cameraPlugin?: CameraPlugin;
+  private container: HTMLElement;
+  private updateState!: (spec: SpecUpdate) => void;
+  private setState!: (fn: (prevState: Spec) => Spec) => void;
   private plugins: ISpaceGraphPlugin[] = [];
   private dispose: () => void;
+  /**
+   * Cleans up all resources, including SolidJS effects, Three.js objects,
+   * and event listeners, to prevent memory leaks.
+   */
+  private isDestroyed = false;
 
-  constructor(containerSelector: string, initialSpec: Spec, plugins: ISpaceGraphPlugin[] = []) {
+  constructor(
+    containerSelector: string,
+    initialSpec: Spec,
+    plugins: ISpaceGraphPlugin[] = []
+  ) {
     try {
       this.container = this.initContainer(containerSelector);
 
@@ -95,6 +76,88 @@ export class SpaceGraph {
       // Re-throw the error to allow the caller to handle it.
       throw error;
     }
+  }
+
+  public static registerType(name: string, actorClass: ElementActorClass) {
+    SpaceGraph.elementActorRegistry.set(name, actorClass);
+  }
+
+  public static getElementActorRegistry() {
+    return SpaceGraph.elementActorRegistry;
+  }
+
+  public static registerLayout(name: string, engineClass: LayoutEngineClass) {
+    SpaceGraph.layoutEngineRegistry.set(name, engineClass);
+  }
+
+  public static getLayoutEngineRegistry() {
+    return SpaceGraph.layoutEngineRegistry;
+  }
+
+  public static registerInstancedType(
+    name: string,
+    geometry: THREE.BufferGeometry
+  ) {
+    SpaceGraph.instancedGeometryRegistry.set(name, geometry);
+  }
+
+  public static getInstancedGeometryRegistry() {
+    return SpaceGraph.instancedGeometryRegistry;
+  }
+
+  /**
+   * Registers an event listener.
+   * @param eventName - The name of the event to listen for.
+   * @param listener - The callback function to execute when the event is fired.
+   * @returns A function that removes the event listener when called.
+   */
+  public on<Key extends keyof GraphEventMap>(
+    eventName: Key,
+    listener: (payload: GraphEventMap[Key]) => void
+  ) {
+    return this.eventManager.on(eventName, listener);
+  }
+
+  /**
+   * Retrieves a node or edge by its ID.
+   * @param id - The unique identifier of the element.
+   * @returns The element's reactive state proxy, or undefined if not found.
+   */
+  public getElement(id: string) {
+    return this.dataManager.getElement(id);
+  }
+
+  public getContainer(): HTMLElement {
+    return this.container;
+  }
+
+  /**
+   * Updates the graph with a new (partial) specification.
+   * Changes are merged into the existing state, and the visualization updates reactively.
+   * @param spec - A partial `Spec` object with the properties to update.
+   */
+  public update(spec: SpecUpdate) {
+    this.updateState(spec);
+  }
+
+  public destroy() {
+    if (this.isDestroyed) {
+      return;
+    }
+    this.isDestroyed = true;
+
+    this.dispose(); // Dispose SolidJS root and all effects
+    // Dispose all registered plugins.
+    // This includes the cameraPlugin, which is stored separately for convenience
+    // but is part of the main plugins array.
+    for (const plugin of this.plugins) {
+      if (plugin.dispose) {
+        plugin.dispose();
+      }
+    }
+    this.renderingManager.dispose();
+    this.eventManager.dispose();
+    this.dataManager.dispose();
   }
 
   private initContainer(containerSelector: string): HTMLElement {
@@ -139,66 +202,5 @@ export class SpaceGraph {
         console.error(`Error initializing plugin:`, error);
       }
     }
-  }
-
-  /**
-   * Registers an event listener.
-   * @param eventName - The name of the event to listen for.
-   * @param listener - The callback function to execute when the event is fired.
-   * @returns A function that removes the event listener when called.
-   */
-  public on<Key extends keyof GraphEventMap>(
-    eventName: Key,
-    listener: (payload: GraphEventMap[Key]) => void,
-  ) {
-    return this.eventManager.on(eventName, listener);
-  }
-
-  /**
-   * Retrieves a node or edge by its ID.
-   * @param id - The unique identifier of the element.
-   * @returns The element's reactive state proxy, or undefined if not found.
-   */
-  public getElement(id: string) {
-    return this.dataManager.getElement(id);
-  }
-
-  public getContainer(): HTMLElement {
-    return this.container;
-  }
-
-  /**
-   * Updates the graph with a new (partial) specification.
-   * Changes are merged into the existing state, and the visualization updates reactively.
-   * @param spec - A partial `Spec` object with the properties to update.
-   */
-  public update(spec: SpecUpdate) {
-    this.updateState(spec);
-  }
-
-  /**
-   * Cleans up all resources, including SolidJS effects, Three.js objects,
-   * and event listeners, to prevent memory leaks.
-   */
-  private isDestroyed = false;
-
-  public destroy() {
-    if (this.isDestroyed) {
-      return;
-    }
-    this.isDestroyed = true;
-
-    this.dispose(); // Dispose SolidJS root and all effects
-    // Dispose all registered plugins.
-    // This includes the cameraPlugin, which is stored separately for convenience
-    // but is part of the main plugins array.
-    for (const plugin of this.plugins) {
-      if (plugin.dispose) {
-        plugin.dispose();
-      }
-    }
-    this.renderingManager.dispose();
-    this.eventManager.dispose();
-    this.dataManager.dispose();
   }
 }

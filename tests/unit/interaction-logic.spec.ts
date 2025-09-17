@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as THREE from 'three';
 import { InteractionLogic } from '../../src/InteractionLogic';
-import { Store, createStore } from 'solid-js/store';
+import { createStore, Store } from 'solid-js/store';
 import { Spec } from '../../src/types';
 
 // Mock factory for the state
@@ -34,15 +34,15 @@ describe('InteractionLogic', () => {
   const mockRendererEl = (
     typeof window !== 'undefined'
       ? {
-        getBoundingClientRect: () => ({
-          width: 800,
-          height: 600,
-          top: 0,
-          left: 0,
-          right: 800,
-          bottom: 600,
-        }),
-      }
+          getBoundingClientRect: () => ({
+            width: 800,
+            height: 600,
+            top: 0,
+            left: 0,
+            right: 800,
+            bottom: 600,
+          }),
+        }
       : null
   ) as HTMLElement;
 
@@ -71,7 +71,7 @@ describe('InteractionLogic', () => {
         dragPlane,
         mockRendererEl,
         mockThreeCamera,
-        mockUpdateState,
+        mockUpdateState
       );
 
       // The ray from the center of the screen is straight down the Z axis.
@@ -94,7 +94,7 @@ describe('InteractionLogic', () => {
         50,
         state,
         mockUpdateState,
-        mockThreeCamera,
+        mockThreeCamera
       );
 
       expect(mockUpdateState).toHaveBeenCalledOnce();
@@ -114,7 +114,7 @@ describe('InteractionLogic', () => {
         0,
         state,
         mockUpdateState,
-        mockThreeCamera,
+        mockThreeCamera
       );
 
       expect(mockUpdateState).toHaveBeenCalledOnce();

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { Spec } from '../../src/types';
 import { createTestGraph, nextTick } from './test-utils';
 import { LayoutPlugin } from '../../src/plugins/LayoutPlugin';
@@ -22,7 +22,9 @@ describe('LayoutPlugin', () => {
     layoutPlugin.updateLayoutEngine();
     await nextTick();
 
-    const initialNode1Pos = { ...graph.state.data.nodes.find((n) => n.id === 'n1')!.position };
+    const initialNode1Pos = {
+      ...graph.state.data.nodes.find((n) => n.id === 'n1')!.position,
+    };
 
     const d3Layout = layoutPlugin.currentLayoutEngine as D3ForceLayout;
     d3Layout.tick(300); // Manually tick the simulation
@@ -55,16 +57,21 @@ describe('LayoutPlugin', () => {
     d3Layout.tick(10); // Manually tick the simulation for a short time
 
     d3Layout.pause();
-    const pos1_paused_x = graph.state.data.nodes.find((n) => n.id === 'n1')?.position?.x;
+    const pos1_paused_x = graph.state.data.nodes.find((n) => n.id === 'n1')
+      ?.position?.x;
 
     d3Layout.tick(10); // Tick again while paused
-    const pos1_after_paused_ticks_x = graph.state.data.nodes.find((n) => n.id === 'n1')?.position?.x;
+    const pos1_after_paused_ticks_x = graph.state.data.nodes.find(
+      (n) => n.id === 'n1'
+    )?.position?.x;
     expect(pos1_after_paused_ticks_x).toBe(pos1_paused_x);
 
     d3Layout.resume();
     d3Layout.reheat();
     d3Layout.tick(10); // Tick again after resume
-    expect(d3Layout.simulation.alpha()).toBeGreaterThan(d3Layout.simulation.alphaMin());
+    expect(d3Layout.simulation.alpha()).toBeGreaterThan(
+      d3Layout.simulation.alphaMin()
+    );
 
     cleanup();
   });

@@ -7,8 +7,8 @@ import { ILayoutEngine } from '../types';
  * A plugin that manages the graph layout by delegating to a layout engine.
  */
 export class LayoutPlugin implements ISpaceGraphPlugin {
-  private graph!: SpaceGraph;
   public currentLayoutEngine: ILayoutEngine | null = null;
+  private graph!: SpaceGraph;
 
   public init(graph: SpaceGraph): void {
     this.graph = graph;
@@ -23,9 +23,8 @@ export class LayoutPlugin implements ISpaceGraphPlugin {
       this.currentLayoutEngine = null;
     }
 
-    const LayoutEngineClass = SpaceGraph.getLayoutEngineRegistry().get(
-      layoutType,
-    );
+    const LayoutEngineClass =
+      SpaceGraph.getLayoutEngineRegistry().get(layoutType);
 
     if (LayoutEngineClass) {
       this.currentLayoutEngine = new LayoutEngineClass();

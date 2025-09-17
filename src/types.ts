@@ -101,7 +101,7 @@ import { SpaceGraph } from './core/SpaceGraph';
 export type ElementActorClass = new (
   scene: THREE.Scene,
   elementState: Store<NodeSpec>,
-  graphState: Store<Spec>,
+  graphState: Store<Spec>
 ) => BaseElementActor;
 
 export interface ILayoutEngine {

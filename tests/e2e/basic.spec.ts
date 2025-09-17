@@ -1,4 +1,4 @@
-import { test, expect } from './utils';
+import { expect, test } from './utils';
 
 test('basic visual test', async ({ page }) => {
   await page.goto('/');

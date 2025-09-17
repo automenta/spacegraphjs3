@@ -2,7 +2,7 @@ import { createEffect } from 'solid-js';
 import { Store } from 'solid-js/store';
 import * as THREE from 'three';
 import { CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
-import { Spec, HtmlElement } from './types';
+import { HtmlElement, Spec } from './types';
 
 export class HTMLRenderer {
   private cssScene: THREE.Scene;
@@ -25,7 +25,7 @@ export class HTMLRenderer {
     // This supports both reactive calls (from createEffect) and manual calls (from tests).
     if (!htmlNodes) {
       htmlNodes = (this.state.data?.nodes || []).filter(
-        (node): node is HtmlElement => node.type === 'html',
+        (node): node is HtmlElement => node.type === 'html'
       );
     }
 

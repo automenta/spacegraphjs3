@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { ISpaceGraphPlugin } from '../core/plugin';
 import { SpaceGraph } from '../core/SpaceGraph';
 import { InteractionLogic } from '../InteractionLogic';
-import { DragState, WheelState, HoverState } from '../types/use-gesture';
+import { DragState, HoverState, WheelState } from '../types/use-gesture';
 
 /**
  * A plugin that handles user interactions with the graph, such as clicking, dragging, and hovering.
@@ -28,10 +28,12 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
         onHover: (state: HoverState) => this.onHover(state),
         onWheel: (state: WheelState) => this.onWheel(state),
       },
-      {},
+      {}
     );
 
-    this.boundOnClick = this.onClick.bind(this) as unknown as (event: PointerEvent) => void;
+    this.boundOnClick = this.onClick.bind(this) as unknown as (
+      event: PointerEvent
+    ) => void;
     this.rendererEl.addEventListener('click', this.boundOnClick);
 
     this.graph.eventManager.on('element:click', ({ target, event }) => {
@@ -48,6 +50,11 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
         interaction: { selectedElementIds: newSelection },
       });
     });
+  }
+
+  public dispose(): void {
+    this.gesture.destroy();
+    this.rendererEl.removeEventListener('click', this.boundOnClick);
   }
 
   private getIntersectedElement(event: MouseEvent | PointerEvent) {
@@ -77,9 +84,8 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     if (allIntersects.length > 0) {
       allIntersects.sort((a, b) => a.distance - b.distance);
       const closestIntersection = allIntersects[0];
-      const elementId = nodeRenderer.getNodeIdFromIntersection(
-        closestIntersection,
-      );
+      const elementId =
+        nodeRenderer.getNodeIdFromIntersection(closestIntersection);
       if (elementId) {
         return this.graph.dataManager.getElement(elementId);
       }
@@ -89,26 +95,56 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
   }
 
   private onDrag(state: DragState) {
-    const { event, first, last, movement: [mx, my], xy: [vx, vy], pinching } = state;
+    const {
+      event,
+      first,
+      last,
+      movement: [mx, my],
+      xy: [vx, vy],
+      pinching,
+    } = state;
     if (pinching) return;
 
     const camera = this.graph.renderingManager.getCamera();
 
     if (first) {
-      const intersectedElement = this.getIntersectedElement(event as PointerEvent);
+      const intersectedElement = this.getIntersectedElement(
+        event as PointerEvent
+      );
       if (intersectedElement && 'position' in intersectedElement) {
         this.draggedElementId = intersectedElement.id;
         // Project the drag plane
         const normal = camera.position.clone().normalize();
-        this.dragPlane.setFromNormalAndCoplanarPoint(normal, new THREE.Vector3(intersectedElement.position.x, intersectedElement.position.y, intersectedElement.position.z));
+        this.dragPlane.setFromNormalAndCoplanarPoint(
+          normal,
+          new THREE.Vector3(
+            intersectedElement.position.x,
+            intersectedElement.position.y,
+            intersectedElement.position.z
+          )
+        );
       }
     }
 
     if (this.draggedElementId) {
-      InteractionLogic.handleNodeDrag(vx, vy, this.draggedElementId, this.dragPlane, this.graph.renderingManager.getRendererDomElement(), camera, this.graph.updateState);
+      InteractionLogic.handleNodeDrag(
+        vx,
+        vy,
+        this.draggedElementId,
+        this.dragPlane,
+        this.graph.renderingManager.getRendererDomElement(),
+        camera,
+        this.graph.updateState
+      );
     } else {
       // Panning
-      InteractionLogic.handlePan(mx, my, this.graph.state, this.graph.updateState, camera);
+      InteractionLogic.handlePan(
+        mx,
+        my,
+        this.graph.state,
+        this.graph.updateState,
+        camera
+      );
     }
 
     if (last) {
@@ -117,27 +153,43 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
   }
 
   private onWheel(state: WheelState) {
-    const { event, delta: [, dy] } = state;
+    const {
+      event,
+      delta: [, dy],
+    } = state;
     event.preventDefault();
     const zoomSpeed = 0.1;
     const direction = dy > 0 ? 'out' : 'in';
-    InteractionLogic.handleKeyZoom(this.graph.state, this.graph.updateState, direction, zoomSpeed);
+    InteractionLogic.handleKeyZoom(
+      this.graph.state,
+      this.graph.updateState,
+      direction,
+      zoomSpeed
+    );
   }
 
   private onHover(state: HoverState) {
     if (this.draggedElementId) return; // Don't hover while dragging
     const element = this.getIntersectedElement(state.event as MouseEvent);
-    const currentHoveredId = this.graph.state.interaction?.hoveredElementId ?? null;
+    const currentHoveredId =
+      this.graph.state.interaction?.hoveredElementId ?? null;
 
     if (element) {
       if (currentHoveredId !== element.id) {
-        this.graph.updateState({ interaction: { hoveredElementId: element.id } });
-        this.graph.eventManager.emit('element:hover:enter', { target: element });
+        this.graph.updateState({
+          interaction: { hoveredElementId: element.id },
+        });
+        this.graph.eventManager.emit('element:hover:enter', {
+          target: element,
+        });
       }
     } else if (currentHoveredId) {
       const oldElement = this.graph.dataManager.getElement(currentHoveredId);
       this.graph.updateState({ interaction: { hoveredElementId: null } });
-      if (oldElement) this.graph.eventManager.emit('element:hover:leave', { target: oldElement });
+      if (oldElement)
+        this.graph.eventManager.emit('element:hover:leave', {
+          target: oldElement,
+        });
     }
   }
 
@@ -151,10 +203,5 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     } else {
       this.graph.eventManager.emit('background:click', { event });
     }
-  }
-
-  public dispose(): void {
-    this.gesture.destroy();
-    this.rendererEl.removeEventListener('click', this.boundOnClick);
   }
 }

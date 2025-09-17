@@ -19,7 +19,7 @@ export class EventManager {
    */
   public on<Key extends keyof GraphEventMap>(
     eventName: Key,
-    listener: (payload: GraphEventMap[Key]) => void,
+    listener: (payload: GraphEventMap[Key]) => void
   ) {
     this.emitter.on(eventName, listener);
     return () => this.emitter.off(eventName, listener);
@@ -32,7 +32,7 @@ export class EventManager {
    */
   public emit<Key extends keyof GraphEventMap>(
     eventName: Key,
-    payload: GraphEventMap[Key],
+    payload: GraphEventMap[Key]
   ) {
     this.emitter.emit(eventName, payload);
   }

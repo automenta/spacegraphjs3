@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import * as THREE from 'three';
 import { InstancedRenderer } from '../../src/renderers/InstancedRenderer';
 import { createState } from '../../src/core/createState';
@@ -33,7 +33,7 @@ describe('InstancedRenderer Styling', () => {
     const renderer = new InstancedRenderer(
       scene,
       state,
-      SpaceGraph.getInstancedGeometryRegistry(),
+      SpaceGraph.getInstancedGeometryRegistry()
     );
 
     // Initial state check

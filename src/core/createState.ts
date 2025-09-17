@@ -19,7 +19,9 @@ export function createState(initialSpec: Spec) {
     layout: { type: 'random' },
     camera: { target: { x: 0, y: 0, z: 0 }, phi: 0, theta: 0, distance: 10 },
     performance: { instancingThreshold: 100 },
-    controls: { keyboard: { enabled: true, panSpeed: 1, zoomSpeed: 1, orbitSpeed: 1 } },
+    controls: {
+      keyboard: { enabled: true, panSpeed: 1, zoomSpeed: 1, orbitSpeed: 1 },
+    },
   };
 
   // 2. Deep merge the user-provided initial spec into the defaults.
@@ -40,7 +42,10 @@ export function createState(initialSpec: Spec) {
         // Use deep merge for all top-level properties except 'data'
         for (const key in specUpdate) {
           if (key !== 'data' && key in s) {
-            deepMerge(s[key as keyof Spec], specUpdate[key as keyof SpecUpdate]);
+            deepMerge(
+              s[key as keyof Spec],
+              specUpdate[key as keyof SpecUpdate]
+            );
           }
         }
 
@@ -52,7 +57,9 @@ export function createState(initialSpec: Spec) {
           }
           // Update existing nodes
           if (specUpdate.data.nodes?.update) {
-            const updates = new Map(specUpdate.data.nodes.update.map((n) => [n.id, n]));
+            const updates = new Map(
+              specUpdate.data.nodes.update.map((n) => [n.id, n])
+            );
             for (let i = 0; i < s.data.nodes.length; i++) {
               if (updates.has(s.data.nodes[i].id)) {
                 deepMerge(s.data.nodes[i], updates.get(s.data.nodes[i].id));
@@ -71,7 +78,9 @@ export function createState(initialSpec: Spec) {
           }
           // Update existing edges
           if (specUpdate.data.edges?.update) {
-            const updates = new Map(specUpdate.data.edges.update.map((e) => [e.id, e]));
+            const updates = new Map(
+              specUpdate.data.edges.update.map((e) => [e.id, e])
+            );
             for (let i = 0; i < s.data.edges.length; i++) {
               if (updates.has(s.data.edges[i].id)) {
                 deepMerge(s.data.edges[i], updates.get(s.data.edges[i].id));
@@ -84,7 +93,7 @@ export function createState(initialSpec: Spec) {
             s.data.edges = s.data.edges.filter((e) => !removeIds.has(e.id));
           }
         }
-      }),
+      })
     );
   };
 

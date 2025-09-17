@@ -1,6 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { SpaceGraph } from '../../src/core/SpaceGraph';
-import * as THREE from 'three';
 
 const error = new Error('Test rendering error');
 const mockRenderer = {
@@ -22,15 +21,18 @@ vi.mock('three', async () => {
 describe('RenderingManager Error Handling', () => {
   it('should catch rendering errors and display an error message', async () => {
     // Mock console.error for this specific test
-    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {
-    });
+    const consoleError = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
 
     // Mock requestAnimationFrame
-    const requestAnimationFrame = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
-      // Allow the animation frame to run once to catch the error
-      setTimeout(() => cb(0), 0);
-      return 0;
-    });
+    const requestAnimationFrame = vi
+      .spyOn(window, 'requestAnimationFrame')
+      .mockImplementation((cb) => {
+        // Allow the animation frame to run once to catch the error
+        setTimeout(() => cb(0), 0);
+        return 0;
+      });
 
     // Create a container element
     const container = document.createElement('div');

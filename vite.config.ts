@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite';
-import { resolve } from 'path';
-import path from 'path';
+import path, { resolve } from 'path';
 
 export default defineConfig({
   build: {
@@ -10,7 +9,16 @@ export default defineConfig({
       fileName: 'spacegraph',
     },
     rollupOptions: {
-      external: ['three', 'solid-js', 'solid-js/store', '@use-gesture/vanilla', 'd3-force-3d', 'popmotion', 'three-mesh-bvh', 'tslib'],
+      external: [
+        'three',
+        'solid-js',
+        'solid-js/store',
+        '@use-gesture/vanilla',
+        'd3-force-3d',
+        'popmotion',
+        'three-mesh-bvh',
+        'tslib',
+      ],
     },
   },
   resolve: {

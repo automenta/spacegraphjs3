@@ -1,8 +1,8 @@
 import {
-  MeshBVH,
   acceleratedRaycast,
   computeBoundsTree,
   disposeBoundsTree,
+  MeshBVH,
 } from 'three-mesh-bvh';
 
 declare module 'three' {
