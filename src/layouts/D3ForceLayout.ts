@@ -24,7 +24,9 @@ export class D3ForceLayout implements ILayoutEngine {
     this.createSimulation();
 
     createEffect(() => {
-      this.simulation.nodes((this.graph.state.data?.nodes ?? []) as D3Node[]);
+      // Create copies of nodes to avoid direct mutation of store objects
+      const nodesCopy = (this.graph.state.data?.nodes ?? []).map(node => ({ ...node }));
+      this.simulation.nodes(nodesCopy as D3Node[]);
       this.reheat();
     });
 
@@ -33,6 +35,7 @@ export class D3ForceLayout implements ILayoutEngine {
       const edges = this.graph.state.data?.edges ?? [];
       const nodeMap = new Map(nodes.map((n) => [n.id, n]));
 
+      // Create copies of edges to avoid direct mutation of store objects
       const links = edges.map((e) => ({
         ...e,
         source: nodeMap.get(e.source)!,
@@ -48,9 +51,10 @@ export class D3ForceLayout implements ILayoutEngine {
   }
 
   private createSimulation() {
-    const state = this.graph.state;
+    // Create copies of nodes to avoid direct mutation of store objects
+    const nodesCopy = (this.graph.state.data?.nodes ?? []).map(node => ({ ...node }));
 
-    this.simulation = forceSimulation<D3Node, D3Link>((state.data?.nodes ?? []) as D3Node[])
+    this.simulation = forceSimulation<D3Node, D3Link>(nodesCopy as D3Node[])
       .numDimensions(3)
       .force(
         'link',
@@ -68,15 +72,23 @@ export class D3ForceLayout implements ILayoutEngine {
     setState(
       produce((s) => {
         const simNodes = this.simulation.nodes();
+        // Create new node objects instead of mutating existing ones
+        const updatedNodes = [...s.data.nodes];
         for (let i = 0; i < simNodes.length; i++) {
           const simNode = simNodes[i];
-          const stateNode = s.data.nodes.find((n) => n.id === simNode.id);
-          if (stateNode && stateNode.position) {
-            stateNode.position.x = simNode.x ?? 0;
-            stateNode.position.y = simNode.y ?? 0;
-            stateNode.position.z = simNode.z ?? 0;
+          const nodeIndex = updatedNodes.findIndex((n) => n.id === simNode.id);
+          if (nodeIndex !== -1 && updatedNodes[nodeIndex].position) {
+            updatedNodes[nodeIndex] = {
+              ...updatedNodes[nodeIndex],
+              position: {
+                x: simNode.x ?? 0,
+                y: simNode.y ?? 0,
+                z: simNode.z ?? 0,
+              },
+            };
           }
         }
+        s.data.nodes = updatedNodes;
       }),
     );
   }

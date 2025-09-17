@@ -9,6 +9,7 @@ import { DataManager } from '../managers/DataManager';
 import { ISpaceGraphPlugin } from './plugin';
 import { SphereElementActor } from '../renderers/elementActors/SphereElementActor';
 import { D3ForceLayout } from '../layouts/D3ForceLayout';
+import { RandomLayout } from '../layouts/RandomLayout';
 
 /**
  * The main class for creating and managing a SpaceGraph visualization.
@@ -20,6 +21,7 @@ export class SpaceGraph {
   ]);
   private static layoutEngineRegistry: Map<string, LayoutEngineClass> = new Map([
     ['force-directed', D3ForceLayout],
+    ['random', RandomLayout],
   ]);
   private static instancedGeometryRegistry: Map<string, THREE.BufferGeometry> =
     new Map([['sphere', new THREE.SphereGeometry(0.5, 16, 16)]]);

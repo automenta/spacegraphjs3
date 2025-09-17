@@ -16,7 +16,7 @@ export function createState(initialSpec: Spec) {
     data: { nodes: [], edges: [] },
     interaction: { hoveredElementId: null, selectedElementIds: [] },
     style: {},
-    layout: { type: 'force-directed' },
+    layout: { type: 'random' },
     camera: { target: { x: 0, y: 0, z: 0 }, phi: 0, theta: 0, distance: 10 },
     performance: { instancingThreshold: 100 },
     controls: { keyboard: { enabled: true, panSpeed: 1, zoomSpeed: 1, orbitSpeed: 1 } },

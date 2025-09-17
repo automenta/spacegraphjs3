@@ -41,7 +41,7 @@ const initialSpec: Spec = {
     ],
   },
   layout: {
-    type: 'force-directed',
+    type: 'random',
   },
   camera: {
     target: { x: 0, y: 0, z: 0 },

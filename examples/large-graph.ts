@@ -16,7 +16,7 @@ THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
 THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
-const NUM_NODES = 10000;
+const NUM_NODES = 1000;
 
 const nodes: GraphElement[] = [];
 for (let i = 0; i < NUM_NODES; i++) {
