@@ -8,7 +8,7 @@ import { ILayoutEngine } from '../types';
  */
 export class LayoutPlugin implements ISpaceGraphPlugin {
   private graph!: SpaceGraph;
-  private currentLayoutEngine: ILayoutEngine | null = null;
+  public currentLayoutEngine: ILayoutEngine | null = null;
 
   public init(graph: SpaceGraph): void {
     this.graph = graph;

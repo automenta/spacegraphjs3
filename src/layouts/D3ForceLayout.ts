@@ -1,5 +1,6 @@
-import { Simulation, forceLink, forceManyBody, forceCenter, SimulationNodeDatum } from 'd3-force-3d';
+import { forceSimulation, Simulation, forceLink, forceManyBody, forceCenter, SimulationNodeDatum, Force } from 'd3-force-3d';
 import { produce } from 'solid-js/store';
+import { createEffect } from 'solid-js';
 import { SpaceGraph } from '../core/SpaceGraph';
 import { ILayoutEngine, NodeSpec, EdgeSpec } from '../types';
 
@@ -13,13 +14,25 @@ export class D3ForceLayout implements ILayoutEngine {
   public init(graph: SpaceGraph): void {
     this.graph = graph;
     this.createSimulation();
+
+    createEffect(() => {
+      this.simulation.nodes((this.graph.state.data?.nodes ?? []) as D3Node[]);
+      this.reheat();
+    });
+
+    createEffect(() => {
+      const linkForce = this.simulation.force('link');
+      if (linkForce && 'links' in linkForce) {
+        (linkForce as Force<D3Node, D3Link>).links!((this.graph.state.data?.edges ?? []) as D3Link[]);
+        this.reheat();
+      }
+    });
   }
 
   private createSimulation() {
     const state = this.graph.state;
-    const setState = this.graph.setState;
 
-    this.simulation = new Simulation<D3Node, D3Link>()
+    this.simulation = forceSimulation<D3Node, D3Link>((state.data?.nodes ?? []) as D3Node[])
       .numDimensions(3)
       .force(
         'link',
@@ -31,24 +44,32 @@ export class D3ForceLayout implements ILayoutEngine {
       .force('center', forceCenter())
       .stop();
 
-    this.simulation.nodes((state.data?.nodes ?? []) as D3Node[]);
+    this.simulation.on('tick', this.onTick.bind(this));
+  }
 
-    this.simulation.on('tick', () => {
-      setState(
-        produce((s) => {
-          const simNodes = this.simulation.nodes();
-          for (let i = 0; i < simNodes.length; i++) {
-            const simNode = simNodes[i];
-            const stateNode = s.data.nodes.find((n) => n.id === simNode.id);
-            if (stateNode && stateNode.position) {
-              stateNode.position.x = simNode.x ?? 0;
-              stateNode.position.y = simNode.y ?? 0;
-              stateNode.position.z = simNode.z ?? 0;
-            }
+  public onTick(): void {
+    const setState = this.graph.setState;
+    setState(
+      produce((s) => {
+        const simNodes = this.simulation.nodes();
+        for (let i = 0; i < simNodes.length; i++) {
+          const simNode = simNodes[i];
+          const stateNode = s.data.nodes.find((n) => n.id === simNode.id);
+          if (stateNode && stateNode.position) {
+            stateNode.position.x = simNode.x ?? 0;
+            stateNode.position.y = simNode.y ?? 0;
+            stateNode.position.z = simNode.z ?? 0;
           }
-        })
-      );
-    });
+        }
+      })
+    );
+  }
+
+  public tick(iterations = 1): void {
+    for (let i = 0; i < iterations; i++) {
+      this.simulation.tick();
+    }
+    this.onTick();
   }
 
   public resume(): void {

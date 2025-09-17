@@ -1,3 +1,4 @@
+import { createRoot } from 'solid-js';
 import { SpaceGraph } from '../../src/core/SpaceGraph';
 import { Spec } from '../../src/types';
 
@@ -12,28 +13,32 @@ export const createTestGraph = (initialSpec: Spec) => {
   container.id = containerId;
   document.body.appendChild(container);
 
-  const mockInitManagers = vi
-    .spyOn(SpaceGraph.prototype as any, 'initManagers')
-    .mockImplementation(function (this: SpaceGraph) {
-      this.renderingManager = new RenderingManager() as any;
-      this.dataManager = new DataManager(this);
-      this.eventManager = new EventManager();
-    });
+  let graph: SpaceGraph;
+  const dispose = createRoot((dispose) => {
+    const mockInitManagers = vi
+      .spyOn(SpaceGraph.prototype as any, 'initManagers')
+      .mockImplementation(function (this: SpaceGraph) {
+        this.renderingManager = new RenderingManager() as any;
+        this.dataManager = new DataManager(this);
+        this.eventManager = new EventManager();
+      });
 
-  const graph = new SpaceGraph(`#${containerId}`, initialSpec);
+    graph = new SpaceGraph(`#${containerId}`, initialSpec);
 
-  mockInitManagers.mockRestore();
+    mockInitManagers.mockRestore();
 
-  const cleanup = () => {
-    graph.destroy();
-    document.body.removeChild(container);
-  };
+    return {
+      graph,
+      container,
+      cleanup: () => {
+        dispose();
+        graph.destroy();
+        document.body.removeChild(container);
+      },
+    };
+  });
 
-  return {
-    graph,
-    container,
-    cleanup,
-  };
+  return dispose;
 };
 
 export const nextTick = () => new Promise((resolve) => setTimeout(resolve, 0));

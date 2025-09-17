@@ -47,7 +47,7 @@ declare module 'd3-force-3d' {
 
   export function forceManyBody<N extends SimulationNodeDatum>(): Force<N, any>;
   export function forceCenter<N extends SimulationNodeDatum>(x?: number, y?: number, z?: number): Force<N, any>;
-  export function Simulation<
+  export function forceSimulation<
     N extends SimulationNodeDatum,
     L extends SimulationLinkDatum<N>
   >(nodes?: N[]): Simulation<N, L>;
