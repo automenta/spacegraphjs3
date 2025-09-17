@@ -175,7 +175,9 @@ export class InteractionLogic {
     // Update the state using the provided function
     updateState({
       data: {
-        nodes: [{ id: draggedElementId, position: newPosition }],
+        nodes: {
+          update: [{ id: draggedElementId, position: newPosition }],
+        },
       },
     });
   }

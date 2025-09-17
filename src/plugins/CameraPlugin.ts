@@ -4,6 +4,7 @@ import { animate } from 'popmotion';
 import { ISpaceGraphPlugin } from '../core/plugin';
 import { SpaceGraph } from '../core/SpaceGraph';
 import { SpecUpdate } from '../types';
+import { InteractionLogic } from '../InteractionLogic';
 
 /**
  * A plugin that manages the camera and provides camera control methods.
@@ -12,11 +13,56 @@ import { SpecUpdate } from '../types';
 export class CameraPlugin implements ISpaceGraphPlugin {
   private graph!: SpaceGraph;
   private threeCamera!: THREE.PerspectiveCamera;
+  private activeKeys: Set<string> = new Set();
+  private boundOnKeyDown!: (event: KeyboardEvent) => void;
+  private boundOnKeyUp!: (event: KeyboardEvent) => void;
 
   public init(graph: SpaceGraph): void {
     this.graph = graph;
     this.threeCamera = graph.renderingManager.getCamera();
     this.syncCameraToState();
+    this.initKeyboardControls();
+  }
+
+  private initKeyboardControls(): void {
+    if (!this.graph.state.controls?.keyboard?.enabled) return;
+
+    this.boundOnKeyDown = this.onKeyDown.bind(this);
+    this.boundOnKeyUp = this.onKeyUp.bind(this);
+
+    window.addEventListener('keydown', this.boundOnKeyDown);
+    window.addEventListener('keyup', this.boundOnKeyUp);
+  }
+
+  private onKeyDown(event: KeyboardEvent): void {
+    this.activeKeys.add(event.key.toLowerCase());
+  }
+
+  private onKeyUp(event: KeyboardEvent): void {
+    this.activeKeys.delete(event.key.toLowerCase());
+  }
+
+  public update(): void {
+    if (!this.graph.state.controls?.keyboard?.enabled) return;
+
+    const controls = this.graph.state.controls.keyboard;
+    if (!controls) return;
+
+    // Panning
+    if (this.activeKeys.has('w')) InteractionLogic.handleKeyPan(this.graph.state, this.graph.updateState, 'forward', controls.panSpeed, this.threeCamera);
+    if (this.activeKeys.has('s')) InteractionLogic.handleKeyPan(this.graph.state, this.graph.updateState, 'backward', controls.panSpeed, this.threeCamera);
+    if (this.activeKeys.has('a')) InteractionLogic.handleKeyPan(this.graph.state, this.graph.updateState, 'left', controls.panSpeed, this.threeCamera);
+    if (this.activeKeys.has('d')) InteractionLogic.handleKeyPan(this.graph.state, this.graph.updateState, 'right', controls.panSpeed, this.threeCamera);
+
+    // Orbiting
+    if (this.activeKeys.has('arrowup')) InteractionLogic.handleKeyOrbit(this.graph.state, this.graph.updateState, 'up', controls.orbitSpeed);
+    if (this.activeKeys.has('arrowdown')) InteractionLogic.handleKeyOrbit(this.graph.state, this.graph.updateState, 'down', controls.orbitSpeed);
+    if (this.activeKeys.has('arrowleft')) InteractionLogic.handleKeyOrbit(this.graph.state, this.graph.updateState, 'left', controls.orbitSpeed);
+    if (this.activeKeys.has('arrowright')) InteractionLogic.handleKeyOrbit(this.graph.state, this.graph.updateState, 'right', controls.orbitSpeed);
+
+    // Zooming
+    if (this.activeKeys.has('+') || this.activeKeys.has('=')) InteractionLogic.handleKeyZoom(this.graph.state, this.graph.updateState, 'in', controls.zoomSpeed);
+    if (this.activeKeys.has('-') || this.activeKeys.has('_')) InteractionLogic.handleKeyZoom(this.graph.state, this.graph.updateState, 'out', controls.zoomSpeed);
   }
 
   /**
@@ -104,5 +150,14 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     };
 
     this.flyTo(target, options);
+  }
+
+  public dispose(): void {
+    if (this.boundOnKeyDown) {
+      window.removeEventListener('keydown', this.boundOnKeyDown);
+    }
+    if (this.boundOnKeyUp) {
+      window.removeEventListener('keyup', this.boundOnKeyUp);
+    }
   }
 }

@@ -37,11 +37,12 @@ export class NodeRenderer implements IRenderer {
     const currentNodeIds = new Set(nodes.map((n) => n.id));
 
     // Add new actors for new nodes.
-    for (const node of nodes) {
+    nodes.forEach((node, index) => {
       if (!this.elementActors.has(node.id)) {
-        this.addElementActor(node);
+        // Pass the state proxy by index for performance
+        this.addElementActor(node, this.state.data!.nodes![index]);
       }
-    }
+    });
 
     // Remove actors for nodes that no longer exist.
     for (const nodeId of this.elementActors.keys()) {
@@ -51,7 +52,7 @@ export class NodeRenderer implements IRenderer {
     }
   }
 
-  private addElementActor(node: NodeSpec) {
+  private addElementActor(node: NodeSpec, elementStateProxy: Store<NodeSpec>) {
     const ActorClass = this.elementActorRegistry.get(node.type);
     if (!ActorClass) {
       console.warn(
@@ -60,13 +61,9 @@ export class NodeRenderer implements IRenderer {
       return;
     }
 
-    const elementStateProxy = this.state.data!.nodes!.find(
-      (n) => n.id === node.id,
-    )!;
-
     const actor = new ActorClass(
       this.scene,
-      elementStateProxy as Store<NodeSpec>,
+      elementStateProxy,
       this.state,
     );
     actor.init();

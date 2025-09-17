@@ -7,6 +7,7 @@ import { RenderingManager } from '../managers/RenderingManager';
 import { EventManager } from '../managers/EventManager';
 import { DataManager } from '../managers/DataManager';
 import { ISpaceGraphPlugin } from './plugin';
+import { CameraPlugin } from '../plugins/CameraPlugin';
 import { SphereElementActor } from '../renderers/elementActors/SphereElementActor';
 import { D3ForceLayout } from '../layouts/D3ForceLayout';
 import { RandomLayout } from '../layouts/RandomLayout';
@@ -64,6 +65,7 @@ export class SpaceGraph {
   public renderingManager!: RenderingManager;
   public eventManager!: EventManager;
   public dataManager!: DataManager;
+  public cameraPlugin?: CameraPlugin;
   private plugins: ISpaceGraphPlugin[] = [];
   private dispose: () => void;
 
@@ -130,6 +132,9 @@ export class SpaceGraph {
     for (const plugin of this.plugins) {
       try {
         plugin.init(this);
+        if (plugin instanceof CameraPlugin) {
+          this.cameraPlugin = plugin;
+        }
       } catch (error) {
         console.error(`Error initializing plugin:`, error);
       }
@@ -184,6 +189,9 @@ export class SpaceGraph {
     this.isDestroyed = true;
 
     this.dispose(); // Dispose SolidJS root and all effects
+    // Dispose all registered plugins.
+    // This includes the cameraPlugin, which is stored separately for convenience
+    // but is part of the main plugins array.
     for (const plugin of this.plugins) {
       if (plugin.dispose) {
         plugin.dispose();

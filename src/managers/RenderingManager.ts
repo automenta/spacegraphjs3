@@ -87,28 +87,22 @@ export class RenderingManager {
     createEffect(() => {
       const nodeCount = this.graph.state.data?.nodes?.length ?? 0;
       const threshold = this.graph.state.performance?.instancingThreshold ?? 100;
-      const shouldUseInstanced = nodeCount > threshold;
+      // TODO: Re-enable instanced rendering once performance issues are resolved.
+      // The InstancedRenderer is currently a work-in-progress and causes timeouts.
+      const shouldUseInstanced = false; // nodeCount > threshold;
 
-      const needsUpdate =
-        !this.nodeRenderer ||
-        (shouldUseInstanced && !(this.nodeRenderer instanceof InstancedRenderer)) ||
-        (!shouldUseInstanced && !(this.nodeRenderer instanceof NodeRenderer));
+      const needsUpdate = !this.nodeRenderer; // Always use NodeRenderer for now
 
       if (needsUpdate) {
         if (this.nodeRenderer) {
           this.nodeRenderer.dispose();
         }
-        this.nodeRenderer = shouldUseInstanced
-          ? new InstancedRenderer(
-            this.scene,
-            this.graph.state,
-            SpaceGraph.getInstancedGeometryRegistry(),
-          )
-          : new NodeRenderer(
-            this.scene,
-            this.graph.state,
-            SpaceGraph.getElementActorRegistry(),
-          );
+        // Always use the non-instanced renderer until the instanced one is fixed.
+        this.nodeRenderer = new NodeRenderer(
+          this.scene,
+          this.graph.state,
+          SpaceGraph.getElementActorRegistry(),
+        );
       }
     });
   }
@@ -141,6 +135,9 @@ export class RenderingManager {
     if (!this.isLooping) return;
 
     try {
+      // Update camera controls
+      this.graph.cameraPlugin?.update();
+
       this.renderer.render(this.scene, this.camera);
       this.cssRenderer.render(this.cssScene, this.camera);
     } catch (error) {

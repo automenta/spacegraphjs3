@@ -68,7 +68,16 @@ export class EdgeRenderer {
           targetNode.position.z,
         );
 
-        const color = new THREE.Color(edge.color || '#aaaaaa');
+        const color = new THREE.Color();
+        try {
+          color.set(edge.color || '#aaaaaa');
+        } catch (error) {
+          console.warn(
+            `Invalid color specified for edge ${edge.id}:`,
+            edge.color,
+          );
+          color.set('#aaaaaa'); // Fallback to grey on error
+        }
         colors.push(color.r, color.g, color.b);
         colors.push(color.r, color.g, color.b);
       }

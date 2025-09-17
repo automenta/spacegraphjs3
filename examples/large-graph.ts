@@ -28,7 +28,9 @@ for (let i = 0; i < NUM_NODES; i++) {
       y: Math.random() * 100 - 50,
       z: Math.random() * 100 - 50,
     },
-    color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+    color: `#${Math.floor(Math.random() * 16777215)
+      .toString(16)
+      .padStart(6, '0')}`,
   });
 }
 

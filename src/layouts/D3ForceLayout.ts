@@ -27,7 +27,7 @@ export class D3ForceLayout implements ILayoutEngine {
       // Create copies of nodes to avoid direct mutation of store objects
       const nodesCopy = (this.graph.state.data?.nodes ?? []).map(node => ({ ...node }));
       this.simulation.nodes(nodesCopy as D3Node[]);
-      this.reheat();
+      // this.reheat(); // Do not start the simulation automatically on init
     });
 
     createEffect(() => {
@@ -45,7 +45,7 @@ export class D3ForceLayout implements ILayoutEngine {
       const linkForce = this.simulation.force('link');
       if (linkForce && 'links' in linkForce) {
         (linkForce as Force<D3Node, D3Link>).links!(links as any);
-        this.reheat();
+        // this.reheat(); // Do not start the simulation automatically on init
       }
     });
   }
