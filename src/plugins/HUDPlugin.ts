@@ -11,7 +11,7 @@ export class HUDPlugin implements ISpaceGraphPlugin {
 
   public init(graph: SpaceGraph): void {
     this.graph = graph;
-    const container = this.graph.renderingManager.getContainer();
+    const container = this.graph.render.getContainer();
     this.hudContainer = document.createElement('div');
     this.hudContainer.style.position = 'absolute';
     this.hudContainer.style.top = '10px';

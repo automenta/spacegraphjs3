@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { Spec } from '../../src';
+import { LayoutPlugin, Spec } from '../../src';
 import { createTestGraph, nextTick } from './test-utils';
-import { LayoutPlugin } from '../../src';
 import { D3ForceLayout } from '../../src/layouts/D3ForceLayout';
 
 describe('LayoutPlugin', () => {

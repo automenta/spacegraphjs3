@@ -18,7 +18,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
 
   public init(graph: SpaceGraph): void {
     this.graph = graph;
-    this.rendererEl = this.graph.renderingManager.getRendererDomElement();
+    this.rendererEl = this.graph.render.getRendererDomElement();
     this.dragPlane = new THREE.Plane();
 
     this.gesture = new Gesture(
@@ -36,7 +36,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     ) => void;
     this.rendererEl.addEventListener('click', this.boundOnClick);
 
-    this.graph.eventManager.on('element:click', ({ target, event }) => {
+    this.graph.events.on('element:click', ({ target, event }) => {
       const isMultiSelect = event.metaKey || event.ctrlKey;
       const currentSelection =
         this.graph.state.interaction?.selectedElementIds ?? [];
@@ -58,9 +58,9 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
   }
 
   private getIntersectedElement(event: MouseEvent | PointerEvent) {
-    const renderer = this.graph.renderingManager.getRenderer();
-    const camera = this.graph.renderingManager.getCamera();
-    const nodeRenderer = this.graph.renderingManager.getNodeRenderer();
+    const renderer = this.graph.render.getRenderer();
+    const camera = this.graph.render.getCamera();
+    const nodeRenderer = this.graph.render.getNodeRenderer();
 
     if (!nodeRenderer) return null;
 
@@ -105,7 +105,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     } = state;
     if (pinching) return;
 
-    const camera = this.graph.renderingManager.getCamera();
+    const camera = this.graph.render.getCamera();
 
     if (first) {
       const intersectedElement = this.getIntersectedElement(
@@ -132,7 +132,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
         vy,
         this.draggedElementId,
         this.dragPlane,
-        this.graph.renderingManager.getRendererDomElement(),
+        this.graph.render.getRendererDomElement(),
         camera,
         this.graph.updateState
       );
@@ -179,7 +179,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
         this.graph.updateState({
           interaction: { hoveredElementId: element.id },
         });
-        this.graph.eventManager.emit('element:hover:enter', {
+        this.graph.events.emit('element:hover:enter', {
           target: element,
         });
       }
@@ -187,7 +187,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
       const oldElement = this.graph.dataManager.getElement(currentHoveredId);
       this.graph.updateState({ interaction: { hoveredElementId: null } });
       if (oldElement)
-        this.graph.eventManager.emit('element:hover:leave', {
+        this.graph.events.emit('element:hover:leave', {
           target: oldElement,
         });
     }
@@ -196,12 +196,12 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
   private onClick(event: PointerEvent) {
     const element = this.getIntersectedElement(event);
     if (element) {
-      this.graph.eventManager.emit('element:click', {
+      this.graph.events.emit('element:click', {
         target: element,
         event,
       });
     } else {
-      this.graph.eventManager.emit('background:click', { event });
+      this.graph.events.emit('background:click', { event });
     }
   }
 }

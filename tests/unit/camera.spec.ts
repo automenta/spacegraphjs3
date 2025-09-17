@@ -1,9 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createState } from '../../src/core/createState';
-import { CameraPlugin } from '../../src';
-import { Spec } from '../../src';
+import { CameraPlugin, SpaceGraph, Spec } from '../../src';
 import * as THREE from 'three';
-import { SpaceGraph } from '../../src';
 import { animate } from 'popmotion';
 
 vi.mock('popmotion', () => ({
@@ -68,7 +66,7 @@ describe('CameraPlugin', () => {
     // Simulate completion
     animateArgs.onComplete();
 
-    expect(mockGraph.eventManager.emit).toHaveBeenCalledWith(
+    expect(mockGraph.events.emit).toHaveBeenCalledWith(
       'camera:animation:end'
     );
   });

@@ -19,7 +19,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
 
   public init(graph: SpaceGraph): void {
     this.graph = graph;
-    this.threeCamera = graph.renderingManager.getCamera();
+    this.threeCamera = graph.render.getCamera();
     this.syncCameraToState();
     this.initKeyboardControls();
   }
@@ -123,7 +123,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     const fromState = { ...this.graph.state.camera };
 
     // Emit animation start event
-    this.graph.eventManager.emit('camera:animation:start');
+    this.graph.events.emit('camera:animation:start');
 
     animate({
       from: fromState,
@@ -134,7 +134,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
       },
       onComplete: () => {
         // Emit animation end event
-        this.graph.eventManager.emit('camera:animation:end');
+        this.graph.events.emit('camera:animation:end');
       },
     });
   }

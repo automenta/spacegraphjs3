@@ -31,8 +31,8 @@ export class SpaceGraph {
   public state!: Store<Spec>;
   public scene: THREE.Scene;
   public camera: THREE.PerspectiveCamera;
-  public renderingManager!: RenderingManager;
-  public eventManager!: EventManager;
+  public render!: RenderingManager;
+  public events!: EventManager;
   public dataManager!: DataManager;
   public cameraPlugin?: CameraPlugin;
   private readonly container: HTMLElement;
@@ -61,8 +61,8 @@ export class SpaceGraph {
         return dispose;
       });
 
-      this.scene = this.renderingManager.getScene();
-      this.camera = this.renderingManager.getCamera();
+      this.scene = this.render.getScene();
+      this.camera = this.render.getCamera();
     } catch (error) {
       console.error('Failed to initialize SpaceGraph:', error);
       // If the container exists, display the error in it.
@@ -115,7 +115,7 @@ export class SpaceGraph {
     eventName: Key,
     listener: (payload: GraphEventMap[Key]) => void
   ) {
-    return this.eventManager.on(eventName, listener);
+    return this.events.on(eventName, listener);
   }
 
   /**
@@ -155,8 +155,8 @@ export class SpaceGraph {
         plugin.dispose();
       }
     }
-    this.renderingManager.dispose();
-    this.eventManager.dispose();
+    this.render.dispose();
+    this.events.dispose();
     this.dataManager.dispose();
   }
 
@@ -182,8 +182,8 @@ export class SpaceGraph {
    * Initializes the core managers for rendering and events.
    */
   private initManagers() {
-    this.renderingManager = new RenderingManager(this, this.container);
-    this.eventManager = new EventManager();
+    this.render = new RenderingManager(this, this.container);
+    this.events = new EventManager();
     this.dataManager = new DataManager(this);
   }
 

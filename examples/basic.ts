@@ -4,12 +4,14 @@ import {
   computeBoundsTree,
   disposeBoundsTree,
 } from 'three-mesh-bvh';
-import { SpaceGraph } from '../src';
-import { Spec } from '../src';
-import { LayoutPlugin } from '../src';
-import { CameraPlugin } from '../src';
-import { InteractionPlugin } from '../src';
-import { HUDPlugin } from '../src';
+import {
+  CameraPlugin,
+  HUDPlugin,
+  InteractionPlugin,
+  LayoutPlugin,
+  SpaceGraph,
+  Spec,
+} from '../src';
 
 // Add the bvh properties to the THREE objects
 THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;

@@ -1,6 +1,5 @@
 import { createRoot } from 'solid-js';
-import { SpaceGraph } from '../../src';
-import { Spec } from '../../src';
+import { SpaceGraph, Spec } from '../../src';
 
 import { vi } from 'vitest';
 import { RenderingManager } from '../mocks/RenderingManager';
@@ -18,9 +17,9 @@ export const createTestGraph = (initialSpec: Spec) => {
     const mockInitManagers = vi
       .spyOn(SpaceGraph.prototype as any, 'initManagers')
       .mockImplementation(function (this: SpaceGraph) {
-        this.renderingManager = new RenderingManager() as any;
+        this.render = new RenderingManager() as any;
         this.dataManager = new DataManager(this);
-        this.eventManager = new EventManager();
+        this.events = new EventManager();
       });
 
     graph = new SpaceGraph(`#${containerId}`, initialSpec);

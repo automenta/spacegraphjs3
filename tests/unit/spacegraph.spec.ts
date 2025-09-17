@@ -13,7 +13,7 @@ describe('SpaceGraph', () => {
     });
 
     // The mock rendering manager's dispose is already a spy
-    const renderingManagerDisposeSpy = graph.renderingManager.dispose;
+    const renderingManagerDisposeSpy = graph.render.dispose;
 
     graph.destroy();
 
