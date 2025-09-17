@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { createEffect } from 'solid-js';
 import { Store } from 'solid-js/store';
-import { GraphElement, Edge, Spec } from './types';
+import { GraphElement, Edge, Spec } from '../types';
+import { expandHex } from '../utils/color';
 
 export class EdgeRenderer {
   private scene: THREE.Scene;
@@ -70,7 +71,8 @@ export class EdgeRenderer {
 
         const color = new THREE.Color();
         try {
-          color.set(edge.color || '#aaaaaa');
+          const colorValue = edge.color || '#aaaaaa';
+          color.set(expandHex(colorValue));
         } catch (error) {
           console.warn(
             `Invalid color specified for edge ${edge.id}:`,

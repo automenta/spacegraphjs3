@@ -3,6 +3,7 @@ import { createEffect, createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { Element, Spec } from '../../types';
 import { BaseElementActor } from './BaseElementActor';
+import { expandHex } from '../../utils/color';
 
 /**
  * An ElementActor for rendering sphere nodes.
@@ -32,7 +33,8 @@ export class SphereElementActor extends BaseElementActor {
     // Safely set the initial color.
     const initialColor = new THREE.Color();
     try {
-      initialColor.set(this.elementState.color || '#ffffff');
+      const colorValue = this.elementState.color || '#ffffff';
+      initialColor.set(expandHex(colorValue));
     } catch (error) {
       console.warn(
         `Invalid initial color for node ${this.elementState.id}:`,
@@ -102,7 +104,8 @@ export class SphereElementActor extends BaseElementActor {
 
     const finalColor = new THREE.Color(); // Start with default color
     try {
-      finalColor.set(elementState.color || '#ffffff');
+      const colorValue = elementState.color || '#ffffff';
+      finalColor.set(expandHex(colorValue));
     } catch (error) {
       console.warn(
         `Invalid color specified for node ${elementState.id}:`,
@@ -115,18 +118,20 @@ export class SphereElementActor extends BaseElementActor {
     const hoverStyle = this.graphState.style['node:hover'];
 
     if (isElementSelected && selectedStyle) {
-      if (selectedStyle.color) finalColor.set(selectedStyle.color);
+      if (selectedStyle.color) finalColor.set(expandHex(selectedStyle.color));
 
       if (selectedStyle.glow) {
         this.glowMesh.visible = true;
-        (this.glowMesh.material as THREE.MeshBasicMaterial).color.set(selectedStyle.glow.color || '#ffffff');
-        (this.glowMesh.material as THREE.MeshBasicMaterial).opacity = selectedStyle.glow.strength || 0.4;
+        (this.glowMesh.material as THREE.MeshBasicMaterial).color.set(
+          expandHex(selectedStyle.glow.color || '#ffffff'),
+        );
+        (this.glowMesh.material as THREE.MeshBasicMaterial).opacity =
+          selectedStyle.glow.strength || 0.4;
       } else {
         this.glowMesh.visible = false;
       }
-
     } else if (isElementHovered && hoverStyle) {
-      if (hoverStyle.color) finalColor.set(hoverStyle.color);
+      if (hoverStyle.color) finalColor.set(expandHex(hoverStyle.color));
       this.glowMesh.visible = false; // No glow for hover in this implementation
     } else {
       this.glowMesh.visible = false;

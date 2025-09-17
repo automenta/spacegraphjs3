@@ -12,6 +12,7 @@ import { createEffect, on } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { Spec, NodeSpec } from '../types';
 import { IRenderer } from './IRenderer';
+import { expandHex } from '../utils/color';
 
 const MAX_INSTANCES = 100000;
 
@@ -165,7 +166,10 @@ export class InstancedRenderer implements IRenderer {
     }
 
     try {
-      mesh.setColorAt(index, new THREE.Color(finalColor));
+      // Ensure the color is a valid 6-digit hex code
+      const colorValue =
+        typeof finalColor === 'string' ? expandHex(finalColor) : finalColor;
+      mesh.setColorAt(index, new THREE.Color(colorValue));
     } catch (error) {
       console.warn(
         `Invalid color specified for instanced node ${node.id}:`,
