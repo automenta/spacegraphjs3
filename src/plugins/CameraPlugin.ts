@@ -8,6 +8,7 @@ import { InteractionLogic } from '../InteractionLogic';
 import { CameraPresetsManager, CameraPreset } from '../utils/CameraPresets';
 import { ThreeObjectPoolManager } from '../utils/ThreeObjectPoolManager';
 import { AnimationCurves, animateProperty } from '../utils/AnimationUtils';
+import { CameraUtils } from '../utils/CameraUtils';
 
 /**
  * A plugin that manages the camera and provides camera control methods.
@@ -38,15 +39,22 @@ export class CameraPlugin implements ISpaceGraphPlugin {
   private inertiaFactor: number = 0.9;
   private cameraVelocity: THREE.Vector3 = new THREE.Vector3();
   private targetVelocity: THREE.Vector3 = new THREE.Vector3();
+  private gestureState: { lastDistance: number; lastAngle: number; isGesturing: boolean } = { lastDistance: 0, lastAngle: 0, isGesturing: false };
+  private touchStartTime: number = 0;
+  private touchStartPositions: Map<number, { x: number; y: number }> = new Map();
+  private cameraUtils!: CameraUtils;
 
   public init(graph: SpaceGraph): void {
     this.graph = graph;
     this.threeCamera = graph.render.getCamera();
     this.presetsManager = new CameraPresetsManager(graph);
+    this.cameraUtils = new CameraUtils(this.threeCamera, graph.render.getScene());
     this.syncCameraToState();
     this.initKeyboardControls();
     this.setupAutoFrameWatcher();
     this.setupPresetCommands();
+    this.setupTouchGestures();
+    this.setupInertiaSystem();
   }
 
   /**
@@ -243,11 +251,277 @@ export class CameraPlugin implements ISpaceGraphPlugin {
   }
 
   /**
+   * Set up touch gesture support for mobile devices
+   */
+  private setupTouchGestures(): void {
+    let touchStartTime = 0;
+    let initialDistance = 0;
+    let initialAngle = 0;
+    let lastTouchCount = 0;
+
+    const handleTouchStart = (event: TouchEvent) => {
+      touchStartTime = Date.now();
+      lastTouchCount = event.touches.length;
+
+      if (event.touches.length === 2) {
+        // Pinch gesture start
+        const touch1 = event.touches[0];
+        const touch2 = event.touches[1];
+        
+        initialDistance = Math.sqrt(
+          Math.pow(touch2.clientX - touch1.clientX, 2) +
+          Math.pow(touch2.clientY - touch1.clientY, 2)
+        );
+        
+        initialAngle = Math.atan2(
+          touch2.clientY - touch1.clientY,
+          touch2.clientX - touch1.clientX
+        );
+
+        this.gestureState.isGesturing = true;
+        this.gestureState.lastDistance = initialDistance;
+        this.gestureState.lastAngle = initialAngle;
+      }
+    };
+
+    const handleTouchMove = (event: TouchEvent) => {
+      if (event.touches.length === 2 && this.gestureState.isGesturing) {
+        event.preventDefault();
+        
+        const touch1 = event.touches[0];
+        const touch2 = event.touches[1];
+        
+        const currentDistance = Math.sqrt(
+          Math.pow(touch2.clientX - touch1.clientX, 2) +
+          Math.pow(touch2.clientY - touch1.clientY, 2)
+        );
+        
+        const currentAngle = Math.atan2(
+          touch2.clientY - touch1.clientY,
+          touch2.clientX - touch1.clientX
+        );
+
+        // Handle pinch zoom
+        const distanceDelta = currentDistance - initialDistance;
+        const zoomFactor = distanceDelta * 0.01;
+        
+        if (Math.abs(zoomFactor) > 0.001) {
+          this.handleSmoothZoom(zoomFactor > 0 ? 'out' : 'in', Math.abs(zoomFactor));
+        }
+
+        // Handle rotation (optional, can be disabled for better UX)
+        const angleDelta = currentAngle - initialAngle;
+        if (Math.abs(angleDelta) > 0.1) {
+          const currentState = this.graph.state.camera;
+          this.graph.update({
+            camera: {
+              theta: currentState.theta + angleDelta * 0.5
+            }
+          });
+        }
+
+        this.gestureState.lastDistance = currentDistance;
+        this.gestureState.lastAngle = currentAngle;
+      }
+    };
+
+    const handleTouchEnd = (event: TouchEvent) => {
+      const touchDuration = Date.now() - touchStartTime;
+      
+      // Handle tap-to-focus gesture
+      if (event.changedTouches.length === 1 && touchDuration < 300 && !this.gestureState.isGesturing) {
+        const touch = event.changedTouches[0];
+        this.handleTapToFocus(touch.clientX, touch.clientY);
+      }
+
+      if (event.touches.length === 0) {
+        this.gestureState.isGesturing = false;
+      }
+    };
+
+    // Add touch event listeners
+    window.addEventListener('touchstart', handleTouchStart, { passive: false });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
+  }
+
+  /**
+   * Handle tap-to-focus gesture for touch devices
+   */
+  private handleTapToFocus(clientX: number, clientY: number): void {
+    // Use CameraUtils for coordinate conversion and raycasting
+    const renderer = this.graph.render.getRenderer();
+    const camera = this.graph.render.getCamera();
+    
+    const screenPos = new THREE.Vector2(clientX, clientY);
+    const worldPos = this.cameraUtils.screenToWorld(screenPos, 1);
+    
+    // Use CameraUtils for raycasting
+    const nodeRenderer = this.graph.render.getNodeRenderer();
+    const objects = nodeRenderer ? nodeRenderer.getRaycastableObjects() : [];
+    const intersects = this.cameraUtils.raycastFromScreen(screenPos, objects);
+    
+    if (intersects.length > 0) {
+      // Frame the clicked object
+      const intersection = intersects[0];
+      const nodeId = nodeRenderer.getNodeIdFromIntersection(intersection);
+      
+      if (nodeId) {
+        const node = this.graph.dataManager.getNode(nodeId);
+        if (node && node.position) {
+          this.flyTo({
+            target: node.position,
+            distance: 20,
+            phi: this.graph.state.camera.phi,
+            theta: this.graph.state.camera.theta
+          }, {
+            duration: 800,
+            easing: AnimationCurves.easeOut.easing
+          });
+        }
+      }
+    } else {
+      // If no object clicked, perform autozoom to fit all elements
+      this.autoZoom({
+        duration: 800,
+        strategy: 'optimal',
+        focusMode: 'all'
+      });
+    }
+  }
+
+  /**
+   * Handle smooth zoom with enhanced easing
+   */
+  private handleSmoothZoom(direction: 'in' | 'out', speed: number = 0.1): void {
+    if (!this.isSmoothZoomEnabled) return;
+
+    const currentState = this.graph.state.camera;
+    const zoomFactor = direction === 'in' ? 1 - (speed * this.smoothZoomFactor) : 1 + (speed * this.smoothZoomFactor);
+    
+    const newDistance = currentState.distance * zoomFactor;
+    
+    // Apply zoom constraints
+    const constrainedDistance = Math.max(
+      this.zoomConstraints.minDistance || 1,
+      Math.min(this.zoomConstraints.maxDistance || 1000, newDistance)
+    );
+
+    this.graph.update({
+      camera: { distance: constrainedDistance }
+    });
+  }
+
+  /**
    * Set up the inertia system for smooth camera movements
    */
   private setupInertiaSystem(): void {
-    // This method is called during initialization to set up the inertia system
-    // The actual inertia logic is applied in the applyInertia method
+    // Set up animation loop for inertia
+    const inertiaLoop = () => {
+      if (this.isInertiaEnabled) {
+        this.applyInertia();
+      }
+      requestAnimationFrame(inertiaLoop);
+    };
+    inertiaLoop();
+  }
+
+  /**
+   * Calculate scene center from elements
+   */
+  private calculateSceneCenter(elements: { position: THREE.Vector3 }[]): THREE.Vector3 {
+    if (elements.length === 0) return new THREE.Vector3(0, 0, 0);
+    
+    const center = new THREE.Vector3();
+    elements.forEach(el => center.add(el.position));
+    center.divideScalar(elements.length);
+    
+    return center;
+  }
+
+  /**
+   * Calculate optimal camera distance based on scene content and strategy
+   */
+  private calculateOptimalDistance(
+    elements: { position: THREE.Vector3 }[],
+    strategy: 'tight' | 'loose' | 'optimal' | 'smart'
+  ): number {
+    if (elements.length === 0) return 50;
+
+    const center = this.calculateSceneCenter(elements);
+    let maxDistance = 0;
+
+    elements.forEach(el => {
+      const distance = el.position.distanceTo(center);
+      maxDistance = Math.max(maxDistance, distance);
+    });
+
+    const baseDistance = maxDistance * 2; // Basic heuristic
+
+    switch (strategy) {
+      case 'tight':
+        return baseDistance * 1.2;
+      case 'loose':
+        return baseDistance * 3;
+      case 'smart':
+        // Intelligent distance calculation based on element count and distribution
+        const distributionFactor = this.calculateDistributionFactor(elements, center);
+        return baseDistance * (1 + distributionFactor * 0.5);
+      case 'optimal':
+      default:
+        return baseDistance * 1.5;
+    }
+  }
+
+  /**
+   * Calculate weighted center based on element properties
+   */
+  private calculateWeightedCenter(elements: { position: THREE.Vector3 }[]): THREE.Vector3 {
+    if (elements.length === 0) return new THREE.Vector3(0, 0, 0);
+
+    const weightedCenter = new THREE.Vector3();
+    let totalWeight = 0;
+
+    elements.forEach(el => {
+      // Simple weight based on distance from origin (can be enhanced)
+      const weight = 1 + el.position.length() * 0.1;
+      weightedCenter.add(el.position.clone().multiplyScalar(weight));
+      totalWeight += weight;
+    });
+
+    weightedCenter.divideScalar(totalWeight);
+    return weightedCenter;
+  }
+
+  /**
+   * Calculate weighted distance based on element importance
+   */
+  private calculateWeightedDistance(
+    elements: { position: THREE.Vector3 }[],
+    strategy: 'tight' | 'loose' | 'optimal' | 'smart'
+  ): number {
+    const center = this.calculateWeightedCenter(elements);
+    return this.calculateOptimalDistance(elements, strategy);
+  }
+
+  /**
+   * Calculate distribution factor for smart framing
+   */
+  private calculateDistributionFactor(
+    elements: { position: THREE.Vector3 }[],
+    center: THREE.Vector3
+  ): number {
+    if (elements.length <= 1) return 0;
+
+    // Calculate standard deviation of distances from center
+    const distances = elements.map(el => el.position.distanceTo(center));
+    const avgDistance = distances.reduce((sum, d) => sum + d, 0) / distances.length;
+    
+    const variance = distances.reduce((sum, d) => sum + Math.pow(d - avgDistance, 2), 0) / distances.length;
+    const stdDev = Math.sqrt(variance);
+
+    // Normalize by average distance
+    return stdDev / (avgDistance || 1);
   }
 
   /**
@@ -275,9 +549,9 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     
     // Adjust distance based on distribution spread
     // More spread out elements need more distance to fit in view
-    const spreadFactor = 1 + (stdDev / center.length() || 0);
+    const spreadFactor = 1 + (stdDev / (center.length() || 1));
     
-    return baseDistance * spreadFactor;
+    return baseDistance * Math.min(spreadFactor, 3.0); // Cap at 3x
   }
 
   /**
@@ -528,27 +802,30 @@ export class CameraPlugin implements ISpaceGraphPlugin {
   }
 
   /**
-   * Automatically zooms to fit all nodes in the scene
+   * Enhanced autozoom with intelligent framing and smooth transitions
    * @param options - Animation options
    */
   public autoZoom(options: {
-    duration: number;
+    duration?: number;
     padding?: number;
     easing?: (t: number) => number | string;
     includeEdges?: boolean;
-    strategy?: 'tight' | 'loose' | 'optimal';
-    focusMode?: 'all' | 'center' | 'weighted';
+    strategy?: 'tight' | 'loose' | 'optimal' | 'smart';
+    focusMode?: 'all' | 'center' | 'weighted' | 'selection';
     aspectRatio?: number;
     perspectiveCorrection?: boolean;
     distributionAware?: boolean;
+    animate?: boolean;
+    onComplete?: () => void;
   } = {
     duration: 1000,
     padding: 1.5,
     includeEdges: true,
-    strategy: 'optimal',
+    strategy: 'smart',
     focusMode: 'all',
     perspectiveCorrection: true,
-    distributionAware: false
+    distributionAware: true,
+    animate: true
   }): void {
     const nodes = this.graph.state.data.nodes;
     if (nodes.length === 0) return;
@@ -590,12 +867,135 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     }
 
     // Handle different focus modes
-    if (options.focusMode === 'center') {
-      // Focus on the center of all elements
-      this.enhancedFrame(elements, options);
+    switch (options.focusMode) {
+      case 'selection':
+        // Focus on selected elements
+        const selectedIds = this.graph.state.interaction.selectedElementIds;
+        if (selectedIds.length > 0) {
+          const selectedElements = this.getElementsByIds(selectedIds);
+          if (options.animate) {
+            this.enhancedFrame(selectedElements, {
+              duration: options.duration || 1000,
+              padding: options.padding,
+              easing: options.easing,
+              strategy: options.strategy as any,
+              perspectiveCorrection: options.perspectiveCorrection,
+              distributionAware: options.distributionAware,
+              onComplete: options.onComplete
+            });
+          } else {
+            this.frame(selectedElements, {
+              duration: options.duration || 1000,
+              padding: options.padding,
+              easing: options.easing as any,
+              strategy: options.strategy as any
+            });
+          }
+          return;
+        }
+        // Fall back to all elements if no selection
+        break;
+        
+      case 'center':
+        // Focus on the center of all elements with optimal distance
+        const center = this.calculateSceneCenter(elements);
+        const optimalDistance = this.calculateOptimalDistance(elements, options.strategy || 'smart');
+        
+        if (options.animate) {
+          this.flyTo({
+            target: center,
+            distance: optimalDistance,
+            phi: this.graph.state.camera.phi,
+            theta: this.graph.state.camera.theta
+          }, {
+            duration: options.duration || 1000,
+            easing: typeof options.easing === 'string' ?
+              (AnimationCurves[options.easing as keyof typeof AnimationCurves]?.easing || AnimationCurves.easeInOut.easing) :
+              (options.easing || AnimationCurves.easeInOut.easing),
+            onComplete: options.onComplete
+          });
+        } else {
+          this.graph.update({
+            camera: {
+              target: { x: center.x, y: center.y, z: center.z },
+              distance: optimalDistance
+            }
+          });
+          if (options.onComplete) options.onComplete();
+        }
+        return;
+        
+      case 'weighted':
+        // Focus based on element importance/weight
+        const weightedCenter = this.calculateWeightedCenter(elements);
+        const weightedDistance = this.calculateWeightedDistance(elements, options.strategy || 'smart');
+        
+        if (options.animate) {
+          this.flyTo({
+            target: weightedCenter,
+            distance: weightedDistance,
+            phi: this.graph.state.camera.phi,
+            theta: this.graph.state.camera.theta
+          }, {
+            duration: options.duration || 1000,
+            easing: typeof options.easing === 'string' ?
+              (AnimationCurves[options.easing as keyof typeof AnimationCurves]?.easing || AnimationCurves.easeInOut.easing) :
+              (options.easing || AnimationCurves.easeInOut.easing),
+            onComplete: options.onComplete
+          });
+        } else {
+          this.graph.update({
+            camera: {
+              target: { x: weightedCenter.x, y: weightedCenter.y, z: weightedCenter.z },
+              distance: weightedDistance
+            }
+          });
+          if (options.onComplete) options.onComplete();
+        }
+        return;
+        
+      case 'all':
+      default:
+        // Default: frame all elements
+        if (options.animate) {
+          this.enhancedFrame(elements, {
+            duration: options.duration || 1000,
+            padding: options.padding,
+            easing: options.easing,
+            strategy: options.strategy as any,
+            perspectiveCorrection: options.perspectiveCorrection,
+            distributionAware: options.distributionAware,
+            onComplete: options.onComplete
+          });
+        } else {
+          this.frame(elements, {
+            duration: options.duration || 1000,
+            padding: options.padding,
+            easing: options.easing as any,
+            strategy: options.strategy as any
+          });
+        }
+        return;
+    }
+    
+    // Fallback to framing all elements
+    if (options.animate) {
+      this.enhancedFrame(elements, {
+        duration: options.duration || 1000,
+        padding: options.padding,
+        easing: options.easing,
+        strategy: options.strategy as any,
+        perspectiveCorrection: options.perspectiveCorrection,
+        distributionAware: options.distributionAware,
+        onComplete: options.onComplete
+      });
     } else {
-      // Default: frame all elements
-      this.enhancedFrame(elements, options);
+      this.frame(elements, {
+        duration: options.duration || 1000,
+        padding: options.padding,
+        easing: options.easing as any,
+        strategy: options.strategy as any
+      });
     }
   }
 

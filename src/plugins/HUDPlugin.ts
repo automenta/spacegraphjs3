@@ -4,6 +4,9 @@ import { ISpaceGraphPlugin } from '../core/plugin';
 import { SpaceGraph } from '../core/SpaceGraph';
 import { Spec } from '../types';
 import { AnimationCurves } from '../utils/AnimationUtils';
+import { HUDUtils } from '../utils/HUDUtils';
+import { ThemeSystem } from '../utils/ThemeSystem';
+import { AnimationSystem } from '../utils/AnimationSystem';
 
 /**
  * REPL Commands class for handling console commands
@@ -408,6 +411,9 @@ export class HUDPlugin implements ISpaceGraphPlugin {
   private performanceMetrics: HTMLElement | null = null;
   private isPerformanceVisible: boolean = false;
   private draggablePanels: Map<string, {element: HTMLElement, isDragging: boolean, offsetX: number, offsetY: number}> = new Map();
+  private animationSystem!: AnimationSystem;
+  private themeManager!: ThemeSystem;
+  private notificationSystem!: HUDUtils;
 
   public init(graph: SpaceGraph): void {
     this.graph = graph;
@@ -416,12 +422,79 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     const container = this.graph.render.getContainer();
     this.createHUDElements(container);
     this.setupEventListeners();
+    this.setupAnimationSystem();
+    this.setupThemeManager();
+    this.setupNotificationSystem();
+    
+    // Initialize new utility systems
+    this.animationSystem = new AnimationSystem();
+    this.themeManager = new ThemeSystem({ allowCustomThemes: true });
+    this.notificationSystem = new HUDUtils();
     
     createEffect(() => this.updateHUD());
   }
 
+  public updateHUD(): void {
+    const hudState = this.graph.state.hud;
+    if (!hudState) {
+      // Animate out
+      this.hudContainer.style.transform = 'translateY(-20px)';
+      this.hudContainer.style.opacity = '0';
+      
+      // Actually hide after animation
+      setTimeout(() => {
+        this.hudContainer.style.display = 'none';
+      }, 300);
+      return;
+    }
+    
+    if (hudState.visible) {
+      // Show with animation
+      this.hudContainer.style.display = 'block';
+      setTimeout(() => {
+        this.hudContainer.style.transform = 'translateY(0)';
+        this.hudContainer.style.opacity = '1';
+      }, 10);
+      
+      // Handle console visibility with fade animation
+      if (hudState.console?.enabled) {
+        this.consoleContainer.style.display = 'block';
+        this.consoleContainer.style.opacity = '0';
+        this.consoleContainer.style.transform = 'translateY(10px)';
+        this.consoleContainer.style.transition = 'all 0.3s ease';
+        
+        setTimeout(() => {
+          this.consoleContainer.style.opacity = '1';
+          this.consoleContainer.style.transform = 'translateY(0)';
+        }, 50);
+      } else {
+        this.consoleContainer.style.opacity = '0';
+        this.consoleContainer.style.transform = 'translateY(10px)';
+        
+        // Actually hide after animation
+        setTimeout(() => {
+          this.consoleContainer.style.display = 'none';
+        }, 300);
+      }
+      
+      // Handle legacy content
+      if (hudState.content && !hudState.console?.enabled) {
+        this.hudContainer.innerHTML = `<div>${hudState.content}</div>`;
+      }
+    } else {
+      // Animate out
+      this.hudContainer.style.transform = 'translateY(-20px)';
+      this.hudContainer.style.opacity = '0';
+      
+      // Actually hide after animation
+      setTimeout(() => {
+        this.hudContainer.style.display = 'none';
+      }, 300);
+    }
+  }
+
   private createHUDElements(container: HTMLElement): void {
-    // Main HUD container
+    // Main HUD container with enhanced styling and animations
     this.hudContainer = document.createElement('div');
     this.hudContainer.style.position = 'absolute';
     this.hudContainer.style.top = '10px';
@@ -440,11 +513,30 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     this.hudContainer.style.transform = 'translateY(-20px)';
     this.hudContainer.style.opacity = '0';
     this.hudContainer.style.backdropFilter = 'blur(10px)';
+    this.hudContainer.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+    this.hudContainer.style.overflow = 'hidden';
     
-    // Animate in
+    // Add gradient overlay for enhanced visual appeal
+    const gradientOverlay = document.createElement('div');
+    gradientOverlay.style.position = 'absolute';
+    gradientOverlay.style.top = '0';
+    gradientOverlay.style.left = '0';
+    gradientOverlay.style.right = '0';
+    gradientOverlay.style.height = '2px';
+    gradientOverlay.style.background = 'linear-gradient(90deg, #00ff00, #0088ff, #ff00ff)';
+    gradientOverlay.style.opacity = '0.7';
+    gradientOverlay.style.transition = 'opacity 0.3s ease';
+    this.hudContainer.appendChild(gradientOverlay);
+    
+    // Animate in with enhanced effects
     setTimeout(() => {
       this.hudContainer.style.transform = 'translateY(0)';
       this.hudContainer.style.opacity = '1';
+      
+      // Add subtle glow effect
+      setTimeout(() => {
+        this.hudContainer.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 255, 0, 0.3)';
+      }, 400);
     }, 100);
     
     // Console container
@@ -454,26 +546,47 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     this.consoleContainer.style.paddingTop = '10px';
     this.consoleContainer.style.borderTop = '1px solid rgba(255, 255, 255, 0.1)';
     
-    // Output area
+    // Output area with enhanced styling
     this.outputElement = document.createElement('div');
     this.outputElement.style.height = '200px';
     this.outputElement.style.overflowY = 'auto';
-    this.outputElement.style.border = '1px solid #444';
+    this.outputElement.style.border = '1px solid rgba(255, 255, 255, 0.2)';
     this.outputElement.style.padding = '8px';
     this.outputElement.style.marginBottom = '8px';
     this.outputElement.style.backgroundColor = 'rgba(0, 0, 0, 0.6)';
     this.outputElement.style.fontFamily = 'monospace';
     this.outputElement.style.fontSize = '11px';
     this.outputElement.style.borderRadius = '4px';
+    this.outputElement.style.boxShadow = 'inset 0 2px 4px rgba(0, 0, 0, 0.3)';
     
-    // Input area
+    // Add syntax highlighting for JSON output
+    this.outputElement.addEventListener('DOMNodeInserted', (event) => {
+      const target = event.target as HTMLElement;
+      if (target && target.textContent && target.textContent.includes('{')) {
+        this.highlightSyntax(target);
+      }
+    });
+    
+    // Input area with enhanced styling
     const inputContainer = document.createElement('div');
     inputContainer.style.display = 'flex';
     inputContainer.style.alignItems = 'center';
     inputContainer.style.padding = '6px 8px';
     inputContainer.style.backgroundColor = 'rgba(30, 30, 30, 0.8)';
     inputContainer.style.borderRadius = '4px';
-    inputContainer.style.border = '1px solid #444';
+    inputContainer.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+    inputContainer.style.transition = 'border-color 0.3s ease, box-shadow 0.3s ease';
+    
+    // Add focus effects
+    inputContainer.addEventListener('focusin', () => {
+      inputContainer.style.borderColor = '#00ff00';
+      inputContainer.style.boxShadow = '0 0 10px rgba(0, 255, 0, 0.3)';
+    });
+    
+    inputContainer.addEventListener('focusout', () => {
+      inputContainer.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+      inputContainer.style.boxShadow = 'none';
+    });
     
     const prompt = document.createElement('span');
     prompt.textContent = '>>> ';
@@ -491,6 +604,22 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     this.inputElement.style.fontSize = '12px';
     this.inputElement.style.outline = 'none';
     this.inputElement.style.padding = '2px';
+    this.inputElement.style.caretColor = '#00ff00';
+    
+    // Add placeholder with animation
+    this.inputElement.placeholder = 'Type command here...';
+    this.inputElement.style.transition = 'color 0.3s ease';
+    
+    // Add input history navigation hint
+    this.inputElement.addEventListener('focus', () => {
+      if (this.inputElement.value === '') {
+        this.inputElement.placeholder = '↑↓ for history, Tab for autocomplete';
+      }
+    });
+    
+    this.inputElement.addEventListener('blur', () => {
+      this.inputElement.placeholder = 'Type command here...';
+    });
     
     inputContainer.appendChild(prompt);
     inputContainer.appendChild(this.inputElement);
@@ -514,11 +643,16 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     
     container.appendChild(this.hudContainer);
 
-    // Add welcome message with delay for smoother appearance
+    // Add welcome message with enhanced animation
     setTimeout(() => {
-      this.addOutput('info', 'SpaceGraphJS REPL Console');
-      this.addOutput('info', 'Type "help" for available commands');
-    }, 300);
+      this.addOutput('info', '🚀 SpaceGraphJS REPL Console');
+      this.addOutput('info', '💡 Type "help" for available commands');
+      this.addOutput('info', '🎯 Try "preset-save" to save camera views');
+      this.addOutput('info', '🎨 Use "theme <name>" to change appearance');
+    }, 500);
+    
+    // Add interactive background effects
+    this.addBackgroundEffects();
     
     // Setup event listeners for notifications
     this.setupNotificationSystem();
@@ -527,336 +661,37 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     this.createPerformancePanel();
   }
 
-  /**
-   * Create a draggable and resizable panel
-   * @param id - Unique identifier for the panel
-   * @param title - Title of the panel
-   * @param content - Initial content
-   * @param options - Panel options
-   */
-  private createDraggablePanel(
-    id: string,
-    title: string,
-    content: string,
-    options: {
-      x?: number;
-      y?: number;
-      width?: number;
-      height?: number;
-      resizable?: boolean;
-    } = {}
-  ): HTMLElement {
-    const {
-      x = 10,
-      y = 10,
-      width = 300,
-      height = 200,
-      resizable = true
-    } = options;
+  private addBackgroundEffects(): void {
+    // Add particle effect background
+    const particles = document.createElement('div');
+    particles.style.position = 'absolute';
+    particles.style.top = '0';
+    particles.style.left = '0';
+    particles.style.right = '0';
+    particles.style.bottom = '0';
+    particles.style.pointerEvents = 'none';
+    particles.style.zIndex = '-1';
+    particles.style.opacity = '0.1';
+    particles.style.overflow = 'hidden';
     
-    const panel = document.createElement('div');
-    panel.id = `hud-panel-${id}`;
-    panel.style.position = 'absolute';
-    panel.style.left = `${x}px`;
-    panel.style.top = `${y}px`;
-    panel.style.width = `${width}px`;
-    panel.style.height = `${height}px`;
-    panel.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-    panel.style.border = '1px solid #444';
-    panel.style.borderRadius = '5px';
-    panel.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
-    panel.style.zIndex = '1000';
-    panel.style.display = 'flex';
-    panel.style.flexDirection = 'column';
-    panel.style.fontFamily = 'monospace';
-    panel.style.fontSize = '12px';
-    panel.style.color = 'white';
-    
-    // Header for dragging
-    const header = document.createElement('div');
-    header.style.padding = '5px 10px';
-    header.style.backgroundColor = 'rgba(50, 50, 50, 0.8)';
-    header.style.cursor = 'move';
-    header.style.userSelect = 'none';
-    header.style.borderBottom = '1px solid #444';
-    header.style.display = 'flex';
-    header.style.justifyContent = 'space-between';
-    header.style.alignItems = 'center';
-    header.textContent = title;
-    
-    // Close button
-    const closeBtn = document.createElement('span');
-    closeBtn.textContent = '×';
-    closeBtn.style.cursor = 'pointer';
-    closeBtn.style.fontWeight = 'bold';
-    closeBtn.style.fontSize = '16px';
-    closeBtn.onclick = () => {
-      panel.style.display = 'none';
-    };
-    header.appendChild(closeBtn);
-    
-    // Content area
-    const contentArea = document.createElement('div');
-    contentArea.style.flex = '1';
-    contentArea.style.padding = '10px';
-    contentArea.style.overflow = 'auto';
-    contentArea.innerHTML = content;
-    
-    panel.appendChild(header);
-    panel.appendChild(contentArea);
-    
-    // Add resize handle if resizable
-    if (resizable) {
-      const resizeHandle = document.createElement('div');
-      resizeHandle.style.position = 'absolute';
-      resizeHandle.style.right = '0';
-      resizeHandle.style.bottom = '0';
-      resizeHandle.style.width = '10px';
-      resizeHandle.style.height = '10px';
-      resizeHandle.style.cursor = 'se-resize';
-      resizeHandle.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
-      panel.appendChild(resizeHandle);
+    // Create floating particles
+    for (let i = 0; i < 20; i++) {
+      const particle = document.createElement('div');
+      particle.style.position = 'absolute';
+      particle.style.width = '2px';
+      particle.style.height = '2px';
+      particle.style.backgroundColor = '#00ff00';
+      particle.style.borderRadius = '50%';
+      particle.style.left = `${Math.random() * 100}%`;
+      particle.style.top = `${Math.random() * 100}%`;
+      particle.style.animation = `float ${3 + Math.random() * 4}s ease-in-out infinite`;
+      particle.style.animationDelay = `${Math.random() * 2}s`;
+      particle.style.opacity = `${0.3 + Math.random() * 0.7}`;
+      
+      particles.appendChild(particle);
     }
     
-    // Add to container
-    this.hudContainer.appendChild(panel);
-    
-    // Setup dragging
-    this.setupPanelDragging(panel, header);
-    
-    // Store reference
-    this.draggablePanels.set(id, {
-      element: panel,
-      isDragging: false,
-      offsetX: 0,
-      offsetY: 0
-    });
-    
-    return panel;
-  }
-
-  /**
-   * Setup dragging for a panel
-   * @param panel - The panel element
-   * @param header - The header element for dragging
-   */
-  private setupPanelDragging(panel: HTMLElement, header: HTMLElement): void {
-    let isDragging = false;
-    let offsetX = 0;
-    let offsetY = 0;
-    
-    header.addEventListener('mousedown', (e) => {
-      isDragging = true;
-      offsetX = e.clientX - panel.offsetLeft;
-      offsetY = e.clientY - panel.offsetTop;
-      panel.style.zIndex = '1001'; // Bring to front
-      e.preventDefault();
-    });
-    
-    document.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
-      
-      panel.style.left = `${e.clientX - offsetX}px`;
-      panel.style.top = `${e.clientY - offsetY}px`;
-    });
-    
-    document.addEventListener('mouseup', () => {
-      isDragging = false;
-      panel.style.zIndex = '1000'; // Reset z-index
-    });
-  }
-
-  /**
-   * Create performance metrics panel
-   */
-  private createPerformancePanel(): void {
-    this.performanceMetrics = document.createElement('div');
-    this.performanceMetrics.id = 'performance-metrics';
-    this.performanceMetrics.style.position = 'absolute';
-    this.performanceMetrics.style.bottom = '10px';
-    this.performanceMetrics.style.right = '10px';
-    this.performanceMetrics.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
-    this.performanceMetrics.style.border = '1px solid #555';
-    this.performanceMetrics.style.borderRadius = '8px';
-    this.performanceMetrics.style.padding = '12px';
-    this.performanceMetrics.style.color = 'white';
-    this.performanceMetrics.style.fontFamily = 'monospace';
-    this.performanceMetrics.style.fontSize = '12px';
-    this.performanceMetrics.style.zIndex = '1000';
-    this.performanceMetrics.style.display = 'none'; // Hidden by default
-    this.performanceMetrics.style.minWidth = '220px';
-    this.performanceMetrics.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
-    this.performanceMetrics.style.backdropFilter = 'blur(5px)';
-    this.performanceMetrics.style.transform = 'translateY(20px)';
-    this.performanceMetrics.style.opacity = '0';
-    this.performanceMetrics.style.transition = 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
-    
-    // Title
-    const title = document.createElement('div');
-    title.textContent = 'Performance Metrics';
-    title.style.fontWeight = 'bold';
-    title.style.marginBottom = '8px';
-    title.style.color = '#00ff00';
-    title.style.fontSize = '13px';
-    title.style.display = 'flex';
-    title.style.justifyContent = 'space-between';
-    title.style.alignItems = 'center';
-    
-    // Close button for metrics panel
-    const closeBtn = document.createElement('span');
-    closeBtn.textContent = '×';
-    closeBtn.style.cursor = 'pointer';
-    closeBtn.style.fontWeight = 'bold';
-    closeBtn.style.fontSize = '16px';
-    closeBtn.style.padding = '0 4px';
-    closeBtn.onclick = (e) => {
-      e.stopPropagation();
-      this.togglePerformanceMetrics();
-    };
-    title.appendChild(closeBtn);
-    
-    this.performanceMetrics.appendChild(title);
-    
-    // Metrics content
-    const content = document.createElement('div');
-    content.id = 'performance-content';
-    content.style.display = 'grid';
-    content.style.gridTemplateColumns = 'auto 1fr';
-    content.style.gap = '6px 12px';
-    content.innerHTML = `
-      <div>FPS:</div><div id="fps-value">0</div>
-      <div>Nodes:</div><div id="node-count">0</div>
-      <div>Edges:</div><div id="edge-count">0</div>
-      <div>Memory:</div><div id="memory-usage">0 KB</div>
-    `;
-    this.performanceMetrics.appendChild(content);
-    
-    // Style the metrics labels
-    const labels = content.querySelectorAll('div:nth-child(odd)');
-    labels.forEach(label => {
-      (label as HTMLElement).style.fontWeight = 'bold';
-      (label as HTMLElement).style.color = '#aaa';
-    });
-    
-    // Style the metrics values
-    const values = content.querySelectorAll('div:nth-child(even)');
-    values.forEach(value => {
-      (value as HTMLElement).style.textAlign = 'right';
-    });
-    
-    // Toggle button
-    const toggleBtn = document.createElement('div');
-    toggleBtn.textContent = 'Toggle Metrics';
-    toggleBtn.style.marginTop = '10px';
-    toggleBtn.style.padding = '6px 10px';
-    toggleBtn.style.backgroundColor = 'rgba(50, 50, 50, 0.8)';
-    toggleBtn.style.cursor = 'pointer';
-    toggleBtn.style.textAlign = 'center';
-    toggleBtn.style.borderRadius = '4px';
-    toggleBtn.style.border = '1px solid #444';
-    toggleBtn.style.transition = 'all 0.2s ease';
-    toggleBtn.style.fontSize = '11px';
-    
-    toggleBtn.onmouseenter = () => {
-      toggleBtn.style.backgroundColor = 'rgba(70, 70, 70, 0.9)';
-    };
-    
-    toggleBtn.onmouseleave = () => {
-      toggleBtn.style.backgroundColor = 'rgba(50, 50, 50, 0.8)';
-    };
-    
-    toggleBtn.onclick = () => {
-      this.togglePerformanceMetrics();
-    };
-    this.performanceMetrics.appendChild(toggleBtn);
-    
-    // Add to container
-    this.hudContainer.appendChild(this.performanceMetrics);
-    
-    // Start FPS monitoring
-    this.startFPSMonitoring();
-  }
-
-  /**
-   * Toggle performance metrics visibility
-   */
-  private togglePerformanceMetrics(): void {
-    if (this.performanceMetrics) {
-      this.isPerformanceVisible = !this.isPerformanceVisible;
-      
-      if (this.isPerformanceVisible) {
-        // Show with animation
-        this.performanceMetrics.style.display = 'block';
-        setTimeout(() => {
-          this.performanceMetrics!.style.transform = 'translateY(0)';
-          this.performanceMetrics!.style.opacity = '1';
-        }, 10);
-      } else {
-        // Hide with animation
-        this.performanceMetrics.style.transform = 'translateY(20px)';
-        this.performanceMetrics.style.opacity = '0';
-        
-        // Actually hide after animation completes
-        setTimeout(() => {
-          if (this.performanceMetrics) {
-            this.performanceMetrics.style.display = 'none';
-          }
-        }, 400);
-      }
-    }
-  }
-
-  /**
-   * Start FPS monitoring
-   */
-  private startFPSMonitoring(): void {
-    let lastTime = performance.now();
-    let frameCount = 0;
-    
-    const updateMetrics = () => {
-      if (!this.isPerformanceVisible) {
-        requestAnimationFrame(updateMetrics);
-        return;
-      }
-      
-      const currentTime = performance.now();
-      frameCount++;
-      
-      if (currentTime - lastTime >= 1000) {
-        const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
-        frameCount = 0;
-        lastTime = currentTime;
-        
-        // Update FPS display
-        const fpsElement = document.getElementById('fps-value');
-        if (fpsElement) {
-          fpsElement.textContent = fps.toString();
-          fpsElement.style.color = fps > 30 ? '#00ff00' : fps > 15 ? '#ffff00' : '#ff0000';
-        }
-        
-        // Update node/edge counts
-        const nodeCountElement = document.getElementById('node-count');
-        const edgeCountElement = document.getElementById('edge-count');
-        if (nodeCountElement && edgeCountElement && this.graph) {
-          nodeCountElement.textContent = this.graph.state.data.nodes.length.toString();
-          edgeCountElement.textContent = this.graph.state.data.edges.length.toString();
-        }
-        
-        // Update memory usage (approximation)
-        const memoryElement = document.getElementById('memory-usage');
-        if (memoryElement) {
-          // Rough estimation based on node/edge count
-          const nodeMemory = this.graph.state.data.nodes.length * 100; // Approx 100 bytes per node
-          const edgeMemory = this.graph.state.data.edges.length * 50; // Approx 50 bytes per edge
-          const totalMemory = Math.round((nodeMemory + edgeMemory) / 1024); // KB
-          memoryElement.textContent = `${totalMemory} KB`;
-        }
-      }
-      
-      requestAnimationFrame(updateMetrics);
-    };
-    
-    requestAnimationFrame(updateMetrics);
+    this.hudContainer.appendChild(particles);
   }
 
   private setupEventListeners(): void {
@@ -882,6 +717,176 @@ export class HUDPlugin implements ISpaceGraphPlugin {
 
     // Focus input when console is shown
     this.inputElement.focus();
+  }
+
+  private executeCommand(): void {
+    const command = this.inputElement.value.trim();
+    if (!command) return;
+    
+    this.addOutput('command', `>>> ${command}`);
+    this.commandHistory.push(command);
+    this.historyIndex = this.commandHistory.length;
+    
+    try {
+      const result = this.evaluateCommand(command);
+      if (result === 'CLEAR_CONSOLE') {
+        this.clearOutput();
+      } else if (result.startsWith('THEME:')) {
+        this.applyTheme(result.split(':')[1]);
+      } else {
+        this.addOutput('result', typeof result === 'object' ? JSON.stringify(result, null, 2) : String(result));
+      }
+    } catch (error) {
+      this.addOutput('error', `Error: ${(error as Error).message}`);
+    }
+    
+    this.inputElement.value = '';
+    this.scrollToBottom();
+  }
+
+  private navigateHistory(direction: number): void {
+    const newIndex = this.historyIndex + direction;
+    if (newIndex >= 0 && newIndex < this.commandHistory.length) {
+      this.historyIndex = newIndex;
+      this.inputElement.value = this.commandHistory[this.historyIndex];
+    } else if (newIndex === this.commandHistory.length) {
+      this.historyIndex = newIndex;
+      this.inputElement.value = '';
+    }
+  }
+
+  private handleAutoComplete(): void {
+    // Basic auto-complete implementation
+    const input = this.inputElement.value;
+    const commands = Object.keys(this.replCommands);
+    const matches = commands.filter(cmd => cmd.startsWith(input));
+    
+    if (matches.length === 1) {
+      this.inputElement.value = matches[0];
+    } else if (matches.length > 1) {
+      this.addOutput('info', `Suggestions: ${matches.join(', ')}`);
+    }
+  }
+
+  private scrollToBottom(): void {
+    this.outputElement.scrollTop = this.outputElement.scrollHeight;
+  }
+
+  private clearOutput(): void {
+    this.outputElement.innerHTML = '';
+    this.addOutput('info', 'Console cleared');
+  }
+
+  private evaluateCommand(command: string): any {
+    // Enhanced command parsing to handle commands with arguments
+    const parts = command.match(/(".*?"|[^"\s]+)(?=\s*|\s*$)/g) || [];
+    if (parts.length === 0) {
+      throw new Error(`Unknown command. Type 'help' for available commands.`);
+    }
+    
+    const cmd = parts[0];
+    if (!cmd) {
+      throw new Error(`Unknown command. Type 'help' for available commands.`);
+    }
+    
+    const args = parts.slice(1).join(' ');
+    
+    // Special handling for commands that need to preserve quoted arguments
+    if (cmd === 'preset-save' || cmd === 'preset-bookmark') {
+      const argsWithQuotes = command.substring(cmd.length).trim();
+      if (cmd in this.replCommands) {
+        const commandFn = (this.replCommands as any)[cmd];
+        return argsWithQuotes ? commandFn(argsWithQuotes) : commandFn();
+      }
+    } else if (cmd in this.replCommands) {
+      const commandFn = (this.replCommands as any)[cmd];
+      return args ? commandFn(args) : commandFn();
+    } else {
+      throw new Error(`Unknown command: ${cmd}. Type 'help' for available commands.`);
+    }
+  }
+
+  private applyTheme(themeName: string): void {
+    const themes: Record<string, any> = {
+      dark: { bg: '#1a1a1a', text: '#ffffff', accent: '#00ff00' },
+      light: { bg: '#ffffff', text: '#000000', accent: '#0066cc' },
+      matrix: { bg: '#000000', text: '#00ff00', accent: '#00ff00' }
+    };
+    
+    const theme = themes[themeName];
+    if (theme) {
+      this.hudContainer.style.backgroundColor = theme.bg;
+      this.hudContainer.style.color = theme.text;
+      this.outputElement.style.borderColor = theme.accent;
+      this.addOutput('info', `Theme applied: ${themeName}`);
+    }
+  }
+
+  private setupAnimationSystem(): void {
+    // AnimationSystem is now initialized in init() method
+  }
+
+  private setupThemeManager(): void {
+    // ThemeSystem is now initialized in init() method
+    // Set up theme change listener
+    this.themeManager.onThemeChange((theme) => {
+      this.applyThemeToHUD();
+    });
+  }
+
+  private applyThemeToHUD(): void {
+    if (!this.themeManager) return;
+    
+    const theme = this.themeManager.getCurrentTheme();
+    if (!theme) return;
+    
+    // Apply to main HUD container
+    if (this.hudContainer) {
+      this.hudContainer.style.backgroundColor = theme.colors.surface;
+      this.hudContainer.style.borderColor = theme.colors.border;
+      this.hudContainer.style.color = theme.colors.text;
+    }
+    
+    // Apply to input container
+    const inputContainer = this.inputElement?.parentElement;
+    if (inputContainer) {
+      inputContainer.style.backgroundColor = 'rgba(30, 30, 30, 0.8)';
+      inputContainer.style.borderColor = theme.colors.border;
+    }
+    
+    // Apply to output element
+    if (this.outputElement) {
+      this.outputElement.style.borderColor = theme.colors.border;
+      this.outputElement.style.backgroundColor = theme.colors.background;
+    }
+  }
+
+  private highlightSyntax(element: HTMLElement): void {
+    if (!element.textContent) return;
+    
+    try {
+      // Simple JSON syntax highlighting
+      if (element.textContent.includes('{') && element.textContent.includes('}')) {
+        let content = element.textContent;
+        
+        // Highlight strings
+        content = content.replace(/"([^"]*)"/g, '<span style="color: #ce9178;">"$1"</span>');
+        
+        // Highlight numbers
+        content = content.replace(/\b(\d+)\b/g, '<span style="color: #b5cea8;">$1</span>');
+        
+        // Highlight booleans and null
+        content = content.replace(/\b(true|false|null)\b/g, '<span style="color: #569cd6;">$1</span>');
+        
+        // Highlight keys
+        content = content.replace(/"([^"]*)":/g, '<span style="color: #9cdcfe;">"$1"</span>:');
+        
+        element.innerHTML = content;
+      }
+    } catch (error) {
+      // Fallback to plain text if highlighting fails
+      console.warn('Syntax highlighting failed:', error);
+    }
   }
 
   private setupNotificationSystem(): void {
@@ -919,7 +924,7 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     });
     
     this.graph.events.on('camera:animation:end', () => {
-      this.showNotification('Camera animation completed', 'success', 2000);
+      this.showNotification('✨ Camera animation completed', 'success', 2000);
     });
   }
 
@@ -969,18 +974,17 @@ export class HUDPlugin implements ISpaceGraphPlugin {
         break;
     }
     
-    // Add pulsing animation for important notifications
+    // Add enhanced visual effects based on type
     if (type === 'error' || type === 'warning') {
       notification.style.animation = 'pulse 2s infinite';
-      const style = document.createElement('style');
-      style.textContent = `
-        @keyframes pulse {
-          0% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), 0 0 8px rgba(255, 255, 255, 0.1); }
-          50% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), 0 0 16px rgba(255, 255, 255, 0.3); }
-          100% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), 0 0 8px rgba(255, 255, 255, 0.1); }
-        }
-      `;
-      document.head.appendChild(style);
+      notification.classList.add('hud-shake-effect');
+    } else if (type === 'success') {
+      notification.classList.add('hud-float-effect');
+    }
+    
+    // Add special effects for certain messages
+    if (message.includes('🚀') || message.includes('✨')) {
+      notification.classList.add('hud-neon-glow');
     }
     
     notification.textContent = message;
@@ -1090,60 +1094,6 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     }, 300);
   }
 
-  private executeCommand(): void {
-    const command = this.inputElement.value.trim();
-    if (!command) return;
-    
-    this.addOutput('command', `>>> ${command}`);
-    this.commandHistory.push(command);
-    this.historyIndex = this.commandHistory.length;
-    
-    try {
-      const result = this.evaluateCommand(command);
-      if (result === 'CLEAR_CONSOLE') {
-        this.clearOutput();
-      } else if (result.startsWith('THEME:')) {
-        this.applyTheme(result.split(':')[1]);
-      } else {
-        this.addOutput('result', typeof result === 'object' ? JSON.stringify(result, null, 2) : String(result));
-      }
-    } catch (error) {
-      this.addOutput('error', `Error: ${(error as Error).message}`);
-    }
-    
-    this.inputElement.value = '';
-    this.scrollToBottom();
-  }
-
-  private evaluateCommand(command: string): any {
-    // Enhanced command parsing to handle commands with arguments
-    const parts = command.match(/(".*?"|[^"\s]+)(?=\s*|\s*$)/g) || [];
-    if (parts.length === 0) {
-      throw new Error(`Unknown command. Type 'help' for available commands.`);
-    }
-    
-    const cmd = parts[0];
-    if (!cmd) {
-      throw new Error(`Unknown command. Type 'help' for available commands.`);
-    }
-    
-    const args = parts.slice(1).join(' ');
-    
-    // Special handling for commands that need to preserve quoted arguments
-    if (cmd === 'preset-save' || cmd === 'preset-bookmark') {
-      const argsWithQuotes = command.substring(cmd.length).trim();
-      if (cmd in this.replCommands) {
-        const commandFn = (this.replCommands as any)[cmd];
-        return argsWithQuotes ? commandFn(argsWithQuotes) : commandFn();
-      }
-    } else if (cmd in this.replCommands) {
-      const commandFn = (this.replCommands as any)[cmd];
-      return args ? commandFn(args) : commandFn();
-    } else {
-      throw new Error(`Unknown command: ${cmd}. Type 'help' for available commands.`);
-    }
-  }
-
   private addOutput(type: 'command' | 'result' | 'error' | 'info', content: string): void {
     const line = document.createElement('div');
     line.style.marginBottom = '3px';
@@ -1174,119 +1124,205 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     line.textContent = content;
     this.outputElement.appendChild(line);
     
-    // Animate in
+    // Add special effects for certain content
+    if (content.includes('🚀') || content.includes('✨') || content.includes('🎯')) {
+      line.classList.add('hud-neon-glow');
+    }
+    
+    // Animate in with enhanced effects
     setTimeout(() => {
       line.style.opacity = '1';
       line.style.transform = 'translateY(0)';
+      
+      // Add subtle glow for results
+      if (type === 'result') {
+        line.style.textShadow = '0 0 5px rgba(255, 255, 255, 0.3)';
+      }
     }, 10);
   }
 
-  private clearOutput(): void {
-    this.outputElement.innerHTML = '';
-    this.addOutput('info', 'Console cleared');
-  }
-
-  private scrollToBottom(): void {
-    this.outputElement.scrollTop = this.outputElement.scrollHeight;
-  }
-
-  private navigateHistory(direction: number): void {
-    const newIndex = this.historyIndex + direction;
-    if (newIndex >= 0 && newIndex < this.commandHistory.length) {
-      this.historyIndex = newIndex;
-      this.inputElement.value = this.commandHistory[this.historyIndex];
-    } else if (newIndex === this.commandHistory.length) {
-      this.historyIndex = newIndex;
-      this.inputElement.value = '';
-    }
-  }
-
-  private handleAutoComplete(): void {
-    // Basic auto-complete implementation
-    const input = this.inputElement.value;
-    const commands = Object.keys(this.replCommands);
-    const matches = commands.filter(cmd => cmd.startsWith(input));
+  private createPerformancePanel(): void {
+    this.performanceMetrics = document.createElement('div');
+    this.performanceMetrics.id = 'performance-metrics';
+    this.performanceMetrics.style.position = 'absolute';
+    this.performanceMetrics.style.bottom = '10px';
+    this.performanceMetrics.style.right = '10px';
+    this.performanceMetrics.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
+    this.performanceMetrics.style.border = '1px solid #555';
+    this.performanceMetrics.style.borderRadius = '8px';
+    this.performanceMetrics.style.padding = '12px';
+    this.performanceMetrics.style.color = 'white';
+    this.performanceMetrics.style.fontFamily = 'monospace';
+    this.performanceMetrics.style.fontSize = '12px';
+    this.performanceMetrics.style.zIndex = '1000';
+    this.performanceMetrics.style.display = 'none'; // Hidden by default
+    this.performanceMetrics.style.minWidth = '220px';
+    this.performanceMetrics.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+    this.performanceMetrics.style.backdropFilter = 'blur(5px)';
+    this.performanceMetrics.style.transform = 'translateY(20px)';
+    this.performanceMetrics.style.opacity = '0';
+    this.performanceMetrics.style.transition = 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
     
-    if (matches.length === 1) {
-      this.inputElement.value = matches[0];
-    } else if (matches.length > 1) {
-      this.addOutput('info', `Suggestions: ${matches.join(', ')}`);
-    }
-  }
-
-  private applyTheme(themeName: string): void {
-    const themes: Record<string, any> = {
-      dark: { bg: '#1a1a1a', text: '#ffffff', accent: '#00ff00' },
-      light: { bg: '#ffffff', text: '#000000', accent: '#0066cc' },
-      matrix: { bg: '#000000', text: '#00ff00', accent: '#00ff00' }
+    // Title
+    const title = document.createElement('div');
+    title.textContent = 'Performance Metrics';
+    title.style.fontWeight = 'bold';
+    title.style.marginBottom = '8px';
+    title.style.color = '#00ff00';
+    title.style.fontSize = '13px';
+    title.style.display = 'flex';
+    title.style.justifyContent = 'space-between';
+    title.style.alignItems = 'center';
+    
+    // Close button for metrics panel
+    const closeBtn = document.createElement('span');
+    closeBtn.textContent = '×';
+    closeBtn.style.cursor = 'pointer';
+    closeBtn.style.fontWeight = 'bold';
+    closeBtn.style.fontSize = '16px';
+    closeBtn.style.padding = '0 4px';
+    closeBtn.onclick = (e) => {
+      e.stopPropagation();
+      this.togglePerformanceMetrics();
+    };
+    title.appendChild(closeBtn);
+    
+    this.performanceMetrics.appendChild(title);
+    
+    // Metrics content
+    const content = document.createElement('div');
+    content.id = 'performance-content';
+    content.style.display = 'grid';
+    content.style.gridTemplateColumns = 'auto 1fr';
+    content.style.gap = '6px 12px';
+    content.innerHTML = `
+      <div>FPS:</div><div id="fps-value">0</div>
+      <div>Nodes:</div><div id="node-count">0</div>
+      <div>Edges:</div><div id="edge-count">0</div>
+      <div>Memory:</div><div id="memory-usage">0 KB</div>
+    `;
+    this.performanceMetrics.appendChild(content);
+    
+    // Style the metrics labels
+    const labels = content.querySelectorAll('div:nth-child(odd)');
+    labels.forEach(label => {
+      (label as HTMLElement).style.fontWeight = 'bold';
+      (label as HTMLElement).style.color = '#aaa';
+    });
+    
+    // Style the metrics values
+    const values = content.querySelectorAll('div:nth-child(even)');
+    values.forEach(value => {
+      (value as HTMLElement).style.textAlign = 'right';
+    });
+    
+    // Toggle button
+    const toggleBtn = document.createElement('div');
+    toggleBtn.textContent = 'Toggle Metrics';
+    toggleBtn.style.marginTop = '10px';
+    toggleBtn.style.padding = '6px 10px';
+    toggleBtn.style.backgroundColor = 'rgba(50, 50, 50, 0.8)';
+    toggleBtn.style.cursor = 'pointer';
+    toggleBtn.style.textAlign = 'center';
+    toggleBtn.style.borderRadius = '4px';
+    toggleBtn.style.border = '1px solid #444';
+    toggleBtn.style.transition = 'all 0.2s ease';
+    toggleBtn.style.fontSize = '11px';
+    
+    toggleBtn.onmouseenter = () => {
+      toggleBtn.style.backgroundColor = 'rgba(70, 70, 70, 0.9)';
     };
     
-    const theme = themes[themeName];
-    if (theme) {
-      this.hudContainer.style.backgroundColor = theme.bg;
-      this.hudContainer.style.color = theme.text;
-      this.outputElement.style.borderColor = theme.accent;
-      this.addOutput('info', `Theme applied: ${themeName}`);
+    toggleBtn.onmouseleave = () => {
+      toggleBtn.style.backgroundColor = 'rgba(50, 50, 50, 0.8)';
+    };
+    
+    toggleBtn.onclick = () => {
+      this.togglePerformanceMetrics();
+    };
+    this.performanceMetrics.appendChild(toggleBtn);
+    
+    // Add to container
+    this.hudContainer.appendChild(this.performanceMetrics);
+    
+    // Start FPS monitoring
+    this.startFPSMonitoring();
+  }
+
+  private togglePerformanceMetrics(): void {
+    if (this.performanceMetrics) {
+      this.isPerformanceVisible = !this.isPerformanceVisible;
+      
+      if (this.isPerformanceVisible) {
+        // Show with animation
+        this.performanceMetrics.style.display = 'block';
+        setTimeout(() => {
+          this.performanceMetrics!.style.transform = 'translateY(0)';
+          this.performanceMetrics!.style.opacity = '1';
+        }, 10);
+      } else {
+        // Hide with animation
+        this.performanceMetrics.style.transform = 'translateY(20px)';
+        this.performanceMetrics.style.opacity = '0';
+        
+        // Actually hide after animation completes
+        setTimeout(() => {
+          if (this.performanceMetrics) {
+            this.performanceMetrics.style.display = 'none';
+          }
+        }, 400);
+      }
     }
   }
 
-  public updateHUD(): void {
-    const hudState = this.graph.state.hud;
-    if (!hudState) {
-      // Animate out
-      this.hudContainer.style.transform = 'translateY(-20px)';
-      this.hudContainer.style.opacity = '0';
-      
-      // Actually hide after animation
-      setTimeout(() => {
-        this.hudContainer.style.display = 'none';
-      }, 300);
-      return;
-    }
+  private startFPSMonitoring(): void {
+    let lastTime = performance.now();
+    let frameCount = 0;
     
-    if (hudState.visible) {
-      // Show with animation
-      this.hudContainer.style.display = 'block';
-      setTimeout(() => {
-        this.hudContainer.style.transform = 'translateY(0)';
-        this.hudContainer.style.opacity = '1';
-      }, 10);
-      
-      // Handle console visibility with fade animation
-      if (hudState.console?.enabled) {
-        this.consoleContainer.style.display = 'block';
-        this.consoleContainer.style.opacity = '0';
-        this.consoleContainer.style.transform = 'translateY(10px)';
-        this.consoleContainer.style.transition = 'all 0.3s ease';
-        
-        setTimeout(() => {
-          this.consoleContainer.style.opacity = '1';
-          this.consoleContainer.style.transform = 'translateY(0)';
-        }, 50);
-      } else {
-        this.consoleContainer.style.opacity = '0';
-        this.consoleContainer.style.transform = 'translateY(10px)';
-        
-        // Actually hide after animation
-        setTimeout(() => {
-          this.consoleContainer.style.display = 'none';
-        }, 300);
+    const updateMetrics = () => {
+      if (!this.isPerformanceVisible) {
+        requestAnimationFrame(updateMetrics);
+        return;
       }
       
-      // Handle legacy content
-      if (hudState.content && !hudState.console?.enabled) {
-        this.hudContainer.innerHTML = `<div>${hudState.content}</div>`;
-      }
-    } else {
-      // Animate out
-      this.hudContainer.style.transform = 'translateY(-20px)';
-      this.hudContainer.style.opacity = '0';
+      const currentTime = performance.now();
+      frameCount++;
       
-      // Actually hide after animation
-      setTimeout(() => {
-        this.hudContainer.style.display = 'none';
-      }, 300);
-    }
+      if (currentTime - lastTime >= 1000) {
+        const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
+        frameCount = 0;
+        lastTime = currentTime;
+        
+        // Update FPS display
+        const fpsElement = document.getElementById('fps-value');
+        if (fpsElement) {
+          fpsElement.textContent = fps.toString();
+          fpsElement.style.color = fps > 30 ? '#00ff00' : fps > 15 ? '#ffff00' : '#ff0000';
+        }
+        
+        // Update node/edge counts
+        const nodeCountElement = document.getElementById('node-count');
+        const edgeCountElement = document.getElementById('edge-count');
+        if (nodeCountElement && edgeCountElement && this.graph) {
+          nodeCountElement.textContent = this.graph.state.data.nodes.length.toString();
+          edgeCountElement.textContent = this.graph.state.data.edges.length.toString();
+        }
+        
+        // Update memory usage (approximation)
+        const memoryElement = document.getElementById('memory-usage');
+        if (memoryElement) {
+          // Rough estimation based on node/edge count
+          const nodeMemory = this.graph.state.data.nodes.length * 100; // Approx 100 bytes per node
+          const edgeMemory = this.graph.state.data.edges.length * 50; // Approx 50 bytes per edge
+          const totalMemory = Math.round((nodeMemory + edgeMemory) / 1024); // KB
+          memoryElement.textContent = `${totalMemory} KB`;
+        }
+      }
+      
+      requestAnimationFrame(updateMetrics);
+    };
+    
+    requestAnimationFrame(updateMetrics);
   }
 
   public dispose(): void {
