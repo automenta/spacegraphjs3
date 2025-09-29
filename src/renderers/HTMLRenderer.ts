@@ -2,7 +2,7 @@ import { createEffect } from 'solid-js';
 import { Store } from 'solid-js/store';
 import * as THREE from 'three';
 import { CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
-import { HtmlElement, Spec } from './types';
+import { HtmlNodeSpec, Spec } from '../types';
 
 export class HTMLRenderer {
   private cssScene: THREE.Scene;
@@ -20,20 +20,23 @@ export class HTMLRenderer {
     });
   }
 
-  public updateHTMLNodes(htmlNodes?: HtmlElement[]) {
+  public updateHTMLNodes(htmlNodes?: HtmlNodeSpec[]) {
     // If htmlNodes are not passed, get them from the state.
     // This supports both reactive calls (from createEffect) and manual calls (from tests).
     if (!htmlNodes) {
       htmlNodes = (this.state.data?.nodes || []).filter(
-        (node): node is HtmlElement => node.type === 'html'
+        (node): node is HtmlNodeSpec => node.type === 'html'
       );
     }
 
     // Remove old objects
-    const currentNodeIds = new Set(htmlNodes.map((n: HtmlElement) => n.id));
+    const currentNodeIds = new Set(htmlNodes.map((n: HtmlNodeSpec) => n.id));
     for (const [id, object] of this.htmlObjects.entries()) {
       if (!currentNodeIds.has(id)) {
-        this.cssScene.remove(object);
+        // Only remove from scene if it's actually a child
+        if (object.parent === this.cssScene) {
+          this.cssScene.remove(object);
+        }
         this.htmlObjects.delete(id);
       }
     }
@@ -73,7 +76,10 @@ export class HTMLRenderer {
 
   public dispose() {
     for (const object of this.htmlObjects.values()) {
-      this.cssScene.remove(object);
+      // Only remove from scene if it's actually a child
+      if (object.parent === this.cssScene) {
+        this.cssScene.remove(object);
+      }
     }
     this.htmlObjects.clear();
   }

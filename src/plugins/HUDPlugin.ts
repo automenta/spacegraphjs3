@@ -1,34 +1,374 @@
 import { createEffect } from 'solid-js';
+import * as THREE from 'three';
 import { ISpaceGraphPlugin } from '../core/plugin';
 import { SpaceGraph } from '../core/SpaceGraph';
+import { Spec } from '../types';
 
 /**
- * A plugin that manages the Heads-Up Display (HUD).
+ * REPL Commands class for handling console commands
+ */
+class REPLCommands {
+  constructor(private graph: SpaceGraph) {}
+
+  help(): string {
+    return `Available commands:
+- help: Show this help message
+- state: Display current graph state
+- nodes: List all nodes
+- edges: List all edges
+- camera: Show camera state
+- layout: Show layout configuration
+- select <id>: Select a node by ID
+- hover <id>: Hover over a node by ID
+- flyTo <target>: Animate camera to target
+- frame <ids>: Frame specified nodes
+- update <spec>: Update graph with new spec
+- clear: Clear console output
+- theme <name>: Change console theme`;
+  }
+
+  state(): object {
+    return this.graph.state;
+  }
+
+  nodes(): Array<{id: string, type: string, position?: {x: number, y: number, z: number}}> {
+    return this.graph.state.data.nodes.map(node => ({
+      id: node.id,
+      type: node.type,
+      position: node.position
+    }));
+  }
+
+  edges(): Array<{id: string, source: string, target: string}> {
+    return this.graph.state.data.edges.map(edge => ({
+      id: edge.id,
+      source: edge.source,
+      target: edge.target
+    }));
+  }
+
+  camera(): object {
+    return this.graph.state.camera;
+  }
+
+  layout(): object {
+    return this.graph.state.layout;
+  }
+
+  select(id: string): string {
+    this.graph.update({
+      interaction: { selectedElementIds: [id] }
+    });
+    return `Selected node: ${id}`;
+  }
+
+  hover(id: string): string {
+    this.graph.update({
+      interaction: { hoveredElementId: id }
+    });
+    return `Hovering over node: ${id}`;
+  }
+
+  flyTo(target: string): string {
+    try {
+      const parsedTarget = JSON.parse(target);
+      this.graph.cameraPlugin?.flyTo(parsedTarget);
+      return `Flying camera to: ${target}`;
+    } catch (error) {
+      throw new Error(`Invalid target format: ${(error as Error).message}`);
+    }
+  }
+
+  frame(ids: string): string {
+    try {
+      const nodeIds = JSON.parse(ids);
+      const nodes = this.graph.state.data.nodes.filter(n => nodeIds.includes(n.id));
+      this.graph.cameraPlugin?.frame(nodes.map(n => ({
+        position: new THREE.Vector3(n.position?.x || 0, n.position?.y || 0, n.position?.z || 0)
+      })));
+      return `Framing nodes: ${ids}`;
+    } catch (error) {
+      throw new Error(`Invalid node IDs format: ${(error as Error).message}`);
+    }
+  }
+
+  update(spec: string): string {
+    try {
+      const parsedSpec = JSON.parse(spec);
+      this.graph.update(parsedSpec);
+      return `Graph updated with new specification`;
+    } catch (error) {
+      throw new Error(`Invalid spec format: ${(error as Error).message}`);
+    }
+  }
+
+  clear(): string {
+    return 'CLEAR_CONSOLE';
+  }
+
+  theme(name: string): string {
+    const themes: Record<string, { bg: string; text: string; accent: string }> = {
+      dark: { bg: '#1a1a1a', text: '#ffffff', accent: '#00ff00' },
+      light: { bg: '#ffffff', text: '#000000', accent: '#0066cc' },
+      matrix: { bg: '#000000', text: '#00ff00', accent: '#00ff00' }
+    };
+    
+    if (name in themes) {
+      return `THEME:${name}`;
+    }
+    throw new Error(`Unknown theme: ${name}. Available: ${Object.keys(themes).join(', ')}`);
+  }
+}
+
+/**
+ * Enhanced HUDPlugin with REPL console functionality
  */
 export class HUDPlugin implements ISpaceGraphPlugin {
   private graph!: SpaceGraph;
   private hudContainer!: HTMLElement;
+  private consoleContainer!: HTMLElement;
+  private inputElement!: HTMLInputElement;
+  private outputElement!: HTMLElement;
+  private replCommands!: REPLCommands;
+  private commandHistory: string[] = [];
+  private historyIndex: number = -1;
 
   public init(graph: SpaceGraph): void {
     this.graph = graph;
+    this.replCommands = new REPLCommands(graph);
+    
     const container = this.graph.render.getContainer();
+    this.createHUDElements(container);
+    this.setupEventListeners();
+    
+    createEffect(() => this.updateHUD());
+  }
+
+  private createHUDElements(container: HTMLElement): void {
+    // Main HUD container
     this.hudContainer = document.createElement('div');
     this.hudContainer.style.position = 'absolute';
     this.hudContainer.style.top = '10px';
     this.hudContainer.style.left = '10px';
     this.hudContainer.style.color = 'white';
+    this.hudContainer.style.fontFamily = 'monospace';
+    this.hudContainer.style.fontSize = '12px';
+    this.hudContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+    this.hudContainer.style.padding = '10px';
+    this.hudContainer.style.borderRadius = '5px';
+    this.hudContainer.style.minWidth = '300px';
+    this.hudContainer.style.maxWidth = '500px';
+    this.hudContainer.style.zIndex = '1000';
+    
+    // Console container
+    this.consoleContainer = document.createElement('div');
+    this.consoleContainer.style.display = 'none';
+    
+    // Output area
+    this.outputElement = document.createElement('div');
+    this.outputElement.style.height = '200px';
+    this.outputElement.style.overflowY = 'auto';
+    this.outputElement.style.border = '1px solid #333';
+    this.outputElement.style.padding = '5px';
+    this.outputElement.style.marginBottom = '5px';
+    this.outputElement.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    this.outputElement.style.fontFamily = 'monospace';
+    this.outputElement.style.fontSize = '11px';
+    
+    // Input area
+    const inputContainer = document.createElement('div');
+    inputContainer.style.display = 'flex';
+    inputContainer.style.alignItems = 'center';
+    
+    const prompt = document.createElement('span');
+    prompt.textContent = '>>> ';
+    prompt.style.color = '#00ff00';
+    prompt.style.fontWeight = 'bold';
+    
+    this.inputElement = document.createElement('input');
+    this.inputElement.type = 'text';
+    this.inputElement.style.flex = '1';
+    this.inputElement.style.backgroundColor = 'transparent';
+    this.inputElement.style.border = 'none';
+    this.inputElement.style.color = 'white';
+    this.inputElement.style.fontFamily = 'monospace';
+    this.inputElement.style.fontSize = '12px';
+    this.inputElement.style.outline = 'none';
+    this.inputElement.style.padding = '2px';
+    
+    inputContainer.appendChild(prompt);
+    inputContainer.appendChild(this.inputElement);
+    
+    this.consoleContainer.appendChild(this.outputElement);
+    this.consoleContainer.appendChild(inputContainer);
+    
+    this.hudContainer.appendChild(this.consoleContainer);
     container.appendChild(this.hudContainer);
 
-    createEffect(() => this.updateHUD());
+    // Add welcome message
+    this.addOutput('info', 'SpaceGraphJS REPL Console');
+    this.addOutput('info', 'Type "help" for available commands');
+  }
+
+  private setupEventListeners(): void {
+    this.inputElement.addEventListener('keydown', (event) => {
+      switch (event.key) {
+        case 'Enter':
+          this.executeCommand();
+          break;
+        case 'ArrowUp':
+          event.preventDefault();
+          this.navigateHistory(-1);
+          break;
+        case 'ArrowDown':
+          event.preventDefault();
+          this.navigateHistory(1);
+          break;
+        case 'Tab':
+          event.preventDefault();
+          this.handleAutoComplete();
+          break;
+      }
+    });
+
+    // Focus input when console is shown
+    this.inputElement.focus();
+  }
+
+  private executeCommand(): void {
+    const command = this.inputElement.value.trim();
+    if (!command) return;
+    
+    this.addOutput('command', `>>> ${command}`);
+    this.commandHistory.push(command);
+    this.historyIndex = this.commandHistory.length;
+    
+    try {
+      const result = this.evaluateCommand(command);
+      if (result === 'CLEAR_CONSOLE') {
+        this.clearOutput();
+      } else if (result.startsWith('THEME:')) {
+        this.applyTheme(result.split(':')[1]);
+      } else {
+        this.addOutput('result', typeof result === 'object' ? JSON.stringify(result, null, 2) : String(result));
+      }
+    } catch (error) {
+      this.addOutput('error', `Error: ${(error as Error).message}`);
+    }
+    
+    this.inputElement.value = '';
+    this.scrollToBottom();
+  }
+
+  private evaluateCommand(command: string): any {
+    // Simple command parsing - can be enhanced with proper parser
+    const parts = command.split(' ');
+    const cmd = parts[0];
+    const args = parts.slice(1).join(' ');
+    
+    if (cmd in this.replCommands) {
+      const commandFn = (this.replCommands as any)[cmd];
+      return args ? commandFn(args) : commandFn();
+    } else {
+      throw new Error(`Unknown command: ${cmd}. Type 'help' for available commands.`);
+    }
+  }
+
+  private addOutput(type: 'command' | 'result' | 'error' | 'info', content: string): void {
+    const line = document.createElement('div');
+    line.style.marginBottom = '2px';
+    line.style.whiteSpace = 'pre-wrap';
+    line.style.wordBreak = 'break-word';
+    
+    switch (type) {
+      case 'command':
+        line.style.color = '#00ff00';
+        break;
+      case 'result':
+        line.style.color = '#ffffff';
+        break;
+      case 'error':
+        line.style.color = '#ff4444';
+        break;
+      case 'info':
+        line.style.color = '#888888';
+        break;
+    }
+    
+    line.textContent = content;
+    this.outputElement.appendChild(line);
+  }
+
+  private clearOutput(): void {
+    this.outputElement.innerHTML = '';
+    this.addOutput('info', 'Console cleared');
+  }
+
+  private scrollToBottom(): void {
+    this.outputElement.scrollTop = this.outputElement.scrollHeight;
+  }
+
+  private navigateHistory(direction: number): void {
+    const newIndex = this.historyIndex + direction;
+    if (newIndex >= 0 && newIndex < this.commandHistory.length) {
+      this.historyIndex = newIndex;
+      this.inputElement.value = this.commandHistory[this.historyIndex];
+    } else if (newIndex === this.commandHistory.length) {
+      this.historyIndex = newIndex;
+      this.inputElement.value = '';
+    }
+  }
+
+  private handleAutoComplete(): void {
+    // Basic auto-complete implementation
+    const input = this.inputElement.value;
+    const commands = Object.keys(this.replCommands);
+    const matches = commands.filter(cmd => cmd.startsWith(input));
+    
+    if (matches.length === 1) {
+      this.inputElement.value = matches[0];
+    } else if (matches.length > 1) {
+      this.addOutput('info', `Suggestions: ${matches.join(', ')}`);
+    }
+  }
+
+  private applyTheme(themeName: string): void {
+    const themes: Record<string, any> = {
+      dark: { bg: '#1a1a1a', text: '#ffffff', accent: '#00ff00' },
+      light: { bg: '#ffffff', text: '#000000', accent: '#0066cc' },
+      matrix: { bg: '#000000', text: '#00ff00', accent: '#00ff00' }
+    };
+    
+    const theme = themes[themeName];
+    if (theme) {
+      this.hudContainer.style.backgroundColor = theme.bg;
+      this.hudContainer.style.color = theme.text;
+      this.outputElement.style.borderColor = theme.accent;
+      this.addOutput('info', `Theme applied: ${themeName}`);
+    }
   }
 
   public updateHUD(): void {
     const hudState = this.graph.state.hud;
-    if (hudState?.visible) {
+    if (!hudState) {
+      this.hudContainer.style.display = 'none';
+      return;
+    }
+    
+    if (hudState.visible) {
       this.hudContainer.style.display = 'block';
-      this.hudContainer.innerHTML = `
-        <div>${hudState.content}</div>
-      `;
+      
+      // Handle console visibility
+      if (hudState.console?.enabled) {
+        this.consoleContainer.style.display = 'block';
+      } else {
+        this.consoleContainer.style.display = 'none';
+      }
+      
+      // Handle legacy content
+      if (hudState.content && !hudState.console?.enabled) {
+        this.hudContainer.innerHTML = `<div>${hudState.content}</div>`;
+      }
     } else {
       this.hudContainer.style.display = 'none';
     }

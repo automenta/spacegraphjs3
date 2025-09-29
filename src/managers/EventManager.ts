@@ -32,9 +32,10 @@ export class EventManager {
    */
   public emit<Key extends keyof GraphEventMap>(
     eventName: Key,
-    payload: GraphEventMap[Key]
+    ...args: GraphEventMap[Key] extends void ? [] : [payload: GraphEventMap[Key]]
   ) {
-    this.emitter.emit(eventName, payload);
+    // @ts-ignore - TypeScript can't properly infer the type here
+    this.emitter.emit(eventName, ...args);
   }
 
   /**

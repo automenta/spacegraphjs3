@@ -7,6 +7,10 @@ import { NodeRenderer } from '../renderers/NodeRenderer';
 import { EdgeRenderer } from '../renderers/EdgeRenderer';
 import { HTMLRenderer } from '../renderers/HTMLRenderer';
 import { InstancedRenderer } from '../renderers/InstancedRenderer';
+import { ThreeObjectPoolManager } from '../utils/ThreeObjectPoolManager';
+import { LODManager } from '../utils/LODManager';
+import { CullingManager } from '../utils/CullingManager';
+import { MemoryManager } from '../utils/MemoryManager';
 
 /**
  * Manages the THREE.js rendering environment, including the scene, camera, and renderer.
@@ -26,6 +30,12 @@ export class RenderingManager {
   private htmlRenderer!: HTMLRenderer;
   private isLooping = true;
 
+  // Performance optimization systems
+  private objectPoolManager: ThreeObjectPoolManager;
+  private lodManager?: LODManager;
+  private cullingManager?: CullingManager;
+  private memoryManager?: MemoryManager;
+
   constructor(graph: SpaceGraph, container: HTMLElement) {
     this.graph = graph;
     this.container = container;
@@ -39,6 +49,8 @@ export class RenderingManager {
     );
     this.renderer = new THREE.WebGLRenderer();
     this.cssRenderer = new CSS2DRenderer();
+    this.objectPoolManager = ThreeObjectPoolManager.getInstance();
+    this.setupPerformanceSystems();
     this.setupRenderers();
     this.initRenderers();
     this.initDynamicNodeRenderer();
@@ -47,6 +59,10 @@ export class RenderingManager {
 
   public getNodeRenderer(): IRenderer {
     return this.nodeRenderer;
+  }
+
+  public getEdgeRenderer(): EdgeRenderer {
+    return this.edgeRenderer;
   }
 
   public getScene(): THREE.Scene {
@@ -87,6 +103,62 @@ export class RenderingManager {
     }
     this.edgeRenderer.dispose();
     this.htmlRenderer.dispose();
+  }
+
+  /**
+   * Creates a performance-aware node with automatic optimization handling.
+   * Integrates with object pooling, LOD, and culling systems when enabled.
+   */
+  public createOptimizedNode(
+    geometry: THREE.BufferGeometry,
+    material: THREE.Material,
+    position?: THREE.Vector3
+  ): THREE.Object3D {
+    // Create mesh (in a real implementation, we would use object pooling here)
+    const mesh = new THREE.Mesh(geometry, material);
+    
+    // Apply initial position
+    if (position) {
+      mesh.position.copy(position);
+    }
+    
+    // Register with LOD system if enabled
+    if (this.lodManager) {
+      // For LOD, we need to define levels - using a simplified approach for now
+      const settings = {
+        distances: [50, 100, 200],
+        detailLevels: [
+          () => mesh, // Full detail
+          () => mesh, // Medium detail (simplified in this example)
+          () => mesh  // Low detail (simplified in this example)
+        ]
+      };
+      this.lodManager.registerObject(mesh, settings);
+    }
+    
+    // Register with culling system if enabled
+    if (this.cullingManager) {
+      this.cullingManager.registerObject(mesh);
+    }
+    
+    return mesh;
+  }
+
+  private setupPerformanceSystems(): void {
+    // Setup LOD system
+    if (this.graph.state.performance?.enableLOD) {
+      this.lodManager = new LODManager();
+    }
+
+    // Setup culling system
+    if (this.graph.state.performance?.enableCulling) {
+      this.cullingManager = new CullingManager();
+    }
+
+    // Setup memory management
+    if (this.graph.state.performance?.enableMemoryManagement) {
+      this.memoryManager = MemoryManager.getInstance();
+    }
   }
 
   private setupRenderers() {

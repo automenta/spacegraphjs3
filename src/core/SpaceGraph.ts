@@ -7,6 +7,7 @@ import {
   LayoutEngineClass,
   Spec,
   SpecUpdate,
+  GraphEventMap,
 } from '../types';
 import { RenderingManager } from '../managers/RenderingManager';
 import { EventManager } from '../managers/EventManager';
@@ -14,25 +15,40 @@ import { DataManager } from '../managers/DataManager';
 import { ISpaceGraphPlugin } from './plugin';
 import { CameraPlugin } from '../plugins/CameraPlugin';
 import { SphereElementActor } from '../renderers/elementActors/SphereElementActor';
+import { BoxElementActor } from '../renderers/elementActors/BoxElementActor';
+import { CustomGeometryActor } from '../renderers/elementActors/CustomGeometryActor';
+import { TextElementActor } from '../renderers/elementActors/TextElementActor';
 import { D3ForceLayout } from '../layouts/D3ForceLayout';
 import { RandomLayout } from '../layouts/RandomLayout';
+import { GridLayout } from '../layouts/GridLayout';
+import { CircleLayout } from '../layouts/CircleLayout';
+import { ColumnLayout } from '../layouts/ColumnLayout';
+import { RowLayout } from '../layouts/RowLayout';
 
 /**
  * The main class for creating and managing a SpaceGraph visualization.
  * It orchestrates the renderer, interaction, layout, and other controllers.
  */
 export class SpaceGraph {
-  private static elementActorRegistry: Map<string, ElementActorClass> = new Map(
-    [['sphere', SphereElementActor]]
-  );
-  private static layoutEngineRegistry: Map<string, LayoutEngineClass> = new Map(
-    [
-      ['force-directed', D3ForceLayout],
-      ['random', RandomLayout],
-    ]
-  );
+  private static elementActorRegistry: Map<string, ElementActorClass> = new Map();
+  
+  // Initialize the registry with default element actors
+  static {
+    SpaceGraph.elementActorRegistry.set('sphere', SphereElementActor);
+    SpaceGraph.elementActorRegistry.set('box', BoxElementActor);
+    SpaceGraph.elementActorRegistry.set('custom', CustomGeometryActor);
+    SpaceGraph.elementActorRegistry.set('text', TextElementActor);
+  }
+  private static layoutEngineRegistry: Map<string, LayoutEngineClass> = new Map([
+    ['force-directed', D3ForceLayout as LayoutEngineClass],
+    ['random', RandomLayout as LayoutEngineClass],
+    ['grid', GridLayout as LayoutEngineClass],
+    ['circle', CircleLayout as LayoutEngineClass],
+    ['column', ColumnLayout as LayoutEngineClass],
+    ['row', RowLayout as LayoutEngineClass],
+  ]);
   private static instancedGeometryRegistry: Map<string, THREE.BufferGeometry> =
-    new Map([['sphere', new THREE.SphereGeometry(0.5, 16, 16)]]);
+    new Map([['sphere', new THREE.SphereGeometry(0.5, 32, 32)]]);
   public state!: Store<Spec>;
   public scene: THREE.Scene;
   public camera: THREE.PerspectiveCamera;
@@ -57,7 +73,8 @@ export class SpaceGraph {
     plugins: ISpaceGraphPlugin[] = []
   ) {
     try {
-      this.container = this.initContainer(containerSelector);
+      const container = this.initContainer(containerSelector);
+      this.container = container;
 
       this.dispose = createRoot((dispose) => {
         this.initReactiveState(initialSpec);
@@ -70,9 +87,10 @@ export class SpaceGraph {
       this.camera = this.render.getCamera();
     } catch (error) {
       console.error('Failed to initialize SpaceGraph:', error);
-      // If the container exists, display the error in it.
-      if (this.container) {
-        this.container.innerHTML = `<div style="color: red; padding: 20px; font-family: monospace;">
+      // If we have a container reference, display the error in it
+      const container = document.querySelector(containerSelector) as HTMLElement;
+      if (container) {
+        container.innerHTML = `<div style="color: red; padding: 20px; font-family: monospace;">
           <h2>Failed to initialize</h2>
           <p>${(error as Error).message}</p>
           <pre>${(error as Error).stack}</pre>
@@ -143,6 +161,10 @@ export class SpaceGraph {
    */
   public update(spec: SpecUpdate) {
     this.updateState(spec);
+  }
+
+  public updateStateWithProducer(fn: (prevState: Spec) => Spec) {
+    this.setState(fn);
   }
 
   public destroy() {

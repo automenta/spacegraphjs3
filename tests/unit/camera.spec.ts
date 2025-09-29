@@ -25,10 +25,11 @@ describe('CameraPlugin', () => {
     const mockGraph = {
       state,
       updateState,
-      renderingManager: {
+      update: updateState, // Add the missing update method
+      render: {
         getCamera: () => mockCamera,
       },
-      eventManager: {
+      events: {
         emit: vi.fn(),
       },
     } as unknown as SpaceGraph;

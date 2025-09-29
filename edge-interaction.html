@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpaceGraphJS - Edge Interaction Demo</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #000;
+      font-family: Arial, sans-serif;
+    }
+    
+    #container {
+      width: 100vw;
+      height: 100vh;
+    }
+    
+    #info {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+      max-width: 300px;
+    }
+    
+    #info h1 {
+      margin: 0 0 10px 0;
+      font-size: 18px;
+    }
+    
+    #info ul {
+      margin: 5px 0;
+      padding-left: 20px;
+    }
+    
+    #info li {
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+  
+  <div id="info">
+    <h1>Edge Interaction Demo</h1>
+    <p>This demo shows edge interaction capabilities:</p>
+    <ul>
+      <li>Hover over edges to highlight them</li>
+      <li>Click edges to select them</li>
+      <li>Ctrl+Click for multi-selection</li>
+      <li>Different edge types: straight, curved, dashed</li>
+    </ul>
+    <p>Open browser console to see event logs</p>
+  </div>
+
+  <script type="module">
+    import './examples/edge-interaction.ts';
+  </script>
+</body>
+</html>

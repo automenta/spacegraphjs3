@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { createEffect, createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
-import { Element, Spec } from '../../types';
+import { NodeSpec, Spec } from '../../types';
 import { BaseElementActor } from './BaseElementActor';
 import { expandHex } from '../../utils/color';
 
@@ -9,12 +9,12 @@ import { expandHex } from '../../utils/color';
  * An ElementActor for rendering sphere nodes.
  */
 export class SphereElementActor extends BaseElementActor {
-  private readonly elementId: string;
+  protected readonly elementId: string;
   private glowMesh!: THREE.Mesh;
 
   constructor(
     scene: THREE.Scene,
-    elementState: Element,
+    elementState: Store<NodeSpec>,
     graphState: Store<Spec>
   ) {
     super(scene, elementState, graphState);
@@ -65,12 +65,11 @@ export class SphereElementActor extends BaseElementActor {
     });
   }
 
-  public getRaycastableObject(): THREE.Object3D {
+  public getRaycastableObject(): THREE.Object3D | null {
     // Return the main mesh, not the group, so the glow is not interactive
-    return (
-      this.threeObject.children.find((c) => !c.userData.isGlow) ||
-      this.threeObject
-    );
+    if (!this.threeObject) return null;
+    const child = this.threeObject.children.find((c) => !c.userData.isGlow);
+    return child || this.threeObject;
   }
 
   public update(): void {
@@ -109,7 +108,7 @@ export class SphereElementActor extends BaseElementActor {
   }
 
   private updateVisuals(
-    elementState: Element,
+    elementState: NodeSpec,
     isElementHovered: boolean,
     isElementSelected: boolean
   ): void {

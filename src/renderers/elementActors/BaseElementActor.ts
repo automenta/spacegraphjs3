@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { Store } from 'solid-js/store';
-import { GraphElement, Spec } from '../types';
+import { NodeSpec, Spec } from '../types';
 
 /**
  * Base class for all Element Actors.
@@ -9,14 +9,14 @@ import { GraphElement, Spec } from '../types';
  */
 export abstract class BaseElementActor {
   protected scene: THREE.Scene;
-  protected elementState: Store<GraphElement>;
+  protected elementState: Store<NodeSpec>;
   protected graphState: Store<Spec>;
   protected threeObject: THREE.Object3D | null = null;
   protected disposeEffect: (() => void) | null = null;
 
   constructor(
     scene: THREE.Scene,
-    elementState: Store<GraphElement>,
+    elementState: Store<NodeSpec>,
     graphState: Store<Spec>
   ) {
     this.scene = scene;
@@ -41,7 +41,10 @@ export abstract class BaseElementActor {
    */
   public dispose(): void {
     if (this.threeObject) {
-      this.scene.remove(this.threeObject);
+      // Only remove from scene if it's actually a child
+      if (this.threeObject.parent === this.scene) {
+        this.scene.remove(this.threeObject);
+      }
       // Dispose of geometry and material if they are unique to this object
       if ((this.threeObject as THREE.Mesh).geometry) {
         (this.threeObject as THREE.Mesh).geometry.dispose();

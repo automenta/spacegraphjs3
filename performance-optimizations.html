@@ -1,0 +1,73 @@
+<![CDATA[<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpaceGraphJS - Performance Optimizations</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #000;
+      font-family: Arial, sans-serif;
+    }
+    
+    #container {
+      width: 100vw;
+      height: 100vh;
+    }
+    
+    .instructions {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      color: white;
+      background: rgba(0,0,0,0.7);
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+      max-width: 400px;
+    }
+    
+    .instructions h3 {
+      margin: 0 0 10px 0;
+      color: #00ff00;
+    }
+    
+    .instructions ul {
+      margin: 5px 0;
+      padding-left: 20px;
+    }
+    
+    .instructions li {
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+  
+  <div class="instructions">
+    <h3>Performance Optimizations Demo</h3>
+    <p>This example demonstrates:</p>
+    <ul>
+      <li>Object pooling for reduced garbage collection</li>
+      <li>Level-of-detail (LOD) management</li>
+      <li>Advanced culling systems</li>
+      <li>Memory management techniques</li>
+    </ul>
+    <p>Controls:</p>
+    <ul>
+      <li>WASD - Pan</li>
+      <li>Arrow Keys - Orbit</li>
+      <li>+/- - Zoom</li>
+      <li>Mouse - Rotate/Zoom/Pan</li>
+    </ul>
+  </div>
+
+  <script type="module">
+    import './examples/performance-optimizations.ts';
+  </script>
+</body>
+</html>]]>

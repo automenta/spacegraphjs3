@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>SpaceGraphJS - Edge Interaction Demo</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: #000;
+        font-family: Arial, sans-serif;
+      }
+
+      #container {
+        width: 100%;
+        height: 100%;
+      }
+
+      #controls {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 1000;
+        color: white;
+        background-color: rgba(0, 0, 0, 0.7);
+        padding: 10px;
+        border-radius: 5px;
+        max-width: 300px;
+      }
+
+      #controls h3 {
+        margin-top: 0;
+      }
+
+      #controls button {
+        margin: 5px;
+        padding: 5px 10px;
+        background-color: #333;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+
+      #controls button:hover {
+        background-color: #555;
+      }
+
+      #controls button.active {
+        background-color: #007acc;
+      }
+
+      #info {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        z-index: 1000;
+        color: white;
+        background-color: rgba(0, 0, 0, 0.7);
+        padding: 10px;
+        border-radius: 5px;
+        max-width: 300px;
+      }
+
+      #events {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        color: white;
+        background-color: rgba(0, 0, 0, 0.7);
+        padding: 10px;
+        border-radius: 5px;
+        width: 300px;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      #events h3 {
+        margin-top: 0;
+      }
+
+      .event-item {
+        margin: 5px 0;
+        padding: 3px;
+        border-left: 3px solid #007acc;
+        padding-left: 5px;
+        font-size: 12px;
+      }
+
+      .event-item.edge-click {
+        border-left-color: #ff0000;
+      }
+
+      .event-item.edge-hover {
+        border-left-color: #00ff00;
+      }
+
+      .event-item.edge-select {
+        border-left-color: #ffff00;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container"></div>
+    <div id="controls">
+      <h3>Edge Interaction Demo</h3>
+      <button id="addStraightBtn">Add Straight Edge</button>
+      <button id="addCurvedBtn">Add Curved Edge</button>
+      <button id="addDashedBtn">Add Dashed Edge</button>
+      <button id="clearEventsBtn">Clear Events</button>
+      <p><strong>Instructions:</strong></p>
+      <ul>
+        <li>Hover over edges to highlight them</li>
+        <li>Click edges to select them (Ctrl/Cmd+Click for multi-select)</li>
+        <li>Try different edge types with the buttons above</li>
+      </ul>
+    </div>
+    <div id="info">
+      <h4>Edge Types:</h4>
+      <ul>
+        <li><strong>Straight</strong> - Direct connection between nodes</li>
+        <li><strong>Curved</strong> - Arced connection with adjustable curvature</li>
+        <li><strong>Dashed</strong> - Dotted line connection with custom dash pattern</li>
+      </ul>
+      <h4>Edge Interactions:</h4>
+      <ul>
+        <li><strong>Hover</strong> - Highlight edges when mouse is over them</li>
+        <li><strong>Click</strong> - Select edges (supports multi-selection)</li>
+        <li><strong>Labels</strong> - Text labels on edges</li>
+      </ul>
+    </div>
+    <div id="events">
+      <h3>Edge Events</h3>
+      <div id="eventList"></div>
+    </div>
+    <script src="/examples/edge-interaction-demo.ts" type="module"></script>
+  </body>
+</html>

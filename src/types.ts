@@ -1,4 +1,5 @@
 // src/types.ts
+import * as THREE from 'three';
 
 export type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
@@ -24,6 +25,15 @@ export interface EdgeSpec {
   source: string;
   target: string;
   color?: string;
+  width?: number;              // Edge width
+  type?: 'straight' | 'curved' | 'dashed'; // Edge type
+  label?: string;              // Edge label
+  selectable?: boolean;        // Whether edge can be selected
+  hoverable?: boolean;         // Whether edge responds to hover
+  data?: Record<string, any>;  // Arbitrary user data
+  curvature?: number;          // For curved edges (0-1)
+  dashSize?: number;           // For dashed edges
+  gapSize?: number;            // For dashed edges
 }
 
 export interface DataUpdate {
@@ -59,6 +69,13 @@ export interface CameraSpec {
   distance: number;
 }
 
+export interface RotationConstraints {
+  minPhi?: number;
+  maxPhi?: number;
+  minTheta?: number;
+  maxTheta?: number;
+}
+
 export interface NodeStyle {
   color?: string;
   glow?: {
@@ -67,9 +84,31 @@ export interface NodeStyle {
   };
 }
 
+export interface EdgeStyle {
+  color?: string;
+  width?: number;
+  opacity?: number;
+  glow?: {
+    color: string;
+    strength: number;
+  };
+  label?: {
+    color: string;
+    fontSize: number;
+    fontFamily: string;
+    backgroundColor?: string;
+    padding?: number;
+  };
+}
+
 export type StyleSpec = {
   'node:hover'?: NodeStyle;
   'node:selected'?: NodeStyle;
+  'edge:hover'?: EdgeStyle;
+  'edge:selected'?: EdgeStyle;
+  'edge:source-selected'?: EdgeStyle;  // Style when source node is selected
+  'edge:target-selected'?: EdgeStyle;  // Style when target node is selected
+  'edge:both-selected'?: EdgeStyle;    // Style when both nodes are selected
 };
 
 export interface ForceDirectedLayoutSpec {
@@ -79,7 +118,46 @@ export interface ForceDirectedLayoutSpec {
   linkStrength?: number;
 }
 
-export type LayoutSpec = ForceDirectedLayoutSpec;
+export interface GridLayoutSpec {
+  type: 'grid';
+  dimensions?: 2 | 3;
+  spacing?: number;
+  columns?: number;
+  rows?: number;
+  depth?: number;
+  origin?: { x: number; y: number; z: number };
+  axisOrder?: ['x' | 'y' | 'z', 'x' | 'y' | 'z', 'x' | 'y' | 'z'];
+}
+
+export interface CircleLayoutSpec {
+  type: 'circle';
+  radius?: number;
+  dimensions?: 2 | 3;
+  center?: { x: number; y: number; z: number };
+  startAngle?: number;
+  direction?: 'clockwise' | 'counterclockwise';
+  distribution?: 'equal' | 'random';
+}
+
+export interface ColumnLayoutSpec {
+  type: 'column';
+  spacing?: number;
+  columns?: number;
+  columnSpacing?: number;
+  origin?: { x: number; y: number; z: number };
+  maxNodesPerColumn?: number;
+}
+
+export interface RowLayoutSpec {
+  type: 'row';
+  spacing?: number;
+  rows?: number;
+  rowSpacing?: number;
+  origin?: { x: number; y: number; z: number };
+  maxNodesPerRow?: number;
+}
+
+export type LayoutSpec = ForceDirectedLayoutSpec | GridLayoutSpec | CircleLayoutSpec | ColumnLayoutSpec | RowLayoutSpec;
 
 export interface ControlsSpec {
   keyboard: {
@@ -92,6 +170,9 @@ export interface ControlsSpec {
 
 export interface PerformanceSpec {
   instancingThreshold: number;
+  enableLOD?: boolean;
+  enableCulling?: boolean;
+  enableMemoryManagement?: boolean;
 }
 
 import { Store } from 'solid-js/store';
@@ -125,6 +206,34 @@ export type GraphEventMap = {
   'background:click': { event: PointerEvent };
   'layout:pin': string[];
   'layout:unpin': string[];
+  'edge:click': {
+    target: EdgeSpec;
+    event: PointerEvent;
+    sourceNode: NodeSpec;
+    targetNode: NodeSpec;
+  };
+  'edge:hover:enter': {
+    target: EdgeSpec;
+    sourceNode: NodeSpec;
+    targetNode: NodeSpec;
+  };
+  'edge:hover:leave': {
+    target: EdgeSpec;
+    sourceNode: NodeSpec;
+    targetNode: NodeSpec;
+  };
+  'edge:select': {
+    target: EdgeSpec;
+    sourceNode: NodeSpec;
+    targetNode: NodeSpec;
+  };
+  'edge:multi-select': {
+    targets: EdgeSpec[];
+    sourceNodes: NodeSpec[];
+    targetNodes: NodeSpec[];
+  };
+  'camera:animation:start': void;
+  'camera:animation:end': void;
 };
 
 export interface Spec {
@@ -140,5 +249,19 @@ export interface Spec {
   interaction: {
     hoveredElementId: string | null;
     selectedElementIds: string[];
+  };
+  hud?: {
+    visible: boolean;
+    console?: {
+      enabled: boolean;
+      history?: string[];
+      currentInput?: string;
+      output?: Array<{
+        type: 'command' | 'result' | 'error' | 'info';
+        content: string;
+        timestamp: number;
+      }>;
+    };
+    content?: string;
   };
 }

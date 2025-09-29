@@ -61,4 +61,6 @@ export class RenderingManager {
   getRenderer = () => this.renderer;
 
   getNodeRenderer = () => this.nodeRenderer;
+
+  getEdgeRenderer = () => this.edgeRenderer;
 }

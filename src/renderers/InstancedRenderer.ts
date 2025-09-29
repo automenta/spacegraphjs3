@@ -1,10 +1,6 @@
 /**
  * @file This file contains the InstancedRenderer, which is a high-performance renderer
  * that uses THREE.InstancedMesh to draw a large number of nodes.
- *
- * @note This renderer is currently a work-in-progress and is not used by default.
- * It needs to be updated to implement the IRenderer interface before it can be
- * integrated into the SpaceGraph architecture.
  */
 
 import * as THREE from 'three';
@@ -14,8 +10,9 @@ import { NodeSpec, Spec } from '../types';
 import { IRenderer } from './IRenderer';
 import { expandHex } from '../utils/color';
 
-const MAX_INSTANCES = 100000;
+import { acceleratedRaycast } from 'three-mesh-bvh';
 
+const MAX_INSTANCES = 100000;
 export class InstancedRenderer implements IRenderer {
   public instancedMeshes: Map<string, THREE.InstancedMesh> = new Map();
   private scene: THREE.Scene;
@@ -26,7 +23,6 @@ export class InstancedRenderer implements IRenderer {
     { idToIndex: Map<string, number>; indexToId: Map<number, string> }
   > = new Map();
   private dummy = new THREE.Object3D();
-  private _dispose: () => void;
 
   constructor(
     scene: THREE.Scene,
@@ -162,6 +158,8 @@ export class InstancedRenderer implements IRenderer {
       );
       mesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
       mesh.userData.typeName = typeName; // Store typeName for raycasting
+      // Enable three-mesh-bvh acceleration for InstancedMesh
+      mesh.raycast = acceleratedRaycast;
       this.scene.add(mesh);
       this.instancedMeshes.set(typeName, mesh);
       this.typeToIdMaps.set(typeName, {

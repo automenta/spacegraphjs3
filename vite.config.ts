@@ -32,4 +32,16 @@ export default defineConfig({
   optimizeDeps: {
     include: ['tslib'],
   },
+  server: {
+    // Use a different port to avoid conflicts
+    port: 5174,
+    // Explicitly disable React refresh
+    hmr: false,
+  },
+  esbuild: {
+    // Ensure TypeScript is handled correctly
+    loader: 'ts',
+    include: /\.ts$/,
+    exclude: /\.jsx?$/,
+  },
 });

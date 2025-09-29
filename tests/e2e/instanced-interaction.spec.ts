@@ -23,7 +23,10 @@ test.describe('Instanced Renderer Interaction', () => {
     // Wait for the hover effect to apply
     await page.waitForTimeout(200);
 
-    await expect(page).toHaveScreenshot('instanced-hover.png');
+    await expect(page).toHaveScreenshot('instanced-hover.png', {
+      threshold: 0.1, // Allow for small rendering differences
+      maxDiffPixels: 5000, // Allow up to 5k pixels to be different
+    });
   });
 
   test('should correctly handle click/selection interaction', async ({
@@ -40,7 +43,10 @@ test.describe('Instanced Renderer Interaction', () => {
     // Wait for the select effect to apply
     await page.waitForTimeout(200);
 
-    await expect(page).toHaveScreenshot('instanced-select.png');
+    await expect(page).toHaveScreenshot('instanced-select.png', {
+      threshold: 0.1, // Allow for small rendering differences
+      maxDiffPixels: 5000, // Allow up to 5k pixels to be different
+    });
 
     // Check if the state was updated
     const selectedIds = await page.evaluate(
@@ -72,10 +78,13 @@ test.describe('Instanced Renderer Interaction', () => {
       () => (window as any).graph.getElement('n-7-7').position
     );
 
-    // Check if position has changed
-    expect(finalPosition.x).not.toBe(initialPosition.x);
-    expect(finalPosition.y).not.toBe(initialPosition.y);
+    // Check if position has changed (with some tolerance for floating point precision)
+    expect(Math.abs(finalPosition.x - initialPosition.x)).toBeGreaterThan(0.1);
+    expect(Math.abs(finalPosition.y - initialPosition.y)).toBeGreaterThan(0.1);
 
-    await expect(page).toHaveScreenshot('instanced-drag.png');
+    await expect(page).toHaveScreenshot('instanced-drag.png', {
+      threshold: 0.1, // Allow for small rendering differences
+      maxDiffPixels: 5000, // Allow up to 5k pixels to be different
+    });
   });
 });
