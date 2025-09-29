@@ -13,6 +13,8 @@ export class EdgeRenderer {
   private hitAreaObjects: Map<string, THREE.Line> = new Map(); // For interaction
   private labelObjects: Map<string, EdgeLabel> = new Map();
   private edgeStates: Map<string, { hovered: boolean; selected: boolean }> = new Map();
+  private edgeGeometries: Map<string, THREE.BufferGeometry> = new Map(); // Cache for edge geometries
+  private edgePositions: Map<string, string> = new Map(); // Cache for edge positions to detect changes
   public lineSegments: THREE.LineSegments;
   private lineSegmentGeometry: THREE.BufferGeometry;
   private lineSegmentMaterial: THREE.LineBasicMaterial;
@@ -83,8 +85,26 @@ export class EdgeRenderer {
     // Get edge state
     const edgeState = this.edgeStates.get(edge.id) || { hovered: false, selected: false };
     
-    // Calculate edge geometry
-    const geometry = this.createEdgeGeometry(edge, sourceNode, targetNode);
+    // Create a key representing the current edge positions and type
+    const sourcePos = sourceNode.position || { x: 0, y: 0, z: 0 };
+    const targetPos = targetNode.position || { x: 0, y: 0, z: 0 };
+    const positionKey = `${sourcePos.x},${sourcePos.y},${sourcePos.z}|${targetPos.x},${targetPos.y},${targetPos.z}|${edge.type || 'straight'}|${edge.curvature || 0}|${edge.dashSize || 0}|${edge.gapSize || 0}`;
+    
+    // Check if we need to recreate the geometry
+    let geometry = this.edgeGeometries.get(edge.id);
+    const cachedPosition = this.edgePositions.get(edge.id);
+    
+    if (!geometry || cachedPosition !== positionKey) {
+      // Dispose of old geometry if it exists
+      if (geometry) {
+        safeDisposeGeometry(geometry);
+      }
+      
+      // Calculate new edge geometry
+      geometry = this.createEdgeGeometry(edge, sourceNode, targetNode);
+      this.edgeGeometries.set(edge.id, geometry);
+      this.edgePositions.set(edge.id, positionKey);
+    }
     
     // Create or update visual line
     if (!this.lineObjects.has(edge.id)) {
@@ -376,7 +396,13 @@ export class EdgeRenderer {
     // Remove hit area
     const hitLine = this.hitAreaObjects.get(edgeId);
     if (hitLine) {
-      safeDisposeObject(hitLine);
+      // Don't dispose geometry here since it's cached and shared
+      if (hitLine.parent === this.scene) {
+        this.scene.remove(hitLine);
+      }
+      if (hitLine.material) {
+        safeDisposeMaterial(hitLine.material);
+      }
       this.hitAreaObjects.delete(edgeId);
     }
 
@@ -390,6 +416,14 @@ export class EdgeRenderer {
         console.warn(`Failed to dispose label for edge ${edgeId}:`, error);
       }
       this.labelObjects.delete(edgeId);
+    }
+
+    // Remove cached geometry
+    const geometry = this.edgeGeometries.get(edgeId);
+    if (geometry) {
+      safeDisposeGeometry(geometry);
+      this.edgeGeometries.delete(edgeId);
+      this.edgePositions.delete(edgeId);
     }
 
     // Remove state
@@ -406,6 +440,13 @@ export class EdgeRenderer {
         console.warn(`Failed to remove edge ${edgeId}:`, error);
       }
     }
+    
+    // Clear geometry caches
+    for (const geometry of this.edgeGeometries.values()) {
+      safeDisposeGeometry(geometry);
+    }
+    this.edgeGeometries.clear();
+    this.edgePositions.clear();
   }
 
   public dispose(): void {
@@ -413,6 +454,13 @@ export class EdgeRenderer {
     if (this.disposeEffect) {
       this.disposeEffect();
     }
+    
+    // Clean up cached geometries
+    for (const geometry of this.edgeGeometries.values()) {
+      safeDisposeGeometry(geometry);
+    }
+    this.edgeGeometries.clear();
+    this.edgePositions.clear();
     
     // Clean up lineSegments
     try {

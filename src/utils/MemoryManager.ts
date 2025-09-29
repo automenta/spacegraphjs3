@@ -22,6 +22,7 @@ type DisposableObject = Object3D | Material | Texture | BufferGeometry | Disposa
 export class MemoryManager {
   private static instance: MemoryManager;
   private trackedObjects: Set<DisposableObject> = new Set();
+  private disposedObjects: WeakSet<DisposableObject> = new WeakSet();
 
   private constructor() {}
 
@@ -38,14 +39,38 @@ export class MemoryManager {
   }
 
   /**
+   * Checks if an object has already been disposed
+   *
+   * @param object - The object to check
+   * @returns True if the object has been disposed
+   */
+  private isDisposed(object: DisposableObject): boolean {
+    return this.disposedObjects.has(object);
+  }
+
+  /**
+   * Marks an object as disposed
+   *
+   * @param object - The object to mark as disposed
+   */
+  private markAsDisposed(object: DisposableObject): void {
+    this.disposedObjects.add(object);
+  }
+
+  /**
    * Disposes of a Three.js object and all its resources
    *
    * @param object - The object to dispose
    */
   public disposeObject(object: DisposableObject): void {
+    // Skip if already disposed
+    if (this.isDisposed(object)) {
+      return;
+    }
+
     if (object instanceof Object3D) {
       // Dispose of geometry and materials in the object
-      if ('geometry' in object) {
+      if ('geometry' in object && (object as unknown as HasGeometry).geometry) {
         this.disposeGeometry((object as unknown as HasGeometry).geometry);
       }
       
@@ -53,7 +78,7 @@ export class MemoryManager {
         const material = (object as unknown as HasMaterial).material;
         if (Array.isArray(material)) {
           material.forEach(mat => this.disposeMaterial(mat));
-        } else {
+        } else if (material) {
           this.disposeMaterial(material);
         }
       }
@@ -67,8 +92,15 @@ export class MemoryManager {
     } else if (object instanceof BufferGeometry) {
       this.disposeGeometry(object);
     } else if (typeof object.dispose === 'function') {
-      object.dispose();
+      try {
+        object.dispose();
+      } catch (error) {
+        console.warn('Error disposing object:', error);
+      }
     }
+    
+    // Mark as disposed
+    this.markAsDisposed(object);
     
     // Remove from tracked objects
     this.trackedObjects.delete(object);
@@ -80,6 +112,11 @@ export class MemoryManager {
    * @param material - The material to dispose
    */
   public disposeMaterial(material: Material): void {
+    // Skip if already disposed
+    if (this.isDisposed(material)) {
+      return;
+    }
+
     // Dispose of textures used by the material
     Object.keys(material).forEach(key => {
       const value = (material as any)[key];
@@ -90,8 +127,15 @@ export class MemoryManager {
     
     // Dispose of the material itself
     if (typeof material.dispose === 'function') {
-      material.dispose();
+      try {
+        material.dispose();
+      } catch (error) {
+        console.warn('Error disposing material:', error);
+      }
     }
+    
+    // Mark as disposed
+    this.markAsDisposed(material);
   }
 
   /**
@@ -100,13 +144,29 @@ export class MemoryManager {
    * @param texture - The texture to dispose
    */
   public disposeTexture(texture: Texture): void {
+    // Skip if already disposed
+    if (this.isDisposed(texture)) {
+      return;
+    }
+
     if (texture.image && typeof texture.image.close === 'function') {
-      texture.image.close();
+      try {
+        texture.image.close();
+      } catch (error) {
+        console.warn('Error closing texture image:', error);
+      }
     }
     
     if (typeof texture.dispose === 'function') {
-      texture.dispose();
+      try {
+        texture.dispose();
+      } catch (error) {
+        console.warn('Error disposing texture:', error);
+      }
     }
+    
+    // Mark as disposed
+    this.markAsDisposed(texture);
   }
 
   /**
@@ -115,9 +175,21 @@ export class MemoryManager {
    * @param geometry - The geometry to dispose
    */
   public disposeGeometry(geometry: BufferGeometry): void {
-    if (typeof geometry.dispose === 'function') {
-      geometry.dispose();
+    // Skip if already disposed
+    if (this.isDisposed(geometry)) {
+      return;
     }
+
+    if (typeof geometry.dispose === 'function') {
+      try {
+        geometry.dispose();
+      } catch (error) {
+        console.warn('Error disposing geometry:', error);
+      }
+    }
+    
+    // Mark as disposed
+    this.markAsDisposed(geometry);
   }
 
   /**
@@ -133,7 +205,15 @@ export class MemoryManager {
    * Disposes of all tracked objects
    */
   public disposeAllTrackedObjects(): void {
-    this.trackedObjects.forEach(object => this.disposeObject(object));
+    // Create a copy of the set to avoid modification during iteration
+    const objectsToDispose = Array.from(this.trackedObjects);
+    objectsToDispose.forEach(object => {
+      try {
+        this.disposeObject(object);
+      } catch (error) {
+        console.warn('Error disposing tracked object:', error);
+      }
+    });
     this.trackedObjects.clear();
   }
 
@@ -144,5 +224,12 @@ export class MemoryManager {
    */
   public getTrackedObjectCount(): number {
     return this.trackedObjects.size;
+  }
+
+  /**
+   * Clears all tracked objects without disposing them
+   */
+  public clearTracking(): void {
+    this.trackedObjects.clear();
   }
 }

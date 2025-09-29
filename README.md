@@ -2,9 +2,22 @@
 
 ⚠️ **STATUS: ALL FEATURES FULLY IMPLEMENTED AND OPERATIONAL** ⚠️
 
-Declarative, high-performance library for creating interactive 2D/3D visualizations. 
+Declarative, high-performance library for creating interactive 2D/3D visualizations.
 
 SpaceGraphJS functions as an intelligent orchestrator, translating a declarative `Spec` into a live scene by managing a suite of best-in-class tools for rendering, interaction, and physics.
+
+## Recent Improvements
+
+We've recently made significant improvements to the codebase:
+
+- **Element Actors Refactoring**: Eliminated code duplication with a new inheritance-based architecture
+- **Memory Management Enhancements**: Improved resource disposal and leak prevention
+- **Event Handling Improvements**: Fixed TypeScript issues and added disposal safety
+- **Layout Engine Optimizations**: Improved performance for large graphs
+- **Rendering Performance**: Implemented geometry caching for edges
+- **Comprehensive Documentation**: Added detailed documentation for all improvements
+
+For details, see [CODEBASE_IMPROVEMENTS_SUMMARY.md](doc/CODEBASE_IMPROVEMENTS_SUMMARY.md)
 
 ## Features
 

@@ -242,6 +242,21 @@ export type GraphEventMap = {
   'camera:animation:end': void;
 };
 
+/**
+ * Utility type for ensuring exhaustive switch statements
+ */
+export type AssertUnreachable = (x: never) => never;
+
+/**
+ * Utility type for making properties required
+ */
+export type RequiredKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
+
+/**
+ * Utility type for making properties optional
+ */
+export type OptionalKeys<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
 export interface Spec {
   data: {
     nodes: NodeSpec[];
