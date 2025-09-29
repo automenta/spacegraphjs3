@@ -1,14 +1,15 @@
 import { createEffect } from 'solid-js';
 import { SpaceGraph } from '../core/SpaceGraph';
-import { EdgeSpec, NodeSpec } from '../types';
+import { EdgeSpec, GroupSpec, NodeSpec } from '../types';
 
 /**
- * Manages the data part of the state, providing efficient access to nodes and edges.
+ * Manages the data part of the state, providing efficient access to nodes, edges, and groups.
  */
 export class DataManager {
   private graph: SpaceGraph;
   private nodes: Map<string, NodeSpec> = new Map();
   private edges: Map<string, EdgeSpec> = new Map();
+  private groups: Map<string, GroupSpec> = new Map();
 
   constructor(graph: SpaceGraph) {
     this.graph = graph;
@@ -26,6 +27,14 @@ export class DataManager {
       const edges = this.graph.state.data?.edges ?? [];
       for (const edge of edges) {
         this.edges.set(edge.id, edge);
+      }
+    });
+
+    createEffect(() => {
+      this.groups.clear();
+      const groups = this.graph.state.data?.groups ?? [];
+      for (const group of groups) {
+        this.groups.set(group.id, group);
       }
     });
   }
@@ -49,16 +58,26 @@ export class DataManager {
   }
 
   /**
-   * Retrieves a node or edge by its ID.
+   * Retrieves a group by its ID.
+   * @param id - The unique identifier of the group.
+   * @returns The group's reactive state proxy, or undefined if not found.
+   */
+  public getGroup(id: string): GroupSpec | undefined {
+    return this.groups.get(id);
+  }
+
+  /**
+   * Retrieves a node, edge, or group by its ID.
    * @param id - The unique identifier of the element.
    * @returns The element's reactive state proxy, or undefined if not found.
    */
-  public getElement(id: string): NodeSpec | EdgeSpec | undefined {
-    return this.getNode(id) || this.getEdge(id);
+  public getElement(id: string): NodeSpec | EdgeSpec | GroupSpec | undefined {
+    return this.getNode(id) || this.getEdge(id) || this.getGroup(id);
   }
 
   public dispose(): void {
     this.nodes.clear();
     this.edges.clear();
+    this.groups.clear();
   }
 }

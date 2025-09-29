@@ -5,6 +5,7 @@ import { EdgeSpec, NodeSpec, Spec, EdgeStyle } from '../types';
 import { expandHex } from '../utils/color';
 import { EdgeLabel } from './EdgeLabel';
 import { safeDisposeObject, safeDisposeGeometry, safeDisposeMaterial } from '../utils/threeUtils';
+import { animateProperty } from '../utils/AnimationUtils';
 
 export class EdgeRenderer {
   private scene: THREE.Scene;
@@ -12,9 +13,11 @@ export class EdgeRenderer {
   private lineObjects: Map<string, THREE.Line> = new Map();
   private hitAreaObjects: Map<string, THREE.Line> = new Map(); // For interaction
   private labelObjects: Map<string, EdgeLabel> = new Map();
-  private edgeStates: Map<string, { hovered: boolean; selected: boolean }> = new Map();
+  private edgeStates: Map<string, { hovered: boolean; selected: boolean; editing: boolean }> = new Map();
   private edgeGeometries: Map<string, THREE.BufferGeometry> = new Map(); // Cache for edge geometries
   private edgePositions: Map<string, string> = new Map(); // Cache for edge positions to detect changes
+  private edgeEditHandles: Map<string, THREE.Object3D[]> = new Map(); // Edit handles for curved edges
+  private edgeAnimations: Map<string, { stop: () => void }> = new Map(); // Active animations for edges
   public lineSegments: THREE.LineSegments;
   private lineSegmentGeometry: THREE.BufferGeometry;
   private lineSegmentMaterial: THREE.LineBasicMaterial;
@@ -83,7 +86,7 @@ export class EdgeRenderer {
     if (!sourceNode || !targetNode) return;
 
     // Get edge state
-    const edgeState = this.edgeStates.get(edge.id) || { hovered: false, selected: false };
+    const edgeState = this.edgeStates.get(edge.id) || { hovered: false, selected: false, editing: false };
     
     // Create a key representing the current edge positions and type
     const sourcePos = sourceNode.position || { x: 0, y: 0, z: 0 };
@@ -122,6 +125,13 @@ export class EdgeRenderer {
       this.updateEdgeLabel(edge, sourceNode, targetNode).catch(error => {
         console.warn(`Failed to update edge label for edge ${edge.id}:`, error);
       });
+    }
+
+    // Show edit handles if edge is being edited
+    if (edgeState.editing && edge.type === 'curved') {
+      this.showEdgeEditHandles(edge.id, sourceNode, targetNode);
+    } else {
+      this.hideEdgeEditHandles(edge.id);
     }
   }
 
@@ -219,7 +229,7 @@ export class EdgeRenderer {
     this.scene.add(line);
   }
 
-  private createEdgeMaterial(edge: EdgeSpec, state: { hovered: boolean; selected: boolean }): THREE.Material {
+  private createEdgeMaterial(edge: EdgeSpec, state: { hovered: boolean; selected: boolean; editing?: boolean }): THREE.Material {
     const baseColor = edge.color || '#aaaaaa';
     let finalColor = new THREE.Color(baseColor);
     let opacity = 0.5;
@@ -274,6 +284,13 @@ export class EdgeRenderer {
       }
     }
 
+    // Apply editing state styling
+    if (state.editing) {
+      width *= 1.5; // Make editing edges thicker
+      opacity = 1.0; // Make editing edges fully opaque
+      finalColor = new THREE.Color('#ffff00'); // Yellow color for editing
+    }
+
     return new THREE.LineBasicMaterial({
       color: finalColor,
       opacity: opacity,
@@ -287,7 +304,7 @@ export class EdgeRenderer {
     if (style.opacity) opacity = style.opacity;
   }
 
-  private updateEdgeVisuals(edge: EdgeSpec, geometry: THREE.BufferGeometry, state: { hovered: boolean; selected: boolean }): void {
+  private updateEdgeVisuals(edge: EdgeSpec, geometry: THREE.BufferGeometry, state: { hovered: boolean; selected: boolean; editing?: boolean }): void {
     const line = this.lineObjects.get(edge.id);
     if (!line) return;
 
@@ -295,10 +312,25 @@ export class EdgeRenderer {
     safeDisposeGeometry(line.geometry);
     line.geometry = geometry;
 
-    // Update material
-    const material = this.createEdgeMaterial(edge, state);
-    safeDisposeMaterial(line.material);
-    line.material = material;
+    // Create new material
+    const newMaterial = this.createEdgeMaterial(edge, state);
+    
+    // Animate material transition if the line already has a material
+    if (line.material) {
+      // Extract target properties from new material
+      const newLineMaterial = newMaterial as THREE.LineBasicMaterial;
+      const targetColor = newLineMaterial.color.clone();
+      const targetOpacity = newLineMaterial.opacity;
+      
+      // Animate the transition
+      this.animateEdgeMaterial(edge.id, line.material as THREE.Material | THREE.Material[], targetColor, targetOpacity);
+      
+      // Dispose of the new material since we're animating the existing one
+      safeDisposeMaterial(newMaterial);
+    } else {
+      // No existing material, just set the new one
+      line.material = newMaterial;
+    }
   }
 
   private updateEdgeHitArea(edge: EdgeSpec, geometry: THREE.BufferGeometry, sourceNode: NodeSpec, targetNode: NodeSpec): void {
@@ -343,7 +375,7 @@ export class EdgeRenderer {
   }
 
   public setEdgeHover(edgeId: string, hovered: boolean): void {
-    const edgeState = this.edgeStates.get(edgeId) || { hovered: false, selected: false };
+    const edgeState = this.edgeStates.get(edgeId) || { hovered: false, selected: false, editing: false };
     edgeState.hovered = hovered;
     this.edgeStates.set(edgeId, edgeState);
     
@@ -360,8 +392,25 @@ export class EdgeRenderer {
   }
 
   public setEdgeSelected(edgeId: string, selected: boolean): void {
-    const edgeState = this.edgeStates.get(edgeId) || { hovered: false, selected: false };
+    const edgeState = this.edgeStates.get(edgeId) || { hovered: false, selected: false, editing: false };
     edgeState.selected = selected;
+    this.edgeStates.set(edgeId, edgeState);
+    
+    // Update visuals
+    const edge = this.state.data.edges.find(e => e.id === edgeId);
+    if (edge) {
+      const sourceNode = this.state.data.nodes.find(n => n.id === edge.source);
+      const targetNode = this.state.data.nodes.find(n => n.id === edge.target);
+      if (sourceNode && targetNode) {
+        const geometry = this.createEdgeGeometry(edge, sourceNode, targetNode);
+        this.updateEdgeVisuals(edge, geometry, edgeState);
+      }
+    }
+  }
+
+  public setEdgeEditing(edgeId: string, editing: boolean): void {
+    const edgeState = this.edgeStates.get(edgeId) || { hovered: false, selected: false, editing: false };
+    edgeState.editing = editing;
     this.edgeStates.set(edgeId, edgeState);
     
     // Update visuals
@@ -428,6 +477,9 @@ export class EdgeRenderer {
 
     // Remove state
     this.edgeStates.delete(edgeId);
+
+    // Remove edit handles
+    this.hideEdgeEditHandles(edgeId);
   }
 
   private clearAllEdges(): void {
@@ -441,12 +493,153 @@ export class EdgeRenderer {
       }
     }
     
-    // Clear geometry caches
-    for (const geometry of this.edgeGeometries.values()) {
-      safeDisposeGeometry(geometry);
+    // Stop all animations
+    for (const animation of this.edgeAnimations.values()) {
+      animation.stop();
     }
-    this.edgeGeometries.clear();
-    this.edgePositions.clear();
+    this.edgeAnimations.clear();
+  }
+  
+  private showEdgeEditHandles(edgeId: string, sourceNode: NodeSpec, targetNode: NodeSpec): void {
+    // Clear any existing handles for this edge
+    this.hideEdgeEditHandles(edgeId);
+    
+    // Create control point for curved edges
+    const edge = this.state.data.edges.find(e => e.id === edgeId);
+    if (!edge || edge.type !== 'curved') return;
+    
+    const sourcePos = new THREE.Vector3(
+      sourceNode.position?.x || 0,
+      sourceNode.position?.y || 0,
+      sourceNode.position?.z || 0
+    );
+    
+    const targetPos = new THREE.Vector3(
+      targetNode.position?.x || 0,
+      targetNode.position?.y || 0,
+      targetNode.position?.z || 0
+    );
+    
+    // Calculate control point position
+    const midPoint = new THREE.Vector3().lerpVectors(sourcePos, targetPos, 0.5);
+    const direction = new THREE.Vector3().subVectors(targetPos, sourcePos).normalize();
+    const perpendicular = new THREE.Vector3(-direction.z, 0, direction.x).normalize();
+    const curvature = edge.curvature || 0.3;
+    const controlPoint = midPoint.clone().add(
+      perpendicular.multiplyScalar(curvature * sourcePos.distanceTo(targetPos) * 0.5)
+    );
+    
+    // Create handle geometry and material
+    const handleGeometry = new THREE.SphereGeometry(0.3, 16, 16);
+    const handleMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffff00,
+      transparent: true,
+      opacity: 0.8
+    });
+    
+    // Create control point handle
+    const controlHandle = new THREE.Mesh(handleGeometry, handleMaterial);
+    controlHandle.position.copy(controlPoint);
+    controlHandle.userData = { edgeId, type: 'controlPoint' };
+    this.scene.add(controlHandle);
+    
+    // Store handles
+    this.edgeEditHandles.set(edgeId, [controlHandle]);
+  }
+  
+  private hideEdgeEditHandles(edgeId: string): void {
+    const handles = this.edgeEditHandles.get(edgeId);
+    if (handles) {
+      handles.forEach(handle => {
+        if (handle.parent === this.scene) {
+          this.scene.remove(handle);
+        }
+        safeDisposeObject(handle);
+      });
+      this.edgeEditHandles.delete(edgeId);
+    }
+  }
+  
+  public getEdgeEditHandles(): THREE.Object3D[] {
+    // Return all edit handles for raycasting
+    const handles: THREE.Object3D[] = [];
+    for (const handleList of this.edgeEditHandles.values()) {
+      handles.push(...handleList);
+    }
+    return handles;
+  }
+
+  /**
+   * Animate a property value with easing
+   * @param from - Starting value
+   * @param to - Target value
+   * @param duration - Animation duration in ms
+   * @param onUpdate - Callback for each animation frame
+   * @param easing - Easing function
+   */
+  private animateProperty(
+    from: number,
+    to: number,
+    duration: number,
+    onUpdate: (value: number) => void,
+    easing: (t: number) => number = t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
+  ): () => void {
+    // Stop any existing animation for this property
+    return animateProperty(from, to, duration, onUpdate, easing);
+  }
+
+  /**
+   * Animate edge material properties with smooth transitions
+   * @param edgeId - The ID of the edge to animate
+   * @param material - The material to animate (can be a single material or array)
+   * @param targetColor - The target color
+   * @param targetOpacity - The target opacity
+   * @param targetWidth - The target width (for future use)
+   */
+  private animateEdgeMaterial(
+    edgeId: string,
+    material: THREE.Material | THREE.Material[],
+    targetColor: THREE.Color,
+    targetOpacity: number
+  ): void {
+    // Stop any existing animations for this edge
+    const existingAnimation = this.edgeAnimations.get(edgeId);
+    if (existingAnimation) {
+      existingAnimation.stop();
+    }
+    
+    // Handle both single material and material array cases
+    const materials = Array.isArray(material) ? material : [material];
+    const lineMaterials = materials as THREE.LineBasicMaterial[];
+    
+    // For now, we'll animate the first material in the array
+    // In the future, we might want to animate all materials
+    const lineMaterial = lineMaterials[0];
+    if (!lineMaterial) return;
+    
+    const currentColor = lineMaterial.color.clone();
+    const currentOpacity = lineMaterial.opacity;
+    
+    // Animate color
+    if (!currentColor.equals(targetColor)) {
+      const stopColorAnimation = this.animateProperty(0, 1, 200, (progress) => {
+        lineMaterial.color.lerpColors(currentColor, targetColor, progress);
+      });
+      
+      // Store animation reference
+      this.edgeAnimations.set(edgeId, { stop: stopColorAnimation });
+    }
+    
+    // Animate opacity
+    if (Math.abs(currentOpacity - targetOpacity) > 0.01) {
+      const stopOpacityAnimation = this.animateProperty(currentOpacity, targetOpacity, 200, (value) => {
+        lineMaterial.opacity = value;
+        lineMaterial.transparent = value < 1.0;
+      });
+      
+      // Store animation reference
+      this.edgeAnimations.set(edgeId, { stop: stopOpacityAnimation });
+    }
   }
 
   public dispose(): void {

@@ -127,7 +127,12 @@ describe('InteractionPlugin Edge Cases', () => {
       },
       dataManager: {
         getElement: (id: string) =>
+          initialSpec.data.nodes.find(node => node.id === id) ||
+          initialSpec.data.edges.find(edge => edge.id === id) || null,
+        getNode: (id: string) =>
           initialSpec.data.nodes.find(node => node.id === id) || null,
+        getEdge: (id: string) =>
+          initialSpec.data.edges.find(edge => edge.id === id) || null,
       },
       events: {
         on: vi.fn(),

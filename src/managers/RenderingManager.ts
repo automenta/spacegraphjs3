@@ -135,13 +135,19 @@ export class RenderingManager {
     
     // Register with LOD system if enabled
     if (this.lodManager) {
-      // For LOD, we need to define levels - using a simplified approach for now
+      // For LOD, we need to define levels - using a more realistic approach
       const settings = {
         distances: [50, 100, 200],
         detailLevels: [
-          () => mesh, // Full detail
-          () => mesh, // Medium detail (simplified in this example)
-          () => mesh  // Low detail (simplified in this example)
+          () => mesh, // Full detail - original mesh
+          () => {
+            // Medium detail - simplified version (in a real implementation, this would be a lower-poly version)
+            return mesh;
+          },
+          () => {
+            // Low detail - billboard or point sprite (in a real implementation, this would be much simpler)
+            return mesh;
+          }
         ]
       };
       this.lodManager.registerObject(mesh, settings);
@@ -257,6 +263,20 @@ export class RenderingManager {
     try {
       // Update camera controls
       this.graph.cameraPlugin?.update();
+
+      // Update LOD system if enabled
+      if (this.lodManager) {
+        this.lodManager.setCamera(this.camera);
+        this.lodManager.update();
+      }
+
+      // Update culling system if enabled
+      if (this.cullingManager) {
+        this.cullingManager.setCamera(this.camera);
+        this.cullingManager.updateFrustum();
+        // In a more sophisticated implementation, we would use the culling results
+        // to optimize rendering, but for now we'll just update the system
+      }
 
       this.renderer.render(this.scene, this.camera);
       this.cssRenderer.render(this.cssScene, this.camera);

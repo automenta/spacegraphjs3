@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { Store } from 'solid-js/store';
 import { Spec, SpecUpdate } from './types';
+import { ThreeObjectPoolManager } from './utils/ThreeObjectPoolManager';
 
 export class InteractionLogic {
   public static handlePan(
@@ -12,14 +13,16 @@ export class InteractionLogic {
   ) {
     if (!state.camera) return;
     const panSpeed = 0.001 * state.camera.distance;
+    
+    const poolManager = ThreeObjectPoolManager.getInstance();
 
-    const right = new THREE.Vector3().setFromMatrixColumn(
+    const right = poolManager.getVector3().setFromMatrixColumn(
       threeCamera.matrix,
       0
     );
-    const up = new THREE.Vector3().setFromMatrixColumn(threeCamera.matrix, 1);
+    const up = poolManager.getVector3().setFromMatrixColumn(threeCamera.matrix, 1);
 
-    const panOffset = new THREE.Vector3()
+    const panOffset = poolManager.getVector3()
       .copy(right)
       .multiplyScalar(-mx * panSpeed)
       .add(up.clone().multiplyScalar(my * panSpeed));
@@ -29,6 +32,11 @@ export class InteractionLogic {
       y: state.camera.target.y + panOffset.y,
       z: state.camera.target.z + panOffset.z,
     };
+
+    // Release vectors back to pool
+    poolManager.releaseVector3(right);
+    poolManager.releaseVector3(up);
+    poolManager.releaseVector3(panOffset);
 
     updateState({
       camera: { ...state.camera, target: newTarget },
@@ -108,14 +116,16 @@ export class InteractionLogic {
     threeCamera: THREE.PerspectiveCamera
   ) {
     if (!state.camera) return;
+    
+    const poolManager = ThreeObjectPoolManager.getInstance();
 
-    const right = new THREE.Vector3().setFromMatrixColumn(
+    const right = poolManager.getVector3().setFromMatrixColumn(
       threeCamera.matrix,
       0
     );
-    const forward = new THREE.Vector3();
+    const forward = poolManager.getVector3();
     threeCamera.getWorldDirection(forward);
-    const panOffset = new THREE.Vector3();
+    const panOffset = poolManager.getVector3();
 
     switch (direction) {
       case 'left':
@@ -138,6 +148,11 @@ export class InteractionLogic {
       z: state.camera.target.z + panOffset.z,
     };
 
+    // Release vectors back to pool
+    poolManager.releaseVector3(right);
+    poolManager.releaseVector3(forward);
+    poolManager.releaseVector3(panOffset);
+
     updateState({
       camera: { ...state.camera, target: newTarget },
     });
@@ -152,7 +167,10 @@ export class InteractionLogic {
     threeCamera: THREE.PerspectiveCamera,
     updateState: (spec: SpecUpdate) => void
   ) {
-    const pointer = new THREE.Vector2();
+    const poolManager = ThreeObjectPoolManager.getInstance();
+    
+    const pointer = poolManager.getVector3();
+    pointer.set(0, 0, 0); // Convert to Vector2 by setting z=0
     const raycaster = new THREE.Raycaster();
 
     // Convert screen coordinates to normalized device coordinates
@@ -161,8 +179,8 @@ export class InteractionLogic {
     pointer.y = -(vy / height) * 2 + 1;
 
     // Find intersection with the drag plane
-    raycaster.setFromCamera(pointer, threeCamera);
-    const intersection = new THREE.Vector3();
+    raycaster.setFromCamera(pointer as unknown as THREE.Vector2, threeCamera);
+    const intersection = poolManager.getVector3();
     raycaster.ray.intersectPlane(dragPlane, intersection);
 
     // Create the update payload for the reactive state
@@ -171,6 +189,10 @@ export class InteractionLogic {
       y: intersection.y,
       z: intersection.z,
     };
+
+    // Release vectors back to pool
+    poolManager.releaseVector3(pointer);
+    poolManager.releaseVector3(intersection);
 
     // Update the state using the provided function
     updateState({

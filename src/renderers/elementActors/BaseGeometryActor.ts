@@ -4,6 +4,7 @@ import { Store } from 'solid-js/store';
 import { NodeSpec, Spec } from '../../types';
 import { BaseElementActor } from './BaseElementActor';
 import { parseColor, applyElementStyling } from '../../utils/colorUtils';
+import { animateProperty } from '../../utils/AnimationUtils';
 
 /**
  * A base class for geometry-based element actors that provides common functionality
@@ -97,6 +98,24 @@ export abstract class BaseGeometryActor extends BaseElementActor {
     this.updateVisuals(this.elementState, isHovered, isSelected);
   }
 
+  /**
+   * Animate a property value with easing
+   * @param from - Starting value
+   * @param to - Target value
+   * @param duration - Animation duration in ms
+   * @param onUpdate - Callback for each animation frame
+   * @param easing - Easing function
+   */
+  protected animateProperty(
+    from: number,
+    to: number,
+    duration: number,
+    onUpdate: (value: number) => void,
+    easing: (t: number) => number = t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
+  ): void {
+    animateProperty(from, to, duration, onUpdate, easing);
+  }
+
   protected updateVisuals(
     elementState: Store<NodeSpec>,
     isElementHovered: boolean,
@@ -105,11 +124,25 @@ export abstract class BaseGeometryActor extends BaseElementActor {
     if (!this.threeObject) return;
     const group = this.threeObject as THREE.Group;
 
-    group.position.set(
+    // Animate position changes
+    const targetPosition = new THREE.Vector3(
       elementState.position?.x ?? 0,
       elementState.position?.y ?? 0,
       elementState.position?.z ?? 0
     );
+
+    // Only animate if there's a significant position change
+    const currentPosition = group.position;
+    const positionDelta = currentPosition.distanceTo(targetPosition);
+    
+    if (positionDelta > 0.01) {
+      // Animate position with easing
+      this.animateProperty(0, 1, 300, (progress) => {
+        group.position.lerpVectors(currentPosition, targetPosition, progress);
+      });
+    } else {
+      group.position.copy(targetPosition);
+    }
 
     const finalColor = parseColor(elementState.color, elementState.id);
 
@@ -124,17 +157,59 @@ export abstract class BaseGeometryActor extends BaseElementActor {
       hoverStyle
     );
 
-    finalColor.copy(stylingResult.color);
+    // Animate color changes
+    const mainMaterial = this.mainMesh.material as THREE.MeshBasicMaterial;
+    const currentMainColor = mainMaterial.color.clone();
+    const targetMainColor = stylingResult.color.clone();
     
+    if (!currentMainColor.equals(targetMainColor)) {
+      this.animateProperty(0, 1, 200, (progress) => {
+        mainMaterial.color.lerpColors(currentMainColor, targetMainColor, progress);
+      });
+    } else {
+      mainMaterial.color.copy(targetMainColor);
+    }
+    
+    // Animate glow effects
     if (stylingResult.glowVisible && stylingResult.glowColor !== undefined && stylingResult.glowStrength !== undefined) {
       this.glowMesh.visible = true;
-      (this.glowMesh.material as THREE.MeshBasicMaterial).color.set(stylingResult.glowColor);
-      (this.glowMesh.material as THREE.MeshBasicMaterial).opacity = stylingResult.glowStrength;
+      const glowMaterial = this.glowMesh.material as THREE.MeshBasicMaterial;
+      const targetGlowColor = new THREE.Color(stylingResult.glowColor);
+      const currentGlowColor = glowMaterial.color.clone();
+      
+      if (!currentGlowColor.equals(targetGlowColor)) {
+        this.animateProperty(0, 1, 200, (progress) => {
+          glowMaterial.color.lerpColors(currentGlowColor, targetGlowColor, progress);
+        });
+      } else {
+        glowMaterial.color.copy(targetGlowColor);
+      }
+      
+      // Animate glow opacity
+      const currentOpacity = glowMaterial.opacity;
+      const targetOpacity = stylingResult.glowStrength;
+      
+      if (Math.abs(currentOpacity - targetOpacity!) > 0.01) {
+        this.animateProperty(currentOpacity, targetOpacity!, 200, (value) => {
+          glowMaterial.opacity = value;
+        });
+      } else {
+        glowMaterial.opacity = targetOpacity!;
+      }
     } else {
-      this.glowMesh.visible = false;
+      // Fade out glow
+      const glowMaterial = this.glowMesh.material as THREE.MeshBasicMaterial;
+      if (glowMaterial.opacity > 0.01) {
+        this.animateProperty(glowMaterial.opacity, 0, 200, (value) => {
+          glowMaterial.opacity = value;
+          if (value <= 0.01) {
+            this.glowMesh.visible = false;
+          }
+        });
+      } else {
+        this.glowMesh.visible = false;
+      }
     }
-
-    (this.mainMesh.material as THREE.MeshBasicMaterial).color.copy(finalColor);
   }
 
   /**

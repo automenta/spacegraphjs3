@@ -91,18 +91,9 @@ export class HTMLRenderer {
   }
   
   public updatePerformanceSystems(): void {
-    // Update culling system
-    if (this.cullingManager) {
-      // In a real implementation, we would get the camera from the rendering manager
-      // For now, we'll skip this as it requires access to the camera
-    }
-    
-    // Update LOD system
-    if (this.lodManager) {
-      // In a real implementation, we would get the camera from the rendering manager
-      // For now, we'll skip this as it requires access to the camera
-      // this.lodManager.update();
-    }
+    // This method is called from the createEffect in the constructor
+    // In a more sophisticated implementation, we would update the performance systems
+    // with camera information, but for now we'll just ensure they're initialized
   }
   
   public getVisibleHtmlObjects(): THREE.Object3D[] {

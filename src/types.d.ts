@@ -213,6 +213,15 @@ export type GraphEventMap = {
     'element:hover:leave': {
         target: NodeSpec | EdgeSpec;
     };
+    'element:drag:start': {
+        target: NodeSpec;
+        startPosition: THREE.Vector3;
+    };
+    'element:drag:end': {
+        target: NodeSpec;
+        startPosition: THREE.Vector3;
+        endPosition: THREE.Vector3;
+    };
     'background:click': {
         event: PointerEvent;
     };
@@ -246,6 +255,8 @@ export type GraphEventMap = {
     };
     'camera:animation:start': void;
     'camera:animation:end': void;
+    'camera:framing:start': void;
+    'camera:framing:end': void;
 };
 export interface Spec {
     data: {

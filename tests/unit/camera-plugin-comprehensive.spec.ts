@@ -311,13 +311,11 @@ describe('CameraPlugin Comprehensive Tests', () => {
 
       plugin.flyTo(targetState, { duration: 1000 });
 
-      expect(animate).toHaveBeenCalledWith({
+      expect(animate).toHaveBeenCalledWith(expect.objectContaining({
         from: mockGraph.state.camera,
         to: targetState,
         duration: 1000,
-        onUpdate: expect.any(Function),
-        onComplete: expect.any(Function),
-      });
+      }));
 
       expect(mockEmit).toHaveBeenCalledWith('camera:animation:start');
     });

@@ -59,11 +59,8 @@ export class EventManager {
     }
     
     // Emit the event with proper typing
-    if (args.length > 0) {
-      this.emitter.emit(eventName, args[0]);
-    } else {
-      this.emitter.emit(eventName, undefined as GraphEventMap[Key]);
-    }
+    // @ts-ignore - mitt types are tricky with conditional payloads
+    this.emitter.emit(eventName, ...args);
   }
 
   /**

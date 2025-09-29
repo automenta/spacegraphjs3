@@ -38,7 +38,8 @@ describe('NodeRenderer', () => {
         interaction: { hoveredElementId: null, selectedElementIds: [] },
       });
 
-      const nodeRenderer = new NodeRenderer(scene, state, elementActorRegistry);
+      const css3DScene = new THREE.Scene();
+      const nodeRenderer = new NodeRenderer(scene, css3DScene, state, elementActorRegistry);
       nodeRenderer.updateNodes();
 
       expect(scene.children.length).toBe(0);
@@ -101,7 +102,8 @@ describe('NodeRenderer', () => {
         interaction: { hoveredElementId: null, selectedElementIds: [] },
       });
 
-      const nodeRenderer = new NodeRenderer(scene, state, elementActorRegistry);
+      const css3DScene = new THREE.Scene();
+      const nodeRenderer = new NodeRenderer(scene, css3DScene, state, elementActorRegistry);
       nodeRenderer.updateNodes();
       (nodeRenderer.elementActors.get('n1') as SphereElementActor)?.update();
       await nextTick();
@@ -179,7 +181,8 @@ describe('NodeRenderer', () => {
         interaction: { hoveredElementId: null, selectedElementIds: [] },
       });
 
-      const nodeRenderer = new NodeRenderer(scene, state, elementActorRegistry);
+      const css3DScene = new THREE.Scene();
+      const nodeRenderer = new NodeRenderer(scene, css3DScene, state, elementActorRegistry);
       nodeRenderer.updateNodes();
       (nodeRenderer.elementActors.get('n1') as SphereElementActor)?.update();
       await nextTick();

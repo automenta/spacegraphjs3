@@ -530,6 +530,20 @@ export default function init() {
   
   controls.appendChild(cameraGroup);
 
+  // Add edge editing instructions
+  const editInstructions = document.createElement('div');
+  editInstructions.innerHTML = `
+    <h4>Edge Editing</h4>
+    <p>To edit a curved edge:</p>
+    <ol>
+      <li>Right-click on a curved edge</li>
+      <li>Select "Edit Path" from the context menu</li>
+      <li>Drag the yellow handle to adjust the curve</li>
+      <li>Right-click again and select "Edit Path" to exit editing mode</li>
+    </ol>
+  `;
+  controls.appendChild(editInstructions);
+
   // Add reset button
   const resetButton = document.createElement('button');
   resetButton.textContent = 'Reset Graph';
@@ -582,6 +596,10 @@ export default function init() {
   console.log('- edges: List all edges');
   console.log('- select node-1: Select the first node');
   console.log('- flyTo {"target":{"x":0,"y":0,"z":0},"distance":30}: Fly to center');
+  console.log('- editEdgePath edge-3: Edit the curved edge path');
+  console.log('- createGroup: Create a group from selected nodes');
+  console.log('- addNodesToGroup groupId: Add selected nodes to a group');
+  console.log('- dissolveGroup groupId: Remove a group but keep nodes');
 }
 
 // If running directly, initialize

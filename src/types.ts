@@ -13,11 +13,44 @@ export interface NodeSpec {
   position?: { x: number; y: number; z: number };
   color?: string;
   label?: string;
+  groupId?: string; // Reference to the group this node belongs to
 }
 
 export interface HtmlNodeSpec extends NodeSpec {
   content?: string;
   className?: string;
+}
+
+export interface BoxNodeSpec extends NodeSpec {
+  width?: number;    // Box width (default: 1.0)
+  height?: number;   // Box height (default: 1.0)
+  depth?: number;    // Box depth (default: 1.0)
+  rounded?: boolean; // Use rounded box geometry (default: false)
+}
+
+/**
+ * Interface for custom geometry node specifications
+ */
+export interface CustomGeometryNodeSpec extends NodeSpec {
+  url: string;                    // URL to load the geometry from
+  format?: 'gltf' | 'glb' | 'obj' | 'fbx' | 'ply' | 'stl'; // Format of the geometry file
+  material?: THREE.MaterialParameters; // Material properties for the geometry
+}
+
+/**
+ * Interface for text node specifications
+ */
+export interface TextNodeSpec extends NodeSpec {
+  text?: string;                 // Text content to display
+  font?: string;                 // Font family (default: 'helvetiker')
+  size?: number;                 // Text size (default: 0.5)
+  depth?: number;                // Text depth/extrusion (default: 0.1)
+  color?: string;                // Text color (default: node color)
+  align?: 'left' | 'center' | 'right'; // Text alignment (default: 'center')
+  lineHeight?: number;           // Line height for multi-line text (default: 1.2)
+  maxWidth?: number;             // Maximum width for text wrapping (default: Infinity)
+  bold?: boolean;                // Bold text (default: false)
+  italic?: boolean;              // Italic text (default: false)
 }
 
 export interface EdgeSpec {
@@ -45,6 +78,11 @@ export interface DataUpdate {
   edges?: {
     add?: EdgeSpec[];
     update?: (DeepPartial<EdgeSpec> & { id: string })[];
+    remove?: string[];
+  };
+  groups?: {
+    add?: GroupSpec[];
+    update?: (DeepPartial<GroupSpec> & { id: string })[];
     remove?: string[];
   };
 }
@@ -209,6 +247,8 @@ export type GraphEventMap = {
   'element:click': { target: NodeSpec | EdgeSpec; event: PointerEvent };
   'element:hover:enter': { target: NodeSpec | EdgeSpec };
   'element:hover:leave': { target: NodeSpec | EdgeSpec };
+  'element:drag:start': { target: NodeSpec; startPosition: THREE.Vector3 };
+  'element:drag:end': { target: NodeSpec; startPosition: THREE.Vector3; endPosition: THREE.Vector3 };
   'background:click': { event: PointerEvent };
   'layout:pin': string[];
   'layout:unpin': string[];
@@ -240,6 +280,8 @@ export type GraphEventMap = {
   };
   'camera:animation:start': void;
   'camera:animation:end': void;
+  'camera:framing:start': void;
+  'camera:framing:end': void;
 };
 
 /**
@@ -257,10 +299,19 @@ export type RequiredKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K
  */
 export type OptionalKeys<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
+export interface GroupSpec {
+  id: string;
+  name?: string;
+  nodes: string[]; // IDs of nodes in this group
+  position?: { x: number; y: number; z: number }; // Center position of the group
+  locked?: boolean; // Whether the group is locked (cannot be modified)
+}
+
 export interface Spec {
   data: {
     nodes: NodeSpec[];
     edges: EdgeSpec[];
+    groups?: GroupSpec[]; // Add groups to the data structure
   };
   style: StyleSpec;
   layout: LayoutSpec;
@@ -270,6 +321,7 @@ export interface Spec {
   interaction: {
     hoveredElementId: string | null;
     selectedElementIds: string[];
+    selectedGroupIds?: string[]; // Track selected groups
   };
   hud?: {
     visible: boolean;
