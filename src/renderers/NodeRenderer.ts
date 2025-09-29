@@ -6,7 +6,6 @@ import { IRenderer } from './IRenderer';
 import { BaseElementActor } from './elementActors/BaseElementActor';
 import { HtmlNodeElementActor } from './elementActors/HtmlNodeElementActor';
 import { CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
-import { HTMLRenderer } from './HTMLRenderer';
 
 /**
  * Manages the rendering of all nodes in the graph using ElementActors.

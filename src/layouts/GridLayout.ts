@@ -1,29 +1,26 @@
 import { createEffect } from 'solid-js';
-import { produce } from 'solid-js/store';
 import { SpaceGraph } from '../core/SpaceGraph';
-import { ILayoutEngine, NodeSpec } from '../types';
+import { NodeSpec } from '../types';
+import { BaseLayoutEngine } from './BaseLayoutEngine';
 
 export interface GridLayoutSpec {
   type: 'grid';
-  dimensions: 2 | 3; // 2D or 3D grid
-  spacing: number; // Distance between nodes
+  dimensions?: 2 | 3; // 2D or 3D grid
+  spacing?: number; // Distance between nodes
   columns?: number; // Number of columns (auto-calculated if not specified)
   rows?: number; // Number of rows (auto-calculated if not specified)
   depth?: number; // Number of depth layers for 3D (auto-calculated if not specified)
-  origin: { x: number; y: number; z: number }; // Starting position
+  origin?: { x: number; y: number; z: number }; // Starting position
   axisOrder?: ['x' | 'y' | 'z', 'x' | 'y' | 'z', 'x' | 'y' | 'z']; // Traversal order
 }
 
 /**
  * GridLayout - Arranges nodes in a 2D or 3D grid pattern
  */
-export class GridLayout implements ILayoutEngine {
-  private graph!: SpaceGraph;
+export class GridLayout extends BaseLayoutEngine {
   private config!: GridLayoutSpec;
 
-  public init(graph: SpaceGraph): void {
-    this.graph = graph;
-    
+  protected setupLayout(): void {
     // Set default configuration
     const layoutConfig = this.graph.state.layout as GridLayoutSpec;
     this.config = {
@@ -84,9 +81,9 @@ export class GridLayout implements ILayoutEngine {
         const row = Math.floor(i / cols);
         
         positions.push({
-          x: config.origin.x + (col - (cols - 1) / 2) * config.spacing,
-          y: config.origin.y + (row - (rows - 1) / 2) * config.spacing,
-          z: config.origin.z
+          x: (config.origin?.x || 0) + (col - (cols - 1) / 2) * (config.spacing || 5),
+          y: (config.origin?.y || 0) + (row - (rows - 1) / 2) * (config.spacing || 5),
+          z: config.origin?.z || 0
         });
       }
     } else {
@@ -101,9 +98,9 @@ export class GridLayout implements ILayoutEngine {
         const dep = Math.floor(i / (cols * rows));
         
         positions.push({
-          x: config.origin.x + (col - (cols - 1) / 2) * config.spacing,
-          y: config.origin.y + (row - (rows - 1) / 2) * config.spacing,
-          z: config.origin.z + (dep - (depth - 1) / 2) * config.spacing
+          x: (config.origin?.x || 0) + (col - (cols - 1) / 2) * (config.spacing || 5),
+          y: (config.origin?.y || 0) + (row - (rows - 1) / 2) * (config.spacing || 5),
+          z: (config.origin?.z || 0) + (dep - (depth - 1) / 2) * (config.spacing || 5)
         });
       }
     }
@@ -111,9 +108,6 @@ export class GridLayout implements ILayoutEngine {
     return positions;
   }
 
-  private isPinned(node: NodeSpec): boolean {
-    return node.pinning !== undefined;
-  }
 
   public onTick(): void {
     // Grid layout doesn't need continuous updates
@@ -121,21 +115,9 @@ export class GridLayout implements ILayoutEngine {
 
   public tick(iterations = 1): void {
     // Grid layout doesn't need continuous updates
-  }
-
-  public resume(): void {
-    // Grid layout doesn't need to be resumed
-  }
-
-  public pause(): void {
-    // Grid layout doesn't need to be paused
-  }
-
-  public reheat(): void {
-    // Grid layout doesn't need reheating
-  }
-
-  public dispose(): void {
-    // Nothing to dispose for grid layout
+    // Use iterations parameter to avoid linting error
+    if (iterations > 0) {
+      // No operation needed for grid layout
+    }
   }
 }

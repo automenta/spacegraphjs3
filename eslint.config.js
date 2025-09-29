@@ -28,6 +28,16 @@ export default [
     },
   },
 
+  // Configuration for Node.js ES Module files (.js)
+  {
+    files: ['doc/screenshots/**/*.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node, // Node.js globals for screenshot scripts
+      },
+    },
+  },
+
   // Configuration for CommonJS Modules (.cjs)
   {
     files: ['**/*.cjs'],

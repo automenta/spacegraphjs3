@@ -276,7 +276,7 @@ export class PerformanceOptimizer {
   /**
    * Create batched mesh
    */
-  private createBatchedMesh(meshes: THREE.Mesh[], key: string): void {
+  private createBatchedMesh(meshes: THREE.Mesh[], _key: string): void {
     if (meshes.length === 0) return;
     
     const geometries: THREE.BufferGeometry[] = [];
@@ -405,7 +405,7 @@ export class PerformanceOptimizer {
   /**
    * Create instanced mesh
    */
-  private createInstancedMesh(meshes: THREE.Mesh[], key: string): void {
+  private createInstancedMesh(meshes: THREE.Mesh[], _key: string): void {
     if (meshes.length === 0) return;
     
     const templateMesh = meshes[0];

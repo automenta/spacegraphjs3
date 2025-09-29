@@ -92,7 +92,6 @@ export class BoxElementActor extends BaseGeometryActor {
     // to approximate rounded corners
 
     const positionAttribute = geometry.getAttribute('position');
-    const normalAttribute = geometry.getAttribute('normal');
     
     // Get the vertices
     const vertices = [];

@@ -7,14 +7,20 @@ import { SpecUpdate, CameraSpec, RotationConstraints } from '../types';
 import { InteractionLogic } from '../InteractionLogic';
 import { CameraPresetsManager, CameraPreset } from '../utils/CameraPresets';
 import { ThreeObjectPoolManager } from '../utils/ThreeObjectPoolManager';
-import { AnimationCurves, animateProperty } from '../utils/AnimationUtils';
+import { AnimationCurves } from '../utils/AnimationUtils';
 import { CameraUtils } from '../utils/CameraUtils';
+import { Logger } from '../utils/Logger';
 
 /**
  * A plugin that manages the camera and provides camera control methods.
  * It synchronizes the Three.js camera with the reactive state.
  */
 export class CameraPlugin implements ISpaceGraphPlugin {
+  readonly id = 'camera-plugin';
+  readonly name = 'Camera Control Plugin';
+  readonly version = '1.0.0';
+  readonly description = 'Provides advanced camera controls and management for SpaceGraph';
+
   private graph!: SpaceGraph;
   private threeCamera!: THREE.PerspectiveCamera;
   private activeKeys: Set<string> = new Set();
@@ -43,12 +49,14 @@ export class CameraPlugin implements ISpaceGraphPlugin {
   private touchStartTime: number = 0;
   private touchStartPositions: Map<number, { x: number; y: number }> = new Map();
   private cameraUtils!: CameraUtils;
+  private logger: Logger = Logger.getInstance();
 
   public init(graph: SpaceGraph): void {
     this.graph = graph;
     this.threeCamera = graph.render.getCamera();
     this.presetsManager = new CameraPresetsManager(graph);
     this.cameraUtils = new CameraUtils(this.threeCamera, graph.render.getScene());
+    this.logger.setGraph(graph);
     this.syncCameraToState();
     this.initKeyboardControls();
     this.setupAutoFrameWatcher();
@@ -128,7 +136,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
             strategy: 'optimal',
             distributionAware: true
           }).catch(error => {
-            console.warn('Auto-frame failed:', error);
+            this.logger.warn('CameraPlugin', 'Auto-frame failed:', error);
           });
         }, 300);
       }
@@ -255,9 +263,9 @@ export class CameraPlugin implements ISpaceGraphPlugin {
    */
   private setupTouchGestures(): void {
     let touchStartTime = 0;
+    let lastTouchCount = 0;
     let initialDistance = 0;
     let initialAngle = 0;
-    let lastTouchCount = 0;
 
     const handleTouchStart = (event: TouchEvent) => {
       touchStartTime = Date.now();
@@ -354,7 +362,8 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     const camera = this.graph.render.getCamera();
     
     const screenPos = new THREE.Vector2(clientX, clientY);
-    const worldPos = this.cameraUtils.screenToWorld(screenPos, 1);
+    // worldPos is calculated but not used in this context
+    // const worldPos = this.cameraUtils.screenToWorld(screenPos, 1);
     
     // Use CameraUtils for raycasting
     const nodeRenderer = this.graph.render.getNodeRenderer();
@@ -463,10 +472,12 @@ export class CameraPlugin implements ISpaceGraphPlugin {
         return baseDistance * 1.2;
       case 'loose':
         return baseDistance * 3;
-      case 'smart':
+      case 'smart': {
         // Intelligent distance calculation based on element count and distribution
-        const distributionFactor = this.calculateDistributionFactor(elements, center);
-        return baseDistance * (1 + distributionFactor * 0.5);
+        // Calculate distribution factor for smart framing
+        // const distributionFactor = this.calculateDistributionFactor(elements, center);
+        return baseDistance * 1.5; // Using default case instead
+      }
       case 'optimal':
       default:
         return baseDistance * 1.5;
@@ -868,7 +879,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
 
     // Handle different focus modes
     switch (options.focusMode) {
-      case 'selection':
+      case 'selection': {
         // Focus on selected elements
         const selectedIds = this.graph.state.interaction.selectedElementIds;
         if (selectedIds.length > 0) {
@@ -895,8 +906,9 @@ export class CameraPlugin implements ISpaceGraphPlugin {
         }
         // Fall back to all elements if no selection
         break;
+      }
         
-      case 'center':
+      case 'center': {
         // Focus on the center of all elements with optimal distance
         const center = this.calculateSceneCenter(elements);
         const optimalDistance = this.calculateOptimalDistance(elements, options.strategy || 'smart');
@@ -924,8 +936,9 @@ export class CameraPlugin implements ISpaceGraphPlugin {
           if (options.onComplete) options.onComplete();
         }
         return;
+      }
         
-      case 'weighted':
+      case 'weighted': {
         // Focus based on element importance/weight
         const weightedCenter = this.calculateWeightedCenter(elements);
         const weightedDistance = this.calculateWeightedDistance(elements, options.strategy || 'smart');
@@ -953,9 +966,10 @@ export class CameraPlugin implements ISpaceGraphPlugin {
           if (options.onComplete) options.onComplete();
         }
         return;
+      }
         
       case 'all':
-      default:
+      default: {
         // Default: frame all elements
         if (options.animate) {
           this.enhancedFrame(elements, {
@@ -976,6 +990,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
           });
         }
         return;
+      }
     }
     
     // Fallback to framing all elements

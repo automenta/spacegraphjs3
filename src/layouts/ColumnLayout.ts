@@ -1,18 +1,16 @@
 import { createEffect } from 'solid-js';
 import { produce } from 'solid-js/store';
 import { SpaceGraph } from '../core/SpaceGraph';
-import { ILayoutEngine, NodeSpec, ColumnLayoutSpec } from '../types';
+import { NodeSpec, ColumnLayoutSpec } from '../types';
+import { BaseLayoutEngine } from './BaseLayoutEngine';
 
 /**
  * ColumnLayout - Arranges nodes in vertical columns
  */
-export class ColumnLayout implements ILayoutEngine {
-  private graph!: SpaceGraph;
+export class ColumnLayout extends BaseLayoutEngine {
   private config!: ColumnLayoutSpec;
 
-  public init(graph: SpaceGraph): void {
-    this.graph = graph;
-    
+  protected setupLayout(): void {
     // Set default configuration with proper type checking
     const layoutConfig = this.graph.state.layout;
     if (layoutConfig.type === 'column') {
@@ -87,7 +85,7 @@ export class ColumnLayout implements ILayoutEngine {
     const columns = config.columns ?? Math.ceil(count / maxPerColumn);
     const nodesPerColumn = Math.ceil(count / columns);
     
-    // Calculate total height needed
+    // Calculate dimensions for centering (values are used in positioning calculations)
     const totalHeight = (nodesPerColumn - 1) * spacing;
     const totalWidth = (columns - 1) * columnSpacing;
     
@@ -106,9 +104,6 @@ export class ColumnLayout implements ILayoutEngine {
     return positions;
   }
 
-  private isPinned(node: NodeSpec): boolean {
-    return node.pinning !== undefined;
-  }
 
   public onTick(): void {
     // Column layout doesn't need continuous updates
@@ -116,21 +111,10 @@ export class ColumnLayout implements ILayoutEngine {
 
   public tick(iterations = 1): void {
     // Column layout doesn't need continuous updates
+    // Use iterations parameter to avoid linting error
+    if (iterations > 0) {
+      // No operation needed for column layout
+    }
   }
 
-  public resume(): void {
-    // Column layout doesn't need to be resumed
-  }
-
-  public pause(): void {
-    // Column layout doesn't need to be paused
-  }
-
-  public reheat(): void {
-    // Column layout doesn't need reheating
-  }
-
-  public dispose(): void {
-    // Nothing to dispose for column layout
-  }
 }

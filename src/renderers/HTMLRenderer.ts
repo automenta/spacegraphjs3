@@ -1,7 +1,7 @@
 import { createEffect } from 'solid-js';
 import { Store } from 'solid-js/store';
 import * as THREE from 'three';
-import { HtmlNodeSpec, Spec } from '../types';
+import { Spec } from '../types';
 import { CullingManager } from '../utils/CullingManager';
 import { LODManager } from '../utils/LODManager';
 

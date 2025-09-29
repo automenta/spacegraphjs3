@@ -603,7 +603,7 @@ export class VisualFeedbackSystem {
     const material = particles.material as THREE.PointsMaterial;
     
     let animationId: number;
-    let startTime = Date.now();
+    const startTime = Date.now();
     const duration = config.duration || 2000;
     const gravity = config.type === 'error' ? -0.01 : -0.005;
     

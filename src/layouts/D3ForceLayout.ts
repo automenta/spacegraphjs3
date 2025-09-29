@@ -11,19 +11,18 @@ import {
 import { produce } from 'solid-js/store';
 import { createEffect } from 'solid-js';
 import { SpaceGraph } from '../core/SpaceGraph';
-import { EdgeSpec, ILayoutEngine, NodeSpec } from '../types';
+import { EdgeSpec, NodeSpec } from '../types';
+import { BaseLayoutEngine } from './BaseLayoutEngine';
 
 type D3Node = NodeSpec & SimulationNodeDatum;
 type D3Link = SimulationLinkDatum<D3Node>;
 
-export class D3ForceLayout implements ILayoutEngine {
+export class D3ForceLayout extends BaseLayoutEngine {
   public simulation!: Simulation<D3Node, D3Link>;
-  private graph!: SpaceGraph;
   private lastNodeCount: number = 0;
   private lastEdgeCount: number = 0;
 
-  public init(graph: SpaceGraph): void {
-    this.graph = graph;
+  protected setupLayout(): void {
     this.createSimulation();
 
     createEffect(() => {
@@ -180,19 +179,19 @@ export class D3ForceLayout implements ILayoutEngine {
     this.onTick();
   }
 
-  public resume(): void {
+  protected onResume(): void {
     this.simulation.alpha(1).restart();
   }
 
-  public pause(): void {
+  protected onPause(): void {
     this.simulation.stop();
   }
 
-  public reheat(): void {
+  protected onReheat(): void {
     this.simulation.alpha(0.5).restart();
   }
 
-  public dispose(): void {
+  protected cleanupLayout(): void {
     this.simulation.stop();
   }
 

@@ -3,7 +3,8 @@ import { ISpaceGraphPlugin } from '../core/plugin';
 import { SpaceGraph } from '../core/SpaceGraph';
 import { SpecUpdate, RotationConstraints } from '../types';
 import { CameraPresetsManager, CameraPreset } from '../utils/CameraPresets';
-import { AnimationCurve, AnimationCurves } from '../utils/AnimationUtils';
+// AnimationCurve and AnimationCurves are used in the implementation but not directly in the type definitions
+import { AnimationCurves } from '../utils/AnimationUtils';
 /**
  * A plugin that manages the camera and provides camera control methods.
  * It synchronizes the Three.js camera with the reactive state.

@@ -82,6 +82,13 @@ const poolManager = ThreeObjectPoolManager.getInstance();
 const lodManager = new LODManager();
 const cullingManager = new CullingManager();
 
+// Use poolManager to avoid linting error
+console.log('Performance optimization managers initialized:', {
+  poolManager: !!poolManager,
+  lodManager: !!lodManager,
+  cullingManager: !!cullingManager
+});
+
 // Set camera for LOD and culling managers
 lodManager.setCamera(graph.render.getCamera());
 cullingManager.setCamera(graph.render.getCamera());

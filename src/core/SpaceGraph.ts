@@ -25,6 +25,7 @@ import { GridLayout } from '../layouts/GridLayout';
 import { CircleLayout } from '../layouts/CircleLayout';
 import { ColumnLayout } from '../layouts/ColumnLayout';
 import { RowLayout } from '../layouts/RowLayout';
+import { registerLayouts } from '../layouts/registerLayouts';
 
 /**
  * The main class for creating and managing a SpaceGraph visualization.
@@ -41,14 +42,12 @@ export class SpaceGraph {
     SpaceGraph.elementActorRegistry.set('text', TextElementActor);
     SpaceGraph.elementActorRegistry.set('html', HtmlNodeElementActor);
   }
-  private static layoutEngineRegistry: Map<string, LayoutEngineClass> = new Map([
-    ['force-directed', D3ForceLayout as LayoutEngineClass],
-    ['random', RandomLayout as LayoutEngineClass],
-    ['grid', GridLayout as LayoutEngineClass],
-    ['circle', CircleLayout as LayoutEngineClass],
-    ['column', ColumnLayout as LayoutEngineClass],
-    ['row', RowLayout as LayoutEngineClass],
-  ]);
+  private static layoutEngineRegistry: Map<string, LayoutEngineClass> = new Map();
+  
+  // Initialize the registry with default layout engines
+  static {
+    registerLayouts();
+  }
   private static instancedGeometryRegistry: Map<string, THREE.BufferGeometry> =
     new Map([['sphere', new THREE.SphereGeometry(0.5, 32, 32)]]);
   public state!: Store<Spec>;
@@ -163,6 +162,17 @@ export class SpaceGraph {
    */
   public update(spec: SpecUpdate) {
     this.updateState(spec);
+    
+    // Notify plugins of state update
+    for (const plugin of this.plugins) {
+      if (plugin.onStateUpdate) {
+        try {
+          plugin.onStateUpdate(spec);
+        } catch (error) {
+          console.error(`Error in plugin ${plugin.id} onStateUpdate:`, error);
+        }
+      }
+    }
   }
 
   public updateStateWithProducer(fn: (prevState: Spec) => Spec) {
@@ -228,7 +238,7 @@ export class SpaceGraph {
           this.cameraPlugin = plugin;
         }
       } catch (error) {
-        console.error(`Error initializing plugin:`, error);
+        throw new Error(`Error initializing plugin: ${(error as Error).message}`);
       }
     }
   }

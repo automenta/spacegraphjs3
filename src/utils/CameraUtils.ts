@@ -87,26 +87,29 @@ export class CameraUtils {
     let distance: number;
 
     switch (focusMode) {
-      case 'center':
+      case 'center': {
         cameraPosition = center.clone().add(new THREE.Vector3(0, 0, maxDistance * 2));
         distance = maxDistance * 2;
         break;
+      }
       
-      case 'weighted':
+      case 'weighted': {
         // Weighted center considering node importance/distance
         const weightedCenter = CameraUtils.calculateWeightedCenter(positions);
         cameraPosition = weightedCenter.clone().add(new THREE.Vector3(0, maxDistance * 0.5, maxDistance * 1.5));
         distance = maxDistance * 1.8;
         break;
+      }
       
-      case 'selection':
+      case 'selection': {
         // Focus on selected elements with closer view
         cameraPosition = center.clone().add(new THREE.Vector3(maxDistance * 0.3, maxDistance * 0.2, maxDistance));
         distance = maxDistance * 1.2;
         break;
+      }
       
       case 'all':
-      default:
+      default: {
         // Traditional bounding sphere approach
         const fov = (camera as THREE.PerspectiveCamera).fov * Math.PI / 180;
         const aspect = (camera as THREE.PerspectiveCamera).aspect;
@@ -116,6 +119,7 @@ export class CameraUtils {
         distance = maxDistance / Math.sin(Math.min(verticalFov, horizontalFov) / 2);
         cameraPosition = center.clone().add(new THREE.Vector3(0, 0, distance));
         break;
+      }
     }
 
     return {
@@ -545,11 +549,12 @@ export class CameraUtils {
       case 'loose':
         distanceMultiplier = 3.0;
         break;
-      case 'smart':
+      case 'smart': {
         // Calculate distribution factor
         const distributionFactor = this.calculateDistributionFactor(elements, center);
         distanceMultiplier = 1 + distributionFactor * 0.5;
         break;
+      }
       case 'optimal':
       default:
         distanceMultiplier = 1.5;

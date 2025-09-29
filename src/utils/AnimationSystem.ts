@@ -4,7 +4,6 @@
  */
 
 import * as THREE from 'three';
-import { AnimationCurves } from './AnimationUtils';
 
 export interface AnimationConfig {
   duration?: number;
@@ -116,7 +115,7 @@ export class AnimationSystem {
    * Add animation to queue
    */
   private addAnimation(task: AnimationTask): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const wrappedTask = {
         ...task,
         config: {
@@ -399,7 +398,7 @@ export class AnimationSystem {
     target: any,
     property: string,
     intensity: number = 1,
-    config: AnimationConfig = {}
+    _config: AnimationConfig = {}
   ): Promise<void> {
     const originalValue = this.cloneValue(target[property]);
     
@@ -415,7 +414,7 @@ export class AnimationSystem {
     target: any,
     property: string,
     intensity: number = 5,
-    config: AnimationConfig = {}
+    _config: AnimationConfig = {}
   ): Promise<void> {
     const originalValue = this.cloneValue(target[property]);
     

@@ -230,15 +230,37 @@ export type ElementActorClass = new (
 ) => BaseElementActor;
 
 export interface ILayoutEngine {
+  /**
+   * Initialize the layout engine with the graph instance.
+   * @param graph - The SpaceGraph instance
+   */
   init(graph: SpaceGraph): void;
 
+  /**
+   * Dispose of the layout engine and clean up resources.
+   */
   dispose(): void;
 
+  /**
+   * Resume the layout engine if it was paused.
+   */
   resume(): void;
 
+  /**
+   * Pause the layout engine.
+   */
   pause(): void;
 
+  /**
+   * Reheat the layout simulation (for force-directed layouts).
+   */
   reheat(): void;
+
+  /**
+   * Perform layout calculations for a specified number of iterations.
+   * @param iterations - Number of iterations to perform (default: 1)
+   */
+  tick(iterations?: number): void;
 }
 
 export type LayoutEngineClass = new () => ILayoutEngine;
@@ -282,6 +304,13 @@ export type GraphEventMap = {
   'camera:animation:end': void;
   'camera:framing:start': void;
   'camera:framing:end': void;
+  'log': {
+    level: number;
+    message: string;
+    timestamp: number;
+    source: string;
+    data?: any;
+  };
 };
 
 /**

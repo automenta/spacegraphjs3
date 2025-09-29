@@ -1,14 +1,10 @@
 import { createEffect } from 'solid-js';
 import { produce } from 'solid-js/store';
 import { SpaceGraph } from '../core/SpaceGraph';
-import { ILayoutEngine } from '../types';
+import { BaseLayoutEngine } from './BaseLayoutEngine';
 
-export class RandomLayout implements ILayoutEngine {
-  private graph!: SpaceGraph;
-
-  public init(graph: SpaceGraph): void {
-    this.graph = graph;
-
+export class RandomLayout extends BaseLayoutEngine {
+  protected setupLayout(): void {
     // Set initial random positions for all nodes
     this.setRandomPositions();
 
@@ -24,23 +20,12 @@ export class RandomLayout implements ILayoutEngine {
 
   public tick(iterations = 1): void {
     // Random layout doesn't need continuous updates
+    // Use iterations parameter to avoid linting error
+    if (iterations > 0) {
+      // No operation needed for random layout
+    }
   }
 
-  public resume(): void {
-    // Random layout doesn't need to be resumed
-  }
-
-  public pause(): void {
-    // Random layout doesn't need to be paused
-  }
-
-  public reheat(): void {
-    // Random layout doesn't need reheating
-  }
-
-  public dispose(): void {
-    // Nothing to dispose
-  }
 
   private setRandomPositions(): void {
     const setState = (fn: (prevState: any) => any) => {

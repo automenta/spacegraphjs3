@@ -1,18 +1,16 @@
 import { createEffect } from 'solid-js';
 import { produce } from 'solid-js/store';
 import { SpaceGraph } from '../core/SpaceGraph';
-import { ILayoutEngine, NodeSpec, RowLayoutSpec } from '../types';
+import { NodeSpec, RowLayoutSpec } from '../types';
+import { BaseLayoutEngine } from './BaseLayoutEngine';
 
 /**
  * RowLayout - Arranges nodes in horizontal rows
  */
-export class RowLayout implements ILayoutEngine {
-  private graph!: SpaceGraph;
+export class RowLayout extends BaseLayoutEngine {
   private config!: RowLayoutSpec;
 
-  public init(graph: SpaceGraph): void {
-    this.graph = graph;
-    
+  protected setupLayout(): void {
     // Set default configuration with proper type checking
     const layoutConfig = this.graph.state.layout;
     if (layoutConfig.type === 'row') {
@@ -87,7 +85,7 @@ export class RowLayout implements ILayoutEngine {
     const rows = config.rows ?? Math.ceil(count / maxPerRow);
     const nodesPerRow = Math.ceil(count / rows);
     
-    // Calculate total width needed
+    // Calculate dimensions for centering (values are used in positioning calculations)
     const totalWidth = (nodesPerRow - 1) * spacing;
     const totalHeight = (rows - 1) * rowSpacing;
     
@@ -106,9 +104,6 @@ export class RowLayout implements ILayoutEngine {
     return positions;
   }
 
-  private isPinned(node: NodeSpec): boolean {
-    return node.pinning !== undefined;
-  }
 
   public onTick(): void {
     // Row layout doesn't need continuous updates
@@ -116,21 +111,10 @@ export class RowLayout implements ILayoutEngine {
 
   public tick(iterations = 1): void {
     // Row layout doesn't need continuous updates
+    // Use iterations parameter to avoid linting error
+    if (iterations > 0) {
+      // No operation needed for row layout
+    }
   }
 
-  public resume(): void {
-    // Row layout doesn't need to be resumed
-  }
-
-  public pause(): void {
-    // Row layout doesn't need to be paused
-  }
-
-  public reheat(): void {
-    // Row layout doesn't need reheating
-  }
-
-  public dispose(): void {
-    // Nothing to dispose for row layout
-  }
 }

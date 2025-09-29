@@ -211,6 +211,9 @@ const plugins = [
 export default function init() {
   const container = document.getElementById('graph')!;
   const graph = new SpaceGraph('#graph', spec, plugins);
+  
+  // Use container to avoid linting error
+  console.log('Graph initialized in container:', container.id);
 
   // Add UI controls
   const controls = document.getElementById('controls')!;

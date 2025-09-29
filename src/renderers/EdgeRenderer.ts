@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import { createEffect } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { EdgeSpec, NodeSpec, Spec, EdgeStyle } from '../types';
-import { expandHex } from '../utils/color';
 import { EdgeLabel } from './EdgeLabel';
 import { safeDisposeObject, safeDisposeGeometry, safeDisposeMaterial } from '../utils/threeUtils';
 import { animateProperty } from '../utils/AnimationUtils';
@@ -193,7 +192,7 @@ export class EdgeRenderer {
     const direction = new THREE.Vector3().subVectors(end, start).normalize();
     
     const positions: number[] = [];
-    let currentPos = start.clone();
+    const currentPos = start.clone();
     let isDash = true;
     
     while (currentPos.distanceTo(start) < distance) {

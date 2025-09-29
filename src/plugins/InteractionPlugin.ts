@@ -84,6 +84,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
         this.graph.render.getScene()?.remove(this.dragIndicator);
       } catch (e) {
         // Ignore errors in case scene is not available
+        console.debug('Scene not available for drag indicator removal:', e);
       }
     }
     
@@ -618,7 +619,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
         // Only emit event for nodes and edges, not groups
         if (('position' in intersected.element && 'type' in intersected.element) || ('source' in intersected.element && 'target' in intersected.element)) {
           this.graph.events.emit('element:drag:start', {
-            target: intersected.element as NodeSpec | EdgeSpec,
+            target: intersected.element as NodeSpec,
             startPosition: this.dragStartPosition.clone()
           });
         }
@@ -889,7 +890,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
             interaction: { hoveredElementId: element.id },
           });
           this.graph.events.emit('element:hover:enter', {
-            target: element,
+            target: element as NodeSpec | EdgeSpec,
           });
         }
       } else if (currentHoveredId) {
@@ -897,7 +898,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
         this.graph.update({ interaction: { hoveredElementId: null } });
         if (oldElement)
           this.graph.events.emit('element:hover:leave', {
-            target: oldElement,
+            target: oldElement as NodeSpec | EdgeSpec,
           });
       }
     }
@@ -913,7 +914,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
       } else if (intersected.type === 'node' && intersected.element) {
         // Handle node click
         this.graph.events.emit('element:click', {
-          target: intersected.element,
+          target: intersected.element as NodeSpec | EdgeSpec,
           event,
         });
       } else {

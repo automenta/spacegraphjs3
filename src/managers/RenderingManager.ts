@@ -12,7 +12,7 @@ import { ThreeObjectPoolManager } from '../utils/ThreeObjectPoolManager';
 import { LODManager } from '../utils/LODManager';
 import { CullingManager } from '../utils/CullingManager';
 import { MemoryManager } from '../utils/MemoryManager';
-import { safeDisposeObject } from '../utils/threeUtils';
+import { AdvancedRenderingOptimizer } from '../utils/AdvancedRenderingOptimizer';
 
 /**
  * Manages the THREE.js rendering environment, including the scene, camera, and renderer.
@@ -39,6 +39,8 @@ export class RenderingManager {
   private lodManager?: LODManager;
   private cullingManager?: CullingManager;
   private memoryManager?: MemoryManager;
+  private renderingOptimizer: AdvancedRenderingOptimizer;
+  private lastFrameTime: number = performance.now();
 
   constructor(graph: SpaceGraph, container: HTMLElement) {
     this.graph = graph;
@@ -56,6 +58,7 @@ export class RenderingManager {
     this.cssRenderer = new CSS2DRenderer();
     this.css3DRenderer = new CSS3DRenderer();
     this.objectPoolManager = ThreeObjectPoolManager.getInstance();
+    this.renderingOptimizer = new AdvancedRenderingOptimizer(graph);
     this.setupPerformanceSystems();
     this.setupRenderers();
     this.initRenderers();
@@ -114,6 +117,9 @@ export class RenderingManager {
     }
     this.edgeRenderer.dispose();
     this.htmlRenderer.dispose();
+    
+    // Dispose rendering optimizer
+    this.renderingOptimizer.dispose();
   }
 
   /**
@@ -260,7 +266,26 @@ export class RenderingManager {
   private animate() {
     if (!this.isLooping) return;
 
+    const currentTime = performance.now();
+    const delta = (currentTime - this.lastFrameTime) / 1000; // Convert to seconds
+    this.lastFrameTime = currentTime;
+
     try {
+      // Update rendering optimizer
+      this.renderingOptimizer.update(delta);
+
+      // Call pre-render plugin methods
+      const plugins = (this.graph as any).plugins || [];
+      for (const plugin of plugins) {
+        if (plugin.onPreRender) {
+          try {
+            plugin.onPreRender(delta);
+          } catch (error) {
+            console.error(`Error in plugin ${plugin.id} onPreRender:`, error);
+          }
+        }
+      }
+
       // Update camera controls
       this.graph.cameraPlugin?.update();
 
@@ -281,10 +306,20 @@ export class RenderingManager {
       this.renderer.render(this.scene, this.camera);
       this.cssRenderer.render(this.cssScene, this.camera);
       this.css3DRenderer.render(this.css3DScene, this.camera);
+
+      // Call post-render plugin methods
+      for (const plugin of plugins) {
+        if (plugin.onPostRender) {
+          try {
+            plugin.onPostRender(delta);
+          } catch (error) {
+            console.error(`Error in plugin ${plugin.id} onPostRender:`, error);
+          }
+        }
+      }
     } catch (error) {
       this.isLooping = false; // Stop the animation loop
-      console.error('Rendering failed:', error);
-      this.displayError(error as Error); // Display a user-friendly error
+      throw new Error(`Rendering failed: ${(error as Error).message}`);
     }
 
     requestAnimationFrame(this.animate.bind(this));

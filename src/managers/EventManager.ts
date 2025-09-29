@@ -59,7 +59,7 @@ export class EventManager {
     }
     
     // Emit the event with proper typing
-    // @ts-ignore - mitt types are tricky with conditional payloads
+    // @ts-expect-error - mitt types are tricky with conditional payloads
     this.emitter.emit(eventName, ...args);
   }
 

@@ -338,7 +338,7 @@ export class EnhancedIntegrationDemo {
         this.cameraControls.reset();
         this.hudSystem.showNotification('Camera reset', 'info', 1000);
         break;
-      case 'f':
+      case 'f': {
         // Focus on selected objects
         const selectedObjects = (this.interactionSystem as any)['selectedObjects'];
         if (selectedObjects.size > 0) {
@@ -351,6 +351,7 @@ export class EnhancedIntegrationDemo {
           }
         }
         break;
+      }
       case 'a':
         if (event.ctrlKey) {
           event.preventDefault();
@@ -367,7 +368,7 @@ export class EnhancedIntegrationDemo {
         this.cameraControls.setAutoRotate(true);
         this.hudSystem.showNotification('Auto-rotate enabled', 'info', 2000);
         break;
-      case 'p':
+      case 'p': {
         const isEnabled = (this.performanceOptimizer as any)['optimizationEnabled'];
         this.performanceOptimizer.setOptimizationEnabled(!isEnabled);
         this.hudSystem.showNotification(
@@ -376,6 +377,7 @@ export class EnhancedIntegrationDemo {
           2000
         );
         break;
+      }
     }
   }
   

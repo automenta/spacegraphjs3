@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import { EdgeSpec, NodeSpec } from '../types';
-import { expandHex } from '../utils/color';
 
 /**
  * A class for rendering 3D text labels on edges.
