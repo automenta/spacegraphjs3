@@ -4,6 +4,9 @@
     "module": "ESNext",
     "declaration": true,
     // Added for declaration file generation
+    "declarationMap": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
     "moduleResolution": "node",
     "strict": true,
     "esModuleInterop": true,
@@ -11,10 +14,10 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "types": ["vite/client"],
+    "types": ["vite/client", "node"],
     "importHelpers": true,
     "importsNotUsedAsValues": "remove"
   },
-  "include": ["src/**/*", "tests/**/*"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

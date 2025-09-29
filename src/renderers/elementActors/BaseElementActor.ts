@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { Store } from 'solid-js/store';
 import { NodeSpec, Spec } from '../../types';
+import { safeDisposeObject } from '../../utils/threeUtils';
 
 /**
  * Base class for all Element Actors.
@@ -41,25 +42,7 @@ export abstract class BaseElementActor {
    */
   public dispose(): void {
     if (this.threeObject) {
-      // Only remove from scene if it's actually a child
-      if (this.threeObject.parent === this.scene) {
-        this.scene.remove(this.threeObject);
-      }
-      // Dispose of geometry and material if they are unique to this object
-      if ((this.threeObject as THREE.Mesh).geometry) {
-        (this.threeObject as THREE.Mesh).geometry.dispose();
-      }
-      if ((this.threeObject as THREE.Mesh).material) {
-        if (Array.isArray((this.threeObject as THREE.Mesh).material)) {
-          (
-            (this.threeObject as THREE.Mesh).material as THREE.Material[]
-          ).forEach((m) => m.dispose());
-        } else {
-          (
-            (this.threeObject as THREE.Mesh).material as THREE.Material
-          ).dispose();
-        }
-      }
+      safeDisposeObject(this.threeObject);
       this.threeObject = null;
     }
     if (this.disposeEffect) {

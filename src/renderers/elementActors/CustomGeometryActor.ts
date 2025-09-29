@@ -4,6 +4,7 @@ import { Store } from 'solid-js/store';
 import { NodeSpec, Spec } from '../../types';
 import { BaseElementActor } from './BaseElementActor';
 import { expandHex } from '../../utils/color';
+import { parseColor, applyElementStyling } from '../../utils/colorUtils';
 
 /**
  * An ElementActor for rendering nodes with custom geometries.
@@ -38,17 +39,7 @@ export class CustomGeometryActor extends BaseElementActor {
     geometry.computeBoundsTree();
 
     // Safely set the initial color.
-    const initialColor = new THREE.Color();
-    try {
-      const colorValue = this.elementState.color || '#ffffff';
-      initialColor.set(expandHex(colorValue));
-    } catch (error) {
-      console.warn(
-        `Invalid initial color for node ${this.elementState.id}:`,
-        this.elementState.color
-      );
-      initialColor.set('#ff00ff'); // Fallback to magenta for visibility.
-    }
+    const initialColor = parseColor(this.elementState.color, this.elementState.id);
 
     // Create material with initial color
     const material = new THREE.MeshBasicMaterial({ color: initialColor });
@@ -97,26 +88,6 @@ export class CustomGeometryActor extends BaseElementActor {
   }
 
   public dispose(): void {
-    if (this.threeObject) {
-      const group = this.threeObject as THREE.Group;
-      const mainMesh = group.children[0] as THREE.Mesh<THREE.BufferGeometry>;
-      const glowMesh = group.children[1] as THREE.Mesh<THREE.BufferGeometry>;
-
-      if (mainMesh.geometry.disposeBoundsTree) {
-        mainMesh.geometry.disposeBoundsTree();
-      }
-      mainMesh.geometry.dispose();
-      (mainMesh.material as THREE.Material).dispose();
-
-      if (glowMesh && glowMesh.geometry) {
-        if (glowMesh.geometry.disposeBoundsTree) {
-          glowMesh.geometry.disposeBoundsTree();
-        }
-        glowMesh.geometry.dispose();
-      }
-      if (glowMesh && glowMesh.material)
-        (glowMesh.material as THREE.Material).dispose();
-    }
     super.dispose();
   }
 
@@ -138,37 +109,25 @@ export class CustomGeometryActor extends BaseElementActor {
       elementState.position?.z ?? 0
     );
 
-    const finalColor = new THREE.Color(); // Start with default color
-    try {
-      const colorValue = elementState.color || '#ffffff';
-      finalColor.set(expandHex(colorValue));
-    } catch (error) {
-      console.warn(
-        `Invalid color specified for node ${elementState.id}:`,
-        elementState.color
-      );
-      finalColor.set('#ff00ff'); // Fallback to magenta for visibility.
-    }
+    const finalColor = parseColor(elementState.color, elementState.id);
 
     const selectedStyle = this.graphState.style['node:selected'];
     const hoverStyle = this.graphState.style['node:hover'];
 
-    if (isElementSelected && selectedStyle) {
-      if (selectedStyle.color) finalColor.set(expandHex(selectedStyle.color));
+    const stylingResult = applyElementStyling(
+      finalColor,
+      isElementSelected,
+      isElementHovered,
+      selectedStyle,
+      hoverStyle
+    );
 
-      if (selectedStyle.glow) {
-        this.glowMesh.visible = true;
-        (this.glowMesh.material as THREE.MeshBasicMaterial).color.set(
-          expandHex(selectedStyle.glow.color || '#ffffff')
-        );
-        (this.glowMesh.material as THREE.MeshBasicMaterial).opacity =
-          selectedStyle.glow.strength || 0.4;
-      } else {
-        this.glowMesh.visible = false;
-      }
-    } else if (isElementHovered && hoverStyle) {
-      if (hoverStyle.color) finalColor.set(expandHex(hoverStyle.color));
-      this.glowMesh.visible = false; // No glow for hover in this implementation
+    finalColor.copy(stylingResult.color);
+    
+    if (stylingResult.glowVisible && stylingResult.glowColor !== undefined && stylingResult.glowStrength !== undefined) {
+      this.glowMesh.visible = true;
+      (this.glowMesh.material as THREE.MeshBasicMaterial).color.set(stylingResult.glowColor);
+      (this.glowMesh.material as THREE.MeshBasicMaterial).opacity = stylingResult.glowStrength;
     } else {
       this.glowMesh.visible = false;
     }

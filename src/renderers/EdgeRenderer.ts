@@ -4,6 +4,7 @@ import { Store } from 'solid-js/store';
 import { EdgeSpec, NodeSpec, Spec, EdgeStyle } from '../types';
 import { expandHex } from '../utils/color';
 import { EdgeLabel } from './EdgeLabel';
+import { safeDisposeObject, safeDisposeGeometry, safeDisposeMaterial } from '../utils/threeUtils';
 
 export class EdgeRenderer {
   private scene: THREE.Scene;
@@ -271,16 +272,12 @@ export class EdgeRenderer {
     if (!line) return;
 
     // Update geometry
-    line.geometry.dispose();
+    safeDisposeGeometry(line.geometry);
     line.geometry = geometry;
 
     // Update material
     const material = this.createEdgeMaterial(edge, state);
-    if (Array.isArray(line.material)) {
-      line.material.forEach(m => (m as THREE.Material).dispose());
-    } else {
-      (line.material as THREE.Material).dispose();
-    }
+    safeDisposeMaterial(line.material);
     line.material = material;
   }
 
@@ -301,7 +298,7 @@ export class EdgeRenderer {
       this.scene.add(hitLine);
     } else {
       const hitLine = this.hitAreaObjects.get(edge.id)!;
-      hitLine.geometry.dispose();
+      safeDisposeGeometry(hitLine.geometry);
       hitLine.geometry = geometry.clone();
     }
   }
@@ -372,65 +369,14 @@ export class EdgeRenderer {
     // Remove visual line
     const line = this.lineObjects.get(edgeId);
     if (line) {
-      try {
-        if (line.parent === this.scene) {
-          this.scene.remove(line);
-        }
-      } catch (error) {
-        // Ignore errors during cleanup
-        console.warn(`Failed to remove line from scene for edge ${edgeId}:`, error);
-      }
-      try {
-        line.geometry.dispose();
-      } catch (error) {
-        // Ignore errors during cleanup
-        console.warn(`Failed to dispose geometry for edge ${edgeId}:`, error);
-      }
-      try {
-        if (line.material) {
-          const materials = Array.isArray(line.material) ? line.material : [line.material];
-          materials.forEach(material => {
-            if (material && typeof (material as THREE.Material).dispose === 'function') {
-              (material as THREE.Material).dispose();
-            }
-          });
-        }
-      } catch (error) {
-        // Ignore errors during cleanup
-        console.warn(`Failed to dispose material for edge ${edgeId}:`, error);
-      }
+      safeDisposeObject(line);
       this.lineObjects.delete(edgeId);
     }
 
     // Remove hit area
     const hitLine = this.hitAreaObjects.get(edgeId);
     if (hitLine) {
-      try {
-        if (hitLine.parent === this.scene) {
-          this.scene.remove(hitLine);
-        }
-      } catch (error) {
-        // Ignore errors during cleanup
-        console.warn(`Failed to remove hitLine from scene for edge ${edgeId}:`, error);
-      }
-      try {
-        hitLine.geometry.dispose();
-      } catch (error) {
-        // Ignore errors during cleanup
-        console.warn(`Failed to dispose hitLine geometry for edge ${edgeId}:`, error);
-      }
-      try {
-        if (hitLine.material) {
-          if (Array.isArray(hitLine.material)) {
-            hitLine.material.forEach(m => (m as THREE.Material).dispose());
-          } else {
-            (hitLine.material as THREE.Material).dispose();
-          }
-        }
-      } catch (error) {
-        // Ignore errors during cleanup
-        console.warn(`Failed to dispose hitLine material for edge ${edgeId}:`, error);
-      }
+      safeDisposeObject(hitLine);
       this.hitAreaObjects.delete(edgeId);
     }
 
@@ -473,21 +419,11 @@ export class EdgeRenderer {
       if (this.lineSegments.parent === this.scene) {
         this.scene.remove(this.lineSegments);
       }
+      safeDisposeGeometry(this.lineSegmentGeometry);
+      safeDisposeMaterial(this.lineSegmentMaterial);
     } catch (error) {
       // Ignore errors during cleanup
-      console.warn('Failed to remove lineSegments from scene:', error);
-    }
-    try {
-      this.lineSegmentGeometry.dispose();
-    } catch (error) {
-      // Ignore errors during cleanup
-      console.warn('Failed to dispose lineSegmentGeometry:', error);
-    }
-    try {
-      this.lineSegmentMaterial.dispose();
-    } catch (error) {
-      // Ignore errors during cleanup
-      console.warn('Failed to dispose lineSegmentMaterial:', error);
+      console.warn('Failed to dispose lineSegments:', error);
     }
   }
 

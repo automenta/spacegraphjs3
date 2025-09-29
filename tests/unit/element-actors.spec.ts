@@ -71,6 +71,7 @@ describe('Element Actors', () => {
       const mainMesh = group.children[0] as THREE.Mesh;
       const glowMesh = group.children[1] as THREE.Mesh;
       
+      // Spy on the actual dispose methods before they might be called
       const geometryDisposeSpy = vi.spyOn(mainMesh.geometry, 'dispose');
       const materialDisposeSpy = vi.spyOn(mainMesh.material as THREE.Material, 'dispose');
       const glowGeometryDisposeSpy = vi.spyOn(glowMesh.geometry, 'dispose');
@@ -78,6 +79,7 @@ describe('Element Actors', () => {
       
       actor.dispose();
       
+      // Check that dispose was called on all geometries and materials
       expect(geometryDisposeSpy).toHaveBeenCalled();
       expect(materialDisposeSpy).toHaveBeenCalled();
       expect(glowGeometryDisposeSpy).toHaveBeenCalled();
