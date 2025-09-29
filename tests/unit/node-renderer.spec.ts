@@ -17,8 +17,26 @@ describe('NodeRenderer', () => {
       const [state, setState] = createStore<Spec>({
         data: { nodes: [], edges: [] },
         style: {},
+        layout: { type: 'force-directed' },
+        camera: {
+          target: { x: 0, y: 0, z: 0 },
+          phi: 0,
+          theta: 0,
+          distance: 100,
+        },
+        controls: {
+          keyboard: {
+            enabled: true,
+            panSpeed: 1,
+            zoomSpeed: 1,
+            orbitSpeed: 1,
+          },
+        },
+        performance: {
+          instancingThreshold: 1000,
+        },
         interaction: { hoveredElementId: null, selectedElementIds: [] },
-      } as Spec);
+      });
 
       const nodeRenderer = new NodeRenderer(scene, state, elementActorRegistry);
       nodeRenderer.updateNodes();
@@ -62,8 +80,26 @@ describe('NodeRenderer', () => {
       const [state, setState] = createStore<Spec>({
         data: { nodes: initialNodes, edges: [] },
         style: {},
+        layout: { type: 'force-directed' },
+        camera: {
+          target: { x: 0, y: 0, z: 0 },
+          phi: 0,
+          theta: 0,
+          distance: 100,
+        },
+        controls: {
+          keyboard: {
+            enabled: true,
+            panSpeed: 1,
+            zoomSpeed: 1,
+            orbitSpeed: 1,
+          },
+        },
+        performance: {
+          instancingThreshold: 1000,
+        },
         interaction: { hoveredElementId: null, selectedElementIds: [] },
-      } as Spec);
+      });
 
       const nodeRenderer = new NodeRenderer(scene, state, elementActorRegistry);
       nodeRenderer.updateNodes();
@@ -122,8 +158,26 @@ describe('NodeRenderer', () => {
           'node:hover': { color: '#00ff00' },
           'node:selected': { color: '#0000ff' },
         },
+        layout: { type: 'force-directed' },
+        camera: {
+          target: { x: 0, y: 0, z: 0 },
+          phi: 0,
+          theta: 0,
+          distance: 100,
+        },
+        controls: {
+          keyboard: {
+            enabled: true,
+            panSpeed: 1,
+            zoomSpeed: 1,
+            orbitSpeed: 1,
+          },
+        },
+        performance: {
+          instancingThreshold: 1000,
+        },
         interaction: { hoveredElementId: null, selectedElementIds: [] },
-      } as Spec);
+      });
 
       const nodeRenderer = new NodeRenderer(scene, state, elementActorRegistry);
       nodeRenderer.updateNodes();

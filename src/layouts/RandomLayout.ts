@@ -43,7 +43,9 @@ export class RandomLayout implements ILayoutEngine {
   }
 
   private setRandomPositions(): void {
-    const setState = this.graph.setState;
+    const setState = (fn: (prevState: any) => any) => {
+      this.graph.updateStateWithProducer(fn);
+    };
     const nodes = this.graph.state.data?.nodes ?? [];
 
     // Only update if there are nodes without positions

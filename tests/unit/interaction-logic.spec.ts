@@ -23,6 +23,17 @@ const createMockState = (): Store<Spec> => {
     },
     style: {},
     layout: { type: 'force-directed' },
+    controls: {
+      keyboard: {
+        enabled: true,
+        panSpeed: 1,
+        zoomSpeed: 1,
+        orbitSpeed: 1,
+      },
+    },
+    performance: {
+      instancingThreshold: 100,
+    },
   });
   return state;
 };

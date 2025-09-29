@@ -1,0 +1,36 @@
+import * as THREE from 'three';
+import { Store } from 'solid-js/store';
+import { EdgeSpec, NodeSpec, Spec } from '../types';
+export declare class EdgeRenderer {
+    private scene;
+    private state;
+    private lineObjects;
+    private hitAreaObjects;
+    private labelObjects;
+    private edgeStates;
+    lineSegments: THREE.LineSegments;
+    private lineSegmentGeometry;
+    private lineSegmentMaterial;
+    private disposeEffect?;
+    constructor(scene: THREE.Scene, state: Store<Spec>);
+    updateEdges(nodes?: NodeSpec[], edges?: EdgeSpec[]): Promise<void>;
+    private updateEdge;
+    private createEdgeGeometry;
+    private createStraightEdgeGeometry;
+    private createCurvedEdgeGeometry;
+    private createDashedEdgeGeometry;
+    private createEdge;
+    private createEdgeMaterial;
+    private applyEdgeStyle;
+    private updateEdgeVisuals;
+    private updateEdgeHitArea;
+    private updateEdgeLabel;
+    setEdgeHover(edgeId: string, hovered: boolean): void;
+    setEdgeSelected(edgeId: string, selected: boolean): void;
+    getEdgeObject(edgeId: string): THREE.Line | undefined;
+    getRaycastableObjects(): THREE.Object3D[];
+    private removeEdge;
+    private clearAllEdges;
+    dispose(): void;
+    private updateLineSegments;
+}

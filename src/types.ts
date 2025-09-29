@@ -60,6 +60,7 @@ export interface SpecUpdate {
     hoveredElementId: string | null;
     selectedElementIds: string[];
   }>;
+  hud?: DeepPartial<Spec['hud']>;
 }
 
 export interface CameraSpec {
@@ -157,7 +158,12 @@ export interface RowLayoutSpec {
   maxNodesPerRow?: number;
 }
 
-export type LayoutSpec = ForceDirectedLayoutSpec | GridLayoutSpec | CircleLayoutSpec | ColumnLayoutSpec | RowLayoutSpec;
+export interface RandomLayoutSpec {
+  type: 'random';
+  // Random layout doesn't have specific properties
+}
+
+export type LayoutSpec = ForceDirectedLayoutSpec | GridLayoutSpec | CircleLayoutSpec | ColumnLayoutSpec | RowLayoutSpec | RandomLayoutSpec;
 
 export interface ControlsSpec {
   keyboard: {

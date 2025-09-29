@@ -5,6 +5,7 @@ import {
   forceManyBody,
   forceSimulation,
   Simulation,
+  SimulationLinkDatum,
   SimulationNodeDatum,
 } from 'd3-force-3d';
 import { produce } from 'solid-js/store';
@@ -13,7 +14,7 @@ import { SpaceGraph } from '../core/SpaceGraph';
 import { EdgeSpec, ILayoutEngine, NodeSpec } from '../types';
 
 type D3Node = NodeSpec & SimulationNodeDatum;
-type D3Link = EdgeSpec;
+type D3Link = SimulationLinkDatum<D3Node>;
 
 export class D3ForceLayout implements ILayoutEngine {
   public simulation!: Simulation<D3Node, D3Link>;
@@ -27,7 +28,10 @@ export class D3ForceLayout implements ILayoutEngine {
       // Create copies of nodes to avoid direct mutation of store objects
       const nodesCopy = (this.graph.state.data?.nodes ?? []).map((node) => ({
         ...node,
-      }));
+        x: node.position?.x ?? 0,
+        y: node.position?.y ?? 0,
+        z: node.position?.z ?? 0,
+      } as D3Node));
       this.simulation.nodes(nodesCopy as D3Node[]);
       // this.reheat(); // Do not start the simulation automatically on init
     });
@@ -38,22 +42,38 @@ export class D3ForceLayout implements ILayoutEngine {
       const nodeMap = new Map(nodes.map((n) => [n.id, n]));
 
       // Create copies of edges to avoid direct mutation of store objects
-      const links = edges.map((e) => ({
-        ...e,
-        source: nodeMap.get(e.source)!,
-        target: nodeMap.get(e.target)!,
-      }));
+      const links = edges.map((e) => {
+        const sourceNode = nodeMap.get(e.source);
+        const targetNode = nodeMap.get(e.target);
+        if (!sourceNode || !targetNode) return null;
+        return {
+          source: {
+            ...sourceNode,
+            x: sourceNode.position?.x ?? 0,
+            y: sourceNode.position?.y ?? 0,
+            z: sourceNode.position?.z ?? 0,
+          } as D3Node,
+          target: {
+            ...targetNode,
+            x: targetNode.position?.x ?? 0,
+            y: targetNode.position?.y ?? 0,
+            z: targetNode.position?.z ?? 0,
+          } as D3Node,
+        };
+      }).filter(Boolean) as D3Link[];
 
       const linkForce = this.simulation.force('link');
       if (linkForce && 'links' in linkForce) {
-        (linkForce as Force<D3Node, D3Link>).links!(links as any);
+        (linkForce as Force<D3Node, D3Link>).links!(links);
         // this.reheat(); // Do not start the simulation automatically on init
       }
     });
   }
 
   public onTick(): void {
-    const setState = this.graph.setState;
+    const setState = (fn: (prevState: any) => any) => {
+      this.graph.updateStateWithProducer(fn);
+    };
     setState(
       produce((s) => {
         const simNodes = this.simulation.nodes();
@@ -105,13 +125,16 @@ export class D3ForceLayout implements ILayoutEngine {
     // Create copies of nodes to avoid direct mutation of store objects
     const nodesCopy = (this.graph.state.data?.nodes ?? []).map((node) => ({
       ...node,
-    }));
+      x: node.position?.x ?? 0,
+      y: node.position?.y ?? 0,
+      z: node.position?.z ?? 0,
+    } as D3Node));
 
     this.simulation = forceSimulation<D3Node, D3Link>(nodesCopy as D3Node[])
       .numDimensions(3)
       .force(
         'link',
-        forceLink<D3Node, D3Link>().id((d) => d.id)
+        forceLink<D3Node, D3Link>()
       )
       .force('charge', forceManyBody())
       .force('center', forceCenter())

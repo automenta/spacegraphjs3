@@ -42,9 +42,29 @@ describe('RenderingManager Error Handling', () => {
     // Initialize SpaceGraph
     new SpaceGraph('#test-container', {
       data: {
-        nodes: [{ id: '1' }],
+        nodes: [{ id: '1', type: 'sphere' }],
         edges: [],
       },
+      style: {},
+      layout: { type: 'force-directed' },
+      camera: {
+        target: { x: 0, y: 0, z: 0 },
+        phi: 0,
+        theta: 0,
+        distance: 100,
+      },
+      controls: {
+        keyboard: {
+          enabled: true,
+          panSpeed: 1,
+          zoomSpeed: 1,
+          orbitSpeed: 1,
+        },
+      },
+      performance: {
+        instancingThreshold: 1000,
+      },
+      interaction: { hoveredElementId: null, selectedElementIds: [] },
     });
 
     // Wait for the error to be displayed

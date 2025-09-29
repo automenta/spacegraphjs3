@@ -4,9 +4,10 @@ type TestFixtures = {
   consoleErrors: string[];
 };
 
-export const test = base.extend<{}, TestFixtures>({
+export const test = base.extend<TestFixtures>({
   consoleErrors: async ({}, use) => {
-    await use([]);
+    const errors: string[] = [];
+    await use(errors);
   },
   page: async ({ page, consoleErrors }, use) => {
     page.on('console', (msg) => {

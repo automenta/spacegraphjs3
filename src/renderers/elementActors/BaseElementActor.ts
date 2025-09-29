@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { Store } from 'solid-js/store';
-import { NodeSpec, Spec } from '../types';
+import { NodeSpec, Spec } from '../../types';
 
 /**
  * Base class for all Element Actors.

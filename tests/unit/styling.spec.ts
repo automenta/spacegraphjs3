@@ -23,6 +23,17 @@ const createMockState = () => {
     },
     layout: { type: 'force-directed' },
     camera: { target: { x: 0, y: 0, z: 0 }, phi: 0, theta: 0, distance: 10 },
+    controls: {
+      keyboard: {
+        enabled: true,
+        panSpeed: 1,
+        zoomSpeed: 1,
+        orbitSpeed: 1,
+      },
+    },
+    performance: {
+      instancingThreshold: 1000,
+    },
   });
 };
 

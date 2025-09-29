@@ -412,3 +412,9 @@ document.addEventListener('DOMContentLoaded', () => {
   createElementTypeControls();
   createHelpInfo();
 });
+
+// Add default export
+export default () => {
+  // Initialization is handled by DOMContentLoaded event
+  console.log('Element Actors Demo initialized');
+};

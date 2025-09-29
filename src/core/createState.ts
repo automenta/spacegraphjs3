@@ -42,10 +42,13 @@ export function createState(initialSpec: Spec) {
         // Use deep merge for all top-level properties except 'data'
         for (const key in specUpdate) {
           if (key !== 'data' && key in s) {
-            deepMerge(
-              s[key as keyof Spec],
-              specUpdate[key as keyof SpecUpdate]
-            );
+            const updateValue = specUpdate[key as keyof SpecUpdate];
+            if (updateValue !== undefined && updateValue !== null && typeof updateValue === 'object') {
+              deepMerge(
+                s[key as keyof Spec] as any,
+                updateValue as any
+              );
+            }
           }
         }
 
@@ -62,7 +65,10 @@ export function createState(initialSpec: Spec) {
             );
             for (let i = 0; i < s.data.nodes.length; i++) {
               if (updates.has(s.data.nodes[i].id)) {
-                deepMerge(s.data.nodes[i], updates.get(s.data.nodes[i].id));
+                const update = updates.get(s.data.nodes[i].id);
+                if (update) {
+                  deepMerge(s.data.nodes[i], update);
+                }
               }
             }
           }
@@ -83,7 +89,10 @@ export function createState(initialSpec: Spec) {
             );
             for (let i = 0; i < s.data.edges.length; i++) {
               if (updates.has(s.data.edges[i].id)) {
-                deepMerge(s.data.edges[i], updates.get(s.data.edges[i].id));
+                const update = updates.get(s.data.edges[i].id);
+                if (update) {
+                  deepMerge(s.data.edges[i], update);
+                }
               }
             }
           }
