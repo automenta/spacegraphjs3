@@ -9,8 +9,9 @@ SpaceGraphJS functions as an intelligent orchestrator, translating a declarative
 ## Features
 
 - ✅ All 6 layout engines (force-directed, grid, circle, column, row, random)
-- ✅ All 4 element actors (sphere, box, text, custom geometry)
+- ✅ All 5 element actors (sphere, box, text, custom geometry, html)
 - ✅ Complete edge interaction system (hover, click, selection)
+- ✅ Rich interactive HTML nodes in 3D space
 - ✅ Enhanced CameraPlugin with auto-zoom, presets, and advanced controls
 - ✅ HUDPlugin with REPL console for interactive debugging
 - ✅ Performance optimizations (instancing, BVH, object pooling)
@@ -47,6 +48,38 @@ SpaceGraphJS is built around a **Reactive Data Plane** powered by SolidJS. The c
 - `graph.getElement(id)`: Retrieve an element by ID
 - `graph.on(event, callback)`: Subscribe to events
 - `graph.destroy()`: Clean up resources
+
+### HTML Nodes
+
+HTML nodes allow you to embed rich interactive HTML content directly in 3D space. They support all standard HTML elements, CSS styling, and user interactions.
+
+#### Creating HTML Nodes
+
+```javascript
+const htmlNode = {
+  id: 'html-node-1',
+  type: 'html',
+  position: { x: 0, y: 0, z: 0 },
+  content: '<div class="my-node"><h3>My Node</h3><p>Rich HTML content</p></div>',
+  className: 'my-node-class'
+};
+```
+
+#### HTML Node Properties
+
+- `content`: HTML string content to display in the node
+- `className`: CSS class name to apply to the node container
+
+#### Interacting with HTML Nodes
+
+HTML nodes support all standard interactions:
+- Click events
+- Hover effects
+- Dragging to reposition
+- Form elements and controls
+- CSS animations and transitions
+
+See `examples/html-node-demo.html` for a complete example.
 
 ### Controllers
 

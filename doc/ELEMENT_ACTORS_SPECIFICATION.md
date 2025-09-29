@@ -385,7 +385,7 @@ private static elementActorRegistry: Map<string, ElementActorClass> = new Map([
   ['box', BoxElementActor],
   ['custom', CustomGeometryActor],
   ['text', TextElementActor],
-  ['html', HTMLRenderer], // Special case for HTML nodes
+  ['html', HtmlNodeElementActor], // Special case for HTML nodes
 ]);
 ```
 

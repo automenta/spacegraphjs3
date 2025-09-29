@@ -18,6 +18,7 @@ import { SphereElementActor } from '../renderers/elementActors/SphereElementActo
 import { BoxElementActor } from '../renderers/elementActors/BoxElementActor';
 import { CustomGeometryActor } from '../renderers/elementActors/CustomGeometryActor';
 import { TextElementActor } from '../renderers/elementActors/TextElementActor';
+import { HtmlNodeElementActor } from '../renderers/elementActors/HtmlNodeElementActor';
 import { D3ForceLayout } from '../layouts/D3ForceLayout';
 import { RandomLayout } from '../layouts/RandomLayout';
 import { GridLayout } from '../layouts/GridLayout';
@@ -38,6 +39,7 @@ export class SpaceGraph {
     SpaceGraph.elementActorRegistry.set('box', BoxElementActor);
     SpaceGraph.elementActorRegistry.set('custom', CustomGeometryActor);
     SpaceGraph.elementActorRegistry.set('text', TextElementActor);
+    SpaceGraph.elementActorRegistry.set('html', HtmlNodeElementActor);
   }
   private static layoutEngineRegistry: Map<string, LayoutEngineClass> = new Map([
     ['force-directed', D3ForceLayout as LayoutEngineClass],

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { createEffect } from 'solid-js';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+import { CSS3DRenderer } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 import { SpaceGraph } from '../core/SpaceGraph';
 import { IRenderer } from '../renderers/IRenderer';
 import { NodeRenderer } from '../renderers/NodeRenderer';
@@ -21,8 +22,10 @@ export class RenderingManager {
   private readonly container: HTMLElement;
   private readonly renderer: THREE.WebGLRenderer;
   private readonly cssRenderer: CSS2DRenderer;
+  private readonly css3DRenderer: CSS3DRenderer;
   private readonly scene: THREE.Scene;
   private readonly cssScene: THREE.Scene;
+  private readonly css3DScene: THREE.Scene;
   private readonly camera: THREE.PerspectiveCamera;
   private graph: SpaceGraph;
 
@@ -42,6 +45,7 @@ export class RenderingManager {
     this.container = container;
     this.scene = new THREE.Scene();
     this.cssScene = new THREE.Scene();
+    this.css3DScene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(
       75,
       this.container.clientWidth / this.container.clientHeight,
@@ -50,6 +54,7 @@ export class RenderingManager {
     );
     this.renderer = new THREE.WebGLRenderer();
     this.cssRenderer = new CSS2DRenderer();
+    this.css3DRenderer = new CSS3DRenderer();
     this.objectPoolManager = ThreeObjectPoolManager.getInstance();
     this.setupPerformanceSystems();
     this.setupRenderers();
@@ -97,6 +102,11 @@ export class RenderingManager {
     if (this.cssRenderer.domElement.parentNode) {
       this.cssRenderer.domElement.parentNode.removeChild(
         this.cssRenderer.domElement
+      );
+    }
+    if (this.css3DRenderer.domElement.parentNode) {
+      this.css3DRenderer.domElement.parentNode.removeChild(
+        this.css3DRenderer.domElement
       );
     }
     if (this.nodeRenderer) {
@@ -169,6 +179,10 @@ export class RenderingManager {
       top: '0px',
       pointerEvents: 'none',
     });
+    this._setupRenderer(this.css3DRenderer, {
+      position: 'absolute',
+      top: '0px',
+    });
 
     window.addEventListener('resize', this.handleResize);
   }
@@ -193,11 +207,12 @@ export class RenderingManager {
 
     this.renderer.setSize(width, height);
     this.cssRenderer.setSize(width, height);
+    this.css3DRenderer.setSize(width, height);
   };
 
   private initRenderers() {
     this.edgeRenderer = new EdgeRenderer(this.scene, this.graph.state);
-    this.htmlRenderer = new HTMLRenderer(this.cssScene, this.graph.state);
+    this.htmlRenderer = new HTMLRenderer(this.cssScene, this.css3DScene, this.graph.state);
   }
 
   private initDynamicNodeRenderer() {
@@ -227,6 +242,7 @@ export class RenderingManager {
         } else {
           this.nodeRenderer = new NodeRenderer(
             this.scene,
+            this.css3DScene,
             this.graph.state,
             SpaceGraph.getElementActorRegistry()
           );
@@ -244,6 +260,7 @@ export class RenderingManager {
 
       this.renderer.render(this.scene, this.camera);
       this.cssRenderer.render(this.cssScene, this.camera);
+      this.css3DRenderer.render(this.css3DScene, this.camera);
     } catch (error) {
       this.isLooping = false; // Stop the animation loop
       console.error('Rendering failed:', error);

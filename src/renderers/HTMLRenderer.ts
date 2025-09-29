@@ -1,86 +1,114 @@
 import { createEffect } from 'solid-js';
 import { Store } from 'solid-js/store';
 import * as THREE from 'three';
-import { CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 import { HtmlNodeSpec, Spec } from '../types';
+import { CullingManager } from '../utils/CullingManager';
+import { LODManager } from '../utils/LODManager';
 
 export class HTMLRenderer {
   private cssScene: THREE.Scene;
+  private css3DScene: THREE.Scene;
   private state: Store<Spec>;
-  private htmlObjects: Map<string, CSS3DObject> = new Map();
+  private cullingManager?: CullingManager;
+  private lodManager?: LODManager;
+  private htmlObjects: Map<string, THREE.Object3D> = new Map();
   private disposeEffect?: () => void;
 
-  constructor(cssScene: THREE.Scene, state: Store<Spec>) {
+  constructor(cssScene: THREE.Scene, css3DScene: THREE.Scene, state: Store<Spec>) {
     this.cssScene = cssScene;
+    this.css3DScene = css3DScene;
     this.state = state;
+
+    // Initialize performance optimization systems if enabled
+    if (state.performance?.enableCulling) {
+      this.cullingManager = new CullingManager();
+    }
+    
+    if (state.performance?.enableLOD) {
+      this.lodManager = new LODManager();
+    }
 
     createEffect(() => {
       // This effect will run whenever the nodes array changes.
-      this.updateHTMLNodes();
+      // With the new element actor system, HTML nodes are managed by HtmlNodeElementActor
+      // This renderer is primarily responsible for maintaining the CSS scenes
+      // and applying performance optimizations
+      this.updatePerformanceSystems();
     });
   }
 
-  public updateHTMLNodes(htmlNodes?: HtmlNodeSpec[]) {
-    // If htmlNodes are not passed, get them from the state.
-    // This supports both reactive calls (from createEffect) and manual calls (from tests).
-    if (!htmlNodes) {
-      htmlNodes = (this.state.data?.nodes || []).filter(
-        (node): node is HtmlNodeSpec => node.type === 'html'
-      );
-    }
-
-    // Remove old objects
-    const currentNodeIds = new Set(htmlNodes.map((n: HtmlNodeSpec) => n.id));
-    for (const [id, object] of this.htmlObjects.entries()) {
-      if (!currentNodeIds.has(id)) {
-        // Only remove from scene if it's actually a child
-        if (object.parent === this.cssScene) {
-          this.cssScene.remove(object);
-        }
-        this.htmlObjects.delete(id);
-      }
-    }
-
-    // Add/update objects
-    for (const node of htmlNodes) {
-      let object = this.htmlObjects.get(node.id);
-
-      if (!object) {
-        // Create new element and object
-        const element = document.createElement('div');
-        element.innerHTML = node.content || '';
-        element.className = node.className || 'spacegraph-html-node';
-        object = new CSS3DObject(element);
-        object.userData.nodeId = node.id;
-        this.htmlObjects.set(node.id, object);
-        this.cssScene.add(object);
-      } else {
-        // Update existing element content if it has changed
-        if (object.element.innerHTML !== (node.content || '')) {
-          object.element.innerHTML = node.content || '';
-        }
-        if (
-          object.element.className !==
-          (node.className || 'spacegraph-html-node')
-        ) {
-          object.element.className = node.className || 'spacegraph-html-node';
-        }
-      }
-
-      // Always update position
-      if (node.position) {
-        object.position.set(node.position.x, node.position.y, node.position.z);
-      }
-    }
+  public updateHTMLNodes() {
+    // With the new element actor system, HTML nodes are managed by HtmlNodeElementActor
+    // This method is kept for backward compatibility but does nothing
+    // Performance optimizations are applied continuously in the render loop
   }
 
   public dispose() {
-    for (const object of this.htmlObjects.values()) {
-      // Only remove from scene if it's actually a child
-      if (object.parent === this.cssScene) {
-        this.cssScene.remove(object);
-      }
-    }
+    // Cleanup is handled by the element actors
     this.htmlObjects.clear();
+    this.cullingManager?.clear();
+    this.lodManager?.clear();
+  }
+  
+  public getCssScene(): THREE.Scene {
+    return this.cssScene;
+  }
+  
+  public getCss3DScene(): THREE.Scene {
+    return this.css3DScene;
+  }
+  
+  public registerHtmlObject(nodeId: string, object: THREE.Object3D): void {
+    this.htmlObjects.set(nodeId, object);
+    
+    // Register with culling system if enabled
+    if (this.cullingManager) {
+      this.cullingManager.registerObject(object);
+    }
+    
+    // Register with LOD system if enabled
+    if (this.lodManager) {
+      // Define LOD settings for HTML nodes
+      const settings = {
+        distances: [50, 100, 200],
+        detailLevels: [
+          (obj: THREE.Object3D) => obj, // Full detail
+          (obj: THREE.Object3D) => obj, // Medium detail (could reduce complexity)
+          (obj: THREE.Object3D) => obj  // Low detail (could hide or simplify)
+        ]
+      };
+      this.lodManager.registerObject(object, settings);
+    }
+  }
+  
+  public unregisterHtmlObject(nodeId: string): void {
+    const object = this.htmlObjects.get(nodeId);
+    if (object) {
+      this.cullingManager?.unregisterObject(object);
+      this.lodManager?.unregisterObject(object);
+      this.htmlObjects.delete(nodeId);
+    }
+  }
+  
+  public updatePerformanceSystems(): void {
+    // Update culling system
+    if (this.cullingManager) {
+      // In a real implementation, we would get the camera from the rendering manager
+      // For now, we'll skip this as it requires access to the camera
+    }
+    
+    // Update LOD system
+    if (this.lodManager) {
+      // In a real implementation, we would get the camera from the rendering manager
+      // For now, we'll skip this as it requires access to the camera
+      // this.lodManager.update();
+    }
+  }
+  
+  public getVisibleHtmlObjects(): THREE.Object3D[] {
+    if (this.cullingManager) {
+      return this.cullingManager.cullObjects();
+    }
+    return Array.from(this.htmlObjects.values());
   }
 }

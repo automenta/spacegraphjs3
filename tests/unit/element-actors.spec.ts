@@ -4,8 +4,9 @@ import { BoxElementActor } from '../../src/renderers/elementActors/BoxElementAct
 import { CustomGeometryActor } from '../../src/renderers/elementActors/CustomGeometryActor';
 import { TextElementActor } from '../../src/renderers/elementActors/TextElementActor';
 import { SphereElementActor } from '../../src/renderers/elementActors/SphereElementActor';
+import { HtmlNodeElementActor } from '../../src/renderers/elementActors/HtmlNodeElementActor';
 import { SpaceGraph } from '../../src/core/SpaceGraph';
-import { Spec } from '../../src/types';
+import { Spec, HtmlNodeSpec } from '../../src/types';
 
 describe('Element Actors', () => {
   let scene: THREE.Scene;
@@ -62,28 +63,21 @@ describe('Element Actors', () => {
       expect(glowMesh.userData.isGlow).toBe(true);
     });
 
-    it('should dispose correctly', () => {
+    it('should dispose correctly', async () => {
       const actor = new BoxElementActor(scene, mockElementState, mockGraphState);
       actor.init();
       
-      // Mock the dispose methods
-      const group = actor['threeObject'] as THREE.Group;
-      const mainMesh = group.children[0] as THREE.Mesh;
-      const glowMesh = group.children[1] as THREE.Mesh;
+      // Capture the threeObject before disposal
+      const threeObject = actor['threeObject'];
       
-      // Spy on the actual dispose methods before they might be called
-      const geometryDisposeSpy = vi.spyOn(mainMesh.geometry, 'dispose');
-      const materialDisposeSpy = vi.spyOn(mainMesh.material as THREE.Material, 'dispose');
-      const glowGeometryDisposeSpy = vi.spyOn(glowMesh.geometry, 'dispose');
-      const glowMaterialDisposeSpy = vi.spyOn(glowMesh.material as THREE.Material, 'dispose');
+      // Mock the safeDisposeObject function
+      const utilsModule = await import('../../src/utils/threeUtils');
+      const disposeSpy = vi.spyOn(utilsModule, 'safeDisposeObject');
       
       actor.dispose();
       
-      // Check that dispose was called on all geometries and materials
-      expect(geometryDisposeSpy).toHaveBeenCalled();
-      expect(materialDisposeSpy).toHaveBeenCalled();
-      expect(glowGeometryDisposeSpy).toHaveBeenCalled();
-      expect(glowMaterialDisposeSpy).toHaveBeenCalled();
+      // Check that safeDisposeObject was called with the captured threeObject
+      expect(disposeSpy).toHaveBeenCalledWith(threeObject);
     });
   });
 
@@ -156,6 +150,84 @@ describe('Element Actors', () => {
       expect(registry.get('box')).toBe(BoxElementActor);
       expect(registry.get('custom')).toBe(CustomGeometryActor);
       expect(registry.get('text')).toBe(TextElementActor);
+    });
+  });
+
+  describe('HtmlNodeElementActor', () => {
+    let htmlElementState: HtmlNodeSpec;
+
+    beforeEach(() => {
+      htmlElementState = {
+        id: 'html-node',
+        type: 'html',
+        position: { x: 0, y: 0, z: 0 },
+        content: '<div>Hello World</div>',
+        className: 'test-html-node'
+      };
+    });
+
+    it('should create an HTML node element actor', () => {
+      const actor = new HtmlNodeElementActor(scene, htmlElementState, mockGraphState);
+      expect(actor).toBeInstanceOf(HtmlNodeElementActor);
+    });
+
+    it('should initialize correctly', () => {
+      const actor = new HtmlNodeElementActor(scene, htmlElementState, mockGraphState);
+      actor.init();
+      
+      // Check that the threeObject was created
+      expect(actor['threeObject']).toBeDefined();
+      expect(actor['threeObject']).toBeInstanceOf(THREE.Object3D);
+      
+      // Check that the CSS3D object has the correct element
+      const css3DObject: any = actor['threeObject'];
+      expect(css3DObject.element.innerHTML).toBe('<div>Hello World</div>');
+      expect(css3DObject.element.className).toBe('test-html-node');
+    });
+
+    it('should update visuals correctly', () => {
+      const actor = new HtmlNodeElementActor(scene, htmlElementState, mockGraphState);
+      actor.init();
+      
+      // Update the element state
+      const updatedState = {
+        ...htmlElementState,
+        content: '<div>Updated Content</div>',
+        className: 'updated-html-node',
+        position: { x: 10, y: 20, z: 30 }
+      };
+      
+      // Mock the update method to test visual updates
+      (actor as any).updateVisuals(updatedState, false, false);
+      
+      // Check that the element content was updated
+      const css3DObject: any = actor['threeObject'];
+      expect(css3DObject.element.innerHTML).toBe('<div>Updated Content</div>');
+      expect(css3DObject.element.className).toBe('updated-html-node');
+      expect(css3DObject.position).toEqual(new THREE.Vector3(10, 20, 30));
+    });
+
+    it('should dispose correctly', async () => {
+      const actor = new HtmlNodeElementActor(scene, htmlElementState, mockGraphState);
+      actor.init();
+      
+      // Capture the threeObject before disposal
+      const threeObject = actor['threeObject'];
+      
+      // Mock the safeDisposeObject function
+      const utilsModule = await import('../../src/utils/threeUtils');
+      const disposeSpy = vi.spyOn(utilsModule, 'safeDisposeObject');
+      
+      actor.dispose();
+      
+      // Check that safeDisposeObject was called with the captured threeObject
+      expect(disposeSpy).toHaveBeenCalledWith(threeObject);
+    });
+
+    it('should be registered with SpaceGraph', () => {
+      const registry = SpaceGraph.getElementActorRegistry();
+      expect(registry.has('html')).toBe(true);
+      expect(registry.get('html')).toBe(HtmlNodeElementActor);
     });
   });
 });
