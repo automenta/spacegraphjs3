@@ -63,6 +63,7 @@ describe('CameraPlugin Comprehensive Tests', () => {
       events: { emit: mockEmit },
       render: {
         getCamera: () => mockCamera,
+        getScene: () => new THREE.Scene(),
       },
     } as unknown as SpaceGraph;
 

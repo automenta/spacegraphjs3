@@ -6,7 +6,8 @@
 import * as THREE from 'three';
 
 // Animation System
-import AnimationSystem, { AnimationSystem as AnimationSystemClass, AnimationConfig, AnimationTask, KeyframeAnimation, ParallelAnimation, SequenceAnimation } from './AnimationSystem';
+import AnimationSystem, { AnimationSystem as AnimationSystemClass, AnimationTask, KeyframeAnimation } from './AnimationSystem';
+import type { AnimationConfig, ParallelAnimation, SequenceAnimation } from './UnifiedAnimationSystem';
 
 // Camera Utils
 import CameraUtils, { CameraUtils as CameraUtilsClass, CameraAnimationConfig } from './CameraUtils';
@@ -28,7 +29,7 @@ import VisualEffectsSystem, { VisualEffectsSystem as VisualEffectsSystemClass, E
 
 // Export types and classes
 export { AnimationSystemClass as AnimationSystem, AnimationConfig, AnimationTask, KeyframeAnimation, ParallelAnimation, SequenceAnimation };
-export { CameraUtilsClass as CameraUtils, CameraAnimationConfig };
+export { CameraUtils, CameraUtilsClass as CameraUtilsClass, CameraAnimationConfig };
 export { HUDUtilsClass as HUDUtils, HUDTheme, HUDAnimationConfig };
 export { InteractionUtilsClass as InteractionUtils, InteractionEvent, GestureConfig, InteractionState };
 export { PerformanceUtilsClass as PerformanceUtils, PerformanceMetrics, PerformanceConfig };

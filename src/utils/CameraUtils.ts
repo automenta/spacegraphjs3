@@ -132,7 +132,7 @@ export class CameraUtils {
   /**
    * Calculate weighted center for non-uniform distributions
    */
-  private static calculateWeightedCenter(positions: THREE.Vector3[]): THREE.Vector3 {
+  static calculateWeightedCenter(positions: THREE.Vector3[]): THREE.Vector3 {
     if (positions.length === 0) return new THREE.Vector3();
 
     // Simple weighted center - can be enhanced with actual node weights
@@ -243,29 +243,6 @@ export class CameraUtils {
   }
 
   /**
-   * Calculate camera distance for optimal framing
-   */
-  static calculateOptimalDistance(
-    boundingRadius: number,
-    camera: THREE.Camera,
-    padding: number = 1.2
-  ): number {
-    if (!(camera instanceof THREE.PerspectiveCamera)) {
-      return boundingRadius * padding;
-    }
-
-    const fov = camera.fov * Math.PI / 180;
-    const aspect = camera.aspect;
-    
-    const verticalFov = fov;
-    const horizontalFov = 2 * Math.atan(Math.tan(fov / 2) * aspect);
-    
-    const requiredDistance = (boundingRadius * padding) / Math.sin(Math.min(verticalFov, horizontalFov) / 2);
-    
-    return requiredDistance;
-  }
-
-  /**
    * Convert spherical coordinates to Cartesian
    */
   static sphericalToCartesian(
@@ -342,6 +319,26 @@ export class CameraUtils {
     }
     
     return path;
+  }
+
+  /**
+   * Calculate optimal distance for camera to fit a bounding radius
+   * @param boundingRadius - The radius of the bounding sphere
+   * @param camera - The camera to calculate for
+   * @returns The optimal distance
+   */
+  static calculateOptimalDistance(boundingRadius: number, camera: THREE.Camera): number {
+    if (!(camera instanceof THREE.PerspectiveCamera)) {
+      // For orthographic or other camera types, return a reasonable default
+      return boundingRadius * 2;
+    }
+    
+    // Calculate distance based on field of view
+    const fov = camera.fov * Math.PI / 180; // Convert to radians
+    const distance = boundingRadius / Math.tan(fov / 2);
+    
+    // Add some padding to ensure the object fits comfortably
+    return distance * 1.2;
   }
 
   /**

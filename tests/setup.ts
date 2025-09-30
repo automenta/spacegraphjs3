@@ -36,6 +36,92 @@ vi.mock('three/examples/jsm/loaders/FontLoader.js', () => {
   };
 });
 
+// Mock geometry loaders to prevent network requests in tests
+vi.mock('three/examples/jsm/loaders/GLTFLoader.js', () => {
+  return {
+    GLTFLoader: vi.fn().mockImplementation(() => {
+      return {
+        load: vi.fn().mockImplementation((url, onLoad, onProgress, onError) => {
+          // Simulate async loading with a minimal delay
+          setTimeout(() => {
+            if (onError) {
+              onError(new Error('Network request disabled in tests'));
+            }
+          }, 0);
+        })
+      };
+    })
+  };
+});
+
+vi.mock('three/examples/jsm/loaders/OBJLoader.js', () => {
+  return {
+    OBJLoader: vi.fn().mockImplementation(() => {
+      return {
+        load: vi.fn().mockImplementation((url, onLoad, onProgress, onError) => {
+          // Simulate async loading with a minimal delay
+          setTimeout(() => {
+            if (onError) {
+              onError(new Error('Network request disabled in tests'));
+            }
+          }, 0);
+        })
+      };
+    })
+  };
+});
+
+vi.mock('three/examples/jsm/loaders/FBXLoader.js', () => {
+  return {
+    FBXLoader: vi.fn().mockImplementation(() => {
+      return {
+        load: vi.fn().mockImplementation((url, onLoad, onProgress, onError) => {
+          // Simulate async loading with a minimal delay
+          setTimeout(() => {
+            if (onError) {
+              onError(new Error('Network request disabled in tests'));
+            }
+          }, 0);
+        })
+      };
+    })
+  };
+});
+
+vi.mock('three/examples/jsm/loaders/PLYLoader.js', () => {
+  return {
+    PLYLoader: vi.fn().mockImplementation(() => {
+      return {
+        load: vi.fn().mockImplementation((url, onLoad, onProgress, onError) => {
+          // Simulate async loading with a minimal delay
+          setTimeout(() => {
+            if (onError) {
+              onError(new Error('Network request disabled in tests'));
+            }
+          }, 0);
+        })
+      };
+    })
+  };
+});
+
+vi.mock('three/examples/jsm/loaders/STLLoader.js', () => {
+  return {
+    STLLoader: vi.fn().mockImplementation(() => {
+      return {
+        load: vi.fn().mockImplementation((url, onLoad, onProgress, onError) => {
+          // Simulate async loading with a minimal delay
+          setTimeout(() => {
+            if (onError) {
+              onError(new Error('Network request disabled in tests'));
+            }
+          }, 0);
+        })
+      };
+    })
+  };
+});
+
 // Fail tests on console errors and warnings
 let consoleErrorSpy: any;
 let consoleWarnSpy: any;

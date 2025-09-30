@@ -6,12 +6,12 @@ import {
 } from 'three-mesh-bvh';
 import {
   CameraPlugin,
-  GraphElement,
   HUDPlugin,
   InteractionPlugin,
   LayoutPlugin,
   SpaceGraph,
   Spec,
+  NodeSpec,
 } from '../src';
 
 // Add the bvh properties to the THREE objects
@@ -21,7 +21,7 @@ THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 const NUM_NODES = 1000;
 
-const nodes: GraphElement[] = [];
+const nodes: NodeSpec[] = [];
 for (let i = 0; i < NUM_NODES; i++) {
   nodes.push({
     id: `n${i}`,
@@ -63,6 +63,15 @@ const spec: Spec = {
   },
   performance: {
     instancingThreshold: 100,
+    // useBasicRenderer: true, // Uncomment this line to use BasicRenderer instead of InstancedRenderer
+  },
+  controls: {
+    keyboard: {
+      enabled: true,
+      panSpeed: 1.0,
+      zoomSpeed: 0.1,
+      orbitSpeed: 0.005,
+    },
   },
   interaction: {
     hoveredElementId: null,

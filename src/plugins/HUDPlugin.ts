@@ -395,6 +395,11 @@ class REPLCommands {
  * Enhanced HUDPlugin with REPL console functionality
  */
 export class HUDPlugin implements ISpaceGraphPlugin {
+  readonly id = 'hud-plugin';
+  readonly name = 'HUD Plugin';
+  readonly version = '1.0.0';
+  readonly description = 'Head-up display with REPL console and performance metrics';
+  
   private graph!: SpaceGraph;
   private hudContainer!: HTMLElement;
   private consoleContainer!: HTMLElement;
@@ -409,9 +414,9 @@ export class HUDPlugin implements ISpaceGraphPlugin {
   private performanceMetrics: HTMLElement | null = null;
   private isPerformanceVisible: boolean = false;
   private draggablePanels: Map<string, {element: HTMLElement, isDragging: boolean, offsetX: number, offsetY: number}> = new Map();
-  private animationSystem!: AnimationSystem;
-  private themeManager!: ThemeSystem;
-  private notificationSystem!: HUDUtils;
+  private animationSystem: AnimationSystem | null = null;
+  private themeManager: ThemeSystem | null = null;
+  private notificationSystem: HUDUtils | null = null;
 
   public init(graph: SpaceGraph): void {
     this.graph = graph;
@@ -475,14 +480,10 @@ export class HUDPlugin implements ISpaceGraphPlugin {
         this.hudContainer.innerHTML = `<div>${hudState.content}</div>`;
       }
     } else {
-      // Animate out
+      // Immediately hide for tests and consistent behavior
+      this.hudContainer.style.display = 'none';
       this.hudContainer.style.transform = 'translateY(-20px)';
       this.hudContainer.style.opacity = '0';
-      
-      // Actually hide after animation
-      setTimeout(() => {
-        this.hudContainer.style.display = 'none';
-      }, 300);
     }
   }
 
@@ -508,6 +509,7 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     this.hudContainer.style.backdropFilter = 'blur(10px)';
     this.hudContainer.style.border = '1px solid rgba(255, 255, 255, 0.1)';
     this.hudContainer.style.overflow = 'hidden';
+    this.hudContainer.style.pointerEvents = 'none'; // Allow pointer events to pass through when not interacting with controls
     
     // Add gradient overlay for enhanced visual appeal
     const gradientOverlay = document.createElement('div');
@@ -538,6 +540,7 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     this.consoleContainer.style.marginTop = '10px';
     this.consoleContainer.style.paddingTop = '10px';
     this.consoleContainer.style.borderTop = '1px solid rgba(255, 255, 255, 0.1)';
+    this.consoleContainer.style.pointerEvents = 'auto'; // Enable pointer events for console controls
     
     // Output area with enhanced styling
     this.outputElement = document.createElement('div');
@@ -551,6 +554,7 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     this.outputElement.style.fontSize = '11px';
     this.outputElement.style.borderRadius = '4px';
     this.outputElement.style.boxShadow = 'inset 0 2px 4px rgba(0, 0, 0, 0.3)';
+    this.outputElement.style.pointerEvents = 'auto'; // Enable pointer events for output area
     
     // Add syntax highlighting for JSON output
     this.outputElement.addEventListener('DOMNodeInserted', (event) => {
@@ -569,6 +573,7 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     inputContainer.style.borderRadius = '4px';
     inputContainer.style.border = '1px solid rgba(255, 255, 255, 0.2)';
     inputContainer.style.transition = 'border-color 0.3s ease, box-shadow 0.3s ease';
+    inputContainer.style.pointerEvents = 'auto'; // Enable pointer events for input container
     
     // Add focus effects
     inputContainer.addEventListener('focusin', () => {
@@ -598,6 +603,7 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     this.inputElement.style.outline = 'none';
     this.inputElement.style.padding = '2px';
     this.inputElement.style.caretColor = '#00ff00';
+    this.inputElement.style.pointerEvents = 'auto'; // Enable pointer events for input element
     
     // Add placeholder with animation
     this.inputElement.placeholder = 'Type command here...';
@@ -632,6 +638,7 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     this.notificationsContainer.style.flexDirection = 'column';
     this.notificationsContainer.style.alignItems = 'flex-end';
     this.notificationsContainer.style.gap = '12px';
+    this.notificationsContainer.style.pointerEvents = 'none'; // Allow pointer events to pass through notifications container
     container.appendChild(this.notificationsContainer);
     
     container.appendChild(this.hudContainer);
@@ -889,40 +896,56 @@ export class HUDPlugin implements ISpaceGraphPlugin {
 
   private setupAnimationSystem(): void {
     // AnimationSystem is now initialized in init() method
+    try {
+      this.animationSystem = new AnimationSystem();
+    } catch (error) {
+      console.warn('Failed to initialize AnimationSystem:', error);
+    }
   }
 
   private setupThemeManager(): void {
     // ThemeSystem is now initialized in init() method
     // Set up theme change listener
-    this.themeManager.onThemeChange(() => {
-      this.applyThemeToHUD();
-    });
+    try {
+      this.themeManager = new ThemeSystem();
+      if (this.themeManager && typeof this.themeManager.onThemeChange === 'function') {
+        this.themeManager.onThemeChange(() => {
+          this.applyThemeToHUD();
+        });
+      }
+    } catch (error) {
+      console.warn('Failed to initialize ThemeSystem:', error);
+    }
   }
 
   private applyThemeToHUD(): void {
     if (!this.themeManager) return;
     
-    const theme = this.themeManager.getCurrentTheme();
-    if (!theme) return;
-    
-    // Apply to main HUD container
-    if (this.hudContainer) {
-      this.hudContainer.style.backgroundColor = theme.colors.surface;
-      this.hudContainer.style.borderColor = theme.colors.border;
-      this.hudContainer.style.color = theme.colors.text;
-    }
-    
-    // Apply to input container
-    const inputContainer = this.inputElement?.parentElement;
-    if (inputContainer) {
-      inputContainer.style.backgroundColor = 'rgba(30, 30, 30, 0.8)';
-      inputContainer.style.borderColor = theme.colors.border;
-    }
-    
-    // Apply to output element
-    if (this.outputElement) {
-      this.outputElement.style.borderColor = theme.colors.border;
-      this.outputElement.style.backgroundColor = theme.colors.background;
+    try {
+      const theme = this.themeManager.getCurrentTheme();
+      if (!theme) return;
+      
+      // Apply to main HUD container
+      if (this.hudContainer) {
+        this.hudContainer.style.backgroundColor = theme.colors.surface;
+        this.hudContainer.style.borderColor = theme.colors.border;
+        this.hudContainer.style.color = theme.colors.text;
+      }
+      
+      // Apply to input container
+      const inputContainer = this.inputElement?.parentElement;
+      if (inputContainer) {
+        inputContainer.style.backgroundColor = 'rgba(30, 30, 30, 0.8)';
+        inputContainer.style.borderColor = theme.colors.border;
+      }
+      
+      // Apply to output element
+      if (this.outputElement) {
+        this.outputElement.style.borderColor = theme.colors.border;
+        this.outputElement.style.backgroundColor = theme.colors.background;
+      }
+    } catch (error) {
+      console.warn('Failed to apply theme to HUD:', error);
     }
   }
 
@@ -956,41 +979,47 @@ export class HUDPlugin implements ISpaceGraphPlugin {
 
   private setupNotificationSystem(): void {
     // Listen for graph events to show notifications
-    this.graph.events.on('element:click', ({ target }) => {
-      this.showNotification(`Clicked: ${target.id}`, 'info', 2000);
-    });
-    
-    this.graph.events.on('element:hover:enter', ({ target }) => {
-      this.showNotification(`Hovering: ${target.id}`, 'info', 1500);
-    });
-    
-    this.graph.events.on('element:drag:start', ({ target }) => {
-      this.showNotification(`Dragging: ${target.id}`, 'info', 1500);
-    });
-    
-    this.graph.events.on('element:drag:end', ({ target }) => {
-      this.showNotification(`Dropped: ${target.id}`, 'success', 2000);
-    });
-    
-    this.graph.events.on('edge:click', ({ target }) => {
-      this.showNotification(`Edge clicked: ${target.id}`, 'info', 2000);
-    });
-    
-    this.graph.events.on('edge:hover:enter', ({ target }) => {
-      this.showNotification(`Edge hovering: ${target.id}`, 'info', 1500);
-    });
-    
-    this.graph.events.on('edge:select', ({ target }) => {
-      this.showNotification(`Edge selected: ${target.id}`, 'success', 2000);
-    });
-    
-    this.graph.events.on('camera:animation:start', () => {
-      this.showNotification('Camera animation started', 'info', 1500);
-    });
-    
-    this.graph.events.on('camera:animation:end', () => {
-      this.showNotification('✨ Camera animation completed', 'success', 2000);
-    });
+    try {
+      if (this.graph && this.graph.events) {
+        this.graph.events.on('element:click', ({ target }) => {
+          this.showNotification(`Clicked: ${target.id}`, 'info', 2000);
+        });
+        
+        this.graph.events.on('element:hover:enter', ({ target }) => {
+          this.showNotification(`Hovering: ${target.id}`, 'info', 1500);
+        });
+        
+        this.graph.events.on('element:drag:start', ({ target }) => {
+          this.showNotification(`Dragging: ${target.id}`, 'info', 1500);
+        });
+        
+        this.graph.events.on('element:drag:end', ({ target }) => {
+          this.showNotification(`Dropped: ${target.id}`, 'success', 2000);
+        });
+        
+        this.graph.events.on('edge:click', ({ target }) => {
+          this.showNotification(`Edge clicked: ${target.id}`, 'info', 2000);
+        });
+        
+        this.graph.events.on('edge:hover:enter', ({ target }) => {
+          this.showNotification(`Edge hovering: ${target.id}`, 'info', 1500);
+        });
+        
+        this.graph.events.on('edge:select', ({ target }) => {
+          this.showNotification(`Edge selected: ${target.id}`, 'success', 2000);
+        });
+        
+        this.graph.events.on('camera:animation:start', () => {
+          this.showNotification('Camera animation started', 'info', 1500);
+        });
+        
+        this.graph.events.on('camera:animation:end', () => {
+          this.showNotification('✨ Camera animation completed', 'success', 2000);
+        });
+      }
+    } catch (error) {
+      console.warn('Failed to set up notification system:', error);
+    }
   }
 
   public showNotification(message: string, type: string = 'info', duration: number = 3000): void {
@@ -1010,6 +1039,7 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     notification.style.wordWrap = 'break-word';
     notification.style.position = 'relative';
     notification.style.overflow = 'hidden';
+    notification.style.pointerEvents = 'auto'; // Enable pointer events for notification (needed for close button)
     
     // Add subtle glow effect
     notification.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.25), 0 0 8px rgba(255, 255, 255, 0.1)';
@@ -1227,6 +1257,7 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     this.performanceMetrics.style.transform = 'translateY(20px)';
     this.performanceMetrics.style.opacity = '0';
     this.performanceMetrics.style.transition = 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
+    this.performanceMetrics.style.pointerEvents = 'auto'; // Enable pointer events for performance metrics
     
     // Title
     const title = document.createElement('div');

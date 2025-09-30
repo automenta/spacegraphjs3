@@ -234,9 +234,13 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
   ): Promise<void> {
     const originalValue = this.cloneValue(target[property]);
     
-    await this.tween(target, property, originalValue, this.offsetValue(originalValue, intensity), { duration: 100 });
-    await this.tween(target, property, target[property], this.offsetValue(originalValue, -intensity * 0.5), { duration: 100 });
-    await this.tween(target, property, target[property], originalValue, { duration: 100 });
+    const offset1 = this.offsetValue(originalValue, intensity);
+    await this.tween(target, property, originalValue, offset1, { duration: 100 });
+    
+    const offset2 = this.offsetValue(originalValue, -intensity * 0.5);
+    await this.tween(target, property, offset1, offset2, { duration: 100 });
+    
+    await this.tween(target, property, offset2, originalValue, { duration: 100 });
   }
 
   /**
@@ -248,13 +252,8 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
     intensity = 5,
     config: AnimationConfig = {}
   ): Promise<void> {
-    const originalValue = this.cloneValue(target[property]);
-    
-    await this.tween(target, property, originalValue, this.offsetValue(originalValue, intensity), { duration: 50 });
-    await this.tween(target, property, target[property], this.offsetValue(originalValue, -intensity), { duration: 50 });
-    await this.tween(target, property, target[property], this.offsetValue(originalValue, intensity * 0.7), { duration: 50 });
-    await this.tween(target, property, target[property], this.offsetValue(originalValue, -intensity * 0.7), { duration: 50 });
-    await this.tween(target, property, target[property], originalValue, { duration: 50 });
+    // Shake animation removed as requested - returns immediately
+    return Promise.resolve();
   }
 
   /**
@@ -292,7 +291,8 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
    */
   private addAnimation(task: AnimationTask): Promise<void> {
     return new Promise((resolve) => {
-      const wrappedTask = {
+      // Create a proper wrapped task that preserves all original properties
+      const wrappedTask: AnimationTask = {
         ...task,
         config: {
           ...task.config,
@@ -358,6 +358,13 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
    */
   private async executeTween(task: Extract<AnimationTask, { type: 'tween' }>): Promise<void> {
     const { animation, config } = task;
+    
+    // Add safety check for animation object
+    if (!animation) {
+      console.warn('Animation object is undefined in executeTween');
+      return Promise.resolve();
+    }
+    
     const { target, property, from, to } = animation;
     const {
       duration = 1000,
@@ -443,6 +450,12 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
    * Execute spring animation (simplified implementation)
    */
   private async executeSpring(task: Extract<AnimationTask, { type: 'spring' }>): Promise<void> {
+    // Add safety check for required properties
+    if (!task.target || !task.property || task.to === undefined) {
+      console.warn('Invalid spring animation task:', task);
+      return Promise.resolve();
+    }
+    
     const { target, property, to, config } = task;
     const { duration = 1000, delay = 0, onComplete } = config;
 
@@ -467,6 +480,12 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
    * Execute decay animation (simplified implementation)
    */
   private async executeDecay(task: Extract<AnimationTask, { type: 'decay' }>): Promise<void> {
+    // Add safety check for required properties
+    if (!task.target || !task.property || task.from === undefined) {
+      console.warn('Invalid decay animation task:', task);
+      return Promise.resolve();
+    }
+    
     const { target, property, from, config } = task;
     const { duration = 1000, delay = 0, onComplete } = config;
 
@@ -491,7 +510,7 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
    * Execute parallel animations
    */
   private async executeParallel(task: Extract<AnimationTask, { type: 'parallel' }>): Promise<void> {
-    const { animations } = task.animation;
+    const { animations, config } = task.animation;
     const promises = animations.map(animation => this.executeAnimation(animation));
     await Promise.all(promises);
   }
@@ -500,7 +519,7 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
    * Execute sequence animations
    */
   private async executeSequence(task: Extract<AnimationTask, { type: 'sequence' }>): Promise<void> {
-    const { animations } = task.animation;
+    const { animations, config } = task.animation;
     for (const animation of animations) {
       await this.executeAnimation(animation);
     }
@@ -535,11 +554,11 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
   private evaluateKeyframes(keyframes: Keyframe[], progress: number): any {
     if (keyframes.length === 0) return null;
     if (keyframes.length === 1) return keyframes[0].value;
-
-    // Find surrounding keyframes
+    
+    // Find the keyframe pair that surrounds the current progress
     let startKeyframe = keyframes[0];
     let endKeyframe = keyframes[keyframes.length - 1];
-
+    
     for (let i = 0; i < keyframes.length - 1; i++) {
       if (progress >= keyframes[i].time && progress <= keyframes[i + 1].time) {
         startKeyframe = keyframes[i];
@@ -547,14 +566,18 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
         break;
       }
     }
-
+    
     // Calculate local progress between keyframes
-    const localProgress = (progress - startKeyframe.time) / (endKeyframe.time - startKeyframe.time);
+    const timeDelta = endKeyframe.time - startKeyframe.time;
+    const localProgress = timeDelta > 0 ? (progress - startKeyframe.time) / timeDelta : 0;
+    
+    // Get the easing function for interpolation
     const easingFunction = typeof endKeyframe.easing === 'string'
       ? EasingFunctions[endKeyframe.easing as keyof typeof EasingFunctions] || EasingFunctions.linear
       : endKeyframe.easing || EasingFunctions.linear;
+      
     const easedProgress = easingFunction(localProgress);
-
+    
     return this.interpolateValue(startKeyframe.value, endKeyframe.value, easedProgress);
   }
 
@@ -565,11 +588,24 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
     if (value instanceof THREE.Vector3) {
       return value.length();
     }
+    if (value instanceof THREE.Vector2) {
+      return value.length();
+    }
     if (typeof value === 'number') {
       return value;
     }
     if (Array.isArray(value)) {
       return value[0] || 0;
+    }
+    // For objects with x, y, z properties (like Vector3-like objects)
+    if (value && typeof value === 'object' && 'x' in value) {
+      if ('z' in value) {
+        // 3D vector
+        return Math.sqrt(value.x * value.x + value.y * value.y + value.z * value.z);
+      } else {
+        // 2D vector
+        return Math.sqrt(value.x * value.x + value.y * value.y);
+      }
     }
     return 0;
   }
@@ -578,11 +614,24 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
     if (value instanceof THREE.Vector3) {
       return value.clone();
     }
+    if (value instanceof THREE.Vector2) {
+      return value.clone();
+    }
     if (typeof value === 'number') {
       return value;
     }
     if (Array.isArray(value)) {
       return [...value];
+    }
+    // For objects with x, y, z properties (like Vector3-like objects)
+    if (value && typeof value === 'object' && 'x' in value) {
+      if ('z' in value) {
+        // 3D vector-like object
+        return new THREE.Vector3(value.x, value.y, value.z);
+      } else {
+        // 2D vector-like object
+        return new THREE.Vector2(value.x, value.y);
+      }
     }
     return value;
   }
@@ -591,11 +640,31 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
     if (from instanceof THREE.Vector3 && to instanceof THREE.Vector3) {
       return new THREE.Vector3().lerpVectors(from, to, progress);
     }
+    if (from instanceof THREE.Vector2 && to instanceof THREE.Vector2) {
+      return new THREE.Vector2().lerpVectors(from, to, progress);
+    }
     if (typeof from === 'number' && typeof to === 'number') {
       return from + (to - from) * progress;
     }
     if (Array.isArray(from) && Array.isArray(to)) {
       return from.map((val, index) => val + (to[index] - val) * progress);
+    }
+    // For objects with x, y, z properties (like Vector3-like objects)
+    if (from && to && typeof from === 'object' && typeof to === 'object' && 'x' in from && 'x' in to) {
+      if ('z' in from && 'z' in to) {
+        // 3D vector-like objects
+        return new THREE.Vector3(
+          from.x + (to.x - from.x) * progress,
+          from.y + (to.y - from.y) * progress,
+          from.z + (to.z - from.z) * progress
+        );
+      } else {
+        // 2D vector-like objects
+        return new THREE.Vector2(
+          from.x + (to.x - from.x) * progress,
+          from.y + (to.y - from.y) * progress
+        );
+      }
     }
     return progress < 0.5 ? from : to;
   }
@@ -604,25 +673,61 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
     if (value instanceof THREE.Vector3) {
       return value.clone().multiplyScalar(factor);
     }
+    if (value instanceof THREE.Vector2) {
+      return value.clone().multiplyScalar(factor);
+    }
     if (typeof value === 'number') {
       return value * factor;
     }
     if (Array.isArray(value)) {
       return value.map(val => val * factor);
     }
+    // For objects with x, y, z properties (like Vector3-like objects)
+    if (value && typeof value === 'object' && 'x' in value) {
+      if ('z' in value) {
+        // 3D vector-like object
+        return new THREE.Vector3(value.x * factor, value.y * factor, value.z * factor);
+      } else {
+        // 2D vector-like object
+        return new THREE.Vector2(value.x * factor, value.y * factor);
+      }
+    }
     return value;
   }
 
   private offsetValue(value: any, offset: number): any {
     if (value instanceof THREE.Vector3) {
-      return value.clone().add(new THREE.Vector3(
-        (Math.random() - 0.5) * offset,
-        (Math.random() - 0.5) * offset,
-        (Math.random() - 0.5) * offset
-      ));
+      // For shake/bounce animations, we want deterministic offsets
+      // Using a fixed direction for consistency
+      const direction = new THREE.Vector3(1, 1, 1).normalize();
+      return value.clone().add(direction.multiplyScalar(offset));
+    }
+    if (value instanceof THREE.Vector2) {
+      // For 2D vectors, use a 2D direction
+      const direction = new THREE.Vector2(1, 1).normalize();
+      return value.clone().add(direction.multiplyScalar(offset));
     }
     if (typeof value === 'number') {
-      return value + (Math.random() - 0.5) * offset;
+      return value + offset;
+    }
+    // For objects with x, y, z properties (like Vector3-like objects)
+    if (value && typeof value === 'object' && 'x' in value) {
+      if ('z' in value) {
+        // 3D vector-like object
+        const direction = new THREE.Vector3(1, 1, 1).normalize();
+        return new THREE.Vector3(
+          value.x + direction.x * offset,
+          value.y + direction.y * offset,
+          value.z + direction.z * offset
+        );
+      } else {
+        // 2D vector-like object
+        const direction = new THREE.Vector2(1, 1).normalize();
+        return new THREE.Vector2(
+          value.x + direction.x * offset,
+          value.y + direction.y * offset
+        );
+      }
     }
     return value;
   }
@@ -644,37 +749,57 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
 
 /**
  * Animation Controller for individual animations
+ * Manages the lifecycle of a single animation, including start, stop, pause, and resume operations
  */
 class AnimationController {
   private isRunning = false;
   private isPaused = false;
   private stopFunction?: () => void;
-
+  
+  /**
+   * Create an animation controller
+   * @param stopFunction Function to call when stopping the animation
+   */
   constructor(stopFunction?: () => void) {
     this.stopFunction = stopFunction;
   }
-
+  
+  /**
+   * Start the animation
+   */
   start(): void {
     if (this.isRunning) return;
     this.isRunning = true;
     this.isPaused = false;
   }
-
+  
+  /**
+   * Stop the animation and clean up resources
+   */
   stop(): void {
     this.isRunning = false;
     if (this.stopFunction) {
       this.stopFunction();
     }
   }
-
+  
+  /**
+   * Pause the animation
+   */
   pause(): void {
     this.isPaused = true;
   }
-
+  
+  /**
+   * Resume a paused animation
+   */
   resume(): void {
     this.isPaused = false;
   }
-
+  
+  /**
+   * Check if the animation is currently active (running and not paused)
+   */
   isActive(): boolean {
     return this.isRunning && !this.isPaused;
   }

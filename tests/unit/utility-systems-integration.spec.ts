@@ -73,8 +73,16 @@ describe('Utility Systems Integration', () => {
       
       // Just verify the method exists and can be called
       const sequencePromise = utilitySystem.animation.sequence([
-        { type: 'tween', target, property: 'x', from: 0, to: 5, config: { duration: 1 } },
-        { type: 'tween', target, property: 'y', from: 0, to: 5, config: { duration: 1 } }
+        {
+          type: 'tween',
+          animation: { target, property: 'x', from: 0, to: 5 },
+          config: { duration: 1 }
+        },
+        {
+          type: 'tween',
+          animation: { target, property: 'y', from: 0, to: 5 },
+          config: { duration: 1 }
+        }
       ]);
 
       // Just verify the promise is created and the method exists
@@ -86,8 +94,16 @@ describe('Utility Systems Integration', () => {
       
       // Just verify the method exists and can be called
       const parallelPromise = utilitySystem.animation.parallel([
-        { type: 'tween', target, property: 'x', from: 0, to: 5, config: { duration: 1 } },
-        { type: 'tween', target, property: 'y', from: 0, to: 5, config: { duration: 1 } }
+        {
+          type: 'tween',
+          animation: { target, property: 'x', from: 0, to: 5 },
+          config: { duration: 1 }
+        },
+        {
+          type: 'tween',
+          animation: { target, property: 'y', from: 0, to: 5 },
+          config: { duration: 1 }
+        }
       ]);
 
       // Just verify the promise is created and the method exists

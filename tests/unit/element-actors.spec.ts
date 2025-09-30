@@ -19,7 +19,9 @@ describe('Element Actors', () => {
       id: 'test-node',
       type: 'test',
       position: { x: 0, y: 0, z: 0 },
-      color: '#ff0000'
+      color: '#ff0000',
+      url: 'test-url.obj',
+      format: 'obj'
     };
     mockGraphState = {
       interaction: {

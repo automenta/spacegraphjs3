@@ -6,13 +6,13 @@ import {
 } from 'three-mesh-bvh';
 import {
   CameraPlugin,
-  GraphElement,
   HUDPlugin,
   InteractionPlugin,
   LayoutPlugin,
   SpaceGraph,
   Spec,
 } from '../src';
+import { NodeSpec } from '../src/types';
 
 // Add the bvh properties to the THREE objects
 THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
@@ -22,7 +22,7 @@ THREE.Mesh.prototype.raycast = acceleratedRaycast;
 const NUM_NODES_X = 15;
 const NUM_NODES_Y = 15;
 const SPACING = 10;
-const nodes: GraphElement[] = [];
+const nodes: NodeSpec[] = [];
 
 for (let i = 0; i < NUM_NODES_X; i++) {
   for (let j = 0; j < NUM_NODES_Y; j++) {
@@ -31,9 +31,9 @@ for (let i = 0; i < NUM_NODES_X; i++) {
       id,
       type: 'sphere',
       position: {
-        x: (i - NUM_NODES_X / 2) * SPACING + (Math.random() - 0.5) * 0.1,
-        y: (j - NUM_NODES_Y / 2) * SPACING + (Math.random() - 0.5) * 0.1,
-        z: (Math.random() - 0.5) * 0.1,
+        x: (i - (NUM_NODES_X - 1) / 2) * SPACING,
+        y: (j - (NUM_NODES_Y - 1) / 2) * SPACING,
+        z: 0,
       },
       color: '#ffffff', // Start with white
     });
@@ -64,8 +64,17 @@ const spec: Spec = {
     theta: 0,
     distance: 250,
   },
+  controls: {
+    keyboard: {
+      enabled: true,
+      panSpeed: 1.0,
+      zoomSpeed: 0.1,
+      orbitSpeed: 0.005,
+    },
+  },
   performance: {
     instancingThreshold: 100, // Ensure instancing is on
+    // useBasicRenderer: true, // Uncomment this line to use BasicRenderer instead of InstancedRenderer
   },
   interaction: {
     hoveredElementId: null,

@@ -8,6 +8,7 @@ import { NodeRenderer } from '../renderers/NodeRenderer';
 import { EdgeRenderer } from '../renderers/EdgeRenderer';
 import { HTMLRenderer } from '../renderers/HTMLRenderer';
 import { InstancedRenderer } from '../renderers/InstancedRenderer';
+import { BasicRenderer } from '../renderers/BasicRenderer';
 import { ThreeObjectPoolManager } from '../utils/ThreeObjectPoolManager';
 import { LODManager } from '../utils/LODManager';
 import { CullingManager } from '../utils/CullingManager';
@@ -39,7 +40,7 @@ export class RenderingManager {
   private lodManager?: LODManager;
   private cullingManager?: CullingManager;
   private memoryManager?: MemoryManager;
-  private renderingOptimizer: AdvancedRenderingOptimizer;
+  private renderingOptimizer!: AdvancedRenderingOptimizer;
   private lastFrameTime: number = performance.now();
 
   constructor(graph: SpaceGraph, container: HTMLElement) {
@@ -58,12 +59,20 @@ export class RenderingManager {
     this.cssRenderer = new CSS2DRenderer();
     this.css3DRenderer = new CSS3DRenderer();
     this.objectPoolManager = ThreeObjectPoolManager.getInstance();
-    this.renderingOptimizer = new AdvancedRenderingOptimizer(graph);
     this.setupPerformanceSystems();
     this.setupRenderers();
     this.initRenderers();
     this.initDynamicNodeRenderer();
     this.animate();
+  }
+
+  /**
+   * Initialize the rendering optimizer after the graph is fully initialized
+   */
+  public initRenderingOptimizer(): void {
+    if (!this.renderingOptimizer) {
+      this.renderingOptimizer = new AdvancedRenderingOptimizer(this.graph);
+    }
   }
 
   public getNodeRenderer(): IRenderer {
@@ -118,8 +127,10 @@ export class RenderingManager {
     this.edgeRenderer.dispose();
     this.htmlRenderer.dispose();
     
-    // Dispose rendering optimizer
-    this.renderingOptimizer.dispose();
+    // Dispose rendering optimizer if it exists
+    if (this.renderingOptimizer) {
+      this.renderingOptimizer.dispose();
+    }
   }
 
   /**
@@ -194,6 +205,7 @@ export class RenderingManager {
     this._setupRenderer(this.css3DRenderer, {
       position: 'absolute',
       top: '0px',
+      pointerEvents: 'none',
     });
 
     window.addEventListener('resize', this.handleResize);
@@ -207,6 +219,8 @@ export class RenderingManager {
     if (styles) {
       Object.assign(renderer.domElement.style, styles);
     }
+    // Add touch-action style to prevent browser interference with gestures
+    renderer.domElement.style.touchAction = 'none';
     this.container.appendChild(renderer.domElement);
   }
 
@@ -237,19 +251,31 @@ export class RenderingManager {
       const needsUpdate =
         !this.nodeRenderer ||
         (shouldUseInstanced &&
-          !(this.nodeRenderer instanceof InstancedRenderer)) ||
-        (!shouldUseInstanced && this.nodeRenderer instanceof InstancedRenderer);
+          !(this.nodeRenderer instanceof InstancedRenderer) &&
+          !(this.nodeRenderer instanceof BasicRenderer)) ||
+        (!shouldUseInstanced &&
+          (this.nodeRenderer instanceof InstancedRenderer || this.nodeRenderer instanceof BasicRenderer));
 
       if (needsUpdate) {
         if (this.nodeRenderer) {
           this.nodeRenderer.dispose();
         }
 
-        if (shouldUseInstanced) {
+        // Check if we should use the BasicRenderer for debugging
+        const useBasicRenderer = this.graph.state.performance?.useBasicRenderer ?? false;
+        
+        if (shouldUseInstanced && !useBasicRenderer) {
           this.nodeRenderer = new InstancedRenderer(
             this.scene,
             this.graph.state,
             SpaceGraph.getInstancedGeometryRegistry()
+          );
+        } else if (shouldUseInstanced && useBasicRenderer) {
+          // Use BasicRenderer as an alternative to InstancedRenderer for debugging
+          this.nodeRenderer = new BasicRenderer(
+            this.scene,
+            this.graph.state,
+            this.css3DScene
           );
         } else {
           this.nodeRenderer = new NodeRenderer(
@@ -271,8 +297,10 @@ export class RenderingManager {
     this.lastFrameTime = currentTime;
 
     try {
-      // Update rendering optimizer
-      this.renderingOptimizer.update(delta);
+      // Update rendering optimizer if it exists
+      if (this.renderingOptimizer) {
+        this.renderingOptimizer.update(delta);
+      }
 
       // Call pre-render plugin methods
       const plugins = (this.graph as any).plugins || [];
@@ -319,7 +347,8 @@ export class RenderingManager {
       }
     } catch (error) {
       this.isLooping = false; // Stop the animation loop
-      throw new Error(`Rendering failed: ${(error as Error).message}`);
+      this.displayError(new Error(`Rendering failed: ${(error as Error).message}`));
+      return; // Exit the animate loop
     }
 
     requestAnimationFrame(this.animate.bind(this));

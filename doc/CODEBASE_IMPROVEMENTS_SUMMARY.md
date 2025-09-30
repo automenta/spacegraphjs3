@@ -129,7 +129,26 @@ Implemented geometry caching in `EdgeRenderer`:
 - Better frame rates with many edges
 - More efficient memory usage
 
-## 7. Documentation Improvements
+## 7. BasicRenderer for Debugging
+
+### Problem
+Need for an alternative rendering backend to debug instancing issues.
+
+### Solution
+Implemented BasicRenderer as an alternative to InstancedRenderer:
+
+- Handles all node types (sphere, box, text, custom, html)
+- Proper integration with CSS3D rendering for HTML nodes
+- Correct color handling and interaction states
+- Integration with RenderingManager to switch based on performance settings
+
+### Benefits
+- Easy debugging of instancing-related rendering issues
+- Fallback rendering option for compatibility testing
+- Better understanding of rendering pipeline
+- Improved testing capabilities
+
+## 8. Documentation Improvements
 
 ### Problem
 Lack of comprehensive documentation for the improved systems.
@@ -172,6 +191,7 @@ Most changes are backward compatible and should not require modifications to exi
 2. Update any direct usage of MemoryManager with new methods
 3. Check event handling code for type compatibility
 4. Review layout configurations for optimal performance
+5. Consider using BasicRenderer for debugging instancing issues
 
 ### For New Development
 New development should leverage:
@@ -189,6 +209,7 @@ New development should leverage:
 2. Add more comprehensive performance monitoring
 3. Implement additional layout engine optimizations
 4. Enhance documentation with examples and tutorials
+5. Expand BasicRenderer capabilities for more debugging scenarios
 
 ### Long-term Vision
 1. Web Worker support for heavy computations

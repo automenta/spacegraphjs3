@@ -167,6 +167,7 @@ export class InteractionLogic {
     threeCamera: THREE.PerspectiveCamera,
     updateState: (spec: SpecUpdate) => void
   ) {
+    console.log('InteractionLogic.handleNodeDrag called with:', { vx, vy, draggedElementId });
     const poolManager = ThreeObjectPoolManager.getInstance();
     
     const pointer = poolManager.getVector3();
@@ -182,6 +183,7 @@ export class InteractionLogic {
     raycaster.setFromCamera(pointer as unknown as THREE.Vector2, threeCamera);
     const intersection = poolManager.getVector3();
     raycaster.ray.intersectPlane(dragPlane, intersection);
+    console.log('Intersection point:', intersection);
 
     // Create the update payload for the reactive state
     const newPosition = {
@@ -189,12 +191,14 @@ export class InteractionLogic {
       y: intersection.y,
       z: intersection.z,
     };
+    console.log('New position:', newPosition);
 
     // Release vectors back to pool
     poolManager.releaseVector3(pointer);
     poolManager.releaseVector3(intersection);
 
     // Update the state using the provided function
+    console.log('Updating state with:', { id: draggedElementId, position: newPosition });
     updateState({
       data: {
         nodes: {

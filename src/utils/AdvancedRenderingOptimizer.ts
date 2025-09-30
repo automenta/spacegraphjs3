@@ -2,6 +2,17 @@ import * as THREE from 'three';
 import { SpaceGraph } from '../core/SpaceGraph';
 import { Logger } from './Logger';
 
+// Extend the Performance interface to include memory property
+declare global {
+  interface Performance {
+    memory?: {
+      usedJSHeapSize: number;
+      totalJSHeapSize: number;
+      jsHeapSizeLimit: number;
+    };
+  }
+}
+
 /**
  * Configuration for advanced rendering optimizations
  */
@@ -165,9 +176,7 @@ export class AdvancedRenderingOptimizer {
     this.stats.frameRate = 1000 / avgFrameTime;
     
     // Update memory usage
-    // @ts-ignore: performance.memory is not in the standard typings but available in Chrome
-    if (performance.memory) {
-      // @ts-ignore: performance.memory is not in the standard typings but available in Chrome
+    if (typeof performance !== 'undefined' && performance.memory) {
       this.stats.memoryUsage = Math.round(
         (performance.memory.usedJSHeapSize / 1024 / 1024) * 100
       ) / 100;

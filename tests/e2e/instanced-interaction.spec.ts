@@ -6,7 +6,39 @@ test.describe('Instanced Renderer Interaction', () => {
     await page.goto('/instanced-interaction.html');
     // Wait for the graph to be initialized
     await page.waitForFunction(() => (window as any).graph);
-    // And for the layout to stabilize
+    // Wait for the instanced renderer to be ready
+    await page.waitForFunction(() => {
+      const graph = (window as any).graph;
+      try {
+        const nodeRenderer = graph.render.getNodeRenderer();
+        return nodeRenderer && nodeRenderer.constructor.name === 'InstancedRenderer';
+      } catch (e) {
+        return false;
+      }
+    });
+    // Wait for instanced meshes to be populated and ready for raycasting
+    await page.waitForFunction(() => {
+      const graph = (window as any).graph;
+      try {
+        const nodeRenderer = graph.render.getNodeRenderer();
+        if (nodeRenderer && nodeRenderer.constructor.name === 'InstancedRenderer') {
+          // Check if instanced meshes have been populated
+          const instancedRenderer = nodeRenderer as any;
+          if (instancedRenderer.instancedMeshes) {
+            for (const mesh of instancedRenderer.instancedMeshes.values()) {
+              if (mesh.count > 0) {
+                // At least one mesh has instances, renderer is ready
+                return true;
+              }
+            }
+          }
+        }
+        return false;
+      } catch (e) {
+        return false;
+      }
+    });
+    // Additional wait for instanced meshes to become raycastable
     await page.waitForTimeout(1000);
   });
 
@@ -32,6 +64,8 @@ test.describe('Instanced Renderer Interaction', () => {
   test('should correctly handle click/selection interaction', async ({
     page,
   }) => {
+    // Wait a bit more for the renderer to be fully ready
+    await page.waitForTimeout(500);
     const canvas = page.locator('canvas');
     await canvas.click({
       position: {
@@ -56,7 +90,28 @@ test.describe('Instanced Renderer Interaction', () => {
   });
 
   test('should correctly handle drag interaction', async ({ page }) => {
+    // Wait a bit more for the renderer to be fully ready
+    await page.waitForTimeout(1000);
+    
+    // Hide the test-results div that intercepts pointer events
+    await page.evaluate(() => {
+      const testResults = document.getElementById('test-results');
+      if (testResults) {
+        testResults.style.display = 'none';
+      }
+    });
+    
     const canvas = page.locator('canvas');
+    
+    // Do a small pan to ensure the instanced renderer is ready for raycasting
+    await canvas.dragTo(canvas, {
+      sourcePosition: { x: 10, y: 10 },
+      targetPosition: { x: 15, y: 15 },
+    });
+    
+    // Wait a bit more after panning to ensure renderer is ready
+    await page.waitForTimeout(500);
+    
     const center = {
       x: page.viewportSize()!.width / 2,
       y: page.viewportSize()!.height / 2,

@@ -28,6 +28,7 @@ describe('CameraPlugin', () => {
       update: updateState, // Add the missing update method
       render: {
         getCamera: () => mockCamera,
+        getScene: () => new THREE.Scene(),
       },
       events: {
         emit: vi.fn(),

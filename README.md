@@ -28,6 +28,7 @@ For details, see [CODEBASE_IMPROVEMENTS_SUMMARY.md](doc/CODEBASE_IMPROVEMENTS_SU
 - ✅ Enhanced CameraPlugin with auto-zoom, presets, and advanced controls
 - ✅ HUDPlugin with REPL console for interactive debugging
 - ✅ Performance optimizations (instancing, BVH, object pooling)
+- ✅ BasicRenderer for debugging instancing issues
 
 ## Quick Start
 
@@ -112,6 +113,10 @@ SpaceGraphJS is designed to be extensible:
 The library automatically scales performance based on graph size:
 - Small graphs: Individual object rendering for maximum flexibility
 - Large graphs: Automatic instancing for high-performance rendering
+
+### BasicRenderer for Debugging
+
+The BasicRenderer is an alternative rendering backend that can be used for debugging instancing issues. To use it, set `performance.useBasicRenderer: true` in your spec.
 
 ## Examples
 

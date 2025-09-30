@@ -111,16 +111,65 @@ export class InstancedRenderer implements IRenderer {
   public getNodeIdFromIntersection(
     intersection: THREE.Intersection
   ): string | null {
-    if (intersection.instanceId === undefined) return null;
+    // If we have instanceId, use it (this is the normal case)
+    if (intersection.instanceId !== undefined) {
+      // If we have instanceId, use it (this is the normal case)
+      const mesh = intersection.object as THREE.InstancedMesh;
+      const typeName = mesh.userData.typeName;
+      if (!typeName) {
+        return null;
+      }
 
-    const mesh = intersection.object as THREE.InstancedMesh;
-    const typeName = mesh.userData.typeName;
-    if (!typeName) return null;
+      const idMaps = this.typeToIdMaps.get(typeName);
+      if (!idMaps) {
+        return null;
+      }
 
-    const idMaps = this.typeToIdMaps.get(typeName);
-    if (!idMaps) return null;
+      const nodeId = idMaps.indexToId.get(intersection.instanceId) ?? null;
+      return nodeId;
+    } else {
+      // If we don't have instanceId, we need to manually find the closest instance
+      // This happens when using three-mesh-bvh with instanced meshes
+      const mesh = intersection.object as THREE.InstancedMesh;
+      const typeName = mesh.userData.typeName;
+      if (!typeName) {
+        return null;
+      }
 
-    return idMaps.indexToId.get(intersection.instanceId) ?? null;
+      const idMaps = this.typeToIdMaps.get(typeName);
+      if (!idMaps) {
+        return null;
+      }
+
+      // Get the world position of the intersection point
+      const intersectionPoint = intersection.point;
+
+      // Find the closest instance to the intersection point
+      let closestInstanceId: number | null = null;
+      let closestDistance = Infinity;
+      const tempMatrix = new THREE.Matrix4();
+      const tempPosition = new THREE.Vector3();
+
+      // Limit search to reasonable number of instances for performance
+      const searchLimit = Math.min(mesh.count, 1000);
+      for (let i = 0; i < searchLimit; i++) {
+        mesh.getMatrixAt(i, tempMatrix);
+        tempPosition.setFromMatrixPosition(tempMatrix);
+        
+        const distance = tempPosition.distanceTo(intersectionPoint);
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestInstanceId = i;
+        }
+      }
+      
+      if (closestInstanceId !== null) {
+        const nodeId = idMaps.indexToId.get(closestInstanceId) ?? null;
+        return nodeId;
+      }
+
+      return null;
+    }
   }
 
   public dispose() {
@@ -146,6 +195,7 @@ export class InstancedRenderer implements IRenderer {
       typeName,
       geometry,
     ] of this.instancedGeometryRegistry.entries()) {
+      // Compute bounds tree for better raycasting performance
       if (geometry.computeBoundsTree) {
         geometry.computeBoundsTree();
       }
@@ -215,6 +265,11 @@ export class InstancedRenderer implements IRenderer {
 
     if (mesh.instanceColor) {
       mesh.instanceColor.needsUpdate = true;
+    }
+    
+    // Debug logging for center node
+    if (node.id === 'n-7-7') {
+      console.log('Updating center node n-7-7 at position:', node.position);
     }
   }
 }

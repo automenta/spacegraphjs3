@@ -7,6 +7,22 @@ import { SphereElementActor } from '../../src/renderers/elementActors/SphereElem
 import { nextTick } from './test-utils';
 import { createRoot } from 'solid-js';
 
+// Extend SphereElementActor to disable animations in tests
+class TestSphereElementActor extends SphereElementActor {
+  constructor(
+    scene: THREE.Scene,
+    elementState: any,
+    graphState: any
+  ) {
+    super(scene, elementState, graphState);
+    // Disable animations for tests
+    (this as any).useAnimations = false;
+  }
+}
+
+// Mock the element actor registry with the test actor
+const testElementActorRegistry = new Map([['sphere', TestSphereElementActor]]);
+
 // Mock the element actor registry
 const elementActorRegistry = new Map([['sphere', SphereElementActor]]);
 
@@ -39,7 +55,7 @@ describe('NodeRenderer', () => {
       });
 
       const css3DScene = new THREE.Scene();
-      const nodeRenderer = new NodeRenderer(scene, css3DScene, state, elementActorRegistry);
+      const nodeRenderer = new NodeRenderer(scene, css3DScene, state, testElementActorRegistry);
       nodeRenderer.updateNodes();
 
       expect(scene.children.length).toBe(0);
@@ -103,9 +119,9 @@ describe('NodeRenderer', () => {
       });
 
       const css3DScene = new THREE.Scene();
-      const nodeRenderer = new NodeRenderer(scene, css3DScene, state, elementActorRegistry);
+      const nodeRenderer = new NodeRenderer(scene, css3DScene, state, testElementActorRegistry);
       nodeRenderer.updateNodes();
-      (nodeRenderer.elementActors.get('n1') as SphereElementActor)?.update();
+      (nodeRenderer.elementActors.get('n1') as any)?.update();
       await nextTick();
 
       let group = scene.children.find(
@@ -182,9 +198,9 @@ describe('NodeRenderer', () => {
       });
 
       const css3DScene = new THREE.Scene();
-      const nodeRenderer = new NodeRenderer(scene, css3DScene, state, elementActorRegistry);
+      const nodeRenderer = new NodeRenderer(scene, css3DScene, state, testElementActorRegistry);
       nodeRenderer.updateNodes();
-      (nodeRenderer.elementActors.get('n1') as SphereElementActor)?.update();
+      (nodeRenderer.elementActors.get('n1') as any)?.update();
       await nextTick();
 
       let group = scene.children.find(

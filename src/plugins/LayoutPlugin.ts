@@ -7,6 +7,11 @@ import { ILayoutEngine } from '../types';
  * A plugin that manages the graph layout by delegating to a layout engine.
  */
 export class LayoutPlugin implements ISpaceGraphPlugin {
+  readonly id = 'layout-plugin';
+  readonly name = 'Layout Plugin';
+  readonly version = '1.0.0';
+  readonly description = 'Manages the graph layout by delegating to a layout engine.';
+  
   public currentLayoutEngine: ILayoutEngine | null = null;
   private graph!: SpaceGraph;
 

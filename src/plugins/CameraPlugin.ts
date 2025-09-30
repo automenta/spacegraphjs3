@@ -51,6 +51,60 @@ export class CameraPlugin implements ISpaceGraphPlugin {
   private cameraUtils!: CameraUtils;
   private logger: Logger = Logger.getInstance();
 
+  /**
+   * Recursively sanitize an object to ensure all values are serializable
+   * @param obj - The object to sanitize
+   * @returns A sanitized copy of the object
+   */
+  private sanitizeObject(obj: any): any {
+    if (obj === null || obj === undefined) {
+      return obj;
+    }
+    
+    // Handle primitive types
+    if (typeof obj !== 'object') {
+      return obj;
+    }
+    
+    // Handle arrays
+    if (Array.isArray(obj)) {
+      return obj.map(item => this.sanitizeObject(item));
+    }
+    
+    // Handle THREE.Vector3 instances
+    if (obj instanceof THREE.Vector3) {
+      return { x: obj.x, y: obj.y, z: obj.z };
+    }
+    
+    // Handle plain objects
+    if (obj.constructor === Object) {
+      const sanitized: any = {};
+      for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          sanitized[key] = this.sanitizeObject(obj[key]);
+        }
+      }
+      return sanitized;
+    }
+    
+    // For any other object type, try to convert to string or return null
+    try {
+      // If it's a plain object-like structure, convert it
+      if (typeof obj === 'object') {
+        const sanitized: any = {};
+        for (const key in obj) {
+          if (obj.hasOwnProperty(key)) {
+            sanitized[key] = this.sanitizeObject(obj[key]);
+          }
+        }
+        return sanitized;
+      }
+      return String(obj);
+    } catch (e) {
+      return null;
+    }
+  }
+
   public init(graph: SpaceGraph): void {
     this.graph = graph;
     this.threeCamera = graph.render.getCamera();
@@ -131,13 +185,16 @@ export class CameraPlugin implements ISpaceGraphPlugin {
         
         // Set new timer with debounce
         debounceTimer = setTimeout(() => {
-          this.frameSelected({
-            duration: 500,
-            strategy: 'optimal',
-            distributionAware: true
-          }).catch(error => {
-            this.logger.warn('CameraPlugin', 'Auto-frame failed:', error);
-          });
+          // Check if cameraPlugin is available before calling frameSelected
+          if (this.graph.cameraPlugin) {
+            this.graph.cameraPlugin.frameSelected({
+              duration: 500,
+              strategy: 'optimal',
+              distributionAware: true
+            }).catch(error => {
+              this.logger.warn('CameraPlugin', 'Auto-frame failed:', error);
+            });
+          }
         }, 300);
       }
       
@@ -435,135 +492,8 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     inertiaLoop();
   }
 
-  /**
-   * Calculate scene center from elements
-   */
-  private calculateSceneCenter(elements: { position: THREE.Vector3 }[]): THREE.Vector3 {
-    if (elements.length === 0) return new THREE.Vector3(0, 0, 0);
-    
-    const center = new THREE.Vector3();
-    elements.forEach(el => center.add(el.position));
-    center.divideScalar(elements.length);
-    
-    return center;
-  }
 
-  /**
-   * Calculate optimal camera distance based on scene content and strategy
-   */
-  private calculateOptimalDistance(
-    elements: { position: THREE.Vector3 }[],
-    strategy: 'tight' | 'loose' | 'optimal' | 'smart'
-  ): number {
-    if (elements.length === 0) return 50;
 
-    const center = this.calculateSceneCenter(elements);
-    let maxDistance = 0;
-
-    elements.forEach(el => {
-      const distance = el.position.distanceTo(center);
-      maxDistance = Math.max(maxDistance, distance);
-    });
-
-    const baseDistance = maxDistance * 2; // Basic heuristic
-
-    switch (strategy) {
-      case 'tight':
-        return baseDistance * 1.2;
-      case 'loose':
-        return baseDistance * 3;
-      case 'smart': {
-        // Intelligent distance calculation based on element count and distribution
-        // Calculate distribution factor for smart framing
-        // const distributionFactor = this.calculateDistributionFactor(elements, center);
-        return baseDistance * 1.5; // Using default case instead
-      }
-      case 'optimal':
-      default:
-        return baseDistance * 1.5;
-    }
-  }
-
-  /**
-   * Calculate weighted center based on element properties
-   */
-  private calculateWeightedCenter(elements: { position: THREE.Vector3 }[]): THREE.Vector3 {
-    if (elements.length === 0) return new THREE.Vector3(0, 0, 0);
-
-    const weightedCenter = new THREE.Vector3();
-    let totalWeight = 0;
-
-    elements.forEach(el => {
-      // Simple weight based on distance from origin (can be enhanced)
-      const weight = 1 + el.position.length() * 0.1;
-      weightedCenter.add(el.position.clone().multiplyScalar(weight));
-      totalWeight += weight;
-    });
-
-    weightedCenter.divideScalar(totalWeight);
-    return weightedCenter;
-  }
-
-  /**
-   * Calculate weighted distance based on element importance
-   */
-  private calculateWeightedDistance(
-    elements: { position: THREE.Vector3 }[],
-    strategy: 'tight' | 'loose' | 'optimal' | 'smart'
-  ): number {
-    const center = this.calculateWeightedCenter(elements);
-    return this.calculateOptimalDistance(elements, strategy);
-  }
-
-  /**
-   * Calculate distribution factor for smart framing
-   */
-  private calculateDistributionFactor(
-    elements: { position: THREE.Vector3 }[],
-    center: THREE.Vector3
-  ): number {
-    if (elements.length <= 1) return 0;
-
-    // Calculate standard deviation of distances from center
-    const distances = elements.map(el => el.position.distanceTo(center));
-    const avgDistance = distances.reduce((sum, d) => sum + d, 0) / distances.length;
-    
-    const variance = distances.reduce((sum, d) => sum + Math.pow(d - avgDistance, 2), 0) / distances.length;
-    const stdDev = Math.sqrt(variance);
-
-    // Normalize by average distance
-    return stdDev / (avgDistance || 1);
-  }
-
-  /**
-   * Calculate camera distance based on element distribution for non-uniform layouts
-   * @param elements - Array of elements with positions
-   * @param center - Center point of all elements
-   * @param baseDistance - Base camera distance
-   * @returns Adjusted camera distance
-   */
-  private calculateDistributionAwareDistance(
-    elements: { position: THREE.Vector3 }[],
-    center: THREE.Vector3,
-    baseDistance: number
-  ): number {
-    if (elements.length <= 1) return baseDistance;
-    
-    // Calculate variance of elements from center
-    let sumSquaredDistances = 0;
-    for (const el of elements) {
-      const distance = el.position.distanceTo(center);
-      sumSquaredDistances += distance * distance;
-    }
-    const variance = sumSquaredDistances / elements.length;
-    const stdDev = Math.sqrt(variance);
-    
-    // Adjust distance based on distribution spread
-    // More spread out elements need more distance to fit in view
-    const spreadFactor = 1 + (stdDev / (center.length() || 1));
-    
-    return baseDistance * Math.min(spreadFactor, 3.0); // Cap at 3x
-  }
 
   /**
    * Animates the camera state to a new target.
@@ -592,16 +522,44 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     this.graph.events.emit('camera:animation:start');
     this.isAnimating = true;
 
-    const animateOptions: any = {
+    // Ensure all values in targetState are serializable
+    const sanitizedTargetState: any = {};
+    for (const key in targetState) {
+      if (targetState.hasOwnProperty(key)) {
+        const value = (targetState as any)[key];
+        // Skip non-serializable values
+        if (value !== null && value !== undefined && typeof value !== 'function' && typeof value !== 'object') {
+          sanitizedTargetState[key] = value;
+        } else if (typeof value === 'object' && value !== null) {
+          // For objects, we need to make sure they're plain objects or Vector3 instances
+          if (value.constructor === Object) {
+            // Deep sanitize plain objects to ensure all nested values are serializable
+            sanitizedTargetState[key] = this.sanitizeObject(value);
+          } else if (value instanceof THREE.Vector3) {
+            // Convert Vector3 to a plain object
+            sanitizedTargetState[key] = { x: value.x, y: value.y, z: value.z };
+          } else {
+            // For any other object type, convert to plain object if possible
+            sanitizedTargetState[key] = this.sanitizeObject(value);
+          }
+        } else {
+          sanitizedTargetState[key] = value;
+        }
+      }
+    }
+
+    // Use popmotion for animation
+    animate({
       from: fromState,
-      to: targetState,
-      duration: options.duration,
-      onUpdate: (latest: Partial<CameraSpec>) => {
-        this.graph.update({ camera: latest });
+      to: sanitizedTargetState,
+      duration: options.duration || 1000,
+      ease: options.easing as any, // Type assertion to bypass strict type checking
+      onUpdate: (latest: any) => {
+        // Remove progress property before updating state
+        const { progress, ...cameraState } = latest;
+        this.graph.update({ camera: cameraState });
         if (options.onUpdate) {
-          // Calculate progress (0-1)
-          const progress = Math.min(1, (Date.now() - startTime) / options.duration);
-          options.onUpdate(progress);
+          options.onUpdate(progress || 0);
         }
       },
       onComplete: () => {
@@ -620,31 +578,8 @@ export class CameraPlugin implements ISpaceGraphPlugin {
             nextCallback();
           }
         }
-      },
-    };
-
-    // Handle easing function
-    if (options.easing) {
-      if (typeof options.easing === 'string') {
-        // Use predefined animation curve
-        const curve = AnimationCurves[options.easing];
-        if (curve) {
-          animateOptions.ease = curve.easing;
-        } else {
-          // Fallback to default easing
-          animateOptions.ease = AnimationCurves.easeInOut.easing;
-        }
-      } else {
-        // Use custom easing function
-        animateOptions.ease = options.easing;
       }
-    } else {
-      // Default easing
-      animateOptions.ease = AnimationCurves.easeInOut.easing;
-    }
-
-    const startTime = Date.now();
-    animate(animateOptions);
+    });
   }
 
   /**
@@ -718,9 +653,14 @@ export class CameraPlugin implements ISpaceGraphPlugin {
       cameraZ *= options.padding;
     }
 
+    // Ensure all values are plain numbers
     const target = {
-      target: { x: center.x, y: center.y, z: center.z },
-      distance: cameraZ,
+      target: {
+        x: typeof center.x === 'number' ? center.x : parseFloat(center.x) || 0,
+        y: typeof center.y === 'number' ? center.y : parseFloat(center.y) || 0,
+        z: typeof center.z === 'number' ? center.z : parseFloat(center.z) || 0
+      },
+      distance: typeof cameraZ === 'number' ? cameraZ : parseFloat(cameraZ) || 50,
     };
 
     // Release pooled objects
@@ -910,8 +850,16 @@ export class CameraPlugin implements ISpaceGraphPlugin {
         
       case 'center': {
         // Focus on the center of all elements with optimal distance
-        const center = this.calculateSceneCenter(elements);
-        const optimalDistance = this.calculateOptimalDistance(elements, options.strategy || 'smart');
+        const center = CameraUtils.calculateWeightedCenter(elements.map(el => el.position));
+        // Use CameraUtils for distance calculation
+        const dummyCamera = new THREE.PerspectiveCamera();
+        dummyCamera.fov = this.threeCamera.fov;
+        dummyCamera.aspect = this.threeCamera.aspect;
+        const target = CameraUtils.calculateOptimalPosition(elements, dummyCamera, {
+          focusMode: 'center',
+          padding: 1.5
+        });
+        const optimalDistance = target.distance || 50;
         
         if (options.animate) {
           this.flyTo({
@@ -940,8 +888,16 @@ export class CameraPlugin implements ISpaceGraphPlugin {
         
       case 'weighted': {
         // Focus based on element importance/weight
-        const weightedCenter = this.calculateWeightedCenter(elements);
-        const weightedDistance = this.calculateWeightedDistance(elements, options.strategy || 'smart');
+        const weightedCenter = CameraUtils.calculateWeightedCenter(elements.map(el => el.position));
+        // Use CameraUtils for distance calculation
+        const dummyCamera = new THREE.PerspectiveCamera();
+        dummyCamera.fov = this.threeCamera.fov;
+        dummyCamera.aspect = this.threeCamera.aspect;
+        const target = CameraUtils.calculateOptimalPosition(elements, dummyCamera, {
+          focusMode: 'weighted',
+          padding: 1.5
+        });
+        const weightedDistance = target.distance || 50;
         
         if (options.animate) {
           this.flyTo({
@@ -1156,7 +1112,20 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     
     // Distribution-aware framing for non-uniform element distributions
     if (options.distributionAware && elements.length > 1) {
-      cameraZ = this.calculateDistributionAwareDistance(elements, center, cameraZ);
+      // Calculate variance of elements from center
+      let sumSquaredDistances = 0;
+      for (const el of elements) {
+        const distance = el.position.distanceTo(center);
+        sumSquaredDistances += distance * distance;
+      }
+      const variance = sumSquaredDistances / elements.length;
+      const stdDev = Math.sqrt(variance);
+      
+      // Adjust distance based on distribution spread
+      // More spread out elements need more distance to fit in view
+      const spreadFactor = 1 + (stdDev / (center.length() || 1));
+      
+      cameraZ = cameraZ * Math.min(spreadFactor, 3.0); // Cap at 3x
     }
 
     const target = {
@@ -1173,6 +1142,9 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     
     // Emit framing start event
     this.graph.events.emit('camera:framing:start');
+    
+    // Debug log to see what values are being passed
+    this.logger.debug('CameraPlugin', 'enhancedFrame calling flyTo with target:', target);
     
     this.flyTo(target, {
       ...options,

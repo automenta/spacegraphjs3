@@ -46,7 +46,24 @@ export class SpaceGraph {
   
   // Initialize the registry with default layout engines
   static {
-    registerLayouts();
+    // Delay layout registration until after class is fully defined to avoid circular dependency
+    if (typeof window !== 'undefined') {
+      // In browser environment, register layouts after class definition
+      setTimeout(() => {
+        try {
+          registerLayouts();
+        } catch (error) {
+          console.warn('Failed to register layouts:', error);
+        }
+      }, 0);
+    } else {
+      // In Node.js environment, register immediately
+      try {
+        registerLayouts();
+      } catch (error) {
+        console.warn('Failed to register layouts:', error);
+      }
+    }
   }
   private static instancedGeometryRegistry: Map<string, THREE.BufferGeometry> =
     new Map([['sphere', new THREE.SphereGeometry(0.5, 32, 32)]]);
@@ -224,6 +241,9 @@ export class SpaceGraph {
     this.render = new RenderingManager(this, this.container);
     this.events = new EventManager();
     this.dataManager = new DataManager(this);
+    
+    // Initialize rendering optimizer after event manager is available
+    this.render.initRenderingOptimizer();
   }
 
   /**

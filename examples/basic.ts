@@ -11,6 +11,7 @@ import {
   LayoutPlugin,
   SpaceGraph,
   Spec,
+  NodeSpec,
 } from '../src';
 
 // Add the bvh properties to the THREE objects
@@ -32,7 +33,7 @@ const initialSpec: Spec = {
         type: 'html',
         content: '<div>Hello World!</div>',
         className: 'my-html-node',
-      },
+      } as NodeSpec,
     ],
     edges: [
       { id: 'e1', source: 'n1', target: 'n2' },
@@ -70,6 +71,10 @@ const initialSpec: Spec = {
       glow: { color: '#ffffff', strength: 1.5 },
     },
   },
+  performance: {
+    instancingThreshold: 100,
+    // useBasicRenderer: true, // Uncomment this line to use BasicRenderer instead of InstancedRenderer
+  },
 };
 
 // 2. Define the plugins to use.
@@ -103,13 +108,13 @@ console.log(`
 `);
 
 // 5. Use the new event system to react to graph events.
-graph.on('layout:start', () => {
-  console.log('Layout simulation started.');
-});
+// graph.on('layout:start', () => {
+//   console.log('Layout simulation started.');
+// });
 
-graph.on('layout:stabilize', () => {
-  console.log('Layout has stabilized.');
-});
+// graph.on('layout:stabilize', () => {
+//   console.log('Layout has stabilized.');
+// });
 
 graph.on('element:click', ({ target }) => {
   console.log(`Element clicked:`, target);

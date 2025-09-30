@@ -17,7 +17,7 @@ export * from './layouts/RandomLayout';
 export * from './layouts/RowLayout';
 
 // Types
-export type { Spec, NodeSpec, EdgeSpec } from './types';
+export type { Spec, NodeSpec, EdgeSpec, HtmlNodeSpec } from './types';
 
 // Register additional layouts
 // Layouts are now registered directly in SpaceGraph class

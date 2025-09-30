@@ -217,6 +217,7 @@ export interface PerformanceSpec {
   enableLOD?: boolean;
   enableCulling?: boolean;
   enableMemoryManagement?: boolean;
+  useBasicRenderer?: boolean;
 }
 
 import { Store } from 'solid-js/store';

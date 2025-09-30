@@ -10,6 +10,11 @@ import { EdgeSpec, GroupSpec, NodeSpec } from '../types';
  * A plugin that handles user interactions with the graph, such as clicking, dragging, and hovering.
  */
 export class InteractionPlugin implements ISpaceGraphPlugin {
+  readonly id = 'interaction-plugin';
+  readonly name = 'Interaction Plugin';
+  readonly version = '1.0.0';
+  readonly description = 'Handles user interactions with the graph, such as clicking, dragging, and hovering.';
+  
   private graph!: SpaceGraph;
   private gesture: Gesture | null = null;
   private dragPlane!: THREE.Plane;
@@ -42,7 +47,21 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
         onHover: (state) => this.onHover(state as unknown as HoverState),
         onWheel: (state) => this.onWheel(state as unknown as WheelState),
       },
-      {}
+      {
+        drag: {
+          filterTaps: true,
+          preventDefault: true,
+          pointer: { capture: true },
+          eventOptions: { passive: false }
+        },
+        hover: {
+          enabled: true,
+        },
+        wheel: {
+          preventDefault: true,
+          eventOptions: { passive: false }
+        },
+      }
     );
 
     this.boundOnClick = this.onClick.bind(this) as unknown as (
@@ -51,8 +70,8 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     this.boundOnContextMenu = this.onContextMenu.bind(this) as unknown as (
       event: PointerEvent
     ) => void;
-    this.rendererEl.addEventListener('click', this.boundOnClick as EventListener);
-    this.rendererEl.addEventListener('contextmenu', this.boundOnContextMenu as EventListener);
+    this.rendererEl.addEventListener('click', this.boundOnClick as EventListener, { passive: false });
+    this.rendererEl.addEventListener('contextmenu', this.boundOnContextMenu as EventListener, { passive: false });
 
     this.graph.events.on('element:click', ({ target, event }) => {
       // Only handle node and edge clicks, not groups
@@ -500,7 +519,9 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     const nodeRenderer = this.graph.render.getNodeRenderer();
     const edgeRenderer = this.graph.render.getEdgeRenderer();
 
-    if (!nodeRenderer) return null;
+    if (!nodeRenderer) {
+      return null;
+    }
 
     const pointer = new THREE.Vector2();
     pointer.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
@@ -508,12 +529,16 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
 
     const raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(pointer, camera);
+    
+    // Increase raycaster precision for better intersection detection
+    raycaster.params.Line!.threshold = 0.1;
+    raycaster.params.Points!.threshold = 0.1;
 
     // First check for edge edit handles (they might be closer)
     if (edgeRenderer) {
       const handleIntersects = raycaster.intersectObjects(
         edgeRenderer.getEdgeEditHandles(),
-        false
+        true // Changed to true for recursive intersection
       );
       
       if (handleIntersects.length > 0) {
@@ -533,7 +558,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
       // Then check for edge intersections
       const edgeIntersects = raycaster.intersectObjects(
         edgeRenderer.getRaycastableObjects(),
-        false
+        true // Changed to true for recursive intersection
       );
       
       const topEdgeHit = edgeIntersects.find(hit =>
@@ -559,7 +584,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     const allIntersects: THREE.Intersection[] = [];
 
     for (const object of raycastableObjects) {
-      const intersects = raycaster.intersectObject(object);
+      const intersects = raycaster.intersectObject(object, true); // Changed to true for recursive intersection
       if (intersects.length > 0) {
         allIntersects.push(...intersects);
       }
@@ -567,13 +592,14 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
 
     if (allIntersects.length > 0) {
       allIntersects.sort((a, b) => a.distance - b.distance);
-      const closestIntersection = allIntersects[0];
-      const elementId =
-        nodeRenderer.getNodeIdFromIntersection(closestIntersection);
-      if (elementId) {
-        const element = this.graph.dataManager.getElement(elementId);
-        if (element) {
-          return { type: 'node', element };
+      // Try each intersection until we find a valid element
+      for (const intersection of allIntersects) {
+        const elementId = nodeRenderer.getNodeIdFromIntersection(intersection);
+        if (elementId) {
+          const element = this.graph.dataManager.getElement(elementId);
+          if (element) {
+            return { type: 'node', element };
+          }
         }
       }
     }
@@ -595,11 +621,13 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     const camera = this.graph.render.getCamera();
 
     if (first) {
+      console.log('Starting drag operation');
       const intersected = this.getIntersectedElement(
         event as PointerEvent
       );
       
       if (intersected && intersected.type === 'node' && intersected.element && 'position' in intersected.element && intersected.element.position) {
+        console.log('Starting drag on node:', intersected.element.id);
         this.draggedElementId = intersected.element.id;
         this.isDragging = true;
         // Store the initial position for visual feedback
@@ -625,6 +653,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
         }
       } else if (intersected && intersected.type === 'edge-handle') {
         // Handle edge editing
+        console.log('Starting drag on edge handle:', intersected.edge!.id);
         this.draggedElementId = intersected.edge!.id;
         this.isDragging = true;
         // Store the initial position for visual feedback
@@ -635,6 +664,8 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
           normal,
           this.dragStartPosition
         );
+      } else {
+        console.log('No intersected element found for drag start');
       }
     }
 
@@ -642,10 +673,12 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
       // Handle node dragging with visual feedback
       const element = this.graph.dataManager.getElement(this.draggedElementId);
       if (element && 'position' in element) {
+        console.log('Dragging node:', this.draggedElementId);
         // Check if this node belongs to a group
         const node = element as NodeSpec;
         if (node.groupId) {
           // Move the entire group
+          console.log('Moving group:', node.groupId);
           this.moveGroup(node.groupId, vx, vy, camera);
         } else {
           // Move individual node
@@ -659,6 +692,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
           }
           
           // Handle the drag
+          console.log('Calling InteractionLogic.handleNodeDrag');
           InteractionLogic.handleNodeDrag(
             vx,
             vy,
@@ -667,6 +701,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
             this.graph.render.getRendererDomElement(),
             camera,
             (spec) => {
+              console.log('Updating node position with spec:', spec);
               // If snap-to-grid is enabled, modify the position
               if (this.snapToGrid && spec.data?.nodes?.update) {
                 const updates = spec.data.nodes.update.map(update => {
@@ -716,6 +751,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
         }
       } else {
         // Handle edge editing
+        console.log('Dragging edge:', this.draggedElementId);
         const edge = this.graph.dataManager.getEdge(this.draggedElementId);
         if (edge && edge.type === 'curved') {
           // Calculate new position based on drag
@@ -772,6 +808,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
       }
     } else {
       // Panning
+      console.log('Panning');
       InteractionLogic.handlePan(
         mx,
         my,
@@ -782,6 +819,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     }
 
     if (last) {
+      console.log('Ending drag operation');
       if (this.draggedElementId && this.dragStartPosition) {
         const element = this.graph.dataManager.getElement(this.draggedElementId);
         if (element && 'position' in element) {

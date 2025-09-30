@@ -14,6 +14,8 @@ export abstract class BaseGeometryActor extends BaseElementActor {
   protected readonly elementId: string;
   protected glowMesh!: THREE.Mesh;
   protected mainMesh!: THREE.Mesh;
+  // Flag to control whether to use animations or apply updates directly
+  protected useAnimations: boolean = true;
 
   constructor(
     scene: THREE.Scene,
@@ -135,7 +137,7 @@ export abstract class BaseGeometryActor extends BaseElementActor {
     const currentPosition = group.position;
     const positionDelta = currentPosition.distanceTo(targetPosition);
     
-    if (positionDelta > 0.01) {
+    if (this.useAnimations && positionDelta > 0.01) {
       // Animate position with easing
       this.animateProperty(0, 1, 300, (progress) => {
         group.position.lerpVectors(currentPosition, targetPosition, progress);
@@ -162,7 +164,7 @@ export abstract class BaseGeometryActor extends BaseElementActor {
     const currentMainColor = mainMaterial.color.clone();
     const targetMainColor = stylingResult.color.clone();
     
-    if (!currentMainColor.equals(targetMainColor)) {
+    if (this.useAnimations && !currentMainColor.equals(targetMainColor)) {
       this.animateProperty(0, 1, 200, (progress) => {
         mainMaterial.color.lerpColors(currentMainColor, targetMainColor, progress);
       });
@@ -177,7 +179,7 @@ export abstract class BaseGeometryActor extends BaseElementActor {
       const targetGlowColor = new THREE.Color(stylingResult.glowColor);
       const currentGlowColor = glowMaterial.color.clone();
       
-      if (!currentGlowColor.equals(targetGlowColor)) {
+      if (this.useAnimations && !currentGlowColor.equals(targetGlowColor)) {
         this.animateProperty(0, 1, 200, (progress) => {
           glowMaterial.color.lerpColors(currentGlowColor, targetGlowColor, progress);
         });
@@ -189,7 +191,7 @@ export abstract class BaseGeometryActor extends BaseElementActor {
       const currentOpacity = glowMaterial.opacity;
       const targetOpacity = stylingResult.glowStrength;
       
-      if (Math.abs(currentOpacity - targetOpacity!) > 0.01) {
+      if (this.useAnimations && Math.abs(currentOpacity - targetOpacity!) > 0.01) {
         this.animateProperty(currentOpacity, targetOpacity!, 200, (value) => {
           glowMaterial.opacity = value;
         });
@@ -199,7 +201,7 @@ export abstract class BaseGeometryActor extends BaseElementActor {
     } else {
       // Fade out glow
       const glowMaterial = this.glowMesh.material as THREE.MeshBasicMaterial;
-      if (glowMaterial.opacity > 0.01) {
+      if (this.useAnimations && glowMaterial.opacity > 0.01) {
         this.animateProperty(glowMaterial.opacity, 0, 200, (value) => {
           glowMaterial.opacity = value;
           if (value <= 0.01) {
@@ -208,6 +210,7 @@ export abstract class BaseGeometryActor extends BaseElementActor {
         });
       } else {
         this.glowMesh.visible = false;
+        glowMaterial.opacity = 0;
       }
     }
   }

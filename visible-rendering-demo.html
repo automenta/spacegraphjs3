@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>SpaceGraphJS - Visible Rendering Demo</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: #000;
+      }
+
+      #container {
+        width: 100%;
+        height: 100%;
+      }
+      
+      #demo-info {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        color: white;
+        font-family: monospace;
+        z-index: 100;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 10px;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container"></div>
+    <div id="demo-info">
+      <h3>Visible Rendering Demo</h3>
+      <p>All node types rendered without labels/menus:</p>
+      <ul>
+        <li>Sphere nodes (red, green, blue)</li>
+        <li>Box nodes (yellow, magenta)</li>
+        <li>Text node (cyan)</li>
+        <li>Custom node (orange)</li>
+        <li>HTML nodes (gray panels)</li>
+      </ul>
+      <p>Try hovering and clicking on nodes to see interaction effects.</p>
+    </div>
+    <script src="/examples/visible-rendering-demo.ts" type="module"></script>
+  </body>
+</html>
