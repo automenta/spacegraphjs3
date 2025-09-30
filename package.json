@@ -12,6 +12,7 @@
     "test": "cross-env NODE_ENV=test vitest --config vitest.config.ts",
     "test:e2e": "playwright test",
     "test:visual": "npx ts-node tests/visual/run-visual-tests.ts",
+    "test:visual-ci": "npx ts-node tests/visual/run-ci-cd-tests.ts",
     "lint": "eslint .",
     "format": "prettier --write .",
     "screenshots": "node doc/screenshots/capture-all.js"
