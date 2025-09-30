@@ -6,12 +6,23 @@
  */
 
 import * as THREE from 'three';
-import UnifiedAnimationSystemDefault from './UnifiedAnimationSystem';
-import type { AnimationConfig, KeyframeAnimation, AnimationTask } from './UnifiedAnimationSystem';
+import UnifiedAnimationSystemDefault, {
+  AnimationConfig,
+  KeyframeAnimation,
+  AnimationTask,
+  TweenAnimation,
+  ParallelAnimation,
+  SequenceAnimation
+} from './UnifiedAnimationSystem';
 
-// Re-export AnimationConfig and AnimationTask directly to avoid module resolution issues
-export type { AnimationConfig, AnimationTask } from './UnifiedAnimationSystem';
-export type { KeyframeAnimation };
+export type {
+  AnimationConfig,
+  AnimationTask,
+  KeyframeAnimation,
+  TweenAnimation,
+  ParallelAnimation,
+  SequenceAnimation
+};
 
 export class AnimationSystem {
   private unifiedSystem: UnifiedAnimationSystemDefault;
@@ -24,11 +35,11 @@ export class AnimationSystem {
   /**
    * Create a simple tween animation
    */
-  tween(
-    target: any,
+  tween<T extends Record<string, any>>(
+    target: T,
     property: string,
-    from: any,
-    to: any,
+    from: T[keyof T],
+    to: T[keyof T],
     config: AnimationConfig = {}
   ): Promise<void> {
     return this.unifiedSystem.tween(target, property, from, to, config);
@@ -44,14 +55,14 @@ export class AnimationSystem {
   /**
    * Run animations in parallel
    */
-  parallel(animations: any[], config: AnimationConfig = {}): Promise<void> {
+  parallel(animations: AnimationTask[], config: AnimationConfig = {}): Promise<void> {
     return this.unifiedSystem.parallel(animations, config);
   }
 
   /**
    * Run animations in sequence
    */
-  sequence(animations: any[], config: AnimationConfig = {}): Promise<void> {
+  sequence(animations: AnimationTask[], config: AnimationConfig = {}): Promise<void> {
     return this.unifiedSystem.sequence(animations, config);
   }
 
@@ -65,8 +76,8 @@ export class AnimationSystem {
   /**
    * Create a bounce animation
    */
-  async bounce(
-    target: any,
+  async bounce<T extends Record<string, any>>(
+    target: T,
     property: string,
     intensity: number = 1,
     config: AnimationConfig = {}
@@ -77,8 +88,8 @@ export class AnimationSystem {
   /**
    * Create a shake animation
    */
-  async shake(
-    target: any,
+  async shake<T extends Record<string, any>>(
+    target: T,
     property: string,
     intensity: number = 5,
     config: AnimationConfig = {}

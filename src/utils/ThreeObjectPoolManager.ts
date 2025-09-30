@@ -9,6 +9,11 @@ export class ThreeObjectPoolManager {
   private pools: Map<string, ObjectPool<any>> = new Map();
   private static instance: ThreeObjectPoolManager;
 
+  // Cached references to frequently used pools for better performance
+  private vector3Pool: Vector3Pool | null = null;
+  private matrix4Pool: Matrix4Pool | null = null;
+  private materialPool: MaterialPool | null = null;
+
   private constructor() {
     this.initializeDefaultPools();
   }
@@ -22,17 +27,20 @@ export class ThreeObjectPoolManager {
 
   private initializeDefaultPools(): void {
     // Vector3 pool
-    this.pools.set('vector3', new Vector3Pool());
+    this.vector3Pool = new Vector3Pool();
+    this.pools.set('vector3', this.vector3Pool);
 
     // Matrix4 pool
-    this.pools.set('matrix4', new Matrix4Pool());
+    this.matrix4Pool = new Matrix4Pool();
+    this.pools.set('matrix4', this.matrix4Pool);
 
     // Geometry pools
     this.pools.set('boxGeometry', new BoxGeometryPool());
     this.pools.set('sphereGeometry', new SphereGeometryPool());
 
     // Material pool
-    this.pools.set('material', new MaterialPool());
+    this.materialPool = new MaterialPool();
+    this.pools.set('material', this.materialPool);
   }
 
   public getPool<T>(name: string): ObjectPool<T> | undefined {
@@ -47,6 +55,12 @@ export class ThreeObjectPoolManager {
    * Get pooled Vector3
    */
   public getVector3(): THREE.Vector3 {
+    // Use cached reference for better performance
+    if (this.vector3Pool) {
+      return this.vector3Pool.acquire();
+    }
+    
+    // Fallback to map lookup
     const pool = this.pools.get('vector3') as Vector3Pool;
     return pool.acquire();
   }
@@ -55,6 +69,13 @@ export class ThreeObjectPoolManager {
    * Release pooled Vector3
    */
   public releaseVector3(vec: THREE.Vector3): void {
+    // Use cached reference for better performance
+    if (this.vector3Pool) {
+      this.vector3Pool.release(vec);
+      return;
+    }
+    
+    // Fallback to map lookup
     const pool = this.pools.get('vector3') as Vector3Pool;
     pool.release(vec);
   }
@@ -117,6 +138,18 @@ export class ThreeObjectPoolManager {
    * Get pooled Material
    */
   public getMaterial(color?: THREE.Color): THREE.MeshBasicMaterial {
+    // Use cached reference for better performance
+    if (this.materialPool) {
+      const material = this.materialPool.acquire();
+      
+      if (color) {
+        material.color.copy(color);
+      }
+      
+      return material;
+    }
+    
+    // Fallback to map lookup
     const pool = this.pools.get('material') as MaterialPool;
     const material = pool.acquire();
     
@@ -131,6 +164,13 @@ export class ThreeObjectPoolManager {
    * Release pooled Material
    */
   public releaseMaterial(mat: THREE.MeshBasicMaterial): void {
+    // Use cached reference for better performance
+    if (this.materialPool) {
+      this.materialPool.release(mat);
+      return;
+    }
+    
+    // Fallback to map lookup
     const pool = this.pools.get('material') as MaterialPool;
     pool.release(mat);
   }
@@ -138,14 +178,40 @@ export class ThreeObjectPoolManager {
   /**
    * Get all pool statistics
    */
-  public getAllStats(): Record<string, { size: number }> {
-    const stats: Record<string, { size: number }> = {};
+  public getAllStats(): Record<string, {
+    size: number;
+    acquired?: number;
+    released?: number;
+    utilization?: number;
+  }> {
+    const stats: Record<string, {
+      size: number;
+      acquired?: number;
+      released?: number;
+      utilization?: number;
+    }> = {};
     
     for (const [name, pool] of this.pools) {
-      stats[name] = { size: pool.size };
+      // Try to get detailed stats, fallback to basic size info
+      if (typeof (pool as any).getStats === 'function') {
+        stats[name] = (pool as any).getStats();
+      } else {
+        stats[name] = { size: pool.size };
+      }
     }
     
     return stats;
+  }
+
+  /**
+   * Reset all pool statistics
+   */
+  public resetAllStats(): void {
+    for (const pool of this.pools.values()) {
+      if (typeof (pool as any).resetStats === 'function') {
+        (pool as any).resetStats();
+      }
+    }
   }
 
   /**
@@ -156,6 +222,11 @@ export class ThreeObjectPoolManager {
       pool.clear();
     }
     this.pools.clear();
+    
+    // Clear cached references
+    this.vector3Pool = null;
+    this.matrix4Pool = null;
+    this.materialPool = null;
   }
 
   /**

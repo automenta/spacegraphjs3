@@ -58,6 +58,12 @@ export class Logger {
    * @param maxLogs - The maximum number of logs
    */
   public setMaxLogs(maxLogs: number): void {
+    // Validate input
+    if (maxLogs <= 0) {
+      this.error('Logger', 'Invalid maxLogs value, must be positive', { maxLogs });
+      return;
+    }
+    
     this.maxLogs = maxLogs;
     // Trim logs if necessary
     if (this.logs.length > this.maxLogs) {
@@ -72,6 +78,16 @@ export class Logger {
    * @param data - Optional data to include
    */
   public error(source: string, message: string, data?: any): void {
+    // Validate inputs
+    if (!source || typeof source !== 'string') {
+      // Fallback to prevent infinite recursion
+      console.error('[Logger] Invalid source for error log:', source);
+      return;
+    }
+    if (!message || typeof message !== 'string') {
+      console.error(`[${source}] Invalid message for error log:`, message);
+      return;
+    }
     this.log(LogLevel.ERROR, source, message, data);
   }
 
@@ -82,6 +98,15 @@ export class Logger {
    * @param data - Optional data to include
    */
   public warn(source: string, message: string, data?: any): void {
+    // Validate inputs
+    if (!source || typeof source !== 'string') {
+      console.warn('[Logger] Invalid source for warn log:', source);
+      return;
+    }
+    if (!message || typeof message !== 'string') {
+      console.warn(`[${source}] Invalid message for warn log:`, message);
+      return;
+    }
     this.log(LogLevel.WARN, source, message, data);
   }
 
@@ -92,6 +117,15 @@ export class Logger {
    * @param data - Optional data to include
    */
   public info(source: string, message: string, data?: any): void {
+    // Validate inputs
+    if (!source || typeof source !== 'string') {
+      console.info('[Logger] Invalid source for info log:', source);
+      return;
+    }
+    if (!message || typeof message !== 'string') {
+      console.info(`[${source}] Invalid message for info log:`, message);
+      return;
+    }
     this.log(LogLevel.INFO, source, message, data);
   }
 
@@ -102,6 +136,15 @@ export class Logger {
    * @param data - Optional data to include
    */
   public debug(source: string, message: string, data?: any): void {
+    // Validate inputs
+    if (!source || typeof source !== 'string') {
+      console.debug('[Logger] Invalid source for debug log:', source);
+      return;
+    }
+    if (!message || typeof message !== 'string') {
+      console.debug(`[${source}] Invalid message for debug log:`, message);
+      return;
+    }
     this.log(LogLevel.DEBUG, source, message, data);
   }
 
@@ -115,6 +158,17 @@ export class Logger {
   private log(level: LogLevel, source: string, message: string, data?: any): void {
     // Check if we should output this log level
     if (level > this.logLevel) {
+      return;
+    }
+
+    // Additional validation for internal method
+    if (!source || typeof source !== 'string') {
+      // Prevent infinite recursion by using console directly
+      console.error('[Logger] Invalid source in internal log method:', source);
+      return;
+    }
+    if (!message || typeof message !== 'string') {
+      console.error(`[${source}] Invalid message in internal log method:`, message);
       return;
     }
 
@@ -136,24 +190,41 @@ export class Logger {
 
     // Output to console based on level
     const formattedMessage = `[${source}] ${message}`;
-    switch (level) {
-      case LogLevel.ERROR:
-        console.error(formattedMessage, data || '');
-        break;
-      case LogLevel.WARN:
-        console.warn(formattedMessage, data || '');
-        break;
-      case LogLevel.INFO:
-        console.info(formattedMessage, data || '');
-        break;
-      case LogLevel.DEBUG:
-        console.debug(formattedMessage, data || '');
-        break;
+    try {
+      switch (level) {
+        case LogLevel.ERROR:
+          console.error(formattedMessage, data || '');
+          break;
+        case LogLevel.WARN:
+          console.warn(formattedMessage, data || '');
+          break;
+        case LogLevel.INFO:
+          console.info(formattedMessage, data || '');
+          break;
+        case LogLevel.DEBUG:
+          console.debug(formattedMessage, data || '');
+          break;
+      }
+    } catch (consoleError) {
+      // If console output fails, we still want to emit the event
+      // This can happen in some environments or with circular references in data
+      try {
+        // Try a simpler output
+        console.log(formattedMessage);
+      } catch (fallbackError) {
+        // If all else fails, we'll still emit the event
+        // We don't want logging failures to break the application
+      }
     }
 
     // Emit log event if graph is available
     if (this.graph) {
-      this.graph.events.emit('log', entry);
+      try {
+        this.graph.events.emit('log', entry);
+      } catch (emitError) {
+        // If event emission fails, log to console as a fallback
+        console.error('[Logger] Failed to emit log event:', emitError);
+      }
     }
   }
 
@@ -195,6 +266,16 @@ export class Logger {
    * @returns JSON string of all logs
    */
   public exportLogs(): string {
-    return JSON.stringify(this.logs, null, 2);
+    try {
+      return JSON.stringify(this.logs, null, 2);
+    } catch (error) {
+      // Handle serialization errors (e.g., circular references)
+      this.error('Logger', 'Failed to export logs due to serialization error', error);
+      // Return a safe fallback
+      return JSON.stringify(this.logs.map(log => ({
+        ...log,
+        data: '[SERIALIZATION_ERROR]'
+      })), null, 2);
+    }
   }
 }

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { animate } from 'popmotion';
 import { AnimationCurves } from './AnimationUtils';
+import { Logger } from './Logger';
 
 /**
  * Advanced camera control system with smooth animations, constraints, and enhanced features
@@ -38,12 +39,20 @@ export class AdvancedCameraControls {
   private isAnimating: boolean = false;
   private animationQueue: Array<() => void> = [];
   
+  private logger: Logger;
+  
   constructor(camera: THREE.PerspectiveCamera) {
+    // Validate input
+    if (!camera) {
+      throw new Error('Camera is required for AdvancedCameraControls');
+    }
+    
     this.camera = camera;
     this.target = new THREE.Vector3(0, 0, 0);
     this.distance = 10;
     this.phi = Math.PI / 2;
     this.theta = 0;
+    this.logger = Logger.getInstance();
     
     this.targetPosition = this.target.clone();
     this.targetDistance = this.distance;
@@ -104,6 +113,12 @@ export class AdvancedCameraControls {
     easing?: (t: number) => number;
     onComplete?: () => void;
   } = {}): void {
+    // Validate inputs
+    if (!target) {
+      this.logger.warn('AdvancedCameraControls', 'Cannot fly to null target');
+      return;
+    }
+    
     const {
       duration = 1000,
       easing = AnimationCurves.easeInOut.easing,
@@ -122,28 +137,33 @@ export class AdvancedCameraControls {
     const startPhi = this.phi;
     const startTheta = this.theta;
     
-    animate({
-      from: { progress: 0 },
-      to: { progress: 1 },
-      duration,
-      ease: easing,
-      onUpdate: ({ progress }) => {
-        this.targetPosition.lerpVectors(startTarget, target, progress);
-        this.targetDistance = startDistance + (distance - startDistance) * progress;
-        this.targetPhi = startPhi + (phi - startPhi) * progress;
-        this.targetTheta = startTheta + (theta - startTheta) * progress;
-      },
-      onComplete: () => {
-        this.isAnimating = false;
-        if (onComplete) onComplete();
-        
-        // Process next animation in queue
-        if (this.animationQueue.length > 0) {
-          const nextAnimation = this.animationQueue.shift();
-          if (nextAnimation) nextAnimation();
+    try {
+      animate({
+        from: { progress: 0 },
+        to: { progress: 1 },
+        duration,
+        ease: easing,
+        onUpdate: ({ progress }) => {
+          this.targetPosition.lerpVectors(startTarget, target, progress);
+          this.targetDistance = startDistance + (distance - startDistance) * progress;
+          this.targetPhi = startPhi + (phi - startPhi) * progress;
+          this.targetTheta = startTheta + (theta - startTheta) * progress;
+        },
+        onComplete: () => {
+          this.isAnimating = false;
+          if (onComplete) onComplete();
+          
+          // Process next animation in queue
+          if (this.animationQueue.length > 0) {
+            const nextAnimation = this.animationQueue.shift();
+            if (nextAnimation) nextAnimation();
+          }
         }
-      }
-    });
+      });
+    } catch (error) {
+      this.logger.error('AdvancedCameraControls', 'Failed to animate camera', error);
+      this.isAnimating = false;
+    }
   }
   
   /**
@@ -154,6 +174,12 @@ export class AdvancedCameraControls {
     padding?: number;
     offset?: THREE.Vector3;
   } = {}): void {
+    // Validate inputs
+    if (!objects) {
+      this.logger.warn('AdvancedCameraControls', 'Cannot frame null objects');
+      return;
+    }
+    
     const {
       duration = 1000,
       padding = 1.5,
@@ -162,30 +188,36 @@ export class AdvancedCameraControls {
     
     if (objects.length === 0) return;
     
-    // Calculate bounding box
-    const box = new THREE.Box3();
-    objects.forEach(obj => {
-      box.expandByObject(obj);
-    });
-    
-    const center = box.getCenter(new THREE.Vector3());
-    const size = box.getSize(new THREE.Vector3());
-    const maxDim = Math.max(size.x, size.y, size.z);
-    
-    // Calculate optimal distance
-    const fov = this.camera.fov * (Math.PI / 180);
-    let distance = Math.abs(maxDim / 2 / Math.tan(fov / 2));
-    distance *= padding;
-    
-    // Calculate optimal angles
-    const targetPosition = center.clone().add(offset);
-    const currentPosition = this.camera.position.clone();
-    const direction = new THREE.Vector3().subVectors(currentPosition, targetPosition).normalize();
-    
-    const phi = Math.acos(direction.y);
-    const theta = Math.atan2(direction.z, direction.x);
-    
-    this.flyTo(targetPosition, distance, phi, theta, { duration });
+    try {
+      // Calculate bounding box
+      const box = new THREE.Box3();
+      objects.forEach(obj => {
+        if (obj) {
+          box.expandByObject(obj);
+        }
+      });
+      
+      const center = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z);
+      
+      // Calculate optimal distance
+      const fov = this.camera.fov * (Math.PI / 180);
+      let distance = Math.abs(maxDim / 2 / Math.tan(fov / 2));
+      distance *= padding;
+      
+      // Calculate optimal angles
+      const targetPosition = center.clone().add(offset);
+      const currentPosition = this.camera.position.clone();
+      const direction = new THREE.Vector3().subVectors(currentPosition, targetPosition).normalize();
+      
+      const phi = Math.acos(direction.y);
+      const theta = Math.atan2(direction.z, direction.x);
+      
+      this.flyTo(targetPosition, distance, phi, theta, { duration });
+    } catch (error) {
+      this.logger.error('AdvancedCameraControls', 'Failed to frame objects', error);
+    }
   }
   
   /**

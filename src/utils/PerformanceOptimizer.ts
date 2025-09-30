@@ -3,6 +3,7 @@ import { ObjectPool } from './ObjectPool';
 import { CullingManager } from './CullingManager';
 import { LODManager, LODSettings } from './LODManager';
 import { MemoryManager } from './MemoryManager';
+import { Logger } from './Logger';
 
 /**
  * Performance optimization configuration
@@ -58,15 +59,29 @@ export class PerformanceOptimizer {
   private optimizationEnabled = true;
   private qualityLevel: number;
   
+  private logger: Logger;
+  
   constructor(
     scene: THREE.Scene,
     camera: THREE.Camera,
     renderer: THREE.WebGLRenderer,
     config: PerformanceConfig = {}
   ) {
+    // Validate inputs
+    if (!scene) {
+      throw new Error('Scene is required for PerformanceOptimizer');
+    }
+    if (!camera) {
+      throw new Error('Camera is required for PerformanceOptimizer');
+    }
+    if (!renderer) {
+      throw new Error('Renderer is required for PerformanceOptimizer');
+    }
+    
     this.scene = scene;
     this.camera = camera;
     this.renderer = renderer;
+    this.logger = Logger.getInstance();
     
     this.config = {
       enableObjectPooling: true,
@@ -99,8 +114,13 @@ export class PerformanceOptimizer {
       shaderCount: 0
     };
     
-    this.initializeOptimizations();
-    this.startPerformanceMonitoring();
+    try {
+      this.initializeOptimizations();
+      this.startPerformanceMonitoring();
+    } catch (error) {
+      this.logger.error('PerformanceOptimizer', 'Failed to initialize optimizer', error);
+      throw error;
+    }
   }
   
   /**
@@ -115,28 +135,33 @@ export class PerformanceOptimizer {
    * Initialize optimization systems
    */
   private initializeOptimizations(): void {
-    if (this.config.enableObjectPooling) {
-      this.setupObjectPooling();
-    }
-    
-    if (this.config.enableFrustumCulling) {
-      this.setupFrustumCulling();
-    }
-    
-    if (this.config.enableLOD) {
-      this.setupLODSystem();
-    }
-    
-    if (this.config.enableMemoryManagement) {
-      this.setupMemoryManagement();
-    }
-    
-    if (this.config.enableBatching) {
-      this.setupBatching();
-    }
-    
-    if (this.config.enableInstancing) {
-      this.setupInstancing();
+    try {
+      if (this.config.enableObjectPooling) {
+        this.setupObjectPooling();
+      }
+      
+      if (this.config.enableFrustumCulling) {
+        this.setupFrustumCulling();
+      }
+      
+      if (this.config.enableLOD) {
+        this.setupLODSystem();
+      }
+      
+      if (this.config.enableMemoryManagement) {
+        this.setupMemoryManagement();
+      }
+      
+      if (this.config.enableBatching) {
+        this.setupBatching();
+      }
+      
+      if (this.config.enableInstancing) {
+        this.setupInstancing();
+      }
+    } catch (error) {
+      this.logger.error('PerformanceOptimizer', 'Failed to initialize optimizations', error);
+      throw error;
     }
   }
   
@@ -144,11 +169,16 @@ export class PerformanceOptimizer {
    * Setup object pooling
    */
   private setupObjectPooling(): void {
-    // Configure object pools for common object types
-    this.objectPools.set('mesh', new ObjectPool(() => new THREE.Mesh(), undefined, 100));
-    this.objectPools.set('group', new ObjectPool(() => new THREE.Group(), undefined, 50));
-    this.objectPools.set('vector3', new ObjectPool(() => new THREE.Vector3(), undefined, 200));
-    this.objectPools.set('color', new ObjectPool(() => new THREE.Color(), undefined, 100));
+    try {
+      // Configure object pools for common object types
+      this.objectPools.set('mesh', new ObjectPool(() => new THREE.Mesh(), undefined, 100));
+      this.objectPools.set('group', new ObjectPool(() => new THREE.Group(), undefined, 50));
+      this.objectPools.set('vector3', new ObjectPool(() => new THREE.Vector3(), undefined, 200));
+      this.objectPools.set('color', new ObjectPool(() => new THREE.Color(), undefined, 100));
+    } catch (error) {
+      this.logger.error('PerformanceOptimizer', 'Failed to setup object pooling', error);
+      throw error;
+    }
   }
   
   /**
@@ -208,31 +238,47 @@ export class PerformanceOptimizer {
    * Create simplified version of object
    */
   private createSimplifiedVersion(object: THREE.Object3D, factor: number): THREE.Object3D {
-    const simplified = object.clone();
-    
-    // Apply simplification factor to geometry if it's a mesh
-    if (simplified instanceof THREE.Mesh && simplified.geometry) {
-      const geometry = simplified.geometry;
-      const positionAttribute = geometry.attributes.position;
-      
-      if (positionAttribute) {
-        const positions = positionAttribute.array as Float32Array;
-        const simplifiedPositions = new Float32Array(Math.floor(positions.length * factor));
-        
-        // Simple decimation - take every nth vertex
-        const step = Math.floor(1 / factor);
-        for (let i = 0, j = 0; i < positions.length && j < simplifiedPositions.length; i += step * 3, j += 3) {
-          simplifiedPositions[j] = positions[i];
-          simplifiedPositions[j + 1] = positions[i + 1];
-          simplifiedPositions[j + 2] = positions[i + 2];
-        }
-        
-        geometry.setAttribute('position', new THREE.BufferAttribute(simplifiedPositions, 3));
-        geometry.computeVertexNormals();
+    try {
+      // Validate inputs
+      if (!object) {
+        this.logger.warn('PerformanceOptimizer', 'Cannot simplify null object');
+        return object;
       }
+      
+      if (factor <= 0 || factor > 1) {
+        this.logger.warn('PerformanceOptimizer', 'Invalid simplification factor, using 0.5', { factor });
+        factor = 0.5;
+      }
+      
+      const simplified = object.clone();
+      
+      // Apply simplification factor to geometry if it's a mesh
+      if (simplified instanceof THREE.Mesh && simplified.geometry) {
+        const geometry = simplified.geometry;
+        const positionAttribute = geometry.attributes.position;
+        
+        if (positionAttribute) {
+          const positions = positionAttribute.array as Float32Array;
+          const simplifiedPositions = new Float32Array(Math.floor(positions.length * factor));
+          
+          // Simple decimation - take every nth vertex
+          const step = Math.floor(1 / factor);
+          for (let i = 0, j = 0; i < positions.length && j < simplifiedPositions.length; i += step * 3, j += 3) {
+            simplifiedPositions[j] = positions[i];
+            simplifiedPositions[j + 1] = positions[i + 1];
+            simplifiedPositions[j + 2] = positions[i + 2];
+          }
+          
+          geometry.setAttribute('position', new THREE.BufferAttribute(simplifiedPositions, 3));
+          geometry.computeVertexNormals();
+        }
+      }
+      
+      return simplified;
+    } catch (error) {
+      this.logger.error('PerformanceOptimizer', 'Failed to create simplified version', error);
+      return object;
     }
-    
-    return simplified;
   }
   
   /**
@@ -369,7 +415,7 @@ export class PerformanceOptimizer {
       
       return mergedGeometry;
     } catch (error) {
-      console.warn('Failed to merge geometries:', error);
+      this.logger.warn('PerformanceOptimizer', 'Failed to merge geometries', error);
       return null;
     }
   }
@@ -500,7 +546,7 @@ export class PerformanceOptimizer {
     
     // Check if performance is below target
     if (avgFPS < this.config.maxFPS * 0.8 || avgFrameTime > this.config.targetFrameTime * 1.2) {
-      console.warn(`Performance below target: ${avgFPS.toFixed(1)} FPS, ${avgFrameTime.toFixed(1)}ms frame time`);
+      this.logger.warn('PerformanceOptimizer', `Performance below target: ${avgFPS.toFixed(1)} FPS, ${avgFrameTime.toFixed(1)}ms frame time`);
       
       if (this.config.adaptiveQuality) {
         this.reduceQuality();
@@ -509,7 +555,7 @@ export class PerformanceOptimizer {
     
     // Check memory usage
     if (this.metrics.memoryUsage > 500) { // 500MB threshold
-      console.warn(`High memory usage: ${this.metrics.memoryUsage.toFixed(1)}MB`);
+      this.logger.warn('PerformanceOptimizer', `High memory usage: ${this.metrics.memoryUsage.toFixed(1)}MB`);
       this.memoryManager.disposeAllTrackedObjects();
     }
   }
@@ -534,7 +580,7 @@ export class PerformanceOptimizer {
     if (this.qualityLevel > 0) {
       this.qualityLevel--;
       this.applyQualitySettings();
-      console.log(`Reduced quality to level ${this.qualityLevel}`);
+      this.logger.info('PerformanceOptimizer', `Reduced quality to level ${this.qualityLevel}`);
     }
   }
   
@@ -545,7 +591,7 @@ export class PerformanceOptimizer {
     if (this.qualityLevel < 3) {
       this.qualityLevel++;
       this.applyQualitySettings();
-      console.log(`Increased quality to level ${this.qualityLevel}`);
+      this.logger.info('PerformanceOptimizer', `Increased quality to level ${this.qualityLevel}`);
     }
   }
   
@@ -607,12 +653,22 @@ export class PerformanceOptimizer {
    * Update configuration
    */
   public updateConfig(newConfig: Partial<PerformanceConfig>): void {
+    // Validate input
+    if (!newConfig) {
+      this.logger.warn('PerformanceOptimizer', 'Cannot update with null config');
+      return;
+    }
+    
     Object.assign(this.config, newConfig);
     
-    // Reinitialize affected systems
-    if (newConfig.qualityLevel) {
-      this.qualityLevel = this.getQualityLevelValue(newConfig.qualityLevel);
-      this.applyQualitySettings();
+    try {
+      // Reinitialize affected systems
+      if (newConfig.qualityLevel) {
+        this.qualityLevel = this.getQualityLevelValue(newConfig.qualityLevel);
+        this.applyQualitySettings();
+      }
+    } catch (error) {
+      this.logger.error('PerformanceOptimizer', 'Failed to update config', error);
     }
   }
   

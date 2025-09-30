@@ -49,14 +49,14 @@ export interface SequenceAnimation {
   config?: AnimationConfig;
 }
 
-export type AnimationTask = 
+export type AnimationTask =
   | { type: 'tween'; animation: TweenAnimation; config: AnimationConfig }
   | { type: 'keyframe'; animation: KeyframeAnimation; config: AnimationConfig }
   | { type: 'parallel'; animation: ParallelAnimation; config: AnimationConfig }
   | { type: 'sequence'; animation: SequenceAnimation; config: AnimationConfig }
   | { type: 'callback'; callback: () => void | Promise<void>; config: AnimationConfig }
-  | { type: 'spring'; target: any; property: string; to: any; config: AnimationConfig }
-  | { type: 'decay'; target: any; property: string; from: any; config: AnimationConfig };
+  | { type: 'spring'; target: Record<string, any>; property: string; to: any; config: AnimationConfig }
+  | { type: 'decay'; target: Record<string, any>; property: string; from: any; config: AnimationConfig };
 
 // Easing functions
 export const EasingFunctions = {
@@ -129,8 +129,8 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
   /**
    * Create a simple tween animation
    */
-  public tween(
-    target: any,
+  public tween<T extends Record<string, any>>(
+    target: T,
     property: string,
     from: any,
     to: any,
@@ -157,8 +157,8 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
   /**
    * Create a spring animation
    */
-  public spring(
-    target: any,
+  public spring<T extends Record<string, any>>(
+    target: T,
     property: string,
     to: any,
     config: AnimationConfig = {}
@@ -175,8 +175,8 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
   /**
    * Create a decay animation
    */
-  public decay(
-    target: any,
+  public decay<T extends Record<string, any>>(
+    target: T,
     property: string,
     from: any,
     config: AnimationConfig = {}

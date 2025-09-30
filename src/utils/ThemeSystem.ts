@@ -4,6 +4,7 @@
  */
 
 import * as THREE from 'three';
+import { Logger } from './Logger';
 
 export interface Theme {
   name: string;
@@ -62,7 +63,11 @@ export class ThemeSystem {
   private themeChangeCallbacks: Array<(theme: Theme) => void> = [];
   private customProperties: Map<string, any> = new Map();
 
+  private logger: Logger;
+  
   constructor(config: ThemeConfig = {}) {
+    this.logger = Logger.getInstance();
+    
     this.config = {
       allowCustomThemes: true,
       transitionDuration: 300,
@@ -71,11 +76,16 @@ export class ThemeSystem {
       ...config
     };
 
-    this.initializeDefaultThemes();
-    this.currentTheme = this.themes.get('dark')!;
-    
-    if (this.config.autoSwitch) {
-      this.setupAutoSwitching();
+    try {
+      this.initializeDefaultThemes();
+      this.currentTheme = this.themes.get('dark')!;
+      
+      if (this.config.autoSwitch) {
+        this.setupAutoSwitching();
+      }
+    } catch (error) {
+      this.logger.error('ThemeSystem', 'Failed to initialize theme system', error);
+      throw error;
     }
   }
 
@@ -308,19 +318,39 @@ export class ThemeSystem {
    * Set current theme
    */
   setTheme(name: string): boolean {
+    // Validate input
+    if (!name) {
+      this.logger.warn('ThemeSystem', 'Cannot set theme with empty name');
+      return false;
+    }
+    
     const theme = this.themes.get(name);
-    if (!theme) return false;
+    if (!theme) {
+      this.logger.warn('ThemeSystem', `Theme not found: ${name}`);
+      return false;
+    }
 
-    const previousTheme = this.currentTheme;
-    this.currentTheme = theme;
+    try {
+      const previousTheme = this.currentTheme;
+      this.currentTheme = theme;
 
-    // Apply theme transition
-    this.applyThemeTransition(previousTheme, theme);
+      // Apply theme transition
+      this.applyThemeTransition(previousTheme, theme);
 
-    // Notify callbacks
-    this.themeChangeCallbacks.forEach(callback => callback(theme));
+      // Notify callbacks
+      this.themeChangeCallbacks.forEach(callback => {
+        try {
+          callback(theme);
+        } catch (error) {
+          this.logger.error('ThemeSystem', 'Error in theme change callback', error);
+        }
+      });
 
-    return true;
+      return true;
+    } catch (error) {
+      this.logger.error('ThemeSystem', 'Failed to set theme', error);
+      return false;
+    }
   }
 
   /**
@@ -375,23 +405,45 @@ export class ThemeSystem {
    * Create custom theme
    */
   createCustomTheme(name: string, baseTheme: string, customizations: Partial<Theme>): Theme | null {
-    if (!this.config.allowCustomThemes) return null;
+    // Validate inputs
+    if (!name) {
+      this.logger.warn('ThemeSystem', 'Cannot create theme with empty name');
+      return null;
+    }
+    
+    if (!baseTheme) {
+      this.logger.warn('ThemeSystem', 'Cannot create theme without base theme');
+      return null;
+    }
+    
+    if (!this.config.allowCustomThemes) {
+      this.logger.warn('ThemeSystem', 'Custom themes are not allowed');
+      return null;
+    }
 
     const base = this.themes.get(baseTheme);
-    if (!base) return null;
+    if (!base) {
+      this.logger.warn('ThemeSystem', `Base theme not found: ${baseTheme}`);
+      return null;
+    }
 
-    const customTheme: Theme = {
-      ...base,
-      name,
-      colors: { ...base.colors, ...customizations.colors },
-      materials: { ...base.materials, ...customizations.materials },
-      effects: { ...base.effects, ...customizations.effects },
-      typography: { ...base.typography, ...customizations.typography },
-      spacing: { ...base.spacing, ...customizations.spacing }
-    };
+    try {
+      const customTheme: Theme = {
+        ...base,
+        name,
+        colors: { ...base.colors, ...customizations.colors },
+        materials: { ...base.materials, ...customizations.materials },
+        effects: { ...base.effects, ...customizations.effects },
+        typography: { ...base.typography, ...customizations.typography },
+        spacing: { ...base.spacing, ...customizations.spacing }
+      };
 
-    this.themes.set(name, customTheme);
-    return customTheme;
+      this.themes.set(name, customTheme);
+      return customTheme;
+    } catch (error) {
+      this.logger.error('ThemeSystem', 'Failed to create custom theme', error);
+      return null;
+    }
   }
 
   /**
@@ -537,6 +589,12 @@ export class ThemeSystem {
    * Import theme from JSON
    */
   importTheme(json: string): Theme | null {
+    // Validate input
+    if (!json) {
+      this.logger.warn('ThemeSystem', 'Cannot import empty theme JSON');
+      return null;
+    }
+    
     try {
       const themeData = JSON.parse(json);
       const theme: Theme = {
@@ -550,7 +608,7 @@ export class ThemeSystem {
 
       return theme;
     } catch (error) {
-      console.error('Failed to import theme:', error);
+      this.logger.error('ThemeSystem', 'Failed to import theme', error);
       return null;
     }
   }
@@ -603,9 +661,13 @@ export class ThemeSystem {
    * Clean up resources
    */
   dispose(): void {
-    this.themes.clear();
-    this.themeChangeCallbacks = [];
-    this.customProperties.clear();
+    try {
+      this.themes.clear();
+      this.themeChangeCallbacks = [];
+      this.customProperties.clear();
+    } catch (error) {
+      this.logger.error('ThemeSystem', 'Failed to dispose theme system', error);
+    }
   }
 }
 
