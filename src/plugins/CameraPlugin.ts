@@ -80,7 +80,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     if (obj.constructor === Object) {
       const sanitized: any = {};
       for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
           sanitized[key] = this.sanitizeObject(obj[key]);
         }
       }
@@ -93,14 +93,14 @@ export class CameraPlugin implements ISpaceGraphPlugin {
       if (typeof obj === 'object') {
         const sanitized: any = {};
         for (const key in obj) {
-          if (obj.hasOwnProperty(key)) {
+          if (Object.prototype.hasOwnProperty.call(obj, key)) {
             sanitized[key] = this.sanitizeObject(obj[key]);
           }
         }
         return sanitized;
       }
       return String(obj);
-    } catch (e) {
+    } catch {
       return null;
     }
   }
@@ -320,13 +320,11 @@ export class CameraPlugin implements ISpaceGraphPlugin {
    */
   private setupTouchGestures(): void {
     let touchStartTime = 0;
-    let lastTouchCount = 0;
     let initialDistance = 0;
     let initialAngle = 0;
 
     const handleTouchStart = (event: TouchEvent) => {
       touchStartTime = Date.now();
-      lastTouchCount = event.touches.length;
 
       if (event.touches.length === 2) {
         // Pinch gesture start
@@ -415,8 +413,6 @@ export class CameraPlugin implements ISpaceGraphPlugin {
    */
   private handleTapToFocus(clientX: number, clientY: number): void {
     // Use CameraUtils for coordinate conversion and raycasting
-    const renderer = this.graph.render.getRenderer();
-    const camera = this.graph.render.getCamera();
     
     const screenPos = new THREE.Vector2(clientX, clientY);
     // worldPos is calculated but not used in this context
@@ -525,7 +521,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     // Ensure all values in targetState are serializable
     const sanitizedTargetState: any = {};
     for (const key in targetState) {
-      if (targetState.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(targetState, key)) {
         const value = (targetState as any)[key];
         // Skip non-serializable values
         if (value !== null && value !== undefined && typeof value !== 'function' && typeof value !== 'object') {
@@ -1338,7 +1334,8 @@ export class CameraPlugin implements ISpaceGraphPlugin {
       const cameraState = this.graph.state.camera;
       if (!cameraState) return;
 
-      let { target, distance, phi, theta } = cameraState;
+      const { target } = cameraState;
+      let { distance, phi, theta } = cameraState;
 
       // Apply rotation constraints
       if (this.rotationConstraints.minPhi !== undefined) {

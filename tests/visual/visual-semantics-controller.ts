@@ -1,6 +1,6 @@
 import { Page, Browser, chromium, expect } from '@playwright/test';
-import path from 'path';
-import fs from 'fs/promises';
+import * as path from 'path';
+import * as fs from 'fs/promises';
 
 /**
  * Visual Semantics Controller for testing UI/UX ergonomics
@@ -375,6 +375,15 @@ export class VisualSemanticsController {
     if (!this.page || !this.browser) {
       throw new Error('Browser or page not available.');
     }
+  }
+
+  /**
+   * Wait for a specified amount of time
+   * @param milliseconds Time to wait in milliseconds
+   */
+  async waitForTimeout(milliseconds: number): Promise<void> {
+    this.ensureInitialized();
+    await this.page!.waitForTimeout(milliseconds);
   }
 }
 

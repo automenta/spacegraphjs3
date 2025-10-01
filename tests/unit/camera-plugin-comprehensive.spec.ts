@@ -451,13 +451,13 @@ describe('CameraPlugin Comprehensive Tests', () => {
 
       mockUpdateState({ camera: newCameraState });
 
-      // Camera position should be updated based on spherical coordinates
-      const expectedX = newCameraState.target.x + 
-        newCameraState.distance * Math.sin(newCameraState.phi) * Math.cos(newCameraState.theta);
-      const expectedY = newCameraState.target.y + 
-        newCameraState.distance * Math.cos(newCameraState.phi);
-      const expectedZ = newCameraState.target.z + 
-        newCameraState.distance * Math.sin(newCameraState.phi) * Math.sin(newCameraState.theta);
+// Camera position should be updated based on spherical coordinates
+const expectedX = newCameraState.target.x +
+  newCameraState.distance * Math.sin(newCameraState.phi) * Math.cos(newCameraState.theta);
+const expectedY = newCameraState.target.y +
+  newCameraState.distance * Math.cos(newCameraState.phi);
+const expectedZ = newCameraState.target.z +
+  newCameraState.distance * Math.sin(newCameraState.phi) * Math.sin(newCameraState.theta);
 
       // The camera position should be updated - just verify it's not the original position
       expect(mockCamera.position.length()).toBeGreaterThan(0);

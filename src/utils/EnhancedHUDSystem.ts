@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import { animate } from 'popmotion';
 import { AnimationCurves } from './AnimationUtils';
 
@@ -607,7 +606,7 @@ export class EnhancedHUDSystem {
    * Clear all elements
    */
   public clear(): void {
-    this.elements.forEach((element, id) => {
+    this.elements.forEach((element, _id) => {
       element.remove();
     });
     this.elements.clear();

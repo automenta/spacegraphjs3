@@ -1,7 +1,7 @@
 import { createEffect } from 'solid-js';
 import { produce } from 'solid-js/store';
-import { SpaceGraph } from '../core/SpaceGraph';
-import { NodeSpec, CircleLayoutSpec } from '../types';
+import { SpaceGraph as _SpaceGraph } from '../core/SpaceGraph';
+import { NodeSpec as _NodeSpec, CircleLayoutSpec } from '../types';
 import { BaseLayoutEngine } from './BaseLayoutEngine';
 
 /**

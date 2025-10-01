@@ -94,7 +94,7 @@ export class HUDUtils {
         element.style.transition = `all ${duration}ms ${easing}`;
         
         // Force reflow
-        element.offsetHeight;
+        void element.offsetHeight;
         
         // Apply target styles
         Object.assign(element.style, to);
@@ -382,7 +382,7 @@ export class HUDUtils {
   static createNotification(
     message: string,
     type: 'info' | 'success' | 'warning' | 'error' = 'info',
-    theme: HUDTheme = HUDUtils.getDefaultTheme().dark
+    _theme: HUDTheme = HUDUtils.getDefaultTheme().dark
   ): HTMLDivElement {
     const notification = document.createElement('div');
     notification.style.padding = '12px 16px';

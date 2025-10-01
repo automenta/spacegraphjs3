@@ -76,7 +76,8 @@ export class EdgeRenderer {
         } catch (error) {
           console.warn(
             `Invalid color specified for edge ${edge.id}:`,
-            edge.color
+            edge.color,
+            error
           );
           color.set('#aaaaaa'); // Fallback to grey on error
         }

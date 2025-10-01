@@ -157,9 +157,9 @@ export class AdvancedRenderingOptimizer {
   
   /**
    * Update the optimizer with the current frame data
-   * @param delta - Time since last frame in seconds
+   * @param _delta - Time since last frame in seconds
    */
-  public update(delta: number): void {
+  public update(_delta: number): void {
     const currentTime = performance.now();
     const frameTime = currentTime - this.lastFrameTime;
     this.lastFrameTime = currentTime;

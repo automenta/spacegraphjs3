@@ -5,6 +5,8 @@ import { SpaceGraph } from '../core/SpaceGraph';
 import { InteractionLogic } from '../InteractionLogic';
 import { DragState, HoverState, WheelState } from '../types/use-gesture';
 import { EdgeSpec, GroupSpec, NodeSpec } from '../types';
+import { ContextMenuManager } from '../utils/ContextMenuManager';
+import { ErrorHandler } from '../utils/ErrorHandler';
 
 /**
  * A plugin that handles user interactions with the graph, such as clicking, dragging, and hovering.
@@ -31,9 +33,9 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
   private dragIndicator: THREE.Mesh | null = null;
   private snapToGrid: boolean = false;
   private gridSize: number = 1.0;
-  private contextMenuActive: boolean = false;
-  private contextMenuElement: HTMLElement | null = null;
+  private contextMenuManager: ContextMenuManager = new ContextMenuManager();
   private groupVisualizations: Map<string, THREE.Group> = new Map(); // Visual representations of groups
+  private errorHandler: ErrorHandler = ErrorHandler.getInstance();
 
   public init(graph: SpaceGraph): void {
     this.graph = graph;
@@ -103,7 +105,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
         this.graph.render.getScene()?.remove(this.dragIndicator);
       } catch (e) {
         // Ignore errors in case scene is not available
-        console.debug('Scene not available for drag indicator removal:', e);
+        this.errorHandler.handleWarning('InteractionPlugin', 'Scene not available for drag indicator removal', e);
       }
     }
     
@@ -125,6 +127,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
       this.graph.render.getScene()?.add(this.dragIndicator);
     } catch (e) {
       // Ignore errors in case scene is not available (e.g., in tests)
+      this.errorHandler.handleWarning('InteractionPlugin', 'Scene not available for drag indicator addition', e);
     }
   }
 
@@ -147,6 +150,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
         this.graph.render.getScene()?.remove(this.dragIndicator);
       } catch (e) {
         // Ignore errors in case scene is not available
+        this.errorHandler.handleWarning('InteractionPlugin', 'Scene not available for drag indicator removal', e);
       }
       this.dragIndicator = null;
     }
@@ -296,6 +300,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
       this.groupVisualizations.set(groupId, groupVisualization);
     } catch (e) {
       // Ignore errors in case scene is not available
+      this.errorHandler.handleWarning('InteractionPlugin', 'Scene not available for group visualization addition', e);
     }
   }
 
@@ -322,6 +327,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
         this.graph.render.getScene()?.remove(visualization);
       } catch (e) {
         // Ignore errors in case scene is not available
+        this.errorHandler.handleWarning('InteractionPlugin', 'Scene not available for group visualization removal', e);
       }
       this.groupVisualizations.delete(groupId);
     }
@@ -508,7 +514,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     }
     this.rendererEl.removeEventListener('click', this.boundOnClick as EventListener);
     this.rendererEl.removeEventListener('contextmenu', this.boundOnContextMenu as EventListener);
-    this.hideContextMenu();
+    this.contextMenuManager.hideContextMenu();
     this.clearAllEdgeEditHandles();
     this.clearAllGroupVisualizations();
   }
@@ -621,13 +627,13 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     const camera = this.graph.render.getCamera();
 
     if (first) {
-      console.log('Starting drag operation');
+      // console.log('Starting drag operation');
       const intersected = this.getIntersectedElement(
         event as PointerEvent
       );
       
       if (intersected && intersected.type === 'node' && intersected.element && 'position' in intersected.element && intersected.element.position) {
-        console.log('Starting drag on node:', intersected.element.id);
+        // console.log('Starting drag on node:', intersected.element.id);
         this.draggedElementId = intersected.element.id;
         this.isDragging = true;
         // Store the initial position for visual feedback
@@ -653,7 +659,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
         }
       } else if (intersected && intersected.type === 'edge-handle') {
         // Handle edge editing
-        console.log('Starting drag on edge handle:', intersected.edge!.id);
+        // console.log('Starting drag on edge handle:', intersected.edge!.id);
         this.draggedElementId = intersected.edge!.id;
         this.isDragging = true;
         // Store the initial position for visual feedback
@@ -665,7 +671,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
           this.dragStartPosition
         );
       } else {
-        console.log('No intersected element found for drag start');
+        // console.log('No intersected element found for drag start');
       }
     }
 
@@ -673,12 +679,12 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
       // Handle node dragging with visual feedback
       const element = this.graph.dataManager.getElement(this.draggedElementId);
       if (element && 'position' in element) {
-        console.log('Dragging node:', this.draggedElementId);
+        // console.log('Dragging node:', this.draggedElementId);
         // Check if this node belongs to a group
         const node = element as NodeSpec;
         if (node.groupId) {
           // Move the entire group
-          console.log('Moving group:', node.groupId);
+          // console.log('Moving group:', node.groupId);
           this.moveGroup(node.groupId, vx, vy, camera);
         } else {
           // Move individual node
@@ -692,7 +698,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
           }
           
           // Handle the drag
-          console.log('Calling InteractionLogic.handleNodeDrag');
+          // console.log('Calling InteractionLogic.handleNodeDrag');
           InteractionLogic.handleNodeDrag(
             vx,
             vy,
@@ -701,7 +707,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
             this.graph.render.getRendererDomElement(),
             camera,
             (spec) => {
-              console.log('Updating node position with spec:', spec);
+              // console.log('Updating node position with spec:', spec);
               // If snap-to-grid is enabled, modify the position
               if (this.snapToGrid && spec.data?.nodes?.update) {
                 const updates = spec.data.nodes.update.map(update => {
@@ -751,7 +757,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
         }
       } else {
         // Handle edge editing
-        console.log('Dragging edge:', this.draggedElementId);
+        // console.log('Dragging edge:', this.draggedElementId);
         const edge = this.graph.dataManager.getEdge(this.draggedElementId);
         if (edge && edge.type === 'curved') {
           // Calculate new position based on drag
@@ -808,7 +814,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
       }
     } else {
       // Panning
-      console.log('Panning');
+      // console.log('Panning');
       InteractionLogic.handlePan(
         mx,
         my,
@@ -819,7 +825,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     }
 
     if (last) {
-      console.log('Ending drag operation');
+      // console.log('Ending drag operation');
       if (this.draggedElementId && this.dragStartPosition) {
         const element = this.graph.dataManager.getElement(this.draggedElementId);
         if (element && 'position' in element) {
@@ -980,224 +986,38 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
   }
 
   private showEdgeContextMenu(x: number, y: number, edge: EdgeSpec, sourceNode: NodeSpec, targetNode: NodeSpec) {
-    // Hide any existing context menu
-    this.hideContextMenu();
-    
-    // Create context menu element
-    const menu = document.createElement('div');
-    menu.className = 'spacegraph-context-menu';
-    menu.style.position = 'absolute';
-    menu.style.left = `${x}px`;
-    menu.style.top = `${y}px`;
-    menu.style.backgroundColor = '#2d2d2d';
-    menu.style.color = '#ffffff';
-    menu.style.border = '1px solid #555555';
-    menu.style.borderRadius = '4px';
-    menu.style.padding = '4px 0';
-    menu.style.boxShadow = '0 2px 8px rgba(0,0,0,0.5)';
-    menu.style.zIndex = '10000';
-    menu.style.minWidth = '150px';
-    
-    // Add menu items
-    const items = [
-      { label: 'Select Edge', action: () => this.selectEdge(edge.id) },
-      { label: 'Delete Edge', action: () => this.deleteEdge(edge.id) },
-      { label: 'Edit Label', action: () => this.editEdgeLabel(edge.id) },
-      { label: 'Reverse Direction', action: () => this.reverseEdgeDirection(edge.id) },
-      { label: 'Highlight Path', action: () => this.highlightPath(edge.id) },
-      { label: 'Edit Path', action: () => this.editEdgePath(edge.id) }
-    ];
-    
-    items.forEach(item => {
-      const menuItem = document.createElement('div');
-      menuItem.className = 'context-menu-item';
-      menuItem.style.padding = '8px 12px';
-      menuItem.style.cursor = 'pointer';
-      menuItem.style.fontSize = '14px';
-      menuItem.textContent = item.label;
-      
-      menuItem.addEventListener('mouseenter', () => {
-        menuItem.style.backgroundColor = '#444444';
-      });
-      
-      menuItem.addEventListener('mouseleave', () => {
-        menuItem.style.backgroundColor = 'transparent';
-      });
-      
-      menuItem.addEventListener('click', () => {
-        item.action();
-        this.hideContextMenu();
-      });
-      
-      menu.appendChild(menuItem);
+    this.contextMenuManager.showEdgeContextMenu(x, y, edge, sourceNode, targetNode, {
+      selectEdge: (edgeId) => this.selectEdge(edgeId),
+      deleteEdge: (edgeId) => this.deleteEdge(edgeId),
+      editEdgeLabel: (edgeId) => this.editEdgeLabel(edgeId),
+      reverseEdgeDirection: (edgeId) => this.reverseEdgeDirection(edgeId),
+      highlightPath: (edgeId) => this.highlightPath(edgeId),
+      editEdgePath: (edgeId) => this.editEdgePath(edgeId)
     });
-    
-    // Add to document
-    document.body.appendChild(menu);
-    this.contextMenuElement = menu;
-    this.contextMenuActive = true;
-    
-    // Add click outside listener to hide menu
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menu && !menu.contains(e.target as Node)) {
-        this.hideContextMenu();
-        document.removeEventListener('click', handleClickOutside);
-      }
-    };
-    
-    setTimeout(() => {
-      document.addEventListener('click', handleClickOutside);
-    }, 0);
   }
 
   private showNodeContextMenu(x: number, y: number, node: NodeSpec) {
-    // Hide any existing context menu
-    this.hideContextMenu();
-    
-    // Create context menu element
-    const menu = document.createElement('div');
-    menu.className = 'spacegraph-context-menu';
-    menu.style.position = 'absolute';
-    menu.style.left = `${x}px`;
-    menu.style.top = `${y}px`;
-    menu.style.backgroundColor = '#2d2d2d';
-    menu.style.color = '#ffffff';
-    menu.style.border = '1px solid #555555';
-    menu.style.borderRadius = '4px';
-    menu.style.padding = '4px 0';
-    menu.style.boxShadow = '0 2px 8px rgba(0,0,0,0.5)';
-    menu.style.zIndex = '10000';
-    menu.style.minWidth = '150px';
-    
-    // Add menu items
-    const items = [
-      { label: 'Select Node', action: () => this.selectNode(node.id) },
-      { label: 'Delete Node', action: () => this.deleteNode(node.id) },
-      { label: 'Edit Label', action: () => this.editNodeLabel(node.id) },
-      { label: 'Add Connection', action: () => this.addNodeConnection(node.id) },
-      { label: 'Group Selected', action: () => this.createGroup() },
-      { label: 'Add to Group', action: () => this.addToGroup(node.id) }
-    ];
-    
-    items.forEach(item => {
-      const menuItem = document.createElement('div');
-      menuItem.className = 'context-menu-item';
-      menuItem.style.padding = '8px 12px';
-      menuItem.style.cursor = 'pointer';
-      menuItem.style.fontSize = '14px';
-      menuItem.textContent = item.label;
-      
-      menuItem.addEventListener('mouseenter', () => {
-        menuItem.style.backgroundColor = '#444444';
-      });
-      
-      menuItem.addEventListener('mouseleave', () => {
-        menuItem.style.backgroundColor = 'transparent';
-      });
-      
-      menuItem.addEventListener('click', () => {
-        item.action();
-        this.hideContextMenu();
-      });
-      
-      menu.appendChild(menuItem);
+    this.contextMenuManager.showNodeContextMenu(x, y, node, {
+      selectNode: (nodeId) => this.selectNode(nodeId),
+      deleteNode: (nodeId) => this.deleteNode(nodeId),
+      editNodeLabel: (nodeId) => this.editNodeLabel(nodeId),
+      addNodeConnection: (nodeId) => this.addNodeConnection(nodeId),
+      createGroup: () => this.createGroup(),
+      addToGroup: (nodeId) => this.addToGroup(nodeId)
     });
-    
-    // Add to document
-    document.body.appendChild(menu);
-    this.contextMenuElement = menu;
-    this.contextMenuActive = true;
-    
-    // Add click outside listener to hide menu
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menu && !menu.contains(e.target as Node)) {
-        this.hideContextMenu();
-        document.removeEventListener('click', handleClickOutside);
-      }
-    };
-    
-    setTimeout(() => {
-      document.addEventListener('click', handleClickOutside);
-    }, 0);
   }
 
   private showBackgroundContextMenu(x: number, y: number) {
-    // Hide any existing context menu
-    this.hideContextMenu();
-    
-    // Create context menu element
-    const menu = document.createElement('div');
-    menu.className = 'spacegraph-context-menu';
-    menu.style.position = 'absolute';
-    menu.style.left = `${x}px`;
-    menu.style.top = `${y}px`;
-    menu.style.backgroundColor = '#2d2d2d';
-    menu.style.color = '#ffffff';
-    menu.style.border = '1px solid #555555';
-    menu.style.borderRadius = '4px';
-    menu.style.padding = '4px 0';
-    menu.style.boxShadow = '0 2px 8px rgba(0,0,0,0.5)';
-    menu.style.zIndex = '10000';
-    menu.style.minWidth = '150px';
-    
-    // Add menu items
-    const items = [
-      { label: 'Add Node', action: () => this.addNodeAtPosition(x, y) },
-      { label: 'Select All', action: () => this.selectAll() },
-      { label: 'Clear Selection', action: () => this.clearAllSelections() },
-      { label: 'Reset View', action: () => this.resetView() }
-    ];
-    
-    items.forEach(item => {
-      const menuItem = document.createElement('div');
-      menuItem.className = 'context-menu-item';
-      menuItem.style.padding = '8px 12px';
-      menuItem.style.cursor = 'pointer';
-      menuItem.style.fontSize = '14px';
-      menuItem.textContent = item.label;
-      
-      menuItem.addEventListener('mouseenter', () => {
-        menuItem.style.backgroundColor = '#444444';
-      });
-      
-      menuItem.addEventListener('mouseleave', () => {
-        menuItem.style.backgroundColor = 'transparent';
-      });
-      
-      menuItem.addEventListener('click', () => {
-        item.action();
-        this.hideContextMenu();
-      });
-      
-      menu.appendChild(menuItem);
+    this.contextMenuManager.showBackgroundContextMenu(x, y, {
+      addNodeAtPosition: (x, y) => this.addNodeAtPosition(x, y),
+      selectAll: () => this.selectAll(),
+      clearAllSelections: () => this.clearAllSelections(),
+      resetView: () => this.resetView()
     });
-    
-    // Add to document
-    document.body.appendChild(menu);
-    this.contextMenuElement = menu;
-    this.contextMenuActive = true;
-    
-    // Add click outside listener to hide menu
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menu && !menu.contains(e.target as Node)) {
-        this.hideContextMenu();
-        document.removeEventListener('click', handleClickOutside);
-      }
-    };
-    
-    setTimeout(() => {
-      document.addEventListener('click', handleClickOutside);
-    }, 0);
   }
 
   private hideContextMenu() {
-    if (this.contextMenuElement) {
-      if (this.contextMenuElement.parentNode) {
-        this.contextMenuElement.parentNode.removeChild(this.contextMenuElement);
-      }
-      this.contextMenuElement = null;
-      this.contextMenuActive = false;
-    }
+    this.contextMenuManager.hideContextMenu();
   }
 
   private selectNode(nodeId: string) {
@@ -1224,21 +1044,27 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     // For now, we'll just emit an event that can be handled by other components
     // Emit a standard event that's supported
     // For now, we'll just log to console as there's no specific event for this
-    console.log('Edit node label requested for node:', nodeId);
+    // console.log('Edit node label requested for node:', nodeId);
+    // Intentionally unused parameter
+    void nodeId;
   }
 
   private addNodeConnection(nodeId: string) {
     // For now, we'll just emit an event that can be handled by other components
     // Emit a standard event that's supported
     // For now, we'll just log to console as there's no specific event for this
-    console.log('Add connection requested for node:', nodeId);
+    // console.log('Add connection requested for node:', nodeId);
+    // Intentionally unused parameter
+    void nodeId;
   }
 
   private findShortestPath(nodeId: string) {
     // For now, we'll just emit an event that can be handled by other components
     // Emit a standard event that's supported
     // For now, we'll just log to console as there's no specific event for this
-    console.log('Find shortest path requested for node:', nodeId);
+    // console.log('Find shortest path requested for node:', nodeId);
+    // Intentionally unused parameter
+    void nodeId;
   }
 
   private addToGroup(nodeId: string) {
@@ -1255,6 +1081,8 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     // In a real implementation, this would show a dialog to select a group
     const firstGroupId = groups[0].id;
     this.addNodesToGroup(firstGroupId);
+    // Intentionally unused parameter
+    void nodeId;
   }
 
   private deleteEdge(edgeId: string) {
@@ -1272,7 +1100,9 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     // For now, we'll just emit an event that can be handled by other components
     // Emit a standard event that's supported
     // For now, we'll just log to console as there's no specific event for this
-    console.log('Edit edge label requested for edge:', edgeId);
+    // console.log('Edit edge label requested for edge:', edgeId);
+    // Intentionally unused parameter
+    void edgeId;
   }
 
   private reverseEdgeDirection(edgeId: string) {
@@ -1297,7 +1127,9 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     // For now, we'll just emit an event that can be handled by other components
     // Emit a standard event that's supported
     // For now, we'll just log to console as there's no specific event for this
-    console.log('Highlight path requested for edge:', edgeId);
+    // console.log('Highlight path requested for edge:', edgeId);
+    // Intentionally unused parameter
+    void edgeId;
   }
 
   private addNodeAtPosition(x: number, y: number) {
@@ -1321,7 +1153,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     // Emit event for adding node at position
     // Emit a standard event that's supported
     // For now, we'll just log to console as there's no specific event for this
-    console.log('Add node at position requested at:', { x, y });
+    // console.log('Add node at position requested at:', { x, y });
   }
 
   private selectAll() {

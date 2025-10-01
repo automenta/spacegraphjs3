@@ -1,8 +1,8 @@
-# Edge Interaction Specification
+# Edge Interaction - Consolidated Documentation
 
 ## Overview
 
-This document specifies the edge interaction functionality for SpaceGraphJS, enabling users to interact with edges in the graph visualization through hover, click, and selection operations.
+The edge interaction system in SpaceGraphJS enables users to interact with edges in the graph visualization through hover, click, and selection operations. This system provides a comprehensive set of features for creating rich, interactive graph experiences.
 
 ## Features
 
@@ -153,9 +153,48 @@ const spec = {
         color: '#ffffff',
         strength: 0.5
       }
+    },
+    'edge:source-selected': {
+      color: '#ffaa00',
+      width: 4,
+      opacity: 0.9
+    },
+    'edge:target-selected': {
+      color: '#00aaff',
+      width: 4,
+      opacity: 0.9
+    },
+    'edge:both-selected': {
+      color: '#ff00ff',
+      width: 5,
+      opacity: 1.0
     }
   }
 };
+```
+
+## Edge Editing
+
+The system supports interactive editing of curved edges:
+
+### Curved Edge Editing
+- Right-click on a curved edge to enter edit mode
+- Drag the yellow handle to adjust the curve
+- Right-click again to exit edit mode
+
+### API for Edge Editing
+```javascript
+// Programmatically edit an edge path
+graph.update({
+  data: {
+    edges: {
+      update: [{
+        id: 'edge-1',
+        curvature: 0.8 // Adjust curvature
+      }]
+    }
+  }
+});
 ```
 
 ## Performance Considerations
@@ -169,6 +208,11 @@ const spec = {
 - Proper disposal of edge geometries and materials
 - Reuse of materials where possible
 - Cleanup of event listeners on destruction
+
+### Rendering Optimization
+- Geometry caching to avoid recreation on every update
+- Efficient hit area handling
+- Batched updates for multiple edge changes
 
 ## Testing
 
@@ -201,6 +245,183 @@ const spec = {
 - Tooltips and popups
 - Rich media integration
 
-## Conclusion
+## Best Practices
 
-The edge interaction system provides a comprehensive set of features for interacting with edges in SpaceGraphJS visualizations. With support for hover, selection, and customizable styling, users can create rich, interactive graph experiences.
+### For Developers
+1. **Consistent Event Naming**: Follow the established naming conventions
+2. **Proper Disposal**: Always clean up resources and event listeners
+3. **Performance Monitoring**: Profile edge interaction performance regularly
+4. **Accessibility**: Ensure keyboard navigation and screen reader support
+
+### For Users
+1. **Appropriate Styling**: Use clear visual distinctions for different states
+2. **Responsive Feedback**: Provide immediate feedback for user actions
+3. **Contextual Help**: Offer guidance for complex interactions
+4. **Progressive Enhancement**: Start with basic interactions and add complexity
+
+## Example Implementation
+
+```javascript
+import {
+  CameraPlugin,
+  HUDPlugin,
+  InteractionPlugin,
+  LayoutPlugin,
+  SpaceGraph,
+  Spec,
+  NodeSpec,
+  EdgeSpec,
+} from 'spacegraphjs';
+
+// Create nodes
+const nodes: NodeSpec[] = [
+  {
+    id: 'node-1',
+    type: 'sphere',
+    position: { x: -10, y: 0, z: 0 },
+    color: '#ff0000',
+    label: 'Node 1'
+  },
+  {
+    id: 'node-2',
+    type: 'box',
+    position: { x: 10, y: 0, z: 0 },
+    color: '#00ff00',
+    label: 'Node 2'
+  }
+];
+
+// Create edges with different types
+const edges: EdgeSpec[] = [
+  {
+    id: 'edge-1',
+    source: 'node-1',
+    target: 'node-2',
+    color: '#ff0000',
+    width: 3,
+    type: 'straight',
+    label: 'Straight Edge'
+  },
+  {
+    id: 'edge-2',
+    source: 'node-1',
+    target: 'node-2',
+    color: '#00ff00',
+    width: 2,
+    type: 'curved',
+    curvature: 0.5,
+    label: 'Curved Edge'
+  },
+  {
+    id: 'edge-3',
+    source: 'node-1',
+    target: 'node-2',
+    color: '#0000ff',
+    width: 4,
+    type: 'dashed',
+    dashSize: 0.5,
+    gapSize: 0.3,
+    label: 'Dashed Edge'
+  }
+];
+
+const spec: Spec = {
+  data: {
+    nodes,
+    edges,
+  },
+  style: {
+    'node:hover': {
+      color: '#ffffff',
+      glow: {
+        color: '#ffffff',
+        strength: 0.8
+      }
+    },
+    'node:selected': {
+      color: '#ffffff',
+      glow: {
+        color: '#ffffff',
+        strength: 1.0
+      }
+    },
+    'edge:hover': {
+      color: '#ffffff',
+      width: 5,
+      opacity: 1.0
+    },
+    'edge:selected': {
+      color: '#ffffff',
+      width: 6,
+      opacity: 1.0,
+      glow: {
+        color: '#ffffff',
+        strength: 0.5
+      }
+    }
+  },
+  layout: {
+    type: 'force-directed',
+    charge: -30,
+    linkDistance: 20,
+  },
+  camera: {
+    target: { x: 0, y: 0, z: 0 },
+    phi: Math.PI / 4,
+    theta: Math.PI / 4,
+    distance: 50,
+  },
+  controls: {
+    keyboard: {
+      enabled: true,
+      panSpeed: 0.1,
+      zoomSpeed: 0.1,
+      orbitSpeed: 0.1,
+    },
+  },
+  performance: {
+    instancingThreshold: 100,
+  },
+  interaction: {
+    hoveredElementId: null,
+    selectedElementIds: [],
+  },
+};
+
+const plugins = [
+  new LayoutPlugin(),
+  new CameraPlugin(),
+  new InteractionPlugin(),
+  new HUDPlugin(),
+];
+
+const graph = new SpaceGraph('#container', spec, plugins);
+
+// Add event listeners to demonstrate edge interaction
+graph.on('edge:click', ({ target, event, sourceNode, targetNode }) => {
+  console.log('Edge clicked:', target.id);
+  console.log('Source node:', sourceNode.id);
+  console.log('Target node:', targetNode.id);
+  console.log('Event:', event);
+});
+
+graph.on('edge:hover:enter', ({ target, sourceNode, targetNode }) => {
+  console.log('Edge hover enter:', target.id);
+  console.log('Source node:', sourceNode.id);
+  console.log('Target node:', targetNode.id);
+});
+
+graph.on('edge:hover:leave', ({ target, sourceNode, targetNode }) => {
+  console.log('Edge hover leave:', target.id);
+  console.log('Source node:', sourceNode.id);
+  console.log('Target node:', targetNode.id);
+});
+
+graph.on('edge:select', ({ target, sourceNode, targetNode }) => {
+  console.log('Edge selected:', target.id);
+  console.log('Source node:', sourceNode.id);
+  console.log('Target node:', targetNode.id);
+});
+
+// Expose graph to window for easy debugging and testing
+(window as any).graph = graph;

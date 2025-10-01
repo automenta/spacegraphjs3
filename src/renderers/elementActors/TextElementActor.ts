@@ -60,14 +60,14 @@ export class TextElementActor extends BaseGeometryActor {
       
       // Get text properties with defaults
       const text = textSpec.text || textSpec.label || this.elementState.id || 'Text';
-      const font = textSpec.font || 'helvetiker';
+      // const font = textSpec.font || 'helvetiker'; // Not currently used
       const size = textSpec.size || 0.5;
       const depth = textSpec.depth || 0.1;
       const align = textSpec.align || 'center';
       const lineHeight = textSpec.lineHeight || 1.2;
       const maxWidth = textSpec.maxWidth || Infinity;
       const bold = textSpec.bold || false;
-      const italic = textSpec.italic || false;
+      // const italic = textSpec.italic || false; // Not currently used
       
       // Determine font URL based on properties
       let fontUrl = TextElementActor.defaultFontUrl;
@@ -86,7 +86,7 @@ export class TextElementActor extends BaseGeometryActor {
       
       // Create text geometries for each line
       const lineGeometries: THREE.BufferGeometry[] = [];
-      let totalHeight = 0;
+      // let totalHeight = 0; // Not used in this scope
       
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
@@ -108,9 +108,9 @@ export class TextElementActor extends BaseGeometryActor {
         lineGeometry.computeBoundingBox();
         
         lineGeometries.push(lineGeometry);
-        if (lineGeometry.boundingBox) {
-          totalHeight += lineGeometry.boundingBox.max.y - lineGeometry.boundingBox.min.y;
-        }
+        // if (lineGeometry.boundingBox) {
+        //   totalHeight += lineGeometry.boundingBox.max.y - lineGeometry.boundingBox.min.y;
+        // }
       }
       
       // Combine all line geometries into a single geometry
@@ -161,7 +161,7 @@ export class TextElementActor extends BaseGeometryActor {
     }
     
     // Create new loading promise
-    const loadingPromise = new Promise((resolve, reject) => {
+    const loadingPromise = new Promise((resolve, _reject) => {
       TextElementActor.fontLoader.load(
         fontUrl,
         (font) => {

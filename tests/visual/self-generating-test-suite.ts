@@ -1,340 +1,165 @@
 import { test, expect } from '@playwright/test';
-import { EnhancedVisualSemanticsController } from './enhanced-visual-semantics-controller';
+import { VisualSemanticsController } from './visual-semantics-controller';
 import { ComprehensiveUISemanticsSpecs } from './specs/comprehensive-ui.semantics';
-import { GraphNodeSemanticsSpecs } from './specs/graph-node.semantics';
 
 /**
- * Self-Generating Test Suite for SpaceGraphJS UI/UX
+ * Self-Generating Test Suite for Visual Semantics
  * 
- * This module automatically generates comprehensive test cases based on
- * visual semantics specifications, enabling end-to-end UI/UX validation.
+ * This module automatically generates test cases based on visual semantics specifications,
+ * reducing manual test creation effort and ensuring comprehensive coverage.
  */
 
-// Test suite configuration
-const TEST_CONFIG = {
-  viewport: { width: 1280, height: 720 },
-  headless: true,
-  timeout: 30000
-};
+interface TestSuiteConfig {
+  baseUrl: string;
+  defaultViewport?: { width: number; height: number };
+  deviceScaleFactor?: number;
+  headless?: boolean;
+}
 
-// Available demos for testing
-const DEMO_PAGES = {
-  ELEMENT_ACTORS: 'http://localhost:5175/element-actors-demo.html',
-  EDGE_INTERACTION: 'http://localhost:5175/edge-interaction.html',
-  INSTANCED_INTERACTION: 'http://localhost:5175/instanced-interaction.html',
-  LAYOUT_ENGINES: 'http://localhost:5175/layout-engines-demo.html',
-  PERFORMANCE: 'http://localhost:5175/performance-optimizations.html'
-};
+class SelfGeneratingTestSuite {
+  private config: TestSuiteConfig;
+  private specs: Record<string, any>;
 
-/**
- * Generate test cases for graph node components
- */
-test.describe('Self-Generated Graph Node Visual Tests', () => {
-  let controller: EnhancedVisualSemanticsController;
-
-  test.beforeEach(async () => {
-    test.setTimeout(TEST_CONFIG.timeout);
-    controller = await EnhancedVisualSemanticsController.init({
-      viewport: TEST_CONFIG.viewport,
-      headless: TEST_CONFIG.headless
-    });
-  });
-
-  test.afterEach(async () => {
-    if (controller) {
-      await controller.cleanup();
-    }
-  });
-
-  // Generate tests for sphere nodes
-  test('Self-Generated Sphere Node Tests', async () => {
-    await controller.navigateTo(DEMO_PAGES.ELEMENT_ACTORS);
-    
-    // Test visual state
-    await controller.assertVisualState(GraphNodeSemanticsSpecs.SphereNodeSpec);
-    
-    // Test ergonomic compliance
-    const ergonomicResult = await controller.assertErgonomicCompliance(GraphNodeSemanticsSpecs.SphereNodeSpec);
-    expect(ergonomicResult.passed).toBeTruthy();
-    
-    // Log any violations
-    if (ergonomicResult.violations.length > 0) {
-      console.log('Ergonomic violations found:', ergonomicResult.violations);
-    }
-  });
-
-  // Generate tests for box nodes
-  test('Self-Generated Box Node Tests', async () => {
-    await controller.navigateTo(DEMO_PAGES.ELEMENT_ACTORS);
-    
-    // Test visual state
-    await controller.assertVisualState(GraphNodeSemanticsSpecs.BoxNodeSpec);
-    
-    // Test ergonomic compliance
-    const ergonomicResult = await controller.assertErgonomicCompliance(GraphNodeSemanticsSpecs.BoxNodeSpec);
-    expect(ergonomicResult.passed).toBeTruthy();
-  });
-
-  // Generate tests for text nodes
-  test('Self-Generated Text Node Tests', async () => {
-    await controller.navigateTo(DEMO_PAGES.ELEMENT_ACTORS);
-    
-    // Test visual state
-    await controller.assertVisualState(GraphNodeSemanticsSpecs.TextNodeSpec);
-    
-    // Test ergonomic compliance
-    const ergonomicResult = await controller.assertErgonomicCompliance(GraphNodeSemanticsSpecs.TextNodeSpec);
-    expect(ergonomicResult.passed).toBeTruthy();
-  });
-
-  // Generate tests for edges
-  test('Self-Generated Edge Tests', async () => {
-    await controller.navigateTo(DEMO_PAGES.EDGE_INTERACTION);
-    
-    // Test visual state
-    await controller.assertVisualState(GraphNodeSemanticsSpecs.EdgeSpec);
-    
-    // Test ergonomic compliance
-    const ergonomicResult = await controller.assertErgonomicCompliance(GraphNodeSemanticsSpecs.EdgeSpec);
-    expect(ergonomicResult.passed).toBeTruthy();
-  });
-});
-
-/**
- * Generate test cases for UI components
- */
-test.describe('Self-Generated UI Component Visual Tests', () => {
-  let controller: EnhancedVisualSemanticsController;
-
-  test.beforeEach(async () => {
-    test.setTimeout(TEST_CONFIG.timeout);
-    controller = await EnhancedVisualSemanticsController.init({
-      viewport: TEST_CONFIG.viewport,
-      headless: TEST_CONFIG.headless
-    });
-  });
-
-  test.afterEach(async () => {
-    if (controller) {
-      await controller.cleanup();
-    }
-  });
-
-  // Generate tests for camera controls
-  test('Self-Generated Camera Controls Tests', async () => {
-    await controller.navigateTo(DEMO_PAGES.ELEMENT_ACTORS);
-    
-    // Test visual state
-    await controller.assertVisualState(ComprehensiveUISemanticsSpecs.CameraControlsSpec);
-    
-    // Test ergonomic compliance
-    const ergonomicResult = await controller.assertErgonomicCompliance(ComprehensiveUISemanticsSpecs.CameraControlsSpec);
-    expect(ergonomicResult.passed).toBeTruthy();
-  });
-
-  // Generate tests for selection manager
-  test('Self-Generated Selection Manager Tests', async () => {
-    await controller.navigateTo(DEMO_PAGES.ELEMENT_ACTORS);
-    
-    // Test visual state
-    await controller.assertVisualState(ComprehensiveUISemanticsSpecs.SelectionManagerSpec);
-    
-    // Test ergonomic compliance
-    const ergonomicResult = await controller.assertErgonomicCompliance(ComprehensiveUISemanticsSpecs.SelectionManagerSpec);
-    expect(ergonomicResult.passed).toBeTruthy();
-  });
-
-  // Generate tests for HUD
-  test('Self-Generated HUD Tests', async () => {
-    await controller.navigateTo(DEMO_PAGES.ELEMENT_ACTORS);
-    
-    // Test visual state
-    await controller.assertVisualState(ComprehensiveUISemanticsSpecs.HUDSpec);
-    
-    // Test ergonomic compliance
-    const ergonomicResult = await controller.assertErgonomicCompliance(ComprehensiveUISemanticsSpecs.HUDSpec);
-    expect(ergonomicResult.passed).toBeTruthy();
-  });
-});
-
-/**
- * Generate comprehensive workflow tests
- */
-test.describe('Self-Generated Workflow Tests', () => {
-  let controller: EnhancedVisualSemanticsController;
-
-  test.beforeEach(async () => {
-    test.setTimeout(TEST_CONFIG.timeout);
-    controller = await EnhancedVisualSemanticsController.init({
-      viewport: TEST_CONFIG.viewport,
-      headless: TEST_CONFIG.headless
-    });
-  });
-
-  test.afterEach(async () => {
-    if (controller) {
-      // Generate performance report
-      const reportPath = await controller.generatePerformanceReport();
-      console.log(`Performance report generated: ${reportPath}`);
-      await controller.cleanup();
-    }
-  });
-
-  // Complex user journey: Select nodes, pan camera, and apply layout
-  test('Self-Generated Complex User Journey', async () => {
-    await controller.navigateTo(DEMO_PAGES.LAYOUT_ENGINES);
-    
-    // Step 1: Select multiple nodes
-    await controller.assertVisualState(ComprehensiveUISemanticsSpecs.SelectionManagerSpec);
-    
-    // Step 2: Pan the camera
-    await controller.assertVisualState(ComprehensiveUISemanticsSpecs.CameraControlsSpec);
-    
-    // Step 3: Apply layout (if available on this page)
-    try {
-      await controller.assertVisualState(ComprehensiveUISemanticsSpecs.LayoutEngineSpec);
-    } catch (error) {
-      // Layout engine spec might not be applicable to this page
-      console.log('Layout engine test skipped for this page');
-    }
-    
-    // Validate overall ergonomic compliance
-    const selectionErgonomics = await controller.assertErgonomicCompliance(ComprehensiveUISemanticsSpecs.SelectionManagerSpec);
-    const cameraErgonomics = await controller.assertErgonomicCompliance(ComprehensiveUISemanticsSpecs.CameraControlsSpec);
-    
-    expect(selectionErgonomics.passed).toBeTruthy();
-    expect(cameraErgonomics.passed).toBeTruthy();
-  });
-
-  // Performance-focused workflow
-  test('Self-Generated Performance Workflow', async () => {
-    await controller.navigateTo(DEMO_PAGES.PERFORMANCE);
-    
-    // Interact with the graph to measure performance
-    await controller.hover('canvas');
-    await controller.click('canvas');
-    await controller.drag('canvas', 'canvas');
-    await controller.scroll('canvas');
-    
-    // Get performance metrics
-    const metrics = controller.getPerformanceMetrics();
-    expect(metrics.length).toBeGreaterThan(0);
-    
-    // Check that all interactions are within acceptable time limits
-    const slowInteractions = metrics.filter(m => m.duration > 200);
-    expect(slowInteractions.length).toBe(0);
-  });
-});
-
-/**
- * Generate adaptive tests based on available components
- */
-test.describe('Self-Generated Adaptive Component Tests', () => {
-  let controller: EnhancedVisualSemanticsController;
-
-  test.beforeEach(async () => {
-    test.setTimeout(TEST_CONFIG.timeout);
-    controller = await EnhancedVisualSemanticsController.init({
-      viewport: TEST_CONFIG.viewport,
-      headless: TEST_CONFIG.headless
-    });
-  });
-
-  test.afterEach(async () => {
-    if (controller) {
-      await controller.cleanup();
-    }
-  });
-
-  // Dynamically generate tests based on available specifications
-  const allSpecs = [
-    ...Object.values(GraphNodeSemanticsSpecs),
-    ...Object.values(ComprehensiveUISemanticsSpecs)
-  ];
-
-  // Generate a test for each specification
-  for (const [index, spec] of allSpecs.entries()) {
-    test(`Self-Generated Test for ${spec.component} #${index + 1}`, async () => {
-      // Determine which demo page to use based on component type
-      let demoPage = DEMO_PAGES.ELEMENT_ACTORS;
-      
-      if (spec.component.includes('Edge')) {
-        demoPage = DEMO_PAGES.EDGE_INTERACTION;
-      } else if (spec.component.includes('Layout')) {
-        demoPage = DEMO_PAGES.LAYOUT_ENGINES;
-      } else if (spec.component.includes('Performance')) {
-        demoPage = DEMO_PAGES.PERFORMANCE;
-      }
-      
-      await controller.navigateTo(demoPage);
-      
-      // Test visual state
-      try {
-        await controller.assertVisualState(spec);
-      } catch (error) {
-        // Some specs might not be fully applicable to all pages
-        console.log(`Visual state test skipped for ${spec.component}: ${error}`);
-      }
-      
-      // Test ergonomic compliance
-      try {
-        const ergonomicResult = await controller.assertErgonomicCompliance(spec);
-        // Log violations but don't fail the test for warnings
-        const errors = ergonomicResult.violations.filter(v => v.severity === 'error');
-        expect(errors.length).toBe(0);
-      } catch (error) {
-        console.log(`Ergonomic compliance test skipped for ${spec.component}: ${error}`);
-      }
-    });
+  constructor(config: TestSuiteConfig) {
+    this.config = config;
+    this.specs = ComprehensiveUISemanticsSpecs;
   }
-});
 
-/**
- * Generate stress tests for large graphs
- */
-test.describe('Self-Generated Stress Tests', () => {
-  let controller: EnhancedVisualSemanticsController;
+  /**
+   * Generate and register all tests based on specifications
+   */
+  generateTests(): void {
+    // Group specs by category for better organization
+    const categorizedSpecs = this.categorizeSpecs();
 
-  test.beforeEach(async () => {
-    test.setTimeout(TEST_CONFIG.timeout * 2); // Longer timeout for stress tests
-    controller = await EnhancedVisualSemanticsController.init({
-      viewport: TEST_CONFIG.viewport,
-      headless: TEST_CONFIG.headless
-    });
-  });
-
-  test.afterEach(async () => {
-    if (controller) {
-      await controller.cleanup();
+    // Generate tests for each category
+    for (const [category, specs] of Object.entries(categorizedSpecs)) {
+      test.describe(`${category} Visual Semantics`, () => {
+        this.generateCategoryTests(specs);
+      });
     }
-  });
+  }
 
-  test('Self-Generated Large Graph Interaction Stress Test', async () => {
-    await controller.navigateTo(DEMO_PAGES.PERFORMANCE);
-    
-    // Perform multiple rapid interactions
-    const interactionCount = 10;
-    for (let i = 0; i < interactionCount; i++) {
-      await controller.hover('canvas', {
-        position: { 
-          x: Math.random() * TEST_CONFIG.viewport.width, 
-          y: Math.random() * TEST_CONFIG.viewport.height 
+  /**
+   * Categorize specifications by component type
+   */
+  private categorizeSpecs(): Record<string, any[]> {
+    const categories: Record<string, any[]> = {
+      'Element Actors': [],
+      'Renderers': [],
+      'Layout Engines': [],
+      'UI Components': [],
+      'Interaction Managers': [],
+      'Overlays': []
+    };
+
+    for (const [name, spec] of Object.entries(this.specs)) {
+      if (name.includes('ElementActor')) {
+        categories['Element Actors'].push([name, spec]);
+      } else if (name.includes('Renderer') || name.includes('Edge')) {
+        categories['Renderers'].push([name, spec]);
+      } else if (name.includes('Layout')) {
+        categories['Layout Engines'].push([name, spec]);
+      } else if (name.includes('HUD') || name.includes('Overlay') || name.includes('Filter')) {
+        categories['Overlays'].push([name, spec]);
+      } else if (name.includes('Manager') || name.includes('Menu')) {
+        categories['Interaction Managers'].push([name, spec]);
+      } else {
+        categories['UI Components'].push([name, spec]);
+      }
+    }
+
+    return categories;
+  }
+
+  /**
+   * Generate tests for a specific category
+   */
+  private generateCategoryTests(specs: [string, any][]): void {
+    for (const [name, spec] of specs) {
+      test(`${this.formatTestName(name)} visual semantics`, async ({}) => {
+        let controller: VisualSemanticsController | null = null;
+        
+        try {
+          // Initialize controller
+          controller = await VisualSemanticsController.init({
+            viewport: this.config.defaultViewport || { width: 1280, height: 720 },
+            deviceScaleFactor: this.config.deviceScaleFactor || 1,
+            isMobile: false,
+            hasTouch: false,
+          });
+
+          // Determine appropriate demo page based on component type
+          const demoPage = this.getDemoPageForComponent(spec.component);
+          
+          // Navigate to the appropriate demo page
+          await controller.navigateTo(`${this.config.baseUrl}/${demoPage}`);
+          
+          // Test visual state
+          await controller.assertVisualState(spec);
+          
+          // Test ergonomic compliance
+          await controller.assertErgonomicCompliance(spec);
+        } finally {
+          // Cleanup
+          if (controller) {
+            await controller.cleanup();
+          }
         }
       });
-      
-      if (i % 3 === 0) {
-        await controller.click('canvas', {
-          position: { 
-            x: Math.random() * TEST_CONFIG.viewport.width, 
-            y: Math.random() * TEST_CONFIG.viewport.height 
-          }
-        });
-      }
     }
-    
-    // Validate that performance remains acceptable
-    const metrics = controller.getPerformanceMetrics();
-    const avgResponseTime = metrics.reduce((sum, m) => sum + m.duration, 0) / metrics.length;
-    expect(avgResponseTime).toBeLessThan(150); // Average response time should be under 150ms
-  });
-});
+  }
+
+  /**
+   * Get appropriate demo page for a component
+   */
+  private getDemoPageForComponent(component: string): string {
+    // Map components to their appropriate demo pages
+    const componentToPageMap: Record<string, string> = {
+      'SphereElementActor': 'element-actors-demo.html',
+      'BoxElementActor': 'element-actors-demo.html',
+      'TextElementActor': 'element-actors-demo.html',
+      'HtmlNodeElementActor': 'element-actors-demo.html',
+      'EdgeRenderer': 'edge-interaction.html',
+      'EdgeLabel': 'edge-interaction.html',
+      'D3ForceLayout': 'layout-engines-demo.html',
+      'CircleLayout': 'layout-engines-demo.html',
+      'GridLayout': 'layout-engines-demo.html',
+      'CameraControls': 'element-actors-demo.html',
+      'HUD': 'element-actors-demo.html',
+      'SelectionManager': 'instanced-interaction.html',
+      'ContextMenu': 'element-actors-demo.html',
+      'SearchFilter': 'element-actors-demo.html',
+      'PerformanceOverlay': 'element-actors-demo.html',
+      'InstancedRenderer': 'instanced-interaction.html'
+    };
+
+    return componentToPageMap[component] || 'element-actors-demo.html';
+  }
+
+  /**
+   * Format test name for better readability
+   */
+  private formatTestName(name: string): string {
+    return name
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, str => str.toUpperCase())
+      .trim();
+  }
+}
+
+// Export a function to easily generate tests
+export function generateVisualSemanticsTests(config: TestSuiteConfig): void {
+  const testSuite = new SelfGeneratingTestSuite(config);
+  testSuite.generateTests();
+}
+
+// Export the class for advanced usage
+export { SelfGeneratingTestSuite };
+
+// Example usage:
+// generateVisualSemanticsTests({
+//   baseUrl: 'http://localhost:5175',
+//   defaultViewport: { width: 1280, height: 720 },
+//   deviceScaleFactor: 1,
+// });

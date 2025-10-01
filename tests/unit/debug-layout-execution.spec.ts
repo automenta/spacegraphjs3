@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, it, vi } from 'vitest';
 import { createTestGraph, nextTick } from './test-utils';
 import { SpaceGraph, LayoutPlugin, CircleLayout } from '../../src';
 

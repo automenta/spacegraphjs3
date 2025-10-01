@@ -1,6 +1,6 @@
 import { createEffect } from 'solid-js';
-import { SpaceGraph } from '../core/SpaceGraph';
-import { NodeSpec } from '../types';
+import { SpaceGraph as _SpaceGraph } from '../core/SpaceGraph';
+import { NodeSpec as _NodeSpec } from '../types';
 import { BaseLayoutEngine } from './BaseLayoutEngine';
 
 export interface GridLayoutSpec {

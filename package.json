@@ -13,6 +13,9 @@
     "test:e2e": "playwright test",
     "test:visual": "npx ts-node tests/visual/run-visual-tests.ts",
     "test:visual-ci": "npx ts-node tests/visual/run-ci-cd-tests.ts",
+    "test:visual-full": "npx playwright test tests/visual/end-to-end-workflow-tests.ts",
+    "test:visual-dashboard": "npx playwright test tests/visual/unified-dashboard-demo.spec.ts",
+    "test:visual-perf": "npx playwright test tests/visual/performance-metrics-demo.spec.ts",
     "lint": "eslint .",
     "format": "prettier --write .",
     "screenshots": "node doc/screenshots/capture-all.js"

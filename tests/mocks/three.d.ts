@@ -7,7 +7,7 @@ export declare const mockThree: {
         };
     };
     PerspectiveCamera: {
-        new (): {};
+        new (): object;
     };
     Vector3: {
         new (x?: number, y?: number, z?: number): {

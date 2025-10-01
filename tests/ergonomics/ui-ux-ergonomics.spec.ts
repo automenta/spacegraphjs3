@@ -12,19 +12,19 @@ test.describe('UI/UX Ergonomics Validation', () => {
     test.setTimeout(30000);
   });
 
-  test('Touch target size compliance', async ({ page }) => {
+  test('Touch target size compliance', async ({ page: _page }) => {
     // Navigate to a demo with interactive elements
-    await page.goto('/element-actors-demo.html');
+    await _page.goto('/element-actors-demo.html');
     
     // Wait for graph to initialize
-    await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
-    await page.waitForTimeout(2000);
+    await _page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
+    await _page.waitForTimeout(2000);
     
     // Evaluate touch target sizes
     // In a real implementation, we would measure actual rendered sizes
     // For now, we'll check that elements are reasonably sized
     
-    const elementSizes = await page.evaluate(() => {
+    const elementSizes = await _page.evaluate(() => {
       // This is a simplified check
       // In reality, we would measure actual rendered sizes
       const graph = (window as any).graph;
@@ -56,16 +56,16 @@ test.describe('UI/UX Ergonomics Validation', () => {
     console.log(`Evaluated ${elementSizes.length} elements for touch target compliance`);
   });
 
-  test('Color contrast ratio compliance', async ({ page }) => {
+  test('Color contrast ratio compliance', async ({ page: _page }) => {
     // Navigate to element actors demo
-    await page.goto('/element-actors-demo.html');
+    await _page.goto('/element-actors-demo.html');
     
     // Wait for graph to initialize
-    await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
-    await page.waitForTimeout(2000);
+    await _page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
+    await _page.waitForTimeout(2000);
     
     // Check background color
-    const backgroundColor = await page.evaluate(() => {
+    const backgroundColor = await _page.evaluate(() => {
       const container = document.getElementById('container');
       if (!container) return '#000000';
       const style = window.getComputedStyle(container);
@@ -73,7 +73,7 @@ test.describe('UI/UX Ergonomics Validation', () => {
     });
     
     // Check typical node colors
-    const nodeColors = await page.evaluate(() => {
+    const nodeColors = await _page.evaluate(() => {
       const graph = (window as any).graph;
       if (!graph) return [];
       
@@ -91,19 +91,19 @@ test.describe('UI/UX Ergonomics Validation', () => {
     expect(nodeColors.length).toBeGreaterThan(0);
   });
 
-  test('Keyboard navigation support', async ({ page }) => {
+  test('Keyboard navigation support', async ({ page: _page }) => {
     // Navigate to element actors demo
-    await page.goto('/element-actors-demo.html');
+    await _page.goto('/element-actors-demo.html');
     
     // Wait for graph to initialize
-    await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
-    await page.waitForTimeout(2000);
+    await _page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
+    await _page.waitForTimeout(2000);
     
     // Focus the canvas
-    await page.focus('canvas');
+    await _page.focus('canvas');
     
     // Check that canvas can receive focus
-    const isFocused = await page.evaluate(() => {
+    const isFocused = await _page.evaluate(() => {
       const activeElement = document.activeElement;
       return activeElement?.tagName === 'CANVAS';
     });
@@ -112,19 +112,19 @@ test.describe('UI/UX Ergonomics Validation', () => {
     
     // Test basic keyboard interactions
     // Tab navigation
-    await page.keyboard.press('Tab');
-    await page.waitForTimeout(100);
+    await _page.keyboard.press('Tab');
+    await _page.waitForTimeout(100);
     
     // Arrow key navigation
-    await page.keyboard.press('ArrowRight');
-    await page.waitForTimeout(100);
+    await _page.keyboard.press('ArrowRight');
+    await _page.waitForTimeout(100);
     
     // Selection
-    await page.keyboard.press('Enter');
-    await page.waitForTimeout(100);
+    await _page.keyboard.press('Enter');
+    await _page.waitForTimeout(100);
     
     // Check that interactions were processed
-    const interactionState = await page.evaluate(() => {
+    const interactionState = await _page.evaluate(() => {
       const graph = (window as any).graph;
       if (!graph) return { selected: [], hovered: null };
       
@@ -137,16 +137,16 @@ test.describe('UI/UX Ergonomics Validation', () => {
     console.log(`Keyboard navigation result: ${JSON.stringify(interactionState)}`);
   });
 
-  test('Screen reader accessibility', async ({ page }) => {
+  test('Screen reader accessibility', async ({ page: _page }) => {
     // Navigate to element actors demo
-    await page.goto('/element-actors-demo.html');
+    await _page.goto('/element-actors-demo.html');
     
     // Wait for graph to initialize
-    await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
-    await page.waitForTimeout(2000);
+    await _page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
+    await _page.waitForTimeout(2000);
     
     // Check for accessibility attributes
-    const accessibilityAttributes = await page.evaluate(() => {
+    const accessibilityAttributes = await _page.evaluate(() => {
       const container = document.getElementById('container');
       if (!container) return {};
       
@@ -180,25 +180,25 @@ test.describe('UI/UX Ergonomics Validation', () => {
     // For now, we just verify that we can check for these attributes
   });
 
-  test('Response time performance', async ({ page }) => {
+  test('Response time performance', async ({ page: _page }) => {
     // Navigate to element actors demo
-    await page.goto('/element-actors-demo.html');
+    await _page.goto('/element-actors-demo.html');
     
     // Wait for graph to initialize
-    await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
-    await page.waitForTimeout(2000);
+    await _page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
+    await _page.waitForTimeout(2000);
     
     // Measure hover response time
     const hoverStartTime = Date.now();
     
-    const viewport = page.viewportSize();
+    const viewport = _page.viewportSize();
     if (viewport) {
-      await page.hover('canvas', {
+      await _page.hover('canvas', {
         position: { x: viewport.width / 2, y: viewport.height / 2 }
       });
     }
     
-    await page.waitForTimeout(100);
+    await _page.waitForTimeout(100);
     
     const hoverEndTime = Date.now();
     const hoverResponseTime = hoverEndTime - hoverStartTime;
@@ -207,12 +207,12 @@ test.describe('UI/UX Ergonomics Validation', () => {
     const clickStartTime = Date.now();
     
     if (viewport) {
-      await page.click('canvas', {
+      await _page.click('canvas', {
         position: { x: viewport.width / 2, y: viewport.height / 2 }
       });
     }
     
-    await page.waitForTimeout(100);
+    await _page.waitForTimeout(100);
     
     const clickEndTime = Date.now();
     const clickResponseTime = clickEndTime - clickStartTime;
@@ -226,16 +226,16 @@ test.describe('UI/UX Ergonomics Validation', () => {
     expect(clickResponseTime).toBeLessThan(200);
   });
 
-  test('Visual feedback for interactions', async ({ page }) => {
+  test('Visual feedback for interactions', async ({ page: _page }) => {
     // Navigate to element actors demo
-    await page.goto('/element-actors-demo.html');
+    await _page.goto('/element-actors-demo.html');
     
     // Wait for graph to initialize
-    await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
-    await page.waitForTimeout(2000);
+    await _page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
+    await _page.waitForTimeout(2000);
     
     // Get initial visual state
-    const initialState = await page.evaluate(() => {
+    const _initialState = await _page.evaluate(() => {
       // In a real implementation, we would capture visual properties
       // For now, we'll just check that we can access the state
       const graph = (window as any).graph;
@@ -248,17 +248,17 @@ test.describe('UI/UX Ergonomics Validation', () => {
     });
     
     // Perform hover interaction
-    const viewport = page.viewportSize();
+    const viewport = _page.viewportSize();
     if (viewport) {
-      await page.hover('canvas', {
+      await _page.hover('canvas', {
         position: { x: viewport.width / 2, y: viewport.height / 2 }
       });
     }
     
-    await page.waitForTimeout(200);
+    await _page.waitForTimeout(200);
     
     // Check that visual state changed
-    const hoverState = await page.evaluate(() => {
+    const hoverState = await _page.evaluate(() => {
       const graph = (window as any).graph;
       if (!graph) return {};
       
@@ -269,15 +269,15 @@ test.describe('UI/UX Ergonomics Validation', () => {
     
     // Perform click interaction
     if (viewport) {
-      await page.click('canvas', {
+      await _page.click('canvas', {
         position: { x: viewport.width / 2, y: viewport.height / 2 }
       });
     }
     
-    await page.waitForTimeout(200);
+    await _page.waitForTimeout(200);
     
     // Check that visual state changed
-    const clickState = await page.evaluate(() => {
+    const clickState = await _page.evaluate(() => {
       const graph = (window as any).graph;
       if (!graph) return {};
       

@@ -1,7 +1,7 @@
 import { createEffect } from 'solid-js';
 import { produce } from 'solid-js/store';
-import { SpaceGraph } from '../core/SpaceGraph';
-import { NodeSpec, ColumnLayoutSpec } from '../types';
+import { SpaceGraph as _SpaceGraph } from '../core/SpaceGraph';
+import { NodeSpec as _NodeSpec, ColumnLayoutSpec } from '../types';
 import { BaseLayoutEngine } from './BaseLayoutEngine';
 
 /**
@@ -86,8 +86,8 @@ export class ColumnLayout extends BaseLayoutEngine {
     const nodesPerColumn = Math.ceil(count / columns);
     
     // Calculate dimensions for centering (values are used in positioning calculations)
-    const totalHeight = (nodesPerColumn - 1) * spacing;
-    const totalWidth = (columns - 1) * columnSpacing;
+    const _totalHeight = (nodesPerColumn - 1) * spacing;
+    const _totalWidth = (columns - 1) * columnSpacing;
     
     for (let i = 0; i < count; i++) {
       const columnIndex = i % columns;

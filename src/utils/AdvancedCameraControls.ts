@@ -256,7 +256,6 @@ export class AdvancedCameraControls {
     const rect = element.getBoundingClientRect();
     
     const targetDistance = this.targetDistance;
-    const targetPosition = this.targetPosition;
     
     // Calculate pan vectors
     const panLeft = new THREE.Vector3()

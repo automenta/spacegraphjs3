@@ -34,6 +34,7 @@ export class HtmlNodeElementActor extends BaseElementActor {
       }
     } catch (e) {
       // Ignore if we can't get the graph instance
+      console.debug('Could not get graph instance:', e);
     }
   }
 
@@ -182,6 +183,9 @@ export class HtmlNodeElementActor extends BaseElementActor {
   }
 
   private onMouseUp(event: MouseEvent): void {
+    // Prevent default to avoid any potential issues
+    event.preventDefault();
+    
     this.isDragging = false;
     
     // Remove global mouse listeners
@@ -190,6 +194,9 @@ export class HtmlNodeElementActor extends BaseElementActor {
   }
   
   private onTouchEnd(event: TouchEvent): void {
+    // Prevent default to avoid any potential issues
+    event.preventDefault();
+    
     this.isDragging = false;
     
     // Remove global touch listeners
@@ -204,7 +211,8 @@ export class HtmlNodeElementActor extends BaseElementActor {
     // Emit hover enter event through the graph instance
     if (this.graphInstance && this.graphInstance.events) {
       this.graphInstance.events.emit('element:hover:enter', {
-        target: this.elementState
+        target: this.elementState,
+        event: event
       });
     }
   }
@@ -216,7 +224,8 @@ export class HtmlNodeElementActor extends BaseElementActor {
     // Emit hover leave event through the graph instance
     if (this.graphInstance && this.graphInstance.events) {
       this.graphInstance.events.emit('element:hover:leave', {
-        target: this.elementState
+        target: this.elementState,
+        event: event
       });
     }
   }

@@ -258,7 +258,8 @@ export class InstancedRenderer implements IRenderer {
     } catch (error) {
       console.warn(
         `Invalid color specified for instanced node ${node.id}:`,
-        finalColor
+        finalColor,
+        error
       );
       mesh.setColorAt(index, new THREE.Color('#ff00ff')); // Fallback to magenta
     }

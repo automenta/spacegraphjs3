@@ -308,6 +308,7 @@ export class VisualEffectsSystem {
    * Update particle system
    */
   private updateParticleSystem(system: THREE.Points, deltaTime: number, time: number): void {
+    void time; // Intentionally unused, keeping for potential future use
     const geometry = system.geometry;
     const positions = geometry.attributes.position.array as Float32Array;
     const velocities = geometry.attributes.velocity.array as Float32Array;
@@ -757,7 +758,7 @@ abstract class VisualEffect {
     this.config = config;
   }
 
-  abstract update(deltaTime: number, time: number): void;
+  abstract update(deltaTime: number, _time: number): void;
   abstract dispose(): void;
 
   isActive(): boolean {

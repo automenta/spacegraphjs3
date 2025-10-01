@@ -41,8 +41,9 @@ export class EdgeRenderer {
     // Create another effect to update edges when interaction state changes
     createEffect(() => {
       // This will trigger when interaction state changes
-      const selectedElements = this.state.interaction.selectedElementIds;
-      const hoveredElement = this.state.interaction.hoveredElementId;
+      // Accessing these values ensures the effect runs when they change
+      void this.state.interaction.selectedElementIds;
+      void this.state.interaction.hoveredElementId;
       
       // Update all edges to reflect potential style changes based on node selection
       this.updateEdges().catch(error => {
@@ -116,7 +117,7 @@ export class EdgeRenderer {
     }
 
     // Create or update hit area for interaction
-    this.updateEdgeHitArea(edge, geometry, sourceNode, targetNode);
+    this.updateEdgeHitArea(edge, geometry);
     
     // Create or update label
     if (edge.label) {
@@ -332,10 +333,8 @@ export class EdgeRenderer {
     }
   }
 
-  private updateEdgeHitArea(edge: EdgeSpec, geometry: THREE.BufferGeometry, sourceNode: NodeSpec, targetNode: NodeSpec): void {
+  private updateEdgeHitArea(edge: EdgeSpec, geometry: THREE.BufferGeometry): void {
     // Create a thicker invisible line for easier interaction
-    const hitAreaWidth = Math.max(edge.width || 2, 8); // Minimum 8px hit area
-    
     const hitMaterial = new THREE.LineBasicMaterial({
       transparent: true,
       opacity: 0.0, // Invisible

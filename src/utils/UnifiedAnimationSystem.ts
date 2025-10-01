@@ -106,6 +106,7 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
   }
 
   protected onUpdate(deltaTime: number): void {
+     void deltaTime; // Intentionally unused, keeping for potential future use
     // Update active animations
     for (const [id, controller] of this.activeAnimations.entries()) {
       if (!controller.isActive()) {
@@ -232,6 +233,7 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
     intensity = 1,
     config: AnimationConfig = {}
   ): Promise<void> {
+    void config; // Intentionally unused, keeping for potential future use
     const originalValue = this.cloneValue(target[property]);
     
     const offset1 = this.offsetValue(originalValue, intensity);
@@ -252,6 +254,8 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
     intensity = 5,
     config: AnimationConfig = {}
   ): Promise<void> {
+    void intensity; // Intentionally unused, keeping for potential future use
+    void config; // Intentionally unused, keeping for potential future use
     // Shake animation removed as requested - returns immediately
     return Promise.resolve();
   }
@@ -458,6 +462,7 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
     
     const { target, property, to, config } = task;
     const { duration = 1000, delay = 0, onComplete } = config;
+     void duration; // Intentionally unused, keeping for potential future use
 
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -488,6 +493,7 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
     
     const { target, property, from, config } = task;
     const { duration = 1000, delay = 0, onComplete } = config;
+     void duration; // Intentionally unused, keeping for potential future use
 
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -511,6 +517,7 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
    */
   private async executeParallel(task: Extract<AnimationTask, { type: 'parallel' }>): Promise<void> {
     const { animations, config } = task.animation;
+     void config; // Intentionally unused, keeping for potential future use
     const promises = animations.map(animation => this.executeAnimation(animation));
     await Promise.all(promises);
   }
@@ -520,6 +527,7 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
    */
   private async executeSequence(task: Extract<AnimationTask, { type: 'sequence' }>): Promise<void> {
     const { animations, config } = task.animation;
+     void config; // Intentionally unused, keeping for potential future use
     for (const animation of animations) {
       await this.executeAnimation(animation);
     }

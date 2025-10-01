@@ -106,15 +106,16 @@ export class BasicRenderer implements IRenderer {
     
     // Create appropriate object based on node type
     switch (node.type) {
-      case 'box':
+      case 'box': {
         const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
         const boxMaterial = new THREE.MeshBasicMaterial({
           color: parseColor(node.color, node.id)
         });
         object = new THREE.Mesh(boxGeometry, boxMaterial);
         break;
+      }
         
-      case 'text':
+      case 'text': {
         // For text nodes, create a more visible representation
         const textGeometry = new THREE.BoxGeometry(2, 0.8, 0.2);
         const textMaterial = new THREE.MeshBasicMaterial({
@@ -122,16 +123,18 @@ export class BasicRenderer implements IRenderer {
         });
         object = new THREE.Mesh(textGeometry, textMaterial);
         break;
+      }
         
-      case 'custom':
+      case 'custom': {
         const customGeometry = new THREE.IcosahedronGeometry(0.7, 0);
         const customMaterial = new THREE.MeshBasicMaterial({
           color: parseColor(node.color, node.id)
         });
         object = new THREE.Mesh(customGeometry, customMaterial);
         break;
+      }
         
-      case 'html':
+      case 'html': {
         // For HTML nodes, create a CSS3D object if css3DScene is available
         if (this.css3DScene) {
           const element = document.createElement('div');
@@ -166,15 +169,17 @@ export class BasicRenderer implements IRenderer {
           object = new THREE.Mesh(htmlGeometry, htmlMaterial);
         }
         break;
+      }
         
       case 'sphere':
-      default:
+      default: {
         const sphereGeometry = new THREE.SphereGeometry(0.7, 16, 16);
         const sphereMaterial = new THREE.MeshBasicMaterial({
           color: parseColor(node.color, node.id)
         });
         object = new THREE.Mesh(sphereGeometry, sphereMaterial);
         break;
+      }
     }
     
     object.userData.nodeId = node.id;
@@ -248,7 +253,8 @@ export class BasicRenderer implements IRenderer {
       } catch (error) {
         console.warn(
           `Invalid color specified for node ${node.id}:`,
-          finalColor
+          finalColor,
+          error
         );
         object.material.color = new THREE.Color('#ff00ff'); // Fallback to magenta
       }
@@ -260,7 +266,8 @@ export class BasicRenderer implements IRenderer {
       } catch (error) {
         console.warn(
           `Invalid color specified for HTML node ${node.id}:`,
-          finalColor
+          finalColor,
+          error
         );
         object.element.style.backgroundColor = '#ff00ff'; // Fallback to magenta
       }

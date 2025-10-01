@@ -10,7 +10,7 @@ import {
 } from 'd3-force-3d';
 import { produce } from 'solid-js/store';
 import { createEffect } from 'solid-js';
-import { SpaceGraph } from '../core/SpaceGraph';
+import { SpaceGraph as _SpaceGraph } from '../core/SpaceGraph';
 import { EdgeSpec, NodeSpec } from '../types';
 import { BaseLayoutEngine } from './BaseLayoutEngine';
 

@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import { SpaceGraph } from '../core/SpaceGraph';
 import { CameraSpec } from '../types';
 

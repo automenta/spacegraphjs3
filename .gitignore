@@ -5,3 +5,8 @@ test-results
 .idea
 test-results
 playwright-report
+
+# Generated declaration files
+*.d.ts
+*.d.ts.map
+!src/**/*.d.ts

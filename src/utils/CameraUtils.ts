@@ -4,7 +4,6 @@
  */
 
 import * as THREE from 'three';
-import { AnimationCurves } from './AnimationUtils';
 
 export interface CameraAnimationConfig {
   duration?: number;
@@ -518,7 +517,7 @@ export class CameraUtils {
    */
   calculateAutozoomParameters(
     elements: Array<{ position: THREE.Vector3 }>,
-    focusMode: 'all' | 'center' | 'weighted' | 'selection' = 'all',
+    _focusMode: 'all' | 'center' | 'weighted' | 'selection' = 'all',
     strategy: 'tight' | 'loose' | 'optimal' | 'smart' = 'optimal'
   ): { target: THREE.Vector3; distance: number } {
     if (elements.length === 0) {
@@ -632,7 +631,7 @@ export class CameraUtils {
       case 'tap':
         if (data.startPos) {
           // Convert to world coordinates and potentially focus on object
-          const worldPos = this.screenToWorld(data.startPos, 10);
+          const _worldPos = this.screenToWorld(data.startPos, 10);
           // This could trigger focus logic
         }
         break;

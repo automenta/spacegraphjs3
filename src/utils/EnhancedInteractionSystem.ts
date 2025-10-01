@@ -1,8 +1,6 @@
 import * as THREE from 'three';
 import { VisualFeedbackSystem, FeedbackConfig, FeedbackType } from './VisualFeedbackSystem';
 import { AdvancedCameraControls } from './AdvancedCameraControls';
-import { animate } from 'popmotion';
-import { AnimationCurves } from './AnimationUtils';
 
 /**
  * Enhanced interaction configuration
@@ -49,7 +47,7 @@ export class EnhancedInteractionSystem {
   private draggingObjects: Set<string> = new Set();
   
   private config: Required<InteractionConfig>;
-  private interactionCallbacks: Map<string, Function[]> = new Map();
+  private interactionCallbacks: Map<string, ((...args: any[]) => void)[]> = new Map();
   
   constructor(
     scene: THREE.Scene,
@@ -238,7 +236,7 @@ export class EnhancedInteractionSystem {
   /**
    * Handle mouse up
    */
-  private onMouseUp(event: MouseEvent): void {
+  private onMouseUp(_event: MouseEvent): void {
     this.draggingObjects.forEach(objectId => {
       const state = this.getInteractionState(objectId);
       state.isDragging = false;
@@ -485,7 +483,7 @@ export class EnhancedInteractionSystem {
   /**
    * Register interaction callback
    */
-  public on(event: string, callback: Function): void {
+  public on(event: string, callback: (...args: any[]) => void): void {
     if (!this.interactionCallbacks.has(event)) {
       this.interactionCallbacks.set(event, []);
     }

@@ -1,6 +1,6 @@
 import { createEffect } from 'solid-js';
 import { produce } from 'solid-js/store';
-import { SpaceGraph } from '../core/SpaceGraph';
+import { SpaceGraph as _SpaceGraph } from '../core/SpaceGraph';
 import { BaseLayoutEngine } from './BaseLayoutEngine';
 
 export class RandomLayout extends BaseLayoutEngine {

@@ -5,7 +5,6 @@
  * This is a wrapper around UnifiedAnimationSystem for backward compatibility
  */
 
-import * as THREE from 'three';
 import UnifiedAnimationSystemDefault, {
   AnimationConfig,
   KeyframeAnimation,
@@ -91,8 +90,8 @@ export class AnimationSystem {
   async shake<T extends Record<string, any>>(
     target: T,
     property: string,
-    intensity: number = 5,
-    config: AnimationConfig = {}
+    _intensity: number = 5,
+    _config: AnimationConfig = {}
   ): Promise<void> {
     // Shake animation removed as requested
     return Promise.resolve();

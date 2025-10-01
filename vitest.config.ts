@@ -11,11 +11,13 @@ export default defineConfig({
       '**/dist/**',
       '**/tests/visual/**',
       '**/e2e/**',
+      '**/ergonomics/**',
+      '**/interaction/**',
     ],
   },
   server: {
-    deps: {
-      inline: ['d3-force-3d'],
+    fs: {
+      allow: ['..'],
     },
   },
   resolve: {

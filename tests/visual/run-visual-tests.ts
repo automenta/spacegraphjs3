@@ -8,8 +8,8 @@
  */
 
 import { spawn } from 'child_process';
-import path from 'path';
-import fs from 'fs/promises';
+import * as path from 'path';
+import * as fs from 'fs/promises';
 
 interface TestSuite {
   name: string;
@@ -22,6 +22,26 @@ const testSuites: TestSuite[] = [
     name: 'Graph Elements Visual Tests',
     path: 'tests/visual/graph-elements.visual.spec.ts',
     description: 'Tests for visual semantics of graph elements (nodes, edges)'
+  },
+  {
+    name: 'Comprehensive UI Visual Tests',
+    path: 'tests/visual/comprehensive-ui.visual.spec.ts',
+    description: 'Comprehensive tests for all UI components'
+  },
+  {
+    name: 'Performance Metrics Tests',
+    path: 'tests/visual/performance-metrics-demo.spec.ts',
+    description: 'Performance benchmarking and monitoring tests'
+  },
+  {
+    name: 'Unified Dashboard Tests',
+    path: 'tests/visual/unified-dashboard-demo.spec.ts',
+    description: 'Unified dashboard visualization tests'
+  },
+  {
+    name: 'End-to-End Workflow Tests',
+    path: 'tests/visual/end-to-end-workflow-tests.ts',
+    description: 'Complete end-to-end visual semantics workflow tests'
   },
   {
     name: 'Interaction Semantics Tests',

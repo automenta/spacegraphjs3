@@ -78,16 +78,7 @@ export class Logger {
    * @param data - Optional data to include
    */
   public error(source: string, message: string, data?: any): void {
-    // Validate inputs
-    if (!source || typeof source !== 'string') {
-      // Fallback to prevent infinite recursion
-      console.error('[Logger] Invalid source for error log:', source);
-      return;
-    }
-    if (!message || typeof message !== 'string') {
-      console.error(`[${source}] Invalid message for error log:`, message);
-      return;
-    }
+    if (!this.validateInputs(source, message, 'error')) return;
     this.log(LogLevel.ERROR, source, message, data);
   }
 
@@ -98,15 +89,7 @@ export class Logger {
    * @param data - Optional data to include
    */
   public warn(source: string, message: string, data?: any): void {
-    // Validate inputs
-    if (!source || typeof source !== 'string') {
-      console.warn('[Logger] Invalid source for warn log:', source);
-      return;
-    }
-    if (!message || typeof message !== 'string') {
-      console.warn(`[${source}] Invalid message for warn log:`, message);
-      return;
-    }
+    if (!this.validateInputs(source, message, 'warn')) return;
     this.log(LogLevel.WARN, source, message, data);
   }
 
@@ -117,15 +100,7 @@ export class Logger {
    * @param data - Optional data to include
    */
   public info(source: string, message: string, data?: any): void {
-    // Validate inputs
-    if (!source || typeof source !== 'string') {
-      console.info('[Logger] Invalid source for info log:', source);
-      return;
-    }
-    if (!message || typeof message !== 'string') {
-      console.info(`[${source}] Invalid message for info log:`, message);
-      return;
-    }
+    if (!this.validateInputs(source, message, 'info')) return;
     this.log(LogLevel.INFO, source, message, data);
   }
 
@@ -136,16 +111,64 @@ export class Logger {
    * @param data - Optional data to include
    */
   public debug(source: string, message: string, data?: any): void {
-    // Validate inputs
-    if (!source || typeof source !== 'string') {
-      console.debug('[Logger] Invalid source for debug log:', source);
-      return;
-    }
-    if (!message || typeof message !== 'string') {
-      console.debug(`[${source}] Invalid message for debug log:`, message);
-      return;
-    }
+    if (!this.validateInputs(source, message, 'debug')) return;
     this.log(LogLevel.DEBUG, source, message, data);
+  }
+
+  /**
+   * Validate log inputs
+   * @param source - The source of the log message
+   * @param message - The log message
+   * @param level - The log level for console output
+   * @returns boolean indicating if inputs are valid
+   */
+  private validateInputs(source: string, message: string, level: string): boolean {
+    // Validate source
+    if (!source || typeof source !== 'string') {
+      // Fallback to prevent infinite recursion
+      const fallbackMessage = `[Logger] Invalid source for ${level} log:`;
+      switch (level) {
+        case 'error':
+          console.error(fallbackMessage, source);
+          break;
+        case 'warn':
+          console.warn(fallbackMessage, source);
+          break;
+        case 'info':
+          console.info(fallbackMessage, source);
+          break;
+        case 'debug':
+          console.debug(fallbackMessage, source);
+          break;
+        default:
+          console.error(fallbackMessage, source);
+      }
+      return false;
+    }
+    
+    // Validate message
+    if (!message || typeof message !== 'string') {
+      const formattedMessage = `[${source}] Invalid message for ${level} log:`;
+      switch (level) {
+        case 'error':
+          console.error(formattedMessage, message);
+          break;
+        case 'warn':
+          console.warn(formattedMessage, message);
+          break;
+        case 'info':
+          console.info(formattedMessage, message);
+          break;
+        case 'debug':
+          console.debug(formattedMessage, message);
+          break;
+        default:
+          console.error(formattedMessage, message);
+      }
+      return false;
+    }
+    
+    return true;
   }
 
   /**
@@ -161,7 +184,8 @@ export class Logger {
       return;
     }
 
-    // Additional validation for internal method
+    // Since this is an internal method, we can assume source and message are already validated
+    // by the public methods, but we'll keep minimal validation for safety
     if (!source || typeof source !== 'string') {
       // Prevent infinite recursion by using console directly
       console.error('[Logger] Invalid source in internal log method:', source);
@@ -208,10 +232,14 @@ export class Logger {
     } catch (consoleError) {
       // If console output fails, we still want to emit the event
       // This can happen in some environments or with circular references in data
+      // Silently handle the error to prevent breaking the application
+      void consoleError; // Intentionally unused, keeping for potential debugging
       try {
         // Try a simpler output
         console.log(formattedMessage);
       } catch (fallbackError) {
+        // Silently handle the fallback error to prevent breaking the application
+        void fallbackError; // Intentionally unused, keeping for potential debugging
         // If all else fails, we'll still emit the event
         // We don't want logging failures to break the application
       }

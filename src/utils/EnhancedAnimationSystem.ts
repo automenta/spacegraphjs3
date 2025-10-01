@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { animate, spring, decay, keyframes } from 'popmotion';
+import { animate } from 'popmotion';
 import { AnimationCurves } from './AnimationUtils';
 
 /**
@@ -497,7 +497,7 @@ export class EnhancedAnimationSystem {
    */
   private createImplodeAnimation(object: THREE.Object3D, config: AnimationConfig): () => void {
     const originalScale = object.scale.clone();
-    const targetScale = new THREE.Vector3(0.01, 0.01, 0.01);
+    // const targetScale = new THREE.Vector3(0.01, 0.01, 0.01);
     
     const animation = animate({
       from: { scale: 1, rotation: 0 },
@@ -641,13 +641,13 @@ export class EnhancedAnimationSystem {
    * Stop all animations
    */
   public stopAllAnimations(): void {
-    this.activeAnimations.forEach((stopAnimation, id) => {
+    this.activeAnimations.forEach((stopAnimation, _id) => {
       stopAnimation();
     });
     this.activeAnimations.clear();
     
     // Clear particle systems
-    this.particleSystems.forEach((particles, id) => {
+    this.particleSystems.forEach((particles, _id) => {
       this.scene.remove(particles);
       if (particles.geometry) particles.geometry.dispose();
       if (particles.material) {
@@ -675,7 +675,7 @@ export class EnhancedAnimationSystem {
     // Update culling manager if available
     if (this.cullingManager) {
       this.cullingManager.updateFrustum();
-      const visibleObjects = this.cullingManager.cullObjects();
+      const _visibleObjects = this.cullingManager.cullObjects();
       // Handle visible objects
     }
   }

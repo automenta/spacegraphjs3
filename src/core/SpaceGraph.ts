@@ -19,12 +19,12 @@ import { BoxElementActor } from '../renderers/elementActors/BoxElementActor';
 import { CustomGeometryActor } from '../renderers/elementActors/CustomGeometryActor';
 import { TextElementActor } from '../renderers/elementActors/TextElementActor';
 import { HtmlNodeElementActor } from '../renderers/elementActors/HtmlNodeElementActor';
-import { D3ForceLayout } from '../layouts/D3ForceLayout';
-import { RandomLayout } from '../layouts/RandomLayout';
-import { GridLayout } from '../layouts/GridLayout';
-import { CircleLayout } from '../layouts/CircleLayout';
-import { ColumnLayout } from '../layouts/ColumnLayout';
-import { RowLayout } from '../layouts/RowLayout';
+import { D3ForceLayout as _D3ForceLayout } from '../layouts/D3ForceLayout';
+import { RandomLayout as _RandomLayout } from '../layouts/RandomLayout';
+import { GridLayout as _GridLayout } from '../layouts/GridLayout';
+import { CircleLayout as _CircleLayout } from '../layouts/CircleLayout';
+import { ColumnLayout as _ColumnLayout } from '../layouts/ColumnLayout';
+import { RowLayout as _RowLayout } from '../layouts/RowLayout';
 import { registerLayouts } from '../layouts/registerLayouts';
 
 /**

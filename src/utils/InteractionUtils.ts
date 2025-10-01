@@ -4,7 +4,7 @@
  */
 
 import * as THREE from 'three';
-import { Vector3 } from 'three';
+// Vector3 is imported for type definitions but not directly used in this file
 
 export interface InteractionEvent {
   type: 'click' | 'dblclick' | 'hover' | 'drag' | 'pinch' | 'tap' | 'swipe';
@@ -172,9 +172,9 @@ export class InteractionUtils {
   detectGesture(events: InteractionEvent[]): InteractionEvent | null {
     if (events.length === 0) return null;
 
-    const latestEvent = events[events.length - 1];
+    const _latestEvent = events[events.length - 1];
     
-    for (const [name, recognizer] of this.gestureRecognizers) {
+    for (const [_name, recognizer] of this.gestureRecognizers) {
       const gesture = recognizer.recognize(events);
       if (gesture) {
         return { ...gesture, timestamp: Date.now() };
@@ -461,7 +461,7 @@ class SwipeGestureRecognizer extends GestureRecognizer {
  * Pinch gesture recognizer
  */
 class PinchGestureRecognizer extends GestureRecognizer {
-  recognize(events: InteractionEvent[]): InteractionEvent | null {
+  recognize(_events: InteractionEvent[]): InteractionEvent | null {
     // Pinch gestures are detected in multi-touch handling
     return null;
   }

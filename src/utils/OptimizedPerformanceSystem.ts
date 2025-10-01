@@ -411,7 +411,7 @@ export class InstancingStrategy implements IOptimizationStrategy {
   private enabled = true;
   private instancedObjects: Map<string, THREE.InstancedMesh> = new Map();
 
-  init(scene: THREE.Scene, camera: THREE.Camera, renderer: THREE.WebGLRenderer): void {
+  init(scene: THREE.Scene, _camera: THREE.Camera, _renderer: THREE.WebGLRenderer): void {
     this.createInstancedMeshes(scene);
   }
 
@@ -578,7 +578,7 @@ export class OptimizedPerformanceSystem extends BaseUtilitySystem {
     this.startPerformanceMonitoring();
   }
 
-  protected onUpdate(deltaTime: number): void {
+  protected onUpdate(_deltaTime: number): void {
     this.updateMetrics();
     this.checkPerformanceThresholds();
     

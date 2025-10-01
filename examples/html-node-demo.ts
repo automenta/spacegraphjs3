@@ -256,9 +256,6 @@ export default function init() {
   // Use container to avoid linting error
   console.log('Graph initialized in container:', container.id);
 
-  // Add UI controls
-  const controls = document.getElementById('controls')!;
-  
   // Add event listeners for HTML node interaction
   graph.on('element:click', ({ target, event }) => {
     console.log('Element clicked:', target.id);

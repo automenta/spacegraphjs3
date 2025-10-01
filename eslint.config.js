@@ -62,6 +62,14 @@ export default [
     rules: {
       // Re-apply no-explicit-any to be off
       '@typescript-eslint/no-explicit-any': 'off',
+      // Allow unused variables that start with underscore
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          'varsIgnorePattern': '^_',
+          'argsIgnorePattern': '^_'
+        }
+      ],
     },
   },
 ];

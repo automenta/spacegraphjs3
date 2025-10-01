@@ -4,6 +4,7 @@ import { CullingManager } from './CullingManager';
 import { LODManager, LODSettings } from './LODManager';
 import { MemoryManager } from './MemoryManager';
 import { Logger } from './Logger';
+import { ErrorHandler } from './ErrorHandler';
 
 /**
  * Performance optimization configuration
@@ -60,6 +61,7 @@ export class PerformanceOptimizer {
   private qualityLevel: number;
   
   private logger: Logger;
+  private errorHandler: ErrorHandler;
   
   constructor(
     scene: THREE.Scene,
@@ -67,21 +69,17 @@ export class PerformanceOptimizer {
     renderer: THREE.WebGLRenderer,
     config: PerformanceConfig = {}
   ) {
+    this.errorHandler = ErrorHandler.getInstance();
+    this.logger = Logger.getInstance();
+    
     // Validate inputs
-    if (!scene) {
-      throw new Error('Scene is required for PerformanceOptimizer');
-    }
-    if (!camera) {
-      throw new Error('Camera is required for PerformanceOptimizer');
-    }
-    if (!renderer) {
-      throw new Error('Renderer is required for PerformanceOptimizer');
-    }
+    this.validateRequiredParameter(scene, 'Scene');
+    this.validateRequiredParameter(camera, 'Camera');
+    this.validateRequiredParameter(renderer, 'Renderer');
     
     this.scene = scene;
     this.camera = camera;
     this.renderer = renderer;
-    this.logger = Logger.getInstance();
     
     this.config = {
       enableObjectPooling: true,
@@ -118,7 +116,7 @@ export class PerformanceOptimizer {
       this.initializeOptimizations();
       this.startPerformanceMonitoring();
     } catch (error) {
-      this.logger.error('PerformanceOptimizer', 'Failed to initialize optimizer', error);
+      this.errorHandler.handleError('PerformanceOptimizer', 'Failed to initialize optimizer', error);
       throw error;
     }
   }
@@ -160,7 +158,7 @@ export class PerformanceOptimizer {
         this.setupInstancing();
       }
     } catch (error) {
-      this.logger.error('PerformanceOptimizer', 'Failed to initialize optimizations', error);
+      this.errorHandler.handleError('PerformanceOptimizer', 'Failed to initialize optimizations', error);
       throw error;
     }
   }
@@ -176,7 +174,7 @@ export class PerformanceOptimizer {
       this.objectPools.set('vector3', new ObjectPool(() => new THREE.Vector3(), undefined, 200));
       this.objectPools.set('color', new ObjectPool(() => new THREE.Color(), undefined, 100));
     } catch (error) {
-      this.logger.error('PerformanceOptimizer', 'Failed to setup object pooling', error);
+      this.errorHandler.handleError('PerformanceOptimizer', 'Failed to setup object pooling', error);
       throw error;
     }
   }
@@ -240,15 +238,11 @@ export class PerformanceOptimizer {
   private createSimplifiedVersion(object: THREE.Object3D, factor: number): THREE.Object3D {
     try {
       // Validate inputs
-      if (!object) {
-        this.logger.warn('PerformanceOptimizer', 'Cannot simplify null object');
+      if (!this.validateOptionalParameter(object, 'Object')) {
         return object;
       }
       
-      if (factor <= 0 || factor > 1) {
-        this.logger.warn('PerformanceOptimizer', 'Invalid simplification factor, using 0.5', { factor });
-        factor = 0.5;
-      }
+      factor = this.validateRangeParameter(factor, 0, 1, 0.5, 'simplification factor');
       
       const simplified = object.clone();
       
@@ -276,7 +270,7 @@ export class PerformanceOptimizer {
       
       return simplified;
     } catch (error) {
-      this.logger.error('PerformanceOptimizer', 'Failed to create simplified version', error);
+      this.errorHandler.handleError('PerformanceOptimizer', 'Failed to create simplified version', error);
       return object;
     }
   }
@@ -415,7 +409,7 @@ export class PerformanceOptimizer {
       
       return mergedGeometry;
     } catch (error) {
-      this.logger.warn('PerformanceOptimizer', 'Failed to merge geometries', error);
+      this.errorHandler.handleWarning('PerformanceOptimizer', 'Failed to merge geometries', error);
       return null;
     }
   }
@@ -654,8 +648,7 @@ export class PerformanceOptimizer {
    */
   public updateConfig(newConfig: Partial<PerformanceConfig>): void {
     // Validate input
-    if (!newConfig) {
-      this.logger.warn('PerformanceOptimizer', 'Cannot update with null config');
+    if (!this.validateOptionalParameter(newConfig, 'Config')) {
       return;
     }
     
@@ -668,7 +661,7 @@ export class PerformanceOptimizer {
         this.applyQualitySettings();
       }
     } catch (error) {
-      this.logger.error('PerformanceOptimizer', 'Failed to update config', error);
+      this.errorHandler.handleError('PerformanceOptimizer', 'Failed to update config', error);
     }
   }
   
@@ -683,5 +676,38 @@ export class PerformanceOptimizer {
     
     this.cullingManager.clear();
     this.lodManager.clear();
+  }
+  
+  /**
+   * Validate required parameter
+   */
+  private validateRequiredParameter(param: any, paramName: string): void {
+    if (!param) {
+      const error = new Error(`${paramName} is required for PerformanceOptimizer`);
+      this.errorHandler.handleError('PerformanceOptimizer', `Validation failed for ${paramName}`, error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Validate optional parameter
+   */
+  private validateOptionalParameter(param: any, paramName: string): boolean {
+    if (!param) {
+      this.errorHandler.handleWarning('PerformanceOptimizer', `Cannot process with null ${paramName.toLowerCase()}`);
+      return false;
+    }
+    return true;
+  }
+  
+  /**
+   * Validate parameter within range
+   */
+  private validateRangeParameter(value: number, min: number, max: number, defaultValue: number, paramName: string): number {
+    if (value <= min || value > max) {
+      this.errorHandler.handleWarning('PerformanceOptimizer', `Invalid ${paramName}, using default value`, { value, min, max, defaultValue });
+      return defaultValue;
+    }
+    return value;
   }
 }

@@ -14,6 +14,7 @@ export function parseColor(colorValue: string | undefined, elementId: string, fa
     const value = colorValue || '#ffffff';
     color.set(expandHex(value));
   } catch (error) {
+    void error; // Intentionally unused, keeping for potential future use
     console.warn(
       `Invalid color specified for node ${elementId}:`,
       colorValue

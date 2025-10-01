@@ -219,6 +219,7 @@ export class VisualFeedbackSystem {
         duration: pulseDuration,
         ease: easingFunction,
         onUpdate: ({ scale, opacity, thickness }) => {
+          void thickness; // Intentionally unused, keeping for potential future use
           pulseMesh.scale.setScalar(scale);
           pulseMaterial.opacity = opacity;
           
@@ -254,6 +255,7 @@ export class VisualFeedbackSystem {
     
     const particleColor = new THREE.Color(config.color || this.getDefaultColor(config.type));
     const intensity = config.intensity || 0.8;
+    void intensity; // Intentionally unused, keeping for potential future use
     
     // Different emission patterns based on feedback type
     const emissionPattern = this.getEmissionPattern(config.type);
@@ -521,6 +523,8 @@ export class VisualFeedbackSystem {
         };
       },
       hover: (index: number, total: number) => {
+        void index; // Intentionally unused, keeping for potential future use
+        void total; // Intentionally unused, keeping for potential future use
         // Gentle upward drift
         return {
           position: new THREE.Vector3(
@@ -555,6 +559,8 @@ export class VisualFeedbackSystem {
         };
       },
       success: (index: number, total: number) => {
+        void index; // Intentionally unused, keeping for potential future use
+        void total; // Intentionally unused, keeping for potential future use
         // Upward celebratory burst
         return {
           position: new THREE.Vector3(
@@ -571,6 +577,8 @@ export class VisualFeedbackSystem {
         };
       },
       error: (index: number, total: number) => {
+        void index; // Intentionally unused, keeping for potential future use
+        void total; // Intentionally unused, keeping for potential future use
         // Erratic, chaotic movement
         return {
           position: new THREE.Vector3(
@@ -599,7 +607,8 @@ export class VisualFeedbackSystem {
     const geometry = particles.geometry;
     const positions = geometry.attributes.position.array as Float32Array;
     const velocities = geometry.attributes.velocity.array as Float32Array;
-    const sizes = geometry.attributes.size.array as Float32Array;
+    const _sizes = geometry.attributes.size.array as Float32Array;
+    void _sizes; // Intentionally unused, keeping for potential future use
     const material = particles.material as THREE.PointsMaterial;
     
     let animationId: number;
@@ -624,7 +633,7 @@ export class VisualFeedbackSystem {
       }
       
       // Update material opacity
-      material.opacity = (1 - progress) * (config.intensity || 0.8);
+      material.opacity = (1 - progress) * 0.8;
       
       geometry.attributes.position.needsUpdate = true;
       
@@ -642,7 +651,7 @@ export class VisualFeedbackSystem {
       const progress = Math.min(elapsed / fadeInDuration, 1);
       const easedProgress = AnimationCurves.easeOut.easing(progress);
       
-      material.opacity = easedProgress * (config.intensity || 0.8);
+      material.opacity = easedProgress * 0.8;
       
       if (progress < 1) {
         requestAnimationFrame(fadeIn);

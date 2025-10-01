@@ -6,32 +6,32 @@ test.describe('Interaction Semantics Test Suite', () => {
     test.setTimeout(60000);
   });
 
-  test('Node selection interaction semantics', async ({ page }) => {
+  test('Node selection interaction semantics', async ({ page: _page }) => {
     // Navigate to element actors demo
-    await page.goto('/element-actors-demo.html');
+    await _page.goto('/element-actors-demo.html');
     
     // Wait for graph to initialize
-    await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
-    await page.waitForTimeout(2000);
+    await _page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
+    await _page.waitForTimeout(2000);
     
     // Get initial selection state
-    const initialSelectedIds = await page.evaluate(() => 
+    const initialSelectedIds = await _page.evaluate(() =>
       (window as any).graph.state.interaction.selectedElementIds || []
     );
     
     // Click on a node (center of canvas)
-    const viewport = page.viewportSize();
+    const viewport = _page.viewportSize();
     if (viewport) {
-      await page.click('canvas', {
+      await _page.click('canvas', {
         position: { x: viewport.width / 2, y: viewport.height / 2 }
       });
     }
     
     // Wait for selection to register
-    await page.waitForTimeout(500);
+    await _page.waitForTimeout(500);
     
     // Check that selection state has changed
-    const selectedIds = await page.evaluate(() => 
+    const selectedIds = await _page.evaluate(() =>
       (window as any).graph.state.interaction.selectedElementIds || []
     );
     
@@ -44,32 +44,32 @@ test.describe('Interaction Semantics Test Suite', () => {
     console.log(`Selected elements: ${selectedIds.join(', ')}`);
   });
 
-  test('Node hover interaction semantics', async ({ page }) => {
+  test('Node hover interaction semantics', async ({ page: _page }) => {
     // Navigate to element actors demo
-    await page.goto('/element-actors-demo.html');
+    await _page.goto('/element-actors-demo.html');
     
     // Wait for graph to initialize
-    await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
-    await page.waitForTimeout(2000);
+    await _page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
+    await _page.waitForTimeout(2000);
     
     // Get initial hover state
-    const initialHoveredId = await page.evaluate(() => 
+    const initialHoveredId = await _page.evaluate(() =>
       (window as any).graph.state.interaction.hoveredElementId || null
     );
     
     // Hover over a node (center of canvas)
-    const viewport = page.viewportSize();
+    const viewport = _page.viewportSize();
     if (viewport) {
-      await page.hover('canvas', {
+      await _page.hover('canvas', {
         position: { x: viewport.width / 2, y: viewport.height / 2 }
       });
     }
     
     // Wait for hover to register
-    await page.waitForTimeout(300);
+    await _page.waitForTimeout(300);
     
     // Check that hover state has changed
-    const hoveredId = await page.evaluate(() => 
+    const hoveredId = await _page.evaluate(() =>
       (window as any).graph.state.interaction.hoveredElementId || null
     );
     
@@ -82,22 +82,22 @@ test.describe('Interaction Semantics Test Suite', () => {
     console.log(`Hovered element: ${hoveredId}`);
   });
 
-  test('Edge interaction semantics', async ({ page }) => {
+  test('Edge interaction semantics', async ({ page: _page }) => {
     // Navigate to edge interaction demo
-    await page.goto('/edge-interaction.html');
+    await _page.goto('/edge-interaction.html');
     
     // Wait for graph to initialize
-    await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
-    await page.waitForTimeout(3000);
+    await _page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
+    await _page.waitForTimeout(3000);
     
     // Get initial state
-    const initialState = await page.evaluate(() => ({
+    const _initialState = await _page.evaluate(() => ({
       selectedIds: (window as any).graph.state.interaction.selectedElementIds || [],
       hoveredId: (window as any).graph.state.interaction.hoveredElementId || null
     }));
     
     // Click on an edge (try different positions to hit an edge)
-    const viewport = page.viewportSize();
+    const viewport = _page.viewportSize();
     if (viewport) {
       // Try multiple positions to find an edge
       const positions = [
@@ -108,10 +108,10 @@ test.describe('Interaction Semantics Test Suite', () => {
       
       let edgeSelected = false;
       for (const pos of positions) {
-        await page.click('canvas', { position: pos });
-        await page.waitForTimeout(300);
+        await _page.click('canvas', { position: pos });
+        await _page.waitForTimeout(300);
         
-        const selectedIds = await page.evaluate(() => 
+        const selectedIds = await _page.evaluate(() =>
           (window as any).graph.state.interaction.selectedElementIds || []
         );
         
@@ -129,42 +129,42 @@ test.describe('Interaction Semantics Test Suite', () => {
     }
   });
 
-  test('Multi-selection interaction semantics', async ({ page }) => {
+  test('Multi-selection interaction semantics', async ({ page: _page }) => {
     // Navigate to element actors demo
-    await page.goto('/element-actors-demo.html');
+    await _page.goto('/element-actors-demo.html');
     
     // Wait for graph to initialize
-    await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
-    await page.waitForTimeout(2000);
+    await _page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
+    await _page.waitForTimeout(2000);
     
     // Array to store selected elements
-    const selectedElements: string[] = [];
+    const _selectedElements: string[] = [];
     
     // Click on multiple nodes with Ctrl key (simulate multi-selection)
-    const viewport = page.viewportSize();
+    const viewport = _page.viewportSize();
     if (viewport) {
       // First click (normal selection)
-      await page.click('canvas', {
+      await _page.click('canvas', {
         position: { x: viewport.width / 2 - 50, y: viewport.height / 2 }
       });
-      await page.waitForTimeout(300);
+      await _page.waitForTimeout(300);
       
       // Get first selected element
-      const firstSelection = await page.evaluate(() => 
+      const firstSelection = await _page.evaluate(() =>
         (window as any).graph.state.interaction.selectedElementIds || []
       );
-      selectedElements.push(...firstSelection);
+      _selectedElements.push(...firstSelection);
       
       // Second click with Ctrl (add to selection)
-      await page.keyboard.down('Control');
-      await page.click('canvas', {
+      await _page.keyboard.down('Control');
+      await _page.click('canvas', {
         position: { x: viewport.width / 2 + 50, y: viewport.height / 2 }
       });
-      await page.keyboard.up('Control');
-      await page.waitForTimeout(300);
+      await _page.keyboard.up('Control');
+      await _page.waitForTimeout(300);
       
       // Get updated selection
-      const updatedSelection = await page.evaluate(() => 
+      const updatedSelection = await _page.evaluate(() =>
         (window as any).graph.state.interaction.selectedElementIds || []
       );
       
@@ -180,24 +180,24 @@ test.describe('Interaction Semantics Test Suite', () => {
     }
   });
 
-  test('Drag interaction semantics', async ({ page }) => {
+  test('Drag interaction semantics', async ({ page: _page }) => {
     // Navigate to instanced interaction demo
-    await page.goto('/instanced-interaction.html');
+    await _page.goto('/instanced-interaction.html');
     
     // Wait for graph to initialize and instanced renderer to be ready
-    await page.waitForFunction(() => (window as any).graph);
-    await page.waitForFunction(() => {
+    await _page.waitForFunction(() => (window as any).graph);
+    await _page.waitForFunction(() => {
       const graph = (window as any).graph;
       try {
         const nodeRenderer = graph.render.getNodeRenderer();
         return nodeRenderer && nodeRenderer.constructor.name === 'InstancedRenderer';
-      } catch (e) {
+      } catch (_e) {
         return false;
       }
     });
     
     // Wait for instanced meshes to be populated
-    await page.waitForFunction(() => {
+    await _page.waitForFunction(() => {
       const graph = (window as any).graph;
       try {
         const nodeRenderer = graph.render.getNodeRenderer();
@@ -212,15 +212,15 @@ test.describe('Interaction Semantics Test Suite', () => {
           }
         }
         return false;
-      } catch (e) {
+      } catch (_e) {
         return false;
       }
     });
     
-    await page.waitForTimeout(1000);
+    await _page.waitForTimeout(1000);
     
     // Hide test-results div that might interfere
-    await page.evaluate(() => {
+    await _page.evaluate(() => {
       const testResults = document.getElementById('test-results');
       if (testResults) {
         testResults.style.display = 'none';
@@ -228,26 +228,26 @@ test.describe('Interaction Semantics Test Suite', () => {
     });
     
     // Get initial position of center node
-    const initialPosition = await page.evaluate(
+    const initialPosition = await _page.evaluate(
       () => (window as any).graph.getElement('n-7-7').position
     );
     
     // Drag the node
-    const viewport = page.viewportSize();
+    const viewport = _page.viewportSize();
     if (viewport) {
       const center = { x: viewport.width / 2, y: viewport.height / 2 };
       
-      await page.dragAndDrop('canvas', 'canvas', {
+      await _page.dragAndDrop('canvas', 'canvas', {
         sourcePosition: center,
         targetPosition: { x: center.x + 100, y: center.y + 100 },
       });
     }
     
     // Wait for drag to complete
-    await page.waitForTimeout(500);
+    await _page.waitForTimeout(500);
     
     // Get final position
-    const finalPosition = await page.evaluate(
+    const finalPosition = await _page.evaluate(
       () => (window as any).graph.getElement('n-7-7').position
     );
     
@@ -258,36 +258,36 @@ test.describe('Interaction Semantics Test Suite', () => {
     console.log(`Node dragged from (${initialPosition.x}, ${initialPosition.y}) to (${finalPosition.x}, ${finalPosition.y})`);
   });
 
-  test('Keyboard navigation semantics', async ({ page }) => {
+  test('Keyboard navigation semantics', async ({ page: _page }) => {
     // Navigate to element actors demo
-    await page.goto('/element-actors-demo.html');
+    await _page.goto('/element-actors-demo.html');
     
     // Wait for graph to initialize
-    await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
-    await page.waitForTimeout(2000);
+    await _page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
+    await _page.waitForTimeout(2000);
     
     // Focus the canvas
-    await page.focus('canvas');
+    await _page.focus('canvas');
     
     // Get initial selection
-    const initialSelected = await page.evaluate(() => 
+    const _initialSelected = await _page.evaluate(() =>
       (window as any).graph.state.interaction.selectedElementIds || []
     );
     
     // Press Tab to move focus
-    await page.keyboard.press('Tab');
-    await page.waitForTimeout(300);
+    await _page.keyboard.press('Tab');
+    await _page.waitForTimeout(300);
     
     // Press Enter to select
-    await page.keyboard.press('Enter');
-    await page.waitForTimeout(300);
+    await _page.keyboard.press('Enter');
+    await _page.waitForTimeout(300);
     
     // Check if selection changed
-    const finalSelected = await page.evaluate(() => 
+    const _finalSelected = await _page.evaluate(() =>
       (window as any).graph.state.interaction.selectedElementIds || []
     );
     
     // Log the interaction
-    console.log(`Keyboard navigation: initial=${initialSelected.join(',')}, final=${finalSelected.join(',')}`);
+    console.log(`Keyboard navigation: initial=${_initialSelected.join(',')}, final=${_finalSelected.join(',')}`);
   });
 });

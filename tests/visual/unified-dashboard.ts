@@ -1,595 +1,476 @@
-import fs from 'fs/promises';
-import path from 'path';
-import { PerformanceReport } from './performance-metrics-collector';
-import { ScreenshotValidationResult } from './automated-screenshot-system';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import { RegressionReport } from './visual-regression-reporter';
+import { PerformanceMetrics } from './performance-metrics-collector';
 
 /**
- * Unified Dashboard for Visual Test Results
+ * Unified Dashboard for Visual Semantics Testing
  * 
- * This system creates a comprehensive dashboard that combines
- * performance metrics, screenshot validation results, and
- * ergonomic compliance data into a single unified view.
+ * This module creates a unified dashboard that displays all test results,
+ * including visual regressions, performance metrics, and ergonomic compliance.
  */
 
-export class UnifiedDashboard {
-  private reportPath: string;
-  private dashboardPath: string;
+interface DashboardData {
+  timestamp: string;
+  visualTests: VisualTestSummary[];
+  performanceTests: PerformanceTestSummary[];
+  ergonomicTests: ErgonomicTestSummary[];
+  overallStatus: 'pass' | 'fail' | 'warning';
+  summary: DashboardSummary;
+}
 
-  constructor(basePath: string = 'tests/visual') {
-    this.reportPath = path.join(basePath, 'reports');
-    this.dashboardPath = path.join(basePath, 'dashboard');
+interface VisualTestSummary {
+  componentName: string;
+  testName: string;
+  status: 'pass' | 'fail' | 'warning';
+  screenshotPath?: string;
+  diffPath?: string;
+  errorMessage?: string;
+}
+
+interface PerformanceTestSummary {
+  componentName: string;
+  testName: string;
+  status: 'pass' | 'fail' | 'warning';
+  metrics: PerformanceMetrics;
+  regression?: boolean;
+  regressionPercentage?: number;
+}
+
+interface ErgonomicTestSummary {
+  componentName: string;
+  testName: string;
+  status: 'pass' | 'fail' | 'warning';
+  requirements: string[];
+  failures: string[];
+}
+
+interface DashboardSummary {
+  totalTests: number;
+  passedTests: number;
+  failedTests: number;
+  warningTests: number;
+  passRate: number;
+  lastUpdated: string;
+}
+
+class UnifiedDashboard {
+  private dashboardDir: string;
+  private data: DashboardData;
+
+  constructor(dashboardDir: string = 'tests/visual/dashboard') {
+    this.dashboardDir = dashboardDir;
+    this.data = this.initializeData();
   }
 
   /**
-   * Initialize the unified dashboard system
+   * Initialize dashboard data structure
    */
-  async initialize(): Promise<void> {
-    await fs.mkdir(this.reportPath, { recursive: true });
-    await fs.mkdir(this.dashboardPath, { recursive: true });
+  private initializeData(): DashboardData {
+    return {
+      timestamp: new Date().toISOString(),
+      visualTests: [],
+      performanceTests: [],
+      ergonomicTests: [],
+      overallStatus: 'pass',
+      summary: {
+        totalTests: 0,
+        passedTests: 0,
+        failedTests: 0,
+        warningTests: 0,
+        passRate: 0,
+        lastUpdated: new Date().toISOString()
+      }
+    };
   }
 
   /**
-   * Generate unified dashboard combining all test results
-   * @param performanceReport Performance metrics report
-   * @param screenshotResults Screenshot validation results
-   * @param ergonomicResults Ergonomic compliance results
-   * @param outputPath Optional output path
+   * Add visual test results to the dashboard
    */
-  async generateUnifiedDashboard(
-    performanceReport: PerformanceReport | null,
-    screenshotResults: ScreenshotValidationResult[] | null,
-    ergonomicResults: any[] | null,
-    outputPath?: string
-  ): Promise<string> {
-    const dashboardPath = outputPath || path.join(
-      this.dashboardPath, 
-      `unified-dashboard-${Date.now()}.html`
-    );
+  addVisualTestResults(results: VisualTestSummary[]): void {
+    this.data.visualTests = [...this.data.visualTests, ...results];
+    this.updateSummary();
+  }
+
+  /**
+   * Add performance test results to the dashboard
+   */
+  addPerformanceTestResults(results: PerformanceTestSummary[]): void {
+    this.data.performanceTests = [...this.data.performanceTests, ...results];
+    this.updateSummary();
+  }
+
+  /**
+   * Add ergonomic test results to the dashboard
+   */
+  addErgonomicTestResults(results: ErgonomicTestSummary[]): void {
+    this.data.ergonomicTests = [...this.data.ergonomicTests, ...results];
+    this.updateSummary();
+  }
+
+  /**
+   * Update dashboard summary statistics
+   */
+  private updateSummary(): void {
+    const allTests = [
+      ...this.data.visualTests,
+      ...this.data.performanceTests,
+      ...this.data.ergonomicTests
+    ];
     
-    const htmlContent = this.createDashboardHTML(
-      performanceReport, 
-      screenshotResults, 
-      ergonomicResults
-    );
+    const totalTests = allTests.length;
+    const passedTests = allTests.filter(test => test.status === 'pass').length;
+    const failedTests = allTests.filter(test => test.status === 'fail').length;
+    const warningTests = allTests.filter(test => test.status === 'warning').length;
     
-    await fs.writeFile(dashboardPath, htmlContent);
-    return dashboardPath;
+    this.data.summary = {
+      totalTests,
+      passedTests,
+      failedTests,
+      warningTests,
+      passRate: totalTests > 0 ? (passedTests / totalTests) * 100 : 0,
+      lastUpdated: new Date().toISOString()
+    };
+    
+    // Update overall status
+    if (failedTests > 0) {
+      this.data.overallStatus = 'fail';
+    } else if (warningTests > 0) {
+      this.data.overallStatus = 'warning';
+    } else {
+      this.data.overallStatus = 'pass';
+    }
+    
+    this.data.timestamp = new Date().toISOString();
   }
 
   /**
-   * Create HTML content for the unified dashboard
-   * @param performanceReport Performance metrics report
-   * @param screenshotResults Screenshot validation results
-   * @param ergonomicResults Ergonomic compliance results
+   * Generate HTML dashboard
    */
-  private createDashboardHTML(
-    performanceReport: PerformanceReport | null,
-    screenshotResults: ScreenshotValidationResult[] | null,
-    ergonomicResults: any[] | null
-  ): string {
-    return `
+  async generateHtmlDashboard(): Promise<string> {
+    await this.createDashboardDirectory();
+    
+    const html = `
 <!DOCTYPE html>
 <html>
 <head>
-    <title>SpaceGraphJS Unified Test Dashboard</title>
+    <title>SpaceGraphJS Visual Semantics Testing Dashboard</title>
     <style>
         :root {
-            --primary: #333;
-            --secondary: #f5f5f5;
-            --success: #4CAF50;
-            --warning: #FF9800;
-            --danger: #f44336;
-            --info: #2196F3;
+            --pass-color: #28a745;
+            --fail-color: #dc3545;
+            --warning-color: #ffc107;
+            --pass-bg: #d4edda;
+            --fail-bg: #f8d7da;
+            --warning-bg: #fff3cd;
+            --header-bg: #f8f9fa;
+            --border-color: #dee2e6;
         }
         
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            margin: 0; 
-            padding: 0;
-            background-color: #fafafa;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f7fa;
             color: #333;
         }
         
-        .header { 
-            background: linear-gradient(135deg, var(--primary), #555);
-            color: white; 
-            padding: 20px; 
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        .header {
+            background-color: var(--header-bg);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .header h1 {
-            margin: 0;
-            font-size: 2.5em;
+            margin: 0 0 10px 0;
+            color: #2c3e50;
         }
         
-        .header p {
-            margin: 10px 0 0;
-            opacity: 0.9;
+        .status-indicator {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 12px;
         }
         
-        .tabs {
+        .status-pass { background-color: var(--pass-color); color: white; }
+        .status-fail { background-color: var(--fail-color); color: white; }
+        .status-warning { background-color: var(--warning-color); color: black; }
+        
+        .summary-stats {
             display: flex;
-            background-color: #eee;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .tab {
-            padding: 15px 25px;
-            cursor: pointer;
-            background-color: #eee;
-            border: none;
-            font-size: 16px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-        
-        .tab.active {
-            background-color: white;
-            border-bottom: 3px solid var(--info);
-            margin-bottom: -1px;
-        }
-        
-        .tab:hover:not(.active) {
-            background-color: #ddd;
-        }
-        
-        .content {
-            padding: 20px;
-            display: none;
-        }
-        
-        .content.active {
-            display: block;
-        }
-        
-        .summary-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
-            margin-bottom: 30px;
+            margin: 20px 0;
         }
         
-        .card {
+        .stat-card {
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            flex: 1;
             text-align: center;
-            transition: transform 0.3s ease;
         }
         
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .card h3 {
-            margin-top: 0;
-            color: var(--primary);
-        }
-        
-        .card .value {
-            font-size: 2.5em;
+        .stat-value {
+            font-size: 2rem;
             font-weight: bold;
             margin: 10px 0;
         }
         
-        .card.performance .value { color: var(--info); }
-        .card.screenshots .value { color: var(--success); }
-        .card.ergonomics .value { color: var(--warning); }
+        .stat-pass { color: var(--pass-color); }
+        .stat-fail { color: var(--fail-color); }
+        .stat-warning { color: var(--warning-color); }
         
-        .section-title {
-            color: var(--primary);
-            border-bottom: 2px solid var(--info);
-            padding-bottom: 10px;
-            margin: 30px 0 20px;
+        .test-section {
+            background: white;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
         
-        .results-table {
+        .section-header {
+            background-color: var(--header-bg);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .test-table {
             width: 100%;
             border-collapse: collapse;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
-        .results-table th {
-            background-color: var(--primary);
-            color: white;
-            text-align: left;
-            padding: 15px;
-            font-weight: 500;
-        }
-        
-        .results-table td {
+        .test-table th {
+            background-color: var(--header-bg);
             padding: 12px 15px;
-            border-bottom: 1px solid #eee;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
         }
         
-        .results-table tr:hover {
-            background-color: #f9f9f9;
+        .test-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
         }
         
-        .status-badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: 500;
+        .test-table tr:hover {
+            background-color: #f8f9fa;
         }
         
-        .status-passed { 
-            background-color: rgba(76, 175, 80, 0.1);
-            color: var(--success);
-            border: 1px solid var(--success);
-        }
-        
-        .status-failed { 
-            background-color: rgba(244, 67, 54, 0.1);
-            color: var(--danger);
-            border: 1px solid var(--danger);
-        }
-        
-        .status-warning { 
-            background-color: rgba(255, 152, 0, 0.1);
-            color: var(--warning);
-            border: 1px solid var(--warning);
-        }
-        
-        .status-regression { 
-            background-color: rgba(244, 67, 54, 0.1);
-            color: var(--danger);
-            border: 1px solid var(--danger);
-        }
-        
-        .status-improvement { 
-            background-color: rgba(76, 175, 80, 0.1);
-            color: var(--success);
-            border: 1px solid var(--success);
-        }
-        
-        .chart-container {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 20px;
-            margin: 20px 0;
-        }
-        
-        .no-data {
+        .status-cell {
             text-align: center;
-            padding: 40px;
-            color: #777;
-            font-style: italic;
         }
         
-        .footer {
-            text-align: center;
-            padding: 20px;
-            color: #777;
-            border-top: 1px solid #eee;
-            margin-top: 30px;
+        .screenshot-link {
+            color: #007bff;
+            text-decoration: none;
         }
         
-        @media (max-width: 768px) {
-            .summary-cards {
-                grid-template-columns: 1fr;
-            }
-            
-            .tabs {
-                flex-direction: column;
-            }
+        .screenshot-link:hover {
+            text-decoration: underline;
+        }
+        
+        .regression-badge {
+            background-color: var(--warning-color);
+            color: black;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
+        .failures-list {
+            color: var(--fail-color);
+            font-size: 0.9em;
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>SpaceGraphJS Unified Test Dashboard</h1>
-        <p>Comprehensive UI/UX Testing Results</p>
-        <p>Generated: ${new Date().toLocaleString()}</p>
-    </div>
-    
-    <div class="tabs">
-        <button class="tab active" onclick="showTab('overview')">Overview</button>
-        <button class="tab" onclick="showTab('performance')">Performance</button>
-        <button class="tab" onclick="showTab('screenshots')">Screenshots</button>
-        <button class="tab" onclick="showTab('ergonomics')">Ergonomics</button>
-    </div>
-    
-    <div id="overview" class="content active">
-        ${this.createOverviewContent(performanceReport, screenshotResults, ergonomicResults)}
-    </div>
-    
-    <div id="performance" class="content">
-        ${this.createPerformanceContent(performanceReport)}
-    </div>
-    
-    <div id="screenshots" class="content">
-        ${this.createScreenshotContent(screenshotResults)}
-    </div>
-    
-    <div id="ergonomics" class="content">
-        ${this.createErgonomicContent(ergonomicResults)}
-    </div>
-    
-    <div class="footer">
-        <p>SpaceGraphJS Visual Semantics Testing Framework</p>
-    </div>
-    
-    <script>
-        function showTab(tabName) {
-            // Hide all content
-            const contents = document.querySelectorAll('.content');
-            contents.forEach(content => content.classList.remove('active'));
-            
-            // Remove active class from tabs
-            const tabs = document.querySelectorAll('.tab');
-            tabs.forEach(tab => tab.classList.remove('active'));
-            
-            // Show selected content
-            document.getElementById(tabName).classList.add('active');
-            
-            // Add active class to clicked tab
-            event.currentTarget.classList.add('active');
-        }
-    </script>
-</body>
-</html>
-    `.trim();
-  }
-
-  /**
-   * Create overview content
-   */
-  private createOverviewContent(
-    performanceReport: PerformanceReport | null,
-    screenshotResults: ScreenshotValidationResult[] | null,
-    ergonomicResults: any[] | null
-  ): string {
-    const totalTests = (screenshotResults?.length || 0) + (ergonomicResults?.length || 0);
-    const passedTests = (screenshotResults?.filter(r => r.passed).length || 0) + 
-                       (ergonomicResults?.filter(r => r.passed).length || 0);
-    const avgPerformance = performanceReport?.summary.averageResponseTime || 0;
-    
-    return `
-        <div class="summary-cards">
-            <div class="card performance">
-                <h3>Performance</h3>
-                <div class="value">${avgPerformance.toFixed(0)}<span style="font-size: 0.5em;">ms</span></div>
-                <p>Average Response Time</p>
-            </div>
-            
-            <div class="card screenshots">
-                <h3>Visual Tests</h3>
-                <div class="value">${passedTests}<span style="font-size: 0.5em;">/${totalTests}</span></div>
-                <p>Tests Passed</p>
-            </div>
-            
-            <div class="card ergonomics">
-                <h3>Components</h3>
-                <div class="value">${performanceReport?.summary.totalComponents || 0}</div>
-                <p>UI Components Tested</p>
-            </div>
+        <h1>SpaceGraphJS Visual Semantics Testing Dashboard</h1>
+        <div>
+            Status: <span class="status-indicator status-${this.data.overallStatus}">${this.data.overallStatus.toUpperCase()}</span>
+            <span style="margin-left: 20px;">Last Updated: ${new Date(this.data.timestamp).toLocaleString()}</span>
         </div>
-        
-        <h2 class="section-title">Recent Test Results</h2>
-        
-        <div class="chart-container">
-            <h3>Test Status Distribution</h3>
-            ${screenshotResults || ergonomicResults ? `
-            <div style="display: flex; justify-content: center; align-items: center; height: 200px;">
-                <div style="width: 200px; height: 200px; border-radius: 50%; background: conic-gradient(
-                    ${passedTests > 0 ? `var(--success) 0 ${(passedTests/totalTests)*100}%` : ''},
-                    ${totalTests > passedTests ? `var(--danger) ${(passedTests/totalTests)*100}% 100%` : ''}
-                ); display: flex; justify-content: center; align-items: center;">
-                    <div style="width: 150px; height: 150px; border-radius: 50%; background: white; display: flex; justify-content: center; align-items: center; font-weight: bold;">
-                        ${totalTests > 0 ? Math.round((passedTests/totalTests)*100) : 0}%
-                    </div>
-                </div>
-            </div>
-            ` : '<div class="no-data">No test data available</div>'}
-        </div>
-    `;
-  }
-
-  /**
-   * Create performance content
-   */
-  private createPerformanceContent(performanceReport: PerformanceReport | null): string {
-    if (!performanceReport) {
-      return '<div class="no-data">No performance data available</div>';
-    }
+    </div>
     
-    return `
-        <div class="summary-cards">
-            <div class="card">
-                <h3>Total Metrics</h3>
-                <div class="value">${performanceReport.totalMetrics}</div>
-                <p>Measurements Collected</p>
-            </div>
-            
-            <div class="card">
-                <h3>Avg Response</h3>
-                <div class="value">${performanceReport.summary.averageResponseTime.toFixed(0)}<span style="font-size: 0.5em;">ms</span></div>
-                <p>Overall Average</p>
-            </div>
-            
-            <div class="card">
-                <h3>Components</h3>
-                <div class="value">${performanceReport.summary.totalComponents}</div>
-                <p>Tested Components</p>
-            </div>
+    <div class="summary-stats">
+        <div class="stat-card">
+            <div>Total Tests</div>
+            <div class="stat-value">${this.data.summary.totalTests}</div>
         </div>
-        
-        <h2 class="section-title">Performance Analysis</h2>
-        
-        <table class="results-table">
+        <div class="stat-card">
+            <div>Passed</div>
+            <div class="stat-value stat-pass">${this.data.summary.passedTests}</div>
+        </div>
+        <div class="stat-card">
+            <div>Failed</div>
+            <div class="stat-value stat-fail">${this.data.summary.failedTests}</div>
+        </div>
+        <div class="stat-card">
+            <div>Warnings</div>
+            <div class="stat-value stat-warning">${this.data.summary.warningTests}</div>
+        </div>
+        <div class="stat-card">
+            <div>Pass Rate</div>
+            <div class="stat-value">${this.data.summary.passRate.toFixed(1)}%</div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <div class="section-header">
+            <span>Visual Tests (${this.data.visualTests.length})</span>
+        </div>
+        <table class="test-table">
             <thead>
                 <tr>
                     <th>Component</th>
-                    <th>Interaction</th>
-                    <th>Sample Size</th>
-                    <th>Avg Time (ms)</th>
-                    <th>Min/Max (ms)</th>
+                    <th>Test</th>
                     <th>Status</th>
+                    <th>Screenshots</th>
                 </tr>
             </thead>
             <tbody>
-                ${performanceReport.analysis.map(item => {
-                  const statusClass = item.comparison?.regression ? 'status-regression' : 
-                                    item.comparison?.improvement ? 'status-improvement' : 'status-passed';
-                  const statusText = item.comparison?.regression ? 'REGRESSION' : 
-                                   item.comparison?.improvement ? 'IMPROVEMENT' : 'STABLE';
-                  
-                  return `
+                ${this.data.visualTests.map(test => `
                 <tr>
-                    <td>${item.component}</td>
-                    <td>${item.interactionType}</td>
-                    <td>${item.sampleSize}</td>
-                    <td>${item.statistics.average.toFixed(2)}</td>
-                    <td>${item.statistics.min.toFixed(0)}/${item.statistics.max.toFixed(0)}</td>
-                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                </tr>
-                `;
-                }).join('')}
-            </tbody>
-        </table>
-    `;
-  }
-
-  /**
-   * Create screenshot content
-   */
-  private createScreenshotContent(screenshotResults: ScreenshotValidationResult[] | null): string {
-    if (!screenshotResults || screenshotResults.length === 0) {
-      return '<div class="no-data">No screenshot validation data available</div>';
-    }
-    
-    const passedCount = screenshotResults.filter(r => r.passed).length;
-    const failedCount = screenshotResults.filter(r => !r.passed && !r.isFirstRun).length;
-    const firstRunCount = screenshotResults.filter(r => r.isFirstRun).length;
-    
-    return `
-        <div class="summary-cards">
-            <div class="card">
-                <h3>Total Tests</h3>
-                <div class="value">${screenshotResults.length}</div>
-                <p>Screenshot Tests</p>
-            </div>
-            
-            <div class="card">
-                <h3>Passed</h3>
-                <div class="value">${passedCount}</div>
-                <p>Tests Passed</p>
-            </div>
-            
-            <div class="card">
-                <h3>Failed</h3>
-                <div class="value">${failedCount}</div>
-                <p>Tests Failed</p>
-            </div>
-        </div>
-        
-        <h2 class="section-title">Screenshot Validation Results</h2>
-        
-        <table class="results-table">
-            <thead>
-                <tr>
-                    <th>Interaction</th>
-                    <th>Status</th>
-                    <th>Diff Pixels</th>
-                    <th>Diff %</th>
-                    <th>Timestamp</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${screenshotResults.map(result => {
-                  const statusClass = result.isFirstRun ? 'status-warning' : 
-                                    result.passed ? 'status-passed' : 'status-failed';
-                  const statusText = result.isFirstRun ? 'FIRST RUN' : 
-                                   result.passed ? 'PASSED' : 'FAILED';
-                  
-                  return `
-                <tr>
-                    <td>${result.interactionName}</td>
-                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                    <td>${result.diffPixels !== undefined ? result.diffPixels : 'N/A'}</td>
-                    <td>${result.diffPercentage !== undefined ? result.diffPercentage.toFixed(2) + '%' : 'N/A'}</td>
-                    <td>${new Date(result.timestamp).toLocaleTimeString()}</td>
-                </tr>
-                `;
-                }).join('')}
-            </tbody>
-        </table>
-    `;
-  }
-
-  /**
-   * Create ergonomic content
-   */
-  private createErgonomicContent(ergonomicResults: any[] | null): string {
-    if (!ergonomicResults || ergonomicResults.length === 0) {
-      return '<div class="no-data">No ergonomic compliance data available</div>';
-    }
-    
-    const passedCount = ergonomicResults.filter(r => r.passed).length;
-    const violationCount = ergonomicResults.reduce((sum, r) => sum + (r.violations?.length || 0), 0);
-    
-    return `
-        <div class="summary-cards">
-            <div class="card">
-                <h3>Components</h3>
-                <div class="value">${ergonomicResults.length}</div>
-                <p>Tested Components</p>
-            </div>
-            
-            <div class="card">
-                <h3>Compliant</h3>
-                <div class="value">${passedCount}</div>
-                <p>Components Passed</p>
-            </div>
-            
-            <div class="card">
-                <h3>Violations</h3>
-                <div class="value">${violationCount}</div>
-                <p>Total Violations</p>
-            </div>
-        </div>
-        
-        <h2 class="section-title">Ergonomic Compliance Results</h2>
-        
-        <table class="results-table">
-            <thead>
-                <tr>
-                    <th>Component</th>
-                    <th>Status</th>
-                    <th>Violations</th>
-                    <th>Metrics</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${ergonomicResults.map(result => {
-                  const statusClass = result.passed ? 'status-passed' : 'status-failed';
-                  const statusText = result.passed ? 'COMPLIANT' : 'VIOLATIONS';
-                  
-                  return `
-                <tr>
-                    <td>${result.component}</td>
-                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                    <td>${result.violations?.length || 0}</td>
+                    <td>${test.componentName}</td>
+                    <td>${test.testName}</td>
+                    <td class="status-cell">
+                        <span class="status-indicator status-${test.status}">${test.status.toUpperCase()}</span>
+                        ${test.errorMessage ? `<div style="color: var(--fail-color); font-size: 0.8em; margin-top: 5px;">${test.errorMessage}</div>` : ''}
+                    </td>
                     <td>
-                        ${result.metrics ? Object.entries(result.metrics).map(([key, value]) => 
-                          `${key}: ${typeof value === 'number' ? value.toFixed(2) : value}`
-                        ).join(', ') : 'N/A'}
+                        ${test.screenshotPath ? `<a href="${test.screenshotPath}" class="screenshot-link">Actual</a>` : ''}
+                        ${test.diffPath ? ` | <a href="${test.diffPath}" class="screenshot-link">Diff</a>` : ''}
                     </td>
                 </tr>
-                `;
-                }).join('')}
+                `).join('')}
             </tbody>
         </table>
-    `;
+    </div>
+    
+    <div class="test-section">
+        <div class="section-header">
+            <span>Performance Tests (${this.data.performanceTests.length})</span>
+        </div>
+        <table class="test-table">
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Test</th>
+                    <th>Status</th>
+                    <th>Response Time</th>
+                    <th>Memory Usage</th>
+                    <th>CPU Usage</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${this.data.performanceTests.map(test => `
+                <tr>
+                    <td>${test.componentName}</td>
+                    <td>${test.testName}</td>
+                    <td class="status-cell">
+                        <span class="status-indicator status-${test.status}">${test.status.toUpperCase()}</span>
+                        ${test.regression ? `<span class="regression-badge">REGRESSION</span>` : ''}
+                    </td>
+                    <td>${test.metrics.responseTime.toFixed(2)}ms</td>
+                    <td>${test.metrics.memoryUsage.toFixed(2)}MB</td>
+                    <td>${test.metrics.cpuUsage.toFixed(2)}%</td>
+                </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="test-section">
+        <div class="section-header">
+            <span>Ergonomic Tests (${this.data.ergonomicTests.length})</span>
+        </div>
+        <table class="test-table">
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Test</th>
+                    <th>Status</th>
+                    <th>Failures</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${this.data.ergonomicTests.map(test => `
+                <tr>
+                    <td>${test.componentName}</td>
+                    <td>${test.testName}</td>
+                    <td class="status-cell">
+                        <span class="status-indicator status-${test.status}">${test.status.toUpperCase()}</span>
+                    </td>
+                    <td>
+                        ${test.failures.length > 0 ? `<div class="failures-list">${test.failures.join(', ')}</div>` : 'All requirements met'}
+                    </td>
+                </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>`;
+    
+    const filepath = path.join(this.dashboardDir, 'index.html');
+    await fs.writeFile(filepath, html);
+    console.log(`Dashboard generated at: ${filepath}`);
+    
+    return filepath;
+  }
+
+  /**
+   * Create dashboard directory if it doesn't exist
+   */
+  private async createDashboardDirectory(): Promise<void> {
+    try {
+      await fs.mkdir(this.dashboardDir, { recursive: true });
+    } catch (error) {
+      console.error('Failed to create dashboard directory:', error);
+    }
+  }
+
+  /**
+   * Load data from a regression report
+   */
+  loadFromRegressionReport(report: RegressionReport): void {
+    // Convert regression report to visual test summaries
+    const visualTests: VisualTestSummary[] = report.regressionDetails.map(detail => ({
+      componentName: detail.componentName,
+      testName: detail.testName,
+      status: 'fail',
+      screenshotPath: detail.screenshotPath,
+      diffPath: detail.diffPath,
+      errorMessage: detail.description
+    }));
+    
+    this.addVisualTestResults(visualTests);
+  }
+
+  /**
+   * Get current dashboard data
+   */
+  getData(): DashboardData {
+    return { ...this.data };
+  }
+
+  /**
+   * Reset dashboard data
+   */
+  reset(): void {
+    this.data = this.initializeData();
   }
 }
 
-// Export singleton instance
-export const unifiedDashboard = new UnifiedDashboard();
+// Export the dashboard class
+export { UnifiedDashboard, type DashboardData, type VisualTestSummary, type PerformanceTestSummary, type ErgonomicTestSummary };

@@ -27,6 +27,9 @@ import ThemeSystem, { ThemeSystem as ThemeSystemClass, Theme, ThemeConfig } from
 // Visual Effects System
 import VisualEffectsSystem, { VisualEffectsSystem as VisualEffectsSystemClass, EffectConfig, ParticleEffect, GlowEffect, TrailEffect } from './VisualEffectsSystem';
 
+// Error Handler
+import { ErrorHandler } from './ErrorHandler';
+
 // Export types and classes
 export { AnimationSystemClass as AnimationSystem, AnimationConfig, AnimationTask, KeyframeAnimation, ParallelAnimation, SequenceAnimation };
 export { CameraUtils, CameraUtilsClass as CameraUtilsClass, CameraAnimationConfig };
@@ -35,6 +38,7 @@ export { InteractionUtilsClass as InteractionUtils, InteractionEvent, GestureCon
 export { PerformanceUtilsClass as PerformanceUtils, PerformanceMetrics, PerformanceConfig };
 export { ThemeSystemClass as ThemeSystem, Theme, ThemeConfig };
 export { VisualEffectsSystemClass as VisualEffectsSystem, EffectConfig, ParticleEffect, GlowEffect, TrailEffect };
+export { ErrorHandler };
 
 // Re-export existing utilities
 export * from './AnimationUtils';
@@ -50,6 +54,7 @@ export * from './PerformanceOptimizer';
 export * from './ThreeObjectPoolManager';
 export * from './ThreeObjectPools';
 export * from './threeUtils';
+export * from './ErrorHandler';
 
 // Utility function to create a complete utility system instance
 export interface UtilitySystemConfig {
@@ -68,11 +73,13 @@ export class UtilitySystem {
   public performance: PerformanceUtils;
   public theme: ThemeSystem;
   public visualEffects: VisualEffectsSystem;
+  public errorHandler: ErrorHandler;
 
   constructor(config: UtilitySystemConfig = {}) {
     this.animation = new AnimationSystemClass(config.performanceMode || false);
     this.camera = new CameraUtilsClass();
     this.hud = new HUDUtilsClass();
+    this.errorHandler = ErrorHandler.getInstance();
     
     if (config.camera && config.scene) {
       this.interaction = new InteractionUtilsClass(config.camera, config.scene, config.interactionConfig);

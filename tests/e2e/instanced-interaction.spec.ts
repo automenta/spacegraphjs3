@@ -12,7 +12,7 @@ test.describe('Instanced Renderer Interaction', () => {
       try {
         const nodeRenderer = graph.render.getNodeRenderer();
         return nodeRenderer && nodeRenderer.constructor.name === 'InstancedRenderer';
-      } catch (e) {
+      } catch (_e) {
         return false;
       }
     });
@@ -34,7 +34,7 @@ test.describe('Instanced Renderer Interaction', () => {
           }
         }
         return false;
-      } catch (e) {
+      } catch (_e) {
         return false;
       }
     });

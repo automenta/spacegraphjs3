@@ -15,7 +15,7 @@ We've recently made significant improvements to the codebase:
 - **Event Handling Improvements**: Fixed TypeScript issues and added disposal safety
 - **Layout Engine Optimizations**: Improved performance for large graphs
 - **Rendering Performance**: Implemented geometry caching for edges
-- **Comprehensive Documentation**: Added detailed documentation for all improvements
+- **Documentation Consolidation**: Removed duplicate documentation and consolidated into comprehensive guides
 
 For details, see [CODEBASE_IMPROVEMENTS_SUMMARY.md](doc/CODEBASE_IMPROVEMENTS_SUMMARY.md)
 
@@ -118,7 +118,28 @@ The library automatically scales performance based on graph size:
 
 The BasicRenderer is an alternative rendering backend that can be used for debugging instancing issues. To use it, set `performance.useBasicRenderer: true` in your spec.
 
+## Documentation
+
+We've consolidated our documentation into comprehensive guides that accurately reflect the current implementation:
+
+- [Layout Engines - Consolidated Guide](doc/LAYOUT_ENGINES_CONSOLIDATED.md): Complete documentation for all layout engines with implementation details
+- [Element Actors - Consolidated Guide](doc/ELEMENT_ACTORS_CONSOLIDATED.md): Comprehensive guide to all element actors with implementation details
+- [Edge Interaction - Consolidated Guide](doc/EDGE_INTERACTION_CONSOLIDATED.md): Complete documentation for edge interaction system with implementation details
+
 ## Examples
+
+We've consolidated our examples into fewer, more comprehensive demos that showcase all major features:
+
+- `examples/comprehensive-demo.ts`: A single comprehensive demo showcasing all element types, edge types, and interactions
+- `examples/basic.ts`: A minimal example for getting started
+- `examples/large-graph.ts`: Performance demonstration with large graphs
+- `examples/layout-engines-demo.ts`: Interactive demo for switching between layout engines
+- `examples/edge-interaction-demo.ts`: Detailed edge interaction demonstration
+- `examples/element-actors-demo.ts`: Comprehensive element actors demonstration
+- `examples/html-node-demo.ts`: HTML nodes demonstration
+- `examples/instanced-interaction.ts`: Instancing and interaction demonstration
+- `examples/performance-optimizations.ts`: Performance optimization techniques
+- `examples/visible-rendering-demo.ts`: Visible rendering demonstration
 
 See the `examples/` directory for various demonstrations of the library's capabilities.
 
