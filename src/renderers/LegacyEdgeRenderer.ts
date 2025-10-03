@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { createEffect } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { EdgeSpec, NodeSpec, Spec } from '../types';
-import { expandHex } from '../utils/color';
+import { expandHex } from '../utils/colorUtils';
 
 export class EdgeRenderer {
   public lineSegments: THREE.LineSegments;

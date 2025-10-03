@@ -3,7 +3,7 @@ import { SpaceGraph } from '../src/index';
 import { AdvancedCameraControls } from '../src/utils/AdvancedCameraControls';
 import { EnhancedInteractionSystem } from '../src/utils/EnhancedInteractionSystem';
 import { EnhancedHUDSystem } from '../src/utils/EnhancedHUDSystem';
-import { PerformanceOptimizer } from '../src/utils/PerformanceOptimizer';
+import { OptimizedPerformanceSystem } from '../src/utils/OptimizedPerformanceSystem';
 import { EnhancedAnimationSystem } from '../src/utils/EnhancedAnimationSystem';
 import { VisualFeedbackSystem } from '../src/utils/VisualFeedbackSystem';
 
@@ -21,7 +21,7 @@ export class EnhancedIntegrationDemo {
   private cameraControls!: AdvancedCameraControls;
   private interactionSystem!: EnhancedInteractionSystem;
   private hudSystem!: EnhancedHUDSystem;
-  private performanceOptimizer!: PerformanceOptimizer;
+  private performanceOptimizer!: OptimizedPerformanceSystem;
   private animationSystem!: EnhancedAnimationSystem;
   private visualFeedback!: VisualFeedbackSystem;
 
@@ -135,7 +135,7 @@ export class EnhancedIntegrationDemo {
     this.hudSystem = new EnhancedHUDSystem(this.container);
 
     // Initialize performance optimizer
-    this.performanceOptimizer = new PerformanceOptimizer(
+    this.performanceOptimizer = new OptimizedPerformanceSystem(
       this.scene,
       this.camera,
       this.renderer,
@@ -409,12 +409,11 @@ export class EnhancedIntegrationDemo {
         this.hudSystem.showNotification('Auto-rotate enabled', 'info', 2000);
         break;
       case 'p': {
-        const isEnabled = (this.performanceOptimizer as any)[
-          'optimizationEnabled'
-        ];
-        this.performanceOptimizer.setOptimizationEnabled(!isEnabled);
+        const currentLevel = this.performanceOptimizer.getMetrics().qualityLevel;
+        const newLevel = currentLevel > 0 ? 0 : 2; // Toggle between low and high
+        this.performanceOptimizer.setQualityLevel(newLevel === 0 ? 'low' : 'high');
         this.hudSystem.showNotification(
-          `Performance monitoring ${!isEnabled ? 'enabled' : 'disabled'}`,
+          `Quality level set to ${newLevel === 0 ? 'low' : 'high'}`,
           'info',
           2000
         );

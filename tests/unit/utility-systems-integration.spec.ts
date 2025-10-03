@@ -6,13 +6,9 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as THREE from 'three';
 import {
-  AnimationSystem,
   CameraUtils,
   HUDUtils,
-  InteractionUtils,
   PerformanceUtils,
-  ThemeSystem,
-  VisualEffectsSystem,
   UtilitySystem,
   createUtilitySystem,
 } from '../../src/utils';
@@ -29,6 +25,14 @@ describe('Utility Systems Integration', () => {
     camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
     camera.position.set(0, 0, 10);
 
+        // Mock renderer for testing
+    renderer = {
+      domElement: document.createElement('canvas'),
+      getSize: () => ({ width: 800, height: 600 }),
+      setSize: () => {},
+      render: () => {},
+    } as any;
+
     // Mock renderer for testing
     renderer = {
       domElement: document.createElement('canvas'),
@@ -36,6 +40,9 @@ describe('Utility Systems Integration', () => {
       setSize: () => {},
       render: () => {},
     } as any;
+
+    // Note: renderer is created but not directly used in tests</search>
+
 
     // Create utility system
     utilitySystem = createUtilitySystem({

@@ -8,7 +8,7 @@ import { createEffect, on } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { NodeSpec, Spec } from '../types';
 import { IRenderer } from './IRenderer';
-import { expandHex } from '../utils/color';
+import { expandHex } from '../utils/colorUtils';
 
 import { acceleratedRaycast } from 'three-mesh-bvh';
 

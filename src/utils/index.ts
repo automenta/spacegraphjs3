@@ -6,12 +6,10 @@
 import * as THREE from 'three';
 
 // Animation System
-import AnimationSystem, {
-  AnimationSystem as AnimationSystemClass,
+import UnifiedAnimationSystem, {
+  UnifiedAnimationSystem as UnifiedAnimationSystemClass,
   AnimationTask,
   KeyframeAnimation,
-} from './AnimationSystem';
-import type {
   AnimationConfig,
   ParallelAnimation,
   SequenceAnimation,
@@ -66,7 +64,7 @@ import { ErrorHandler } from './ErrorHandler';
 
 // Export types and classes
 export {
-  AnimationSystemClass as AnimationSystem,
+  UnifiedAnimationSystemClass as AnimationSystem,
   AnimationConfig,
   AnimationTask,
   KeyframeAnimation,
@@ -103,14 +101,14 @@ export { ErrorHandler };
 // Re-export existing utilities
 export * from './AnimationUtils';
 export * from './CameraPresets';
-export * from './color';
+
 export * from './colorUtils';
 export * from './CullingManager';
 export * from './deepMerge';
 export * from './LODManager';
 export * from './MemoryManager';
 export * from './ObjectPool';
-export * from './PerformanceOptimizer';
+
 export * from './ThreeObjectPoolManager';
 export * from './ThreeObjectPools';
 export * from './threeUtils';
@@ -126,7 +124,7 @@ export interface UtilitySystemConfig {
 }
 
 export class UtilitySystem {
-  public animation: AnimationSystem;
+  public animation: UnifiedAnimationSystem;
   public camera: CameraUtils;
   public hud: HUDUtils;
   public interaction: InteractionUtils;
@@ -136,7 +134,7 @@ export class UtilitySystem {
   public errorHandler: ErrorHandler;
 
   constructor(config: UtilitySystemConfig = {}) {
-    this.animation = new AnimationSystemClass(config.performanceMode || false);
+    this.animation = new UnifiedAnimationSystemClass();
     this.camera = new CameraUtilsClass();
     this.hud = new HUDUtilsClass();
     this.errorHandler = ErrorHandler.getInstance();
@@ -229,7 +227,7 @@ export function disposeUtilitySystem(): void {
 }
 
 export default {
-  AnimationSystem,
+  UnifiedAnimationSystem,
   CameraUtils,
   HUDUtils,
   InteractionUtils,
