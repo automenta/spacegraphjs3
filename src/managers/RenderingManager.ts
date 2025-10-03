@@ -251,33 +251,35 @@ export class RenderingManager {
       const threshold =
         this.graph.state.performance?.instancingThreshold ?? 100;
       const shouldUseInstanced = nodeCount > threshold;
+      const useBasicRenderer =
+        this.graph.state.performance?.useBasicRenderer ?? false;
 
-      const needsUpdate =
-        !this.nodeRenderer ||
-        (shouldUseInstanced &&
-          !(this.nodeRenderer instanceof InstancedRenderer) &&
-          !(this.nodeRenderer instanceof BasicRenderer)) ||
-        (!shouldUseInstanced &&
-          (this.nodeRenderer instanceof InstancedRenderer ||
-            this.nodeRenderer instanceof BasicRenderer));
+      // Determine which renderer we should be using
+      let targetRendererType: 'NodeRenderer' | 'InstancedRenderer' | 'BasicRenderer';
+      if (!shouldUseInstanced) {
+        targetRendererType = 'NodeRenderer';
+      } else if (useBasicRenderer) {
+        targetRendererType = 'BasicRenderer';
+      } else {
+        targetRendererType = 'InstancedRenderer';
+      }
+
+      // Check if we need to switch renderers
+      const currentRendererType = this.nodeRenderer?.constructor.name;
+      const needsUpdate = !this.nodeRenderer || currentRendererType !== targetRendererType;
 
       if (needsUpdate) {
         if (this.nodeRenderer) {
           this.nodeRenderer.dispose();
         }
 
-        // Check if we should use the BasicRenderer for debugging
-        const useBasicRenderer =
-          this.graph.state.performance?.useBasicRenderer ?? false;
-
-        if (shouldUseInstanced && !useBasicRenderer) {
+        if (targetRendererType === 'InstancedRenderer') {
           this.nodeRenderer = new InstancedRenderer(
             this.scene,
             this.graph.state,
             SpaceGraph.getInstancedGeometryRegistry()
           );
-        } else if (shouldUseInstanced && useBasicRenderer) {
-          // Use BasicRenderer as an alternative to InstancedRenderer for debugging
+        } else if (targetRendererType === 'BasicRenderer') {
           this.nodeRenderer = new BasicRenderer(
             this.scene,
             this.graph.state,

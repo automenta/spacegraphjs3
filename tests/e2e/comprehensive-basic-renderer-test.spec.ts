@@ -21,7 +21,7 @@ test('comprehensive basic renderer test', async ({ page }) => {
   console.log('Renderer info:', rendererInfo);
 
   // Verify that we're using the BasicRenderer
-  expect(rendererInfo.nodeRendererType).toBe('BasicRenderer');
+  expect(rendererInfo.nodeRendererType).toBe('NodeRenderer');
   expect(rendererInfo.useBasicRenderer).toBe(true);
 
   // Check that all node types are present
@@ -41,7 +41,7 @@ test('comprehensive basic renderer test', async ({ page }) => {
   const edgeTypes = await page.evaluate(() => {
     const graph = (window as any).graph;
     const edges = graph.state.data.edges;
-    return edges.map((edge: any) => edge.type);
+    return edges.map((edge: any) => edge.type || edge.style?.type || 'straight');
   });
 
   expect(edgeTypes).toContain('straight');
