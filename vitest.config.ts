@@ -11,8 +11,8 @@ export default defineConfig({
       '**/dist/**',
       '**/tests/visual/**',
       '**/e2e/**',
-      '**/ergonomics/**',
       '**/interaction/**',
+      // Note: ergonomics tests are now included
     ],
   },
   server: {
