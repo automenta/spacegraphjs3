@@ -9,7 +9,7 @@ import { test, expect } from '@playwright/test';
  */
 
 test.describe('UI/UX Ergonomics Validation', () => {
-  test.beforeEach(async ({}) => {
+  test.beforeEach(async (_fixtures) => {
     test.setTimeout(30000);
   });
 
@@ -316,7 +316,7 @@ test.describe('UI/UX Ergonomics Validation', () => {
         await page.mouse.move(x, y);
         await page.waitForTimeout(50);
 
-        const hoverState = await page.evaluate(() => {
+        await page.evaluate(() => {
           const graph = (window as any).graph;
           return graph?.state.interaction?.hoveredElementId || null;
         });

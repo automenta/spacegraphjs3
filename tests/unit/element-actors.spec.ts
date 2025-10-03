@@ -3,10 +3,9 @@ import * as THREE from 'three';
 import { BoxElementActor } from '../../src/renderers/elementActors/BoxElementActor';
 import { CustomGeometryActor } from '../../src/renderers/elementActors/CustomGeometryActor';
 import { TextElementActor } from '../../src/renderers/elementActors/TextElementActor';
-import { SphereElementActor } from '../../src/renderers/elementActors/SphereElementActor';
 import { HtmlNodeElementActor } from '../../src/renderers/elementActors/HtmlNodeElementActor';
 import { SpaceGraph } from '../../src/core/SpaceGraph';
-import { Spec, HtmlNodeSpec } from '../../src/types';
+import { HtmlNodeSpec } from '../../src/types';
 
 describe('Element Actors', () => {
   let scene: THREE.Scene;

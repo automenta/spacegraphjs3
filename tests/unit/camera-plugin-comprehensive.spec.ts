@@ -454,15 +454,15 @@ describe('CameraPlugin Comprehensive Tests', () => {
       mockUpdateState({ camera: newCameraState });
 
       // Camera position should be updated based on spherical coordinates
-      const expectedX =
+      const _expectedX =
         newCameraState.target.x +
         newCameraState.distance *
           Math.sin(newCameraState.phi) *
           Math.cos(newCameraState.theta);
-      const expectedY =
+      const _expectedY =
         newCameraState.target.y +
         newCameraState.distance * Math.cos(newCameraState.phi);
-      const expectedZ =
+      const _expectedZ =
         newCameraState.target.z +
         newCameraState.distance *
           Math.sin(newCameraState.phi) *
@@ -486,7 +486,7 @@ describe('CameraPlugin Comprehensive Tests', () => {
       // Since we're in a test environment, the reactive effect might not run automatically
       // Let's test the sync functionality directly
 
-      const lookAtSpy = vi.spyOn(mockCamera, 'lookAt');
+      const _lookAtSpy = vi.spyOn(mockCamera, 'lookAt');
 
       // Manually call the sync method to test it works
       plugin['syncCameraToState']();

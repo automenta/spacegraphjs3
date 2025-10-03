@@ -4,7 +4,7 @@ import { AdvancedCameraControls } from '../src/utils/AdvancedCameraControls';
 import { EnhancedInteractionSystem } from '../src/utils/EnhancedInteractionSystem';
 import { EnhancedHUDSystem } from '../src/utils/EnhancedHUDSystem';
 import { OptimizedPerformanceSystem } from '../src/utils/OptimizedPerformanceSystem';
-import { EnhancedAnimationSystem } from '../src/utils/EnhancedAnimationSystem';
+import { UnifiedAnimationSystem } from '../src/utils/UnifiedAnimationSystem';
 import { VisualFeedbackSystem } from '../src/utils/VisualFeedbackSystem';
 
 /**
@@ -22,7 +22,7 @@ export class EnhancedIntegrationDemo {
   private interactionSystem!: EnhancedInteractionSystem;
   private hudSystem!: EnhancedHUDSystem;
   private performanceOptimizer!: OptimizedPerformanceSystem;
-  private animationSystem!: EnhancedAnimationSystem;
+  private animationSystem!: UnifiedAnimationSystem;
   private visualFeedback!: VisualFeedbackSystem;
 
   private isRunning = false;
@@ -154,7 +154,7 @@ export class EnhancedIntegrationDemo {
     );
 
     // Initialize animation system
-    this.animationSystem = new EnhancedAnimationSystem(this.scene);
+    this.animationSystem = new UnifiedAnimationSystem();
 
     // Initialize visual feedback system
     this.visualFeedback = new VisualFeedbackSystem(this.scene);
@@ -339,21 +339,9 @@ export class EnhancedIntegrationDemo {
   /**
    * Handle node click with enhanced animations
    */
-  private handleNodeClick(object: THREE.Object3D): void {
+  private async handleNodeClick(object: THREE.Object3D): Promise<void> {
     // Create click animation
-    this.animationSystem.createAnimation(object, {
-      type: 'pulse',
-      duration: 500,
-      to: 0.8,
-    });
-
-    // Create particle effect
-    this.animationSystem.createAnimation(object, {
-      type: 'explode',
-      duration: 1000,
-      from: object.userData.color || 0xffffff,
-      to: 0.5,
-    });
+    await this.animationSystem.bounce(object, 'scale', 0.2);
 
     // Show node information
     this.hudSystem.showNotification(
@@ -469,7 +457,7 @@ export class EnhancedIntegrationDemo {
     this.interactionSystem.update();
 
     // Update animation system
-    this.animationSystem.update();
+    this.animationSystem.update(16.67);
 
     // Update performance metrics
     const metrics = this.performanceOptimizer.getMetrics();

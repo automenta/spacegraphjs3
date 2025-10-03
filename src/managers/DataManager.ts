@@ -54,7 +54,21 @@ export class DataManager {
     const nodeIds = new Set(nodes.map((node) => node.id));
     const groupIds = new Set(groups.map((group) => group.id));
 
-    // Check edge references
+    this.validateEdgeReferences(edges, nodeIds);
+    this.validateGroupNodeReferences(groups, nodeIds);
+    this.validateNodeGroupReferences(nodes, groupIds);
+
+    // Check for duplicate IDs
+    this.checkForDuplicateIds(nodes, edges, groups);
+  }
+
+  /**
+   * Validates that edge source and target nodes exist
+   */
+  private validateEdgeReferences(
+    edges: EdgeSpec[],
+    nodeIds: Set<string>
+  ): void {
     edges.forEach((edge) => {
       if (edge.source && !nodeIds.has(edge.source)) {
         this.showValidationWarning(
@@ -74,8 +88,15 @@ export class DataManager {
         );
       }
     });
+  }
 
-    // Check group node references
+  /**
+   * Validates that group node references exist
+   */
+  private validateGroupNodeReferences(
+    groups: GroupSpec[],
+    nodeIds: Set<string>
+  ): void {
     groups.forEach((group) => {
       (group.nodes || []).forEach((nodeId) => {
         if (!nodeIds.has(nodeId)) {
@@ -88,8 +109,15 @@ export class DataManager {
         }
       });
     });
+  }
 
-    // Check node group references
+  /**
+   * Validates that node group references exist
+   */
+  private validateNodeGroupReferences(
+    nodes: NodeSpec[],
+    groupIds: Set<string>
+  ): void {
     nodes.forEach((node) => {
       if (node.groupId && !groupIds.has(node.groupId)) {
         this.showValidationWarning(
@@ -110,9 +138,6 @@ export class DataManager {
         );
       }
     });
-
-    // Check for duplicate IDs
-    this.checkForDuplicateIds(nodes, edges, groups);
   }
 
   /**
@@ -125,47 +150,30 @@ export class DataManager {
   ): void {
     const allIds = new Map<string, string>();
 
-    // Check nodes
-    nodes.forEach((node) => {
-      if (allIds.has(node.id)) {
-        this.showValidationWarning(
-          `duplicate-id-${node.id}`,
-          `Duplicate ID "${node.id}" found in nodes.\n` +
-            '⚠️  This will cause conflicts and unpredictable behavior.\n' +
-            '💡 Ensure all element IDs are unique across nodes, edges, and groups'
-        );
-      } else {
-        allIds.set(node.id, 'node');
-      }
-    });
+    this.checkDuplicatesInCollection(nodes, 'node', allIds);
+    this.checkDuplicatesInCollection(edges, 'edge', allIds);
+    this.checkDuplicatesInCollection(groups, 'group', allIds);
+  }
 
-    // Check edges
-    edges.forEach((edge) => {
-      if (allIds.has(edge.id)) {
-        const existingType = allIds.get(edge.id);
+  /**
+   * Checks for duplicate IDs in a collection of elements
+   */
+  private checkDuplicatesInCollection<T extends { id: string }>(
+    elements: T[],
+    elementType: string,
+    allIds: Map<string, string>
+  ): void {
+    elements.forEach((element) => {
+      if (allIds.has(element.id)) {
+        const existingType = allIds.get(element.id);
         this.showValidationWarning(
-          `duplicate-id-${edge.id}`,
-          `Duplicate ID "${edge.id}" found in edges (also exists as ${existingType}).\n` +
+          `duplicate-id-${element.id}`,
+          `Duplicate ID "${element.id}" found in ${elementType}s (also exists as ${existingType}).\n` +
             '⚠️  This will cause conflicts and unpredictable behavior.\n' +
             '💡 Ensure all element IDs are unique across nodes, edges, and groups'
         );
       } else {
-        allIds.set(edge.id, 'edge');
-      }
-    });
-
-    // Check groups
-    groups.forEach((group) => {
-      if (allIds.has(group.id)) {
-        const existingType = allIds.get(group.id);
-        this.showValidationWarning(
-          `duplicate-id-${group.id}`,
-          `Duplicate ID "${group.id}" found in groups (also exists as ${existingType}).\n` +
-            '⚠️  This will cause conflicts and unpredictable behavior.\n' +
-            '💡 Ensure all element IDs are unique across nodes, edges, and groups'
-        );
-      } else {
-        allIds.set(group.id, 'group');
+        allIds.set(element.id, elementType);
       }
     });
   }

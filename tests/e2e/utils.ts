@@ -5,7 +5,7 @@ type TestFixtures = {
 };
 
 export const test = base.extend<TestFixtures>({
-  consoleErrors: async ({}, use) => {
+  consoleErrors: async (_fixtures, use) => {
     const errors: string[] = [];
     await use(errors);
   },

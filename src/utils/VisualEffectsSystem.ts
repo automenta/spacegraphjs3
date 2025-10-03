@@ -489,9 +489,7 @@ export class VisualEffectsSystem {
       const progress = elapsed / duration;
 
       if (progress >= 1) {
-        this.scene.remove(particle);
-        particle.geometry.dispose();
-        (particle.material as THREE.Material).dispose();
+        safeDisposeObject(particle);
         return;
       }
 
@@ -578,9 +576,7 @@ export class VisualEffectsSystem {
       const progress = elapsed / duration;
 
       if (progress >= 1) {
-        this.scene.remove(sparkle);
-        sparkle.geometry.dispose();
-        (sparkle.material as THREE.Material).dispose();
+        safeDisposeObject(sparkle);
         return;
       }
 
@@ -658,9 +654,7 @@ export class VisualEffectsSystem {
       const progress = elapsed / duration;
 
       if (progress >= 1) {
-        this.scene.remove(beam);
-        beam.geometry.dispose();
-        (beam.material as THREE.Material).dispose();
+        safeDisposeObject(beam);
         return;
       }
 
@@ -733,9 +727,7 @@ export class VisualEffectsSystem {
       const progress = elapsed / duration;
 
       if (progress >= 1) {
-        this.scene.remove(shockwave);
-        shockwave.geometry.dispose();
-        (shockwave.material as THREE.Material).dispose();
+        safeDisposeObject(shockwave);
         return;
       }
 
@@ -768,17 +760,13 @@ export class VisualEffectsSystem {
     try {
       const particleSystem = this.particleSystems.get(id);
       if (particleSystem) {
-        this.scene.remove(particleSystem);
-        particleSystem.geometry.dispose();
-        (particleSystem.material as THREE.Material).dispose();
+        safeDisposeObject(particleSystem);
         this.particleSystems.delete(id);
       }
 
       const effectMesh = this.effectMeshes.get(id);
       if (effectMesh) {
-        this.scene.remove(effectMesh);
-        effectMesh.geometry.dispose();
-        (effectMesh.material as THREE.Material).dispose();
+        safeDisposeObject(effectMesh);
         this.effectMeshes.delete(id);
       }
     } catch (error) {
@@ -797,9 +785,7 @@ export class VisualEffectsSystem {
     try {
       this.particleSystems.forEach((system, id) => {
         try {
-          this.scene.remove(system);
-          system.geometry.dispose();
-          (system.material as THREE.Material).dispose();
+          safeDisposeObject(system);
         } catch (error) {
           this.logger.error(
             'VisualEffectsSystem',

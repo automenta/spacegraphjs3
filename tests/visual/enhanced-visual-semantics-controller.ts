@@ -1,4 +1,4 @@
-import { Page, Browser, chromium, expect } from '@playwright/test';
+import { Page, Browser, chromium } from '@playwright/test';
 import path from 'path';
 import fs from 'fs/promises';
 import { createRequire } from 'module';
@@ -499,7 +499,7 @@ export class EnhancedVisualSemanticsController {
         passed: actualSize >= minSize,
         actualSize,
       };
-    } catch (error) {
+    } catch {
       return {
         passed: false,
         actualSize: 0,
@@ -517,7 +517,7 @@ export class EnhancedVisualSemanticsController {
     minRatio: number
   ): Promise<ContrastCheckResult> {
     try {
-      const colors = await this.page!.evaluate((id) => {
+      await this.page!.evaluate((id) => {
         const element = document.getElementById(id);
         if (!element) return { foreground: '#000000', background: '#ffffff' };
 
@@ -535,7 +535,7 @@ export class EnhancedVisualSemanticsController {
         passed: actualRatio >= minRatio,
         actualRatio,
       };
-    } catch (error) {
+    } catch {
       return {
         passed: false,
         actualRatio: 0,
@@ -568,7 +568,7 @@ export class EnhancedVisualSemanticsController {
       return {
         passed: result,
       };
-    } catch (error) {
+    } catch {
       return {
         passed: false,
       };

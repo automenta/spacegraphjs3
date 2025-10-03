@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import * as THREE from 'three';
 import { SpaceGraph } from '../../src/core/SpaceGraph';
-import { NodeSpec, EdgeSpec, Spec } from '../../src/types';
+import { Spec } from '../../src/types';
 
 // Mock the Gesture library
 vi.mock('@use-gesture/vanilla', () => ({

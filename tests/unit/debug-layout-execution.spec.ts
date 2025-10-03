@@ -1,6 +1,6 @@
-import { describe, it, vi } from 'vitest';
+import { describe, it } from 'vitest';
 import { createTestGraph, nextTick } from './test-utils';
-import { SpaceGraph, LayoutPlugin, CircleLayout } from '../../src';
+import { LayoutPlugin } from '../../src';
 
 describe('Layout Execution Debug', () => {
   it('should instantiate and call circle layout', async () => {
