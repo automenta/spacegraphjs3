@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [solidPlugin()],
   resolve: {
     alias: {
-      'spacegraphjs': path.resolve(__dirname, '../../src'),
+      spacegraphjs: path.resolve(__dirname, '../../src'),
     },
   },
   server: {

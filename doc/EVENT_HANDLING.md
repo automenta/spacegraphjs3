@@ -36,7 +36,7 @@ const unsubscribe = eventManager.on('element:click', (payload) => {
 // Emit an event
 eventManager.emit('element:click', {
   target: node,
-  event: pointerEvent
+  event: pointerEvent,
 });
 
 // Remove listener

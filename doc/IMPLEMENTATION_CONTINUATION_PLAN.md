@@ -22,16 +22,16 @@ After thorough analysis of the SpaceGraphJS3 codebase, I've identified the follo
    imported.
 
 2. **Missing Layout Engines**: Only 3 of 6 planned layout engines are implemented. Missing:
-    - CircleLayout (circular/spherical arrangements)
-    - ColumnLayout (vertical arrangements)
-    - RowLayout (horizontal arrangements)
+   - CircleLayout (circular/spherical arrangements)
+   - ColumnLayout (vertical arrangements)
+   - RowLayout (horizontal arrangements)
 
 3. **Edge Interaction System**: Currently edges are purely visual with no interaction capabilities
 
 4. **Additional Element Actors**: Only SphereElementActor is implemented. Missing:
-    - BoxElementActor (cube/box geometry)
-    - CustomGeometryActor (custom THREE.BufferGeometry support)
-    - TextElementActor (3D text rendering)
+   - BoxElementActor (cube/box geometry)
+   - CustomGeometryActor (custom THREE.BufferGeometry support)
+   - TextElementActor (3D text rendering)
 
 ## Implementation Priority
 
@@ -192,7 +192,9 @@ abstract class BaseDeterministicLayout implements ILayoutEngine {
     createEffect(() => this.arrangeNodes());
   }
 
-  protected abstract calculatePositions(nodes: NodeSpec[]): Array<{x: number, y: number, z: number}>;
+  protected abstract calculatePositions(
+    nodes: NodeSpec[]
+  ): Array<{ x: number; y: number; z: number }>;
 
   protected arrangeNodes(): void {
     // Common node arrangement logic
@@ -220,8 +222,8 @@ SpaceGraph.registerLayout('row', RowLayout);
 Update TypeScript types to include new layout specifications:
 
 ```typescript
-export type LayoutSpec = 
-  | ForceDirectedLayoutSpec 
+export type LayoutSpec =
+  | ForceDirectedLayoutSpec
   | RandomLayoutSpec
   | GridLayoutSpec
   | CircleLayoutSpec

@@ -1,6 +1,9 @@
 import { test, expect } from '@playwright/test';
 import { EnhancedVisualSemanticsController } from './enhanced-visual-semantics-controller';
-import { getAllErgonomicsSpecs, getErgonomicsSpec } from './specs/ergonomics.spec';
+import {
+  getAllErgonomicsSpecs,
+  getErgonomicsSpec,
+} from './specs/ergonomics.spec';
 
 /**
  * Ergonomics Validation Tests
@@ -163,7 +166,8 @@ test.describe('Ergonomics Validation with Visual Testing', () => {
         await controller.assertVisualState(spec);
 
         // Assert ergonomic compliance
-        const ergonomicResult = await controller.assertErgonomicCompliance(spec);
+        const ergonomicResult =
+          await controller.assertErgonomicCompliance(spec);
 
         results.push({
           component: spec.component,
@@ -174,7 +178,6 @@ test.describe('Ergonomics Validation with Visual Testing', () => {
 
         // Each component should pass ergonomic checks
         expect(ergonomicResult.passed).toBe(true);
-
       } catch (error) {
         console.error(`Ergonomics test failed for ${spec.component}:`, error);
         results.push({
@@ -188,11 +191,13 @@ test.describe('Ergonomics Validation with Visual Testing', () => {
     }
 
     // Generate summary report
-    const passedCount = results.filter(r => r.passed).length;
+    const passedCount = results.filter((r) => r.passed).length;
     const totalCount = results.length;
     const complianceRate = (passedCount / totalCount) * 100;
 
-    console.log(`Ergonomics Compliance Summary: ${passedCount}/${totalCount} components passed (${complianceRate.toFixed(1)}%)`);
+    console.log(
+      `Ergonomics Compliance Summary: ${passedCount}/${totalCount} components passed (${complianceRate.toFixed(1)}%)`
+    );
 
     // Should have 100% compliance for videogame-like experience
     expect(complianceRate).toBe(100);
@@ -223,7 +228,7 @@ test.describe('Ergonomics Validation with Visual Testing', () => {
     for (const interaction of interactions) {
       await interaction();
       // Small delay to simulate user thinking time
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
     }
 
     const totalTime = Date.now() - startTime;
@@ -234,11 +239,14 @@ test.describe('Ergonomics Validation with Visual Testing', () => {
 
     // Get performance metrics
     const metrics = controller.getPerformanceMetrics();
-    const avgMetricTime = metrics.length > 0
-      ? metrics.reduce((sum, m) => sum + m.duration, 0) / metrics.length
-      : 0;
+    const avgMetricTime =
+      metrics.length > 0
+        ? metrics.reduce((sum, m) => sum + m.duration, 0) / metrics.length
+        : 0;
 
-    console.log(`Videogame Responsiveness: ${avgResponseTime.toFixed(1)}ms average response time, ${avgMetricTime.toFixed(1)}ms average metric time`);
+    console.log(
+      `Videogame Responsiveness: ${avgResponseTime.toFixed(1)}ms average response time, ${avgMetricTime.toFixed(1)}ms average metric time`
+    );
 
     // Generate detailed performance report
     const reportPath = await controller.generatePerformanceReport();
@@ -264,6 +272,8 @@ test.describe('Ergonomics Validation with Visual Testing', () => {
       }
     }
 
-    console.log('Visual regression baseline captured for all ergonomics components');
+    console.log(
+      'Visual regression baseline captured for all ergonomics components'
+    );
   });
 });

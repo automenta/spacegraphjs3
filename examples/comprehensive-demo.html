@@ -1,138 +1,139 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>SpaceGraphJS - Comprehensive Demo</title>
-  <style>
+  <head>
+    <meta charset="UTF-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>SpaceGraphJS - Comprehensive Demo</title>
+    <style>
       body {
-          margin: 0;
-          padding: 0;
-          overflow: hidden;
-          font-family: Arial, sans-serif;
-          background-color: #1a1a1a;
-          color: #ffffff;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+        background-color: #1a1a1a;
+        color: #ffffff;
       }
 
       #controls {
-          position: absolute;
-          top: 10px;
-          left: 10px;
-          z-index: 100;
-          background: rgba(0, 0, 0, 0.8);
-          padding: 15px;
-          border-radius: 8px;
-          color: white;
-          max-width: 300px;
-          max-height: calc(100vh - 40px);
-          overflow-y: auto;
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 100;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 15px;
+        border-radius: 8px;
+        color: white;
+        max-width: 300px;
+        max-height: calc(100vh - 40px);
+        overflow-y: auto;
       }
 
-      #controls h3, #controls h4 {
-          margin: 0 0 10px 0;
-          color: #00ff00;
+      #controls h3,
+      #controls h4 {
+        margin: 0 0 10px 0;
+        color: #00ff00;
       }
 
       #controls p {
-          margin: 5px 0;
-          font-size: 14px;
+        margin: 5px 0;
+        font-size: 14px;
       }
 
       #controls button {
-          margin: 3px;
-          padding: 4px 8px;
-          border: 1px solid #444;
-          border-radius: 4px;
-          background: #333;
-          color: white;
-          cursor: pointer;
-          font-size: 12px;
+        margin: 3px;
+        padding: 4px 8px;
+        border: 1px solid #444;
+        border-radius: 4px;
+        background: #333;
+        color: white;
+        cursor: pointer;
+        font-size: 12px;
       }
 
       #controls button:hover {
-          background: #555;
+        background: #555;
       }
 
       #controls button.active {
-          background: #007acc;
-          border-color: #00aaff;
+        background: #007acc;
+        border-color: #00aaff;
       }
 
       #controls > div {
-          margin-bottom: 15px;
+        margin-bottom: 15px;
       }
 
       #controls > div:last-child {
-          margin-bottom: 0;
+        margin-bottom: 0;
       }
 
       #instructions {
-          position: absolute;
-          bottom: 10px;
-          left: 10px;
-          z-index: 100;
-          background: rgba(0, 0, 0, 0.8);
-          padding: 10px;
-          border-radius: 5px;
-          color: white;
-          max-width: 300px;
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        z-index: 100;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 10px;
+        border-radius: 5px;
+        color: white;
+        max-width: 300px;
       }
 
       #instructions h3 {
-          margin: 0 0 10px 0;
-          color: #00ff00;
+        margin: 0 0 10px 0;
+        color: #00ff00;
       }
 
       #instructions ul {
-          margin: 0;
-          padding-left: 20px;
+        margin: 0;
+        padding-left: 20px;
       }
 
       #instructions li {
-          margin-bottom: 5px;
-          font-size: 13px;
+        margin-bottom: 5px;
+        font-size: 13px;
       }
 
       #graph {
-          width: 100vw;
-          height: 100vh;
+        width: 100vw;
+        height: 100vh;
       }
-  </style>
-</head>
-<body>
-<div id="controls">
-  <h3>SpaceGraphJS Comprehensive Demo</h3>
-  <p>This demo showcases all implemented features:</p>
-  <ul>
-    <li>All layout engines</li>
-    <li>All element actors</li>
-    <li>Edge interaction system</li>
-    <li>Camera controls</li>
-    <li>HUD with REPL console</li>
-  </ul>
-  <!-- Control groups will be added by JavaScript -->
-</div>
+    </style>
+  </head>
+  <body>
+    <div id="controls">
+      <h3>SpaceGraphJS Comprehensive Demo</h3>
+      <p>This demo showcases all implemented features:</p>
+      <ul>
+        <li>All layout engines</li>
+        <li>All element actors</li>
+        <li>Edge interaction system</li>
+        <li>Camera controls</li>
+        <li>HUD with REPL console</li>
+      </ul>
+      <!-- Control groups will be added by JavaScript -->
+    </div>
 
-<div id="instructions">
-  <h3>Interaction Guide</h3>
-  <ul>
-    <li><strong>Hover/Ctrl+Click</strong> nodes/edges</li>
-    <li><strong>Drag nodes</strong> to reposition</li>
-    <li><strong>Drag background</strong> to pan</li>
-    <li><strong>Scroll</strong> to zoom</li>
-    <li><strong>Arrow keys</strong> for navigation</li>
-    <li><strong>WASD</strong> for panning</li>
-    <li><strong>+/-</strong> for zooming</li>
-    <li><strong>REPL Console</strong> in HUD for commands</li>
-  </ul>
-</div>
+    <div id="instructions">
+      <h3>Interaction Guide</h3>
+      <ul>
+        <li><strong>Hover/Ctrl+Click</strong> nodes/edges</li>
+        <li><strong>Drag nodes</strong> to reposition</li>
+        <li><strong>Drag background</strong> to pan</li>
+        <li><strong>Scroll</strong> to zoom</li>
+        <li><strong>Arrow keys</strong> for navigation</li>
+        <li><strong>WASD</strong> for panning</li>
+        <li><strong>+/-</strong> for zooming</li>
+        <li><strong>REPL Console</strong> in HUD for commands</li>
+      </ul>
+    </div>
 
-<div id="graph"></div>
+    <div id="graph"></div>
 
-<script type="module">
-  import init from './comprehensive-demo.ts';
+    <script type="module">
+      import init from './comprehensive-demo.ts';
 
-  init();
-</script>
-</body>
+      init();
+    </script>
+  </body>
 </html>

@@ -45,7 +45,11 @@ export const CameraControlsSpec: VisualSemanticsSpec = {
     {
       name: 'Camera FlyTo Animation',
       steps: [
-        { type: 'click', target: 'canvas', params: { position: { x: 100, y: 100 } } },
+        {
+          type: 'click',
+          target: 'canvas',
+          params: { position: { x: 100, y: 100 } },
+        },
       ],
       expectedOutcomes: [
         {
@@ -90,7 +94,11 @@ export const NodeInteractionSpec: VisualSemanticsSpec = {
     {
       name: 'Node Hover Feedback',
       steps: [
-        { type: 'hover', target: 'canvas', params: { position: { x: 200, y: 200 } } },
+        {
+          type: 'hover',
+          target: 'canvas',
+          params: { position: { x: 200, y: 200 } },
+        },
       ],
       expectedOutcomes: [
         {
@@ -103,7 +111,11 @@ export const NodeInteractionSpec: VisualSemanticsSpec = {
     {
       name: 'Node Selection',
       steps: [
-        { type: 'click', target: 'canvas', params: { position: { x: 200, y: 200 } } },
+        {
+          type: 'click',
+          target: 'canvas',
+          params: { position: { x: 200, y: 200 } },
+        },
       ],
       expectedOutcomes: [
         {
@@ -144,7 +156,11 @@ export const TextElementSpec: VisualSemanticsSpec = {
     {
       name: 'Text Readability Check',
       steps: [
-        { type: 'hover', target: 'canvas', params: { position: { x: 300, y: 300 } } },
+        {
+          type: 'hover',
+          target: 'canvas',
+          params: { position: { x: 300, y: 300 } },
+        },
       ],
       expectedOutcomes: [
         {
@@ -244,7 +260,11 @@ export const AccessibilitySpec: VisualSemanticsSpec = {
       name: 'Screen Reader Support',
       steps: [
         // Screen reader support is tested via attributes, not interactions
-        { type: 'hover', target: 'canvas', params: { position: { x: 50, y: 50 } } },
+        {
+          type: 'hover',
+          target: 'canvas',
+          params: { position: { x: 50, y: 50 } },
+        },
       ],
       expectedOutcomes: [
         {
@@ -279,6 +299,10 @@ export function getAllErgonomicsSpecs(): VisualSemanticsSpec[] {
 }
 
 // Helper function to get ergonomics spec by component name
-export function getErgonomicsSpec(componentName: string): VisualSemanticsSpec | undefined {
-  return getAllErgonomicsSpecs().find(spec => spec.component === componentName);
+export function getErgonomicsSpec(
+  componentName: string
+): VisualSemanticsSpec | undefined {
+  return getAllErgonomicsSpecs().find(
+    (spec) => spec.component === componentName
+  );
 }

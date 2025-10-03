@@ -5,9 +5,24 @@ async function createSimpleGraph() {
   // Create a simple graph with just nodes and edges
   const graph = SpaceGraph.create({
     nodes: [
-      { id: '1', type: 'sphere', label: 'Node 1', position: { x: 0, y: 0, z: 0 } },
-      { id: '2', type: 'sphere', label: 'Node 2', position: { x: 10, y: 0, z: 0 } },
-      { id: '3', type: 'sphere', label: 'Node 3', position: { x: 5, y: 10, z: 0 } },
+      {
+        id: '1',
+        type: 'sphere',
+        label: 'Node 1',
+        position: { x: 0, y: 0, z: 0 },
+      },
+      {
+        id: '2',
+        type: 'sphere',
+        label: 'Node 2',
+        position: { x: 10, y: 0, z: 0 },
+      },
+      {
+        id: '3',
+        type: 'sphere',
+        label: 'Node 3',
+        position: { x: 5, y: 10, z: 0 },
+      },
     ],
     edges: [
       { id: 'e1', source: '1', target: '2', color: '#ff6b6b' },
@@ -66,7 +81,9 @@ async function createCustomGraph() {
     },
   });
 
-  console.log('Custom large graph created with grid layout and basic renderer!');
+  console.log(
+    'Custom large graph created with grid layout and basic renderer!'
+  );
   return graph;
 }
 

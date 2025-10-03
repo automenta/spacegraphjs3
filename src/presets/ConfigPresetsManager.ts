@@ -44,7 +44,8 @@ export class ConfigPresetsManager {
     return {
       id: 'network',
       name: 'Network Graph',
-      description: 'Dark theme with force-directed layout for network visualizations',
+      description:
+        'Dark theme with force-directed layout for network visualizations',
       category: 'network',
       spec: {
         style: {
@@ -268,7 +269,8 @@ export class ConfigPresetsManager {
     return {
       id: 'performance',
       name: 'High Performance',
-      description: 'Optimized settings for large datasets with performance enhancements',
+      description:
+        'Optimized settings for large datasets with performance enhancements',
       category: 'performance',
       spec: {
         style: {
@@ -394,9 +396,15 @@ export class ConfigPresetsManager {
    * Get built-in presets only
    */
   public getBuiltInPresets(): ConfigPreset[] {
-    const builtInIds = ['network', 'mindmap', 'flowchart', 'minimal', 'performance'];
+    const builtInIds = [
+      'network',
+      'mindmap',
+      'flowchart',
+      'minimal',
+      'performance',
+    ];
     return builtInIds
-      .map(id => this.presets.get(id))
+      .map((id) => this.presets.get(id))
       .filter((preset): preset is ConfigPreset => preset !== undefined);
   }
 
@@ -439,7 +447,15 @@ export class ConfigPresetsManager {
       if (collection.presets) {
         for (const preset of collection.presets) {
           // Skip built-in presets to avoid overwriting
-          if (!['network', 'mindmap', 'flowchart', 'minimal', 'performance'].includes(preset.id)) {
+          if (
+            ![
+              'network',
+              'mindmap',
+              'flowchart',
+              'minimal',
+              'performance',
+            ].includes(preset.id)
+          ) {
             this.presets.set(preset.id, preset);
 
             if (preset.category !== 'custom') {
@@ -473,7 +489,13 @@ export class ConfigPresetsManager {
       const ctx = thumbnailCanvas.getContext('2d');
       if (!ctx) throw new Error('Could not get canvas context');
 
-      ctx.drawImage(canvas, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
+      ctx.drawImage(
+        canvas,
+        0,
+        0,
+        thumbnailCanvas.width,
+        thumbnailCanvas.height
+      );
 
       return thumbnailCanvas.toDataURL('image/png');
     } catch (error) {
@@ -512,7 +534,15 @@ export class ConfigPresetsManager {
       if (collection.presets) {
         for (const preset of collection.presets) {
           // Only load custom presets from storage, built-ins are created fresh
-          if (!['network', 'mindmap', 'flowchart', 'minimal', 'performance'].includes(preset.id)) {
+          if (
+            ![
+              'network',
+              'mindmap',
+              'flowchart',
+              'minimal',
+              'performance',
+            ].includes(preset.id)
+          ) {
             this.presets.set(preset.id, preset);
 
             if (preset.category !== 'custom') {

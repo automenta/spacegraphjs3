@@ -55,15 +55,18 @@ export class HtmlNodeElementActor extends BaseElementActor {
     element.style.willChange = 'transform';
 
     // Enhanced widget styling for modern UI appearance
-    element.style.background = 'linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.95))';
+    element.style.background =
+      'linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.95))';
     element.style.border = '1px solid rgba(255, 255, 255, 0.1)';
     element.style.borderRadius = '12px';
     element.style.padding = '20px';
     element.style.minWidth = '240px';
     element.style.minHeight = '120px';
-    element.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
+    element.style.boxShadow =
+      '0 8px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
     element.style.backdropFilter = 'blur(20px)';
-    element.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    element.style.fontFamily =
+      'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     element.style.fontSize = '14px';
     element.style.color = '#ffffff';
     element.style.overflow = 'hidden';
@@ -79,7 +82,8 @@ export class HtmlNodeElementActor extends BaseElementActor {
     innerGlow.style.bottom = '0';
     innerGlow.style.borderRadius = '11px';
     innerGlow.style.padding = '1px';
-    innerGlow.style.background = 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent)';
+    innerGlow.style.background =
+      'linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent)';
     innerGlow.style.pointerEvents = 'none';
     element.appendChild(innerGlow);
 
@@ -355,17 +359,20 @@ export class HtmlNodeElementActor extends BaseElementActor {
 
     // Apply hover/selection styles with enhanced visual effects
     if (isElementSelected) {
-      element.style.boxShadow = '0 12px 40px rgba(0, 255, 0, 0.4), 0 0 20px rgba(0, 255, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2)';
+      element.style.boxShadow =
+        '0 12px 40px rgba(0, 255, 0, 0.4), 0 0 20px rgba(0, 255, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2)';
       element.style.transform = 'scale(1.08) translateZ(15px) rotateX(2deg)';
       element.style.borderColor = 'rgba(0, 255, 0, 0.4)';
       element.style.zIndex = '1000';
     } else if (isElementHovered) {
-      element.style.boxShadow = '0 8px 30px rgba(255, 255, 0, 0.3), 0 0 15px rgba(255, 255, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15)';
+      element.style.boxShadow =
+        '0 8px 30px rgba(255, 255, 0, 0.3), 0 0 15px rgba(255, 255, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15)';
       element.style.transform = 'scale(1.05) translateZ(10px) rotateX(1deg)';
       element.style.borderColor = 'rgba(255, 255, 0, 0.3)';
       element.style.zIndex = '999';
     } else {
-      element.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
+      element.style.boxShadow =
+        '0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
       element.style.transform = 'scale(1) translateZ(0) rotateX(0deg)';
       element.style.borderColor = 'rgba(255, 255, 255, 0.1)';
       element.style.zIndex = 'auto';

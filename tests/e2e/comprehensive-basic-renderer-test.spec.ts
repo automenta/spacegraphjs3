@@ -41,7 +41,9 @@ test('comprehensive basic renderer test', async ({ page }) => {
   const edgeTypes = await page.evaluate(() => {
     const graph = (window as any).graph;
     const edges = graph.state.data.edges;
-    return edges.map((edge: any) => edge.type || edge.style?.type || 'straight');
+    return edges.map(
+      (edge: any) => edge.type || edge.style?.type || 'straight'
+    );
   });
 
   expect(edgeTypes).toContain('straight');

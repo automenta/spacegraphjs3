@@ -55,7 +55,13 @@ tests/
 ```typescript
 import { describe, expect, it, beforeEach, afterEach } from 'vitest';
 import { createTestGraph, nextTick } from './test-utils';
-import { SpaceGraph, CircleLayoutSpec, ColumnLayoutSpec, RowLayoutSpec, GridLayoutSpec } from '../../src';
+import {
+  SpaceGraph,
+  CircleLayoutSpec,
+  ColumnLayoutSpec,
+  RowLayoutSpec,
+  GridLayoutSpec,
+} from '../../src';
 
 describe('Comprehensive Layout Engine Tests', () => {
   describe('CircleLayout', () => {
@@ -67,7 +73,7 @@ describe('Comprehensive Layout Engine Tests', () => {
         center: { x: 0, y: 0, z: 0 },
         startAngle: 0,
         direction: 'clockwise',
-        distribution: 'equal'
+        distribution: 'equal',
       };
 
       const { graph, cleanup } = createTestGraph({
@@ -76,11 +82,11 @@ describe('Comprehensive Layout Engine Tests', () => {
             { id: 'n1', type: 'sphere' },
             { id: 'n2', type: 'sphere' },
             { id: 'n3', type: 'sphere' },
-            { id: 'n4', type: 'sphere' }
+            { id: 'n4', type: 'sphere' },
           ],
-          edges: []
+          edges: [],
         },
-        layout: circleSpec
+        layout: circleSpec,
       });
 
       await nextTick();
@@ -94,8 +100,8 @@ describe('Comprehensive Layout Engine Tests', () => {
         if (node.position) {
           // Calculate distance from center
           const distance = Math.sqrt(
-            node.position.x * node.position.x + 
-            node.position.y * node.position.y
+            node.position.x * node.position.x +
+              node.position.y * node.position.y
           );
           // Should be approximately equal to radius (10)
           expect(distance).toBeCloseTo(10, 1);
@@ -118,17 +124,18 @@ describe('Comprehensive Layout Engine Tests', () => {
         radius: 20,
         dimensions: 3,
         center: { x: 0, y: 0, z: 0 },
-        distribution: 'equal'
+        distribution: 'equal',
       };
 
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: Array.from({ length: 100 }, (_, i) => ({
-            id: `n${i}`, type: 'sphere'
+            id: `n${i}`,
+            type: 'sphere',
           })),
-          edges: []
+          edges: [],
         },
-        layout: circleSpec
+        layout: circleSpec,
       });
 
       await nextTick();
@@ -137,14 +144,14 @@ describe('Comprehensive Layout Engine Tests', () => {
       expect(nodes).toHaveLength(100);
 
       // Verify spherical distribution
-      nodes.forEach(node => {
+      nodes.forEach((node) => {
         expect(node.position).toBeDefined();
         if (node.position) {
           // Calculate distance from center
           const distance = Math.sqrt(
-            node.position.x * node.position.x + 
-            node.position.y * node.position.y +
-            node.position.z * node.position.z
+            node.position.x * node.position.x +
+              node.position.y * node.position.y +
+              node.position.z * node.position.z
           );
           // Should be approximately equal to radius (20)
           expect(distance).toBeCloseTo(20, 1);
@@ -158,7 +165,7 @@ describe('Comprehensive Layout Engine Tests', () => {
       const circleSpec: CircleLayoutSpec = {
         type: 'circle',
         radius: 15,
-        dimensions: 2
+        dimensions: 2,
       };
 
       const { graph, cleanup } = createTestGraph({
@@ -166,29 +173,29 @@ describe('Comprehensive Layout Engine Tests', () => {
           nodes: [
             { id: 'n1', type: 'sphere', pinning: { x: 100, y: 200, z: 0 } },
             { id: 'n2', type: 'sphere' },
-            { id: 'n3', type: 'sphere' }
+            { id: 'n3', type: 'sphere' },
           ],
-          edges: []
+          edges: [],
         },
-        layout: circleSpec
+        layout: circleSpec,
       });
 
       await nextTick();
 
       const nodes = graph.state.data.nodes;
-      
+
       // Pinned node should maintain its position
-      const pinnedNode = nodes.find(n => n.id === 'n1');
+      const pinnedNode = nodes.find((n) => n.id === 'n1');
       expect(pinnedNode?.position).toEqual({ x: 100, y: 200, z: 0 });
-      
+
       // Unpinned nodes should be arranged in circle
-      const unpinnedNodes = nodes.filter(n => n.id !== 'n1');
-      unpinnedNodes.forEach(node => {
+      const unpinnedNodes = nodes.filter((n) => n.id !== 'n1');
+      unpinnedNodes.forEach((node) => {
         expect(node.position).toBeDefined();
         if (node.position) {
           const distance = Math.sqrt(
-            node.position.x * node.position.x + 
-            node.position.y * node.position.y
+            node.position.x * node.position.x +
+              node.position.y * node.position.y
           );
           expect(distance).toBeCloseTo(15, 1);
         }
@@ -201,16 +208,16 @@ describe('Comprehensive Layout Engine Tests', () => {
       const circleSpec: CircleLayoutSpec = {
         type: 'circle',
         radius: 10,
-        dimensions: 2
+        dimensions: 2,
       };
 
       // Test with single node
       const { graph: graph1, cleanup: cleanup1 } = createTestGraph({
         data: {
           nodes: [{ id: 'n1', type: 'sphere' }],
-          edges: []
+          edges: [],
         },
-        layout: circleSpec
+        layout: circleSpec,
       });
 
       await nextTick();
@@ -220,7 +227,7 @@ describe('Comprehensive Layout Engine Tests', () => {
       // Test with empty graph
       const { graph: graph2, cleanup: cleanup2 } = createTestGraph({
         data: { nodes: [], edges: [] },
-        layout: circleSpec
+        layout: circleSpec,
       });
 
       await nextTick();
@@ -237,17 +244,18 @@ describe('Comprehensive Layout Engine Tests', () => {
         columns: 2,
         columnSpacing: 10,
         origin: { x: 0, y: 0, z: 0 },
-        maxNodesPerColumn: 3
+        maxNodesPerColumn: 3,
       };
 
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: Array.from({ length: 6 }, (_, i) => ({
-            id: `n${i}`, type: 'sphere'
+            id: `n${i}`,
+            type: 'sphere',
           })),
-          edges: []
+          edges: [],
         },
-        layout: columnSpec
+        layout: columnSpec,
       });
 
       await nextTick();
@@ -284,17 +292,18 @@ describe('Comprehensive Layout Engine Tests', () => {
         rows: 2,
         rowSpacing: 8,
         origin: { x: 0, y: 0, z: 0 },
-        maxNodesPerRow: 3
+        maxNodesPerRow: 3,
       };
 
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: Array.from({ length: 6 }, (_, i) => ({
-            id: `n${i}`, type: 'sphere'
+            id: `n${i}`,
+            type: 'sphere',
           })),
-          edges: []
+          edges: [],
         },
-        layout: rowSpec
+        layout: rowSpec,
       });
 
       await nextTick();
@@ -329,17 +338,18 @@ describe('Comprehensive Layout Engine Tests', () => {
         type: 'grid',
         dimensions: 2,
         spacing: 3,
-        origin: { x: 0, y: 0, z: 0 }
+        origin: { x: 0, y: 0, z: 0 },
       };
 
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: Array.from({ length: 9 }, (_, i) => ({
-            id: `n${i}`, type: 'sphere'
+            id: `n${i}`,
+            type: 'sphere',
           })),
-          edges: []
+          edges: [],
         },
-        layout: gridSpec
+        layout: gridSpec,
       });
 
       await nextTick();
@@ -353,7 +363,7 @@ describe('Comprehensive Layout Engine Tests', () => {
         if (node.position) {
           const row = Math.floor(index / 3);
           const col = index % 3;
-          
+
           // Check position relative to grid
           expect(node.position.x).toBeCloseTo((col - 1) * 3, 1);
           expect(node.position.y).toBeCloseTo((1 - row) * 3, 1); // Inverted Y for screen coordinates
@@ -372,17 +382,18 @@ describe('Comprehensive Layout Engine Tests', () => {
         columns: 3,
         rows: 3,
         depth: 3,
-        origin: { x: 0, y: 0, z: 0 }
+        origin: { x: 0, y: 0, z: 0 },
       };
 
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: Array.from({ length: 27 }, (_, i) => ({
-            id: `n${i}`, type: 'sphere'
+            id: `n${i}`,
+            type: 'sphere',
           })),
-          edges: []
+          edges: [],
         },
-        layout: gridSpec
+        layout: gridSpec,
       });
 
       await nextTick();
@@ -397,7 +408,7 @@ describe('Comprehensive Layout Engine Tests', () => {
           const layer = Math.floor(index / 9);
           const row = Math.floor((index % 9) / 3);
           const col = index % 3;
-          
+
           // Check position relative to 3D grid
           expect(node.position.x).toBeCloseTo((col - 1) * 4, 1);
           expect(node.position.y).toBeCloseTo((1 - row) * 4, 1);
@@ -418,7 +429,12 @@ describe('Comprehensive Layout Engine Tests', () => {
 ```typescript
 import { describe, expect, it, beforeEach, afterEach } from 'vitest';
 import { createTestGraph, nextTick } from './test-utils';
-import { SpaceGraph, BoxNodeSpec, TextNodeSpec, CustomGeometryNodeSpec } from '../../src';
+import {
+  SpaceGraph,
+  BoxNodeSpec,
+  TextNodeSpec,
+  CustomGeometryNodeSpec,
+} from '../../src';
 
 describe('Element Actors Tests', () => {
   describe('BoxElementActor', () => {
@@ -426,17 +442,17 @@ describe('Element Actors Tests', () => {
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: [
-            { 
-              id: 'box1', 
+            {
+              id: 'box1',
               type: 'box',
               width: 2,
               height: 3,
               depth: 4,
-              rounded: false
-            } as BoxNodeSpec
+              rounded: false,
+            } as BoxNodeSpec,
           ],
-          edges: []
-        }
+          edges: [],
+        },
       });
 
       await nextTick();
@@ -444,7 +460,7 @@ describe('Element Actors Tests', () => {
       const node = graph.state.data.nodes[0];
       expect(node).toBeDefined();
       expect(node.type).toBe('box');
-      
+
       // Verify box-specific properties
       const boxSpec = node as BoxNodeSpec;
       expect(boxSpec.width).toBe(2);
@@ -459,24 +475,24 @@ describe('Element Actors Tests', () => {
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: [
-            { 
-              id: 'box2', 
+            {
+              id: 'box2',
               type: 'box',
               width: 1,
               height: 1,
               depth: 1,
-              rounded: true
-            } as BoxNodeSpec
+              rounded: true,
+            } as BoxNodeSpec,
           ],
-          edges: []
-        }
+          edges: [],
+        },
       });
 
       await nextTick();
 
       const node = graph.state.data.nodes[0];
       expect(node).toBeDefined();
-      
+
       const boxSpec = node as BoxNodeSpec;
       expect(boxSpec.rounded).toBe(true);
 
@@ -487,19 +503,19 @@ describe('Element Actors Tests', () => {
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: [
-            { 
-              id: 'box3', 
+            {
+              id: 'box3',
               type: 'box',
               color: '#ff0000',
-              position: { x: 10, y: 20, z: 30 }
-            } as BoxNodeSpec
+              position: { x: 10, y: 20, z: 30 },
+            } as BoxNodeSpec,
           ],
-          edges: []
+          edges: [],
         },
         style: {
           'node:hover': { color: '#00ff00' },
-          'node:selected': { color: '#0000ff' }
-        }
+          'node:selected': { color: '#0000ff' },
+        },
       });
 
       await nextTick();
@@ -512,7 +528,7 @@ describe('Element Actors Tests', () => {
       // Test hover state
       graph.update({ interaction: { hoveredElementId: 'box3' } });
       await nextTick();
-      
+
       // Test selection state
       graph.update({ interaction: { selectedElementIds: ['box3'] } });
       await nextTick();
@@ -526,23 +542,23 @@ describe('Element Actors Tests', () => {
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: [
-            { 
-              id: 'text1', 
+            {
+              id: 'text1',
               type: 'text',
               text: 'Hello World',
               fontSize: 2,
-              color: '#ffffff'
-            } as TextNodeSpec
+              color: '#ffffff',
+            } as TextNodeSpec,
           ],
-          edges: []
-        }
+          edges: [],
+        },
       });
 
       await nextTick();
 
       const node = graph.state.data.nodes[0];
       expect(node).toBeDefined();
-      
+
       const textSpec = node as TextNodeSpec;
       expect(textSpec.text).toBe('Hello World');
       expect(textSpec.fontSize).toBe(2);
@@ -555,24 +571,24 @@ describe('Element Actors Tests', () => {
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: [
-            { 
-              id: 'text2', 
+            {
+              id: 'text2',
               type: 'text',
               text: 'Aligned Text',
               textAlign: 'center',
               verticalAlign: 'middle',
-              billboard: true
-            } as TextNodeSpec
+              billboard: true,
+            } as TextNodeSpec,
           ],
-          edges: []
-        }
+          edges: [],
+        },
       });
 
       await nextTick();
 
       const node = graph.state.data.nodes[0];
       expect(node).toBeDefined();
-      
+
       const textSpec = node as TextNodeSpec;
       expect(textSpec.textAlign).toBe('center');
       expect(textSpec.verticalAlign).toBe('middle');
@@ -585,24 +601,24 @@ describe('Element Actors Tests', () => {
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: [
-            { 
-              id: 'text3', 
+            {
+              id: 'text3',
               type: 'text',
               text: 'Custom Font Text',
-              fontUrl: '/fonts/custom-font.json'
-            } as TextNodeSpec
+              fontUrl: '/fonts/custom-font.json',
+            } as TextNodeSpec,
           ],
-          edges: []
-        }
+          edges: [],
+        },
       });
 
       // Wait for async font loading
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       await nextTick();
 
       const node = graph.state.data.nodes[0];
       expect(node).toBeDefined();
-      
+
       const textSpec = node as TextNodeSpec;
       expect(textSpec.fontUrl).toBe('/fonts/custom-font.json');
 
@@ -615,29 +631,29 @@ describe('Element Actors Tests', () => {
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: [
-            { 
-              id: 'custom1', 
+            {
+              id: 'custom1',
               type: 'custom',
               geometryData: {
                 vertices: [0, 0, 0, 1, 0, 0, 0, 1, 0],
-                indices: [0, 1, 2]
+                indices: [0, 1, 2],
               },
               geometryType: 'buffer',
               material: {
                 type: 'basic',
-                color: '#00ff00'
-              }
-            } as CustomGeometryNodeSpec
+                color: '#00ff00',
+              },
+            } as CustomGeometryNodeSpec,
           ],
-          edges: []
-        }
+          edges: [],
+        },
       });
 
       await nextTick();
 
       const node = graph.state.data.nodes[0];
       expect(node).toBeDefined();
-      
+
       const customSpec = node as CustomGeometryNodeSpec;
       expect(customSpec.geometryData).toBeDefined();
       expect(customSpec.geometryType).toBe('buffer');
@@ -651,27 +667,29 @@ describe('Element Actors Tests', () => {
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: [
-            { 
-              id: 'custom2', 
+            {
+              id: 'custom2',
               type: 'custom',
-              geometryData: { /* geometry data */ },
+              geometryData: {
+                /* geometry data */
+              },
               material: {
                 type: 'standard',
                 color: '#ff0000',
                 transparent: true,
-                opacity: 0.8
-              }
-            } as CustomGeometryNodeSpec
+                opacity: 0.8,
+              },
+            } as CustomGeometryNodeSpec,
           ],
-          edges: []
-        }
+          edges: [],
+        },
       });
 
       await nextTick();
 
       const node = graph.state.data.nodes[0];
       expect(node).toBeDefined();
-      
+
       const customSpec = node as CustomGeometryNodeSpec;
       expect(customSpec.material?.type).toBe('standard');
       expect(customSpec.material?.transparent).toBe(true);
@@ -684,24 +702,24 @@ describe('Element Actors Tests', () => {
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: [
-            { 
-              id: 'custom3', 
+            {
+              id: 'custom3',
               type: 'custom',
               geometryUrl: '/invalid/geometry/file.obj',
-              geometryType: 'obj'
-            } as CustomGeometryNodeSpec
+              geometryType: 'obj',
+            } as CustomGeometryNodeSpec,
           ],
-          edges: []
-        }
+          edges: [],
+        },
       });
 
       // Wait for async geometry loading to fail
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       await nextTick();
 
       const node = graph.state.data.nodes[0];
       expect(node).toBeDefined();
-      
+
       // Should fall back to default geometry
       const customSpec = node as CustomGeometryNodeSpec;
       expect(customSpec.geometryUrl).toBe('/invalid/geometry/file.obj');
@@ -725,17 +743,23 @@ describe('Edge Interaction System Tests', () => {
   describe('Edge Hover', () => {
     it('should detect edge hover events', async () => {
       const hoverEvents: any[] = [];
-      
+
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: [
             { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } },
-            { id: 'n2', type: 'sphere', position: { x: 10, y: 0, z: 0 } }
+            { id: 'n2', type: 'sphere', position: { x: 10, y: 0, z: 0 } },
           ],
           edges: [
-            { id: 'e1', source: 'n1', target: 'n2', selectable: true, hoverable: true }
-          ]
-        }
+            {
+              id: 'e1',
+              source: 'n1',
+              target: 'n2',
+              selectable: true,
+              hoverable: true,
+            },
+          ],
+        },
       });
 
       graph.on('edge:hover:enter', (event) => {
@@ -744,7 +768,7 @@ describe('Edge Interaction System Tests', () => {
 
       // Simulate edge hover
       await simulatePointerEvent(graph, 'pointermove', { x: 100, y: 200 });
-      
+
       await nextTick();
 
       expect(hoverEvents).toHaveLength(1);
@@ -760,18 +784,16 @@ describe('Edge Interaction System Tests', () => {
         data: {
           nodes: [
             { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } },
-            { id: 'n2', type: 'sphere', position: { x: 10, y: 0, z: 0 } }
+            { id: 'n2', type: 'sphere', position: { x: 10, y: 0, z: 0 } },
           ],
-          edges: [
-            { id: 'e1', source: 'n1', target: 'n2', color: '#ffffff' }
-          ]
+          edges: [{ id: 'e1', source: 'n1', target: 'n2', color: '#ffffff' }],
         },
         style: {
           'edge:hover': {
             color: '#ff0000',
-            width: 4
-          }
-        }
+            width: 4,
+          },
+        },
       });
 
       await nextTick();
@@ -789,17 +811,15 @@ describe('Edge Interaction System Tests', () => {
 
     it('should handle edge hover leave events', async () => {
       const leaveEvents: any[] = [];
-      
+
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: [
             { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } },
-            { id: 'n2', type: 'sphere', position: { x: 10, y: 0, z: 0 } }
+            { id: 'n2', type: 'sphere', position: { x: 10, y: 0, z: 0 } },
           ],
-          edges: [
-            { id: 'e1', source: 'n1', target: 'n2' }
-          ]
-        }
+          edges: [{ id: 'e1', source: 'n1', target: 'n2' }],
+        },
       });
 
       graph.on('edge:hover:leave', (event) => {
@@ -809,7 +829,7 @@ describe('Edge Interaction System Tests', () => {
       // Simulate hover and then leave
       graph.update({ interaction: { hoveredElementId: 'e1' } });
       await nextTick();
-      
+
       graph.update({ interaction: { hoveredElementId: null } });
       await nextTick();
 
@@ -823,17 +843,15 @@ describe('Edge Interaction System Tests', () => {
   describe('Edge Selection', () => {
     it('should support single edge selection', async () => {
       const selectEvents: any[] = [];
-      
+
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: [
             { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } },
-            { id: 'n2', type: 'sphere', position: { x: 10, y: 0, z: 0 } }
+            { id: 'n2', type: 'sphere', position: { x: 10, y: 0, z: 0 } },
           ],
-          edges: [
-            { id: 'e1', source: 'n1', target: 'n2', selectable: true }
-          ]
-        }
+          edges: [{ id: 'e1', source: 'n1', target: 'n2', selectable: true }],
+        },
       });
 
       graph.on('edge:select', (event) => {
@@ -856,13 +874,13 @@ describe('Edge Interaction System Tests', () => {
           nodes: [
             { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } },
             { id: 'n2', type: 'sphere', position: { x: 10, y: 0, z: 0 } },
-            { id: 'n3', type: 'sphere', position: { x: 20, y: 0, z: 0 } }
+            { id: 'n3', type: 'sphere', position: { x: 20, y: 0, z: 0 } },
           ],
           edges: [
             { id: 'e1', source: 'n1', target: 'n2', selectable: true },
-            { id: 'e2', source: 'n2', target: 'n3', selectable: true }
-          ]
-        }
+            { id: 'e2', source: 'n2', target: 'n3', selectable: true },
+          ],
+        },
       });
 
       await nextTick();
@@ -887,19 +905,17 @@ describe('Edge Interaction System Tests', () => {
         data: {
           nodes: [
             { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } },
-            { id: 'n2', type: 'sphere', position: { x: 10, y: 0, z: 0 } }
+            { id: 'n2', type: 'sphere', position: { x: 10, y: 0, z: 0 } },
           ],
-          edges: [
-            { id: 'e1', source: 'n1', target: 'n2', color: '#ffffff' }
-          ]
+          edges: [{ id: 'e1', source: 'n1', target: 'n2', color: '#ffffff' }],
         },
         style: {
           'edge:selected': {
             color: '#00ff00',
             width: 6,
-            glow: { color: '#00ff00', strength: 0.8 }
-          }
-        }
+            glow: { color: '#00ff00', strength: 0.8 },
+          },
+        },
       });
 
       await nextTick();
@@ -922,18 +938,18 @@ describe('Edge Interaction System Tests', () => {
         data: {
           nodes: [
             { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } },
-            { id: 'n2', type: 'sphere', position: { x: 20, y: 0, z: 0 } }
+            { id: 'n2', type: 'sphere', position: { x: 20, y: 0, z: 0 } },
           ],
           edges: [
-            { 
-              id: 'e1', 
-              source: 'n1', 
+            {
+              id: 'e1',
+              source: 'n1',
               target: 'n2',
               type: 'curved',
-              curvature: 0.5
-            }
-          ]
-        }
+              curvature: 0.5,
+            },
+          ],
+        },
       });
 
       await nextTick();
@@ -950,19 +966,19 @@ describe('Edge Interaction System Tests', () => {
         data: {
           nodes: [
             { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } },
-            { id: 'n2', type: 'sphere', position: { x: 10, y: 0, z: 0 } }
+            { id: 'n2', type: 'sphere', position: { x: 10, y: 0, z: 0 } },
           ],
           edges: [
-            { 
-              id: 'e1', 
-              source: 'n1', 
+            {
+              id: 'e1',
+              source: 'n1',
               target: 'n2',
               type: 'dashed',
               dashSize: 0.5,
-              gapSize: 0.3
-            }
-          ]
-        }
+              gapSize: 0.3,
+            },
+          ],
+        },
       });
 
       await nextTick();
@@ -980,17 +996,17 @@ describe('Edge Interaction System Tests', () => {
         data: {
           nodes: [
             { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } },
-            { id: 'n2', type: 'sphere', position: { x: 10, y: 0, z: 0 } }
+            { id: 'n2', type: 'sphere', position: { x: 10, y: 0, z: 0 } },
           ],
           edges: [
-            { 
-              id: 'e1', 
-              source: 'n1', 
+            {
+              id: 'e1',
+              source: 'n1',
               target: 'n2',
-              label: 'Connection Label'
-            }
-          ]
-        }
+              label: 'Connection Label',
+            },
+          ],
+        },
       });
 
       await nextTick();
@@ -1005,30 +1021,34 @@ describe('Edge Interaction System Tests', () => {
   describe('Edge Event Coordination', () => {
     it('should coordinate edge and node selection states', async () => {
       const events: any[] = [];
-      
+
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: [
             { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } },
-            { id: 'n2', type: 'sphere', position: { x: 10, y: 0, z: 0 } }
+            { id: 'n2', type: 'sphere', position: { x: 10, y: 0, z: 0 } },
           ],
-          edges: [
-            { id: 'e1', source: 'n1', target: 'n2' }
-          ]
-        }
+          edges: [{ id: 'e1', source: 'n1', target: 'n2' }],
+        },
       });
 
-      graph.on('edge:select', (event) => events.push({ type: 'edge:select', data: event }));
-      graph.on('element:click', (event) => events.push({ type: 'element:click', data: event }));
+      graph.on('edge:select', (event) =>
+        events.push({ type: 'edge:select', data: event })
+      );
+      graph.on('element:click', (event) =>
+        events.push({ type: 'element:click', data: event })
+      );
 
       // Select edge
       graph.update({ interaction: { selectedElementIds: ['e1'] } });
       await nextTick();
 
       // Verify both edge and general element events fire
-      const edgeSelectEvents = events.filter(e => e.type === 'edge:select');
-      const elementClickEvents = events.filter(e => e.type === 'element:click');
-      
+      const edgeSelectEvents = events.filter((e) => e.type === 'edge:select');
+      const elementClickEvents = events.filter(
+        (e) => e.type === 'element:click'
+      );
+
       expect(edgeSelectEvents).toHaveLength(1);
       expect(elementClickEvents).toHaveLength(0); // element:click is for nodes only
 
@@ -1037,35 +1057,39 @@ describe('Edge Interaction System Tests', () => {
 
     it('should handle rapid edge interactions without race conditions', async () => {
       const events: any[] = [];
-      
+
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: [
             { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } },
-            { id: 'n2', type: 'sphere', position: { x: 10, y: 0, z: 0 } }
+            { id: 'n2', type: 'sphere', position: { x: 10, y: 0, z: 0 } },
           ],
-          edges: [
-            { id: 'e1', source: 'n1', target: 'n2' }
-          ]
-        }
+          edges: [{ id: 'e1', source: 'n1', target: 'n2' }],
+        },
       });
 
-      graph.on('edge:hover:enter', (event) => events.push({ type: 'enter', id: event.target.id }));
-      graph.on('edge:hover:leave', (event) => events.push({ type: 'leave', id: event.target.id }));
+      graph.on('edge:hover:enter', (event) =>
+        events.push({ type: 'enter', id: event.target.id })
+      );
+      graph.on('edge:hover:leave', (event) =>
+        events.push({ type: 'leave', id: event.target.id })
+      );
 
       // Simulate rapid hover changes
       for (let i = 0; i < 10; i++) {
-        graph.update({ interaction: { hoveredElementId: i % 2 === 0 ? 'e1' : null } });
+        graph.update({
+          interaction: { hoveredElementId: i % 2 === 0 ? 'e1' : null },
+        });
         await nextTick();
       }
 
       // Verify events are in correct order and no duplicates
-      const enterEvents = events.filter(e => e.type === 'enter');
-      const leaveEvents = events.filter(e => e.type === 'leave');
-      
+      const enterEvents = events.filter((e) => e.type === 'enter');
+      const leaveEvents = events.filter((e) => e.type === 'leave');
+
       // Should have alternating enter/leave events
       expect(enterEvents.length + leaveEvents.length).toBeGreaterThan(0);
-      
+
       cleanup();
     });
   });
@@ -1089,13 +1113,13 @@ describe('Enhanced Camera Features Tests', () => {
           nodes: [
             { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } },
             { id: 'n2', type: 'sphere', position: { x: 20, y: 20, z: 20 } },
-            { id: 'n3', type: 'sphere', position: { x: -10, y: -10, z: -10 } }
+            { id: 'n3', type: 'sphere', position: { x: -10, y: -10, z: -10 } },
           ],
-          edges: []
+          edges: [],
         },
         camera: {
-          autoFrameEnabled: true
-        }
+          autoFrameEnabled: true,
+        },
       });
 
       await nextTick();
@@ -1105,7 +1129,7 @@ describe('Enhanced Camera Features Tests', () => {
       await nextTick();
 
       // Wait for auto-framing animation
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
       // Verify camera has been adjusted to frame selected elements
       const cameraState = graph.state.camera;
@@ -1121,22 +1145,25 @@ describe('Enhanced Camera Features Tests', () => {
         data: {
           nodes: [
             { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } },
-            { id: 'n2', type: 'sphere', position: { x: 10, y: 10, z: 10 } }
+            { id: 'n2', type: 'sphere', position: { x: 10, y: 10, z: 10 } },
           ],
-          edges: []
-        }
+          edges: [],
+        },
       });
 
       await nextTick();
 
       // Test tight framing
-      await graph.camera.frame([
-        { position: new Vector3(0, 0, 0), size: 1 },
-        { position: new Vector3(10, 10, 10), size: 1 }
-      ], {
-        strategy: 'tight',
-        padding: 2
-      });
+      await graph.camera.frame(
+        [
+          { position: new Vector3(0, 0, 0), size: 1 },
+          { position: new Vector3(10, 10, 10), size: 1 },
+        ],
+        {
+          strategy: 'tight',
+          padding: 2,
+        }
+      );
 
       await nextTick();
 
@@ -1144,13 +1171,16 @@ describe('Enhanced Camera Features Tests', () => {
       const initialDistance = cameraState.distance;
 
       // Test loose framing
-      await graph.camera.frame([
-        { position: new Vector3(0, 0, 0), size: 1 },
-        { position: new Vector3(10, 10, 10), size: 1 }
-      ], {
-        strategy: 'loose',
-        padding: 5
-      });
+      await graph.camera.frame(
+        [
+          { position: new Vector3(0, 0, 0), size: 1 },
+          { position: new Vector3(10, 10, 10), size: 1 },
+        ],
+        {
+          strategy: 'loose',
+          padding: 5,
+        }
+      );
 
       await nextTick();
 
@@ -1168,22 +1198,25 @@ describe('Enhanced Camera Features Tests', () => {
         data: {
           nodes: [
             { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } },
-            { id: 'n2', type: 'sphere', position: { x: 100, y: 10, z: 0 } }
+            { id: 'n2', type: 'sphere', position: { x: 100, y: 10, z: 0 } },
           ],
-          edges: []
-        }
+          edges: [],
+        },
       });
 
       await nextTick();
 
       // Test with specific aspect ratio
-      await graph.camera.frame([
-        { position: new Vector3(0, 0, 0), size: 1 },
-        { position: new Vector3(100, 10, 0), size: 1 }
-      ], {
-        aspectRatio: 16/9,
-        strategy: 'optimal'
-      });
+      await graph.camera.frame(
+        [
+          { position: new Vector3(0, 0, 0), size: 1 },
+          { position: new Vector3(100, 10, 0), size: 1 },
+        ],
+        {
+          aspectRatio: 16 / 9,
+          strategy: 'optimal',
+        }
+      );
 
       await nextTick();
 
@@ -1199,8 +1232,8 @@ describe('Enhanced Camera Features Tests', () => {
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: [{ id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } }],
-          edges: []
-        }
+          edges: [],
+        },
       });
 
       await nextTick();
@@ -1211,16 +1244,19 @@ describe('Enhanced Camera Features Tests', () => {
           target: { x: 10, y: 20, z: 30 },
           phi: 45,
           theta: 45,
-          distance: 50
-        }
+          distance: 50,
+        },
       });
       await nextTick();
 
       // Save as preset
-      const preset = await graph.camera.presetsManager.createPreset('Test View', {
-        description: 'Test camera position',
-        category: 'Testing'
-      });
+      const preset = await graph.camera.presetsManager.createPreset(
+        'Test View',
+        {
+          description: 'Test camera position',
+          category: 'Testing',
+        }
+      );
 
       expect(preset.name).toBe('Test View');
       expect(preset.description).toBe('Test Camera Position');
@@ -1232,8 +1268,8 @@ describe('Enhanced Camera Features Tests', () => {
           target: { x: 0, y: 0, z: 0 },
           phi: 0,
           theta: 0,
-          distance: 10
-        }
+          distance: 10,
+        },
       });
       await nextTick();
 
@@ -1255,8 +1291,8 @@ describe('Enhanced Camera Features Tests', () => {
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: [{ id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } }],
-          edges: []
-        }
+          edges: [],
+        },
       });
 
       await nextTick();
@@ -1264,7 +1300,7 @@ describe('Enhanced Camera Features Tests', () => {
       // Test top view
       await graph.camera.applyQuickPreset('top');
       await nextTick();
-      
+
       let cameraState = graph.state.camera;
       expect(cameraState.phi).toBe(0);
       expect(cameraState.theta).toBe(0);
@@ -1272,7 +1308,7 @@ describe('Enhanced Camera Features Tests', () => {
       // Test isometric view
       await graph.camera.applyQuickPreset('isometric');
       await nextTick();
-      
+
       cameraState = graph.state.camera;
       expect(cameraState.phi).toBe(45);
       expect(cameraState.theta).toBe(45);
@@ -1284,8 +1320,8 @@ describe('Enhanced Camera Features Tests', () => {
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: [{ id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } }],
-          edges: []
-        }
+          edges: [],
+        },
       });
 
       await nextTick();
@@ -1300,16 +1336,18 @@ describe('Enhanced Camera Features Tests', () => {
       expect(exported).toContain('View 2');
 
       // Clear presets
-      graph.camera.presetsManager.importPresets('{"version":"1.0","presets":[],"categories":[]}');
-      
+      graph.camera.presetsManager.importPresets(
+        '{"version":"1.0","presets":[],"categories":[]}'
+      );
+
       // Import presets back
       graph.camera.presetsManager.importPresets(exported);
-      
+
       // Verify presets restored
       const presets = graph.camera.presetsManager.getAllPresets();
       expect(presets).toHaveLength(2);
-      expect(presets.some(p => p.name === 'View 1')).toBe(true);
-      expect(presets.some(p => p.name === 'View 2')).toBe(true);
+      expect(presets.some((p) => p.name === 'View 1')).toBe(true);
+      expect(presets.some((p) => p.name === 'View 2')).toBe(true);
 
       cleanup();
     });
@@ -1320,8 +1358,8 @@ describe('Enhanced Camera Features Tests', () => {
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: [{ id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } }],
-          edges: []
-        }
+          edges: [],
+        },
       });
 
       await nextTick();
@@ -1333,7 +1371,7 @@ describe('Enhanced Camera Features Tests', () => {
         constrainPhi: true,
         minTheta: -180,
         maxTheta: 180,
-        constrainTheta: false
+        constrainTheta: false,
       });
 
       // Try to rotate beyond constraints
@@ -1357,8 +1395,8 @@ describe('Enhanced Camera Features Tests', () => {
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: [{ id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } }],
-          edges: []
-        }
+          edges: [],
+        },
       });
 
       await nextTick();
@@ -1366,7 +1404,7 @@ describe('Enhanced Camera Features Tests', () => {
       // Set snap angles
       graph.camera.setRotationConstraints({
         snapAngles: [0, 45, 90, 135, 180, 225, 270, 315],
-        snapThreshold: 10
+        snapThreshold: 10,
       });
 
       // Rotate close to snap angle
@@ -1391,21 +1429,21 @@ describe('Enhanced Camera Features Tests', () => {
         data: {
           nodes: [
             { id: 'n1', type: 'sphere', position: { x: 10, y: 10, z: 10 } },
-            { id: 'n2', type: 'sphere', position: { x: 0, y: 0, z: 0 } }
+            { id: 'n2', type: 'sphere', position: { x: 0, y: 0, z: 0 } },
           ],
-          edges: []
-        }
+          edges: [],
+        },
       });
 
       await nextTick();
 
       // Set pivot to n1 position
       graph.camera.setRotationPivot(new Vector3(10, 10, 10));
-      
+
       // Orbit around pivot
       await graph.camera.orbitAround('y', 90, {
         duration: 1000,
-        pivot: 'n1' // Orbit around node n1
+        pivot: 'n1', // Orbit around node n1
       });
       await nextTick();
 
@@ -1424,36 +1462,39 @@ describe('Enhanced Camera Features Tests', () => {
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: [{ id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } }],
-          edges: []
-        }
+          edges: [],
+        },
       });
 
       await nextTick();
 
       const animationUpdates: number[] = [];
-      
+
       // Test bounce easing
-      await graph.camera.flyTo({
-        target: { x: 10, y: 10, z: 10 },
-        phi: 45,
-        theta: 45,
-        distance: 20
-      }, {
-        duration: 1000,
-        easing: 'bounce',
-        onUpdate: (progress) => {
-          animationUpdates.push(progress);
+      await graph.camera.flyTo(
+        {
+          target: { x: 10, y: 10, z: 10 },
+          phi: 45,
+          theta: 45,
+          distance: 20,
+        },
+        {
+          duration: 1000,
+          easing: 'bounce',
+          onUpdate: (progress) => {
+            animationUpdates.push(progress);
+          },
         }
-      });
+      );
 
       expect(animationUpdates.length).toBeGreaterThan(0);
-      
+
       // Verify bounce effect (progress should oscillate)
       const hasOscillation = animationUpdates.some((val, i) => {
         if (i === 0) return false;
         return val < animationUpdates[i - 1]; // Decrease indicates bounce
       });
-      
+
       expect(hasOscillation).toBe(true);
 
       cleanup();
@@ -1463,8 +1504,8 @@ describe('Enhanced Camera Features Tests', () => {
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: [{ id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } }],
-          edges: []
-        }
+          edges: [],
+        },
       });
 
       await nextTick();
@@ -1473,29 +1514,35 @@ describe('Enhanced Camera Features Tests', () => {
       let secondAnimationCompleted = false;
 
       // Start long animation
-      const firstAnimation = graph.camera.flyTo({
-        target: { x: 100, y: 100, z: 100 },
-        distance: 100
-      }, {
-        duration: 2000,
-        onComplete: () => {
-          firstAnimationCompleted = true;
+      const firstAnimation = graph.camera.flyTo(
+        {
+          target: { x: 100, y: 100, z: 100 },
+          distance: 100,
+        },
+        {
+          duration: 2000,
+          onComplete: () => {
+            firstAnimationCompleted = true;
+          },
         }
-      });
+      );
 
       // Wait a bit then interrupt with second animation
-      await new Promise(resolve => setTimeout(resolve, 200));
-      
-      await graph.camera.flyTo({
-        target: { x: 10, y: 10, z: 10 },
-        distance: 10
-      }, {
-        duration: 500,
-        interruptible: true,
-        onComplete: () => {
-          secondAnimationCompleted = true;
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      await graph.camera.flyTo(
+        {
+          target: { x: 10, y: 10, z: 10 },
+          distance: 10,
+        },
+        {
+          duration: 500,
+          interruptible: true,
+          onComplete: () => {
+            secondAnimationCompleted = true;
+          },
         }
-      });
+      );
 
       await firstAnimation; // Wait for first to complete (should be interrupted)
 
@@ -1521,53 +1568,57 @@ describe('Performance Optimization Tests', () => {
   describe('Object Pooling', () => {
     it('should reuse objects from pools', async () => {
       const poolManager = ThreeObjectPoolManager.getInstance();
-      
+
       // Get initial stats
       const initialStats = poolManager.getAllStats();
-      const initialVector3Available = initialStats['vector3']?.availableObjects || 0;
-      
+      const initialVector3Available =
+        initialStats['vector3']?.availableObjects || 0;
+
       // Acquire and release multiple objects
       const vectors: THREE.Vector3[] = [];
       for (let i = 0; i < 10; i++) {
         vectors.push(poolManager.getVector3());
       }
-      
+
       // Check that objects were acquired
       const duringStats = poolManager.getAllStats();
       const duringVector3InUse = duringStats['vector3']?.inUseObjects || 0;
       expect(duringVector3InUse).toBeGreaterThanOrEqual(10);
-      
+
       // Release objects back to pool
-      vectors.forEach(vec => poolManager.releaseVector3(vec));
-      
+      vectors.forEach((vec) => poolManager.releaseVector3(vec));
+
       // Check that objects were returned
       const finalStats = poolManager.getAllStats();
-      const finalVector3Available = finalStats['vector3']?.availableObjects || 0;
-      expect(finalVector3Available).toBeGreaterThanOrEqual(initialVector3Available);
+      const finalVector3Available =
+        finalStats['vector3']?.availableObjects || 0;
+      expect(finalVector3Available).toBeGreaterThanOrEqual(
+        initialVector3Available
+      );
     });
 
     it('should handle pool growth correctly', async () => {
       const poolManager = ThreeObjectPoolManager.getInstance();
-      
+
       // Get initial stats
       const initialStats = poolManager.getAllStats();
       const initialSize = initialStats['vector3']?.totalObjects || 0;
-      
+
       // Acquire more objects than initial pool size
       const vectors: THREE.Vector3[] = [];
       const acquireCount = initialSize + 20;
-      
+
       for (let i = 0; i < acquireCount; i++) {
         vectors.push(poolManager.getVector3());
       }
-      
+
       // Check that pool grew
       const finalStats = poolManager.getAllStats();
       const finalSize = finalStats['vector3']?.totalObjects || 0;
       expect(finalSize).toBeGreaterThan(initialSize);
-      
+
       // Cleanup
-      vectors.forEach(vec => poolManager.releaseVector3(vec));
+      vectors.forEach((vec) => poolManager.releaseVector3(vec));
     });
   });
 
@@ -1576,20 +1627,20 @@ describe('Performance Optimization Tests', () => {
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: Array.from({ length: 50 }, (_, i) => ({
-            id: `n${i}`, 
+            id: `n${i}`,
             type: 'sphere',
-            position: { 
-              x: Math.random() * 100, 
-              y: Math.random() * 100, 
-              z: Math.random() * 100 
-            }
+            position: {
+              x: Math.random() * 100,
+              y: Math.random() * 100,
+              z: Math.random() * 100,
+            },
           })),
-          edges: []
+          edges: [],
         },
         performance: {
           enableLOD: true,
-          instancingThreshold: 100
-        }
+          instancingThreshold: 100,
+        },
       });
 
       await nextTick();
@@ -1599,19 +1650,25 @@ describe('Performance Optimization Tests', () => {
 
       // Test with different camera distances
       const cameraPlugin = graph.cameraPlugin;
-      
+
       // Close distance - should use high detail
-      await cameraPlugin?.flyTo({
-        target: { x: 50, y: 50, z: 50 },
-        distance: 10
-      }, { duration: 100 });
+      await cameraPlugin?.flyTo(
+        {
+          target: { x: 50, y: 50, z: 50 },
+          distance: 10,
+        },
+        { duration: 100 }
+      );
       await nextTick();
 
       // Far distance - should use lower detail
-      await cameraPlugin?.flyTo({
-        target: { x: 50, y: 50, z: 50 },
-        distance: 200
-      }, { duration: 100 });
+      await cameraPlugin?.flyTo(
+        {
+          target: { x: 50, y: 50, z: 50 },
+          distance: 200,
+        },
+        { duration: 100 }
+      );
       await nextTick();
 
       // LOD switching should have occurred
@@ -1623,27 +1680,28 @@ describe('Performance Optimization Tests', () => {
     it('should maintain visual quality during LOD transitions', async () => {
       const { graph, cleanup } = createTestGraph({
         data: {
-          nodes: [
-            { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } }
-          ],
-          edges: []
+          nodes: [{ id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } }],
+          edges: [],
         },
         performance: {
-          enableLOD: true
-        }
+          enableLOD: true,
+        },
       });
 
       await nextTick();
 
       // Test smooth LOD transitions
       const cameraPlugin = graph.cameraPlugin;
-      
+
       // Gradually change distance to trigger transitions
       for (let distance = 10; distance <= 200; distance += 20) {
-        await cameraPlugin?.flyTo({
-          target: { x: 0, y: 0, z: 0 },
-          distance
-        }, { duration: 50 });
+        await cameraPlugin?.flyTo(
+          {
+            target: { x: 0, y: 0, z: 0 },
+            distance,
+          },
+          { duration: 50 }
+        );
         await nextTick();
       }
 
@@ -1660,14 +1718,22 @@ describe('Performance Optimization Tests', () => {
         data: {
           nodes: [
             { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } },
-            { id: 'n2', type: 'sphere', position: { x: 1000, y: 1000, z: 1000 } }, // Far away
-            { id: 'n3', type: 'sphere', position: { x: -1000, y: -1000, z: -1000 } } // Far away
+            {
+              id: 'n2',
+              type: 'sphere',
+              position: { x: 1000, y: 1000, z: 1000 },
+            }, // Far away
+            {
+              id: 'n3',
+              type: 'sphere',
+              position: { x: -1000, y: -1000, z: -1000 },
+            }, // Far away
           ],
-          edges: []
+          edges: [],
         },
         performance: {
-          enableCulling: true
-        }
+          enableCulling: true,
+        },
       });
 
       await nextTick();
@@ -1687,20 +1753,20 @@ describe('Performance Optimization Tests', () => {
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: Array.from({ length: 100 }, (_, i) => ({
-            id: `n${i}`, 
+            id: `n${i}`,
             type: 'sphere',
-            position: { 
-              x: (i % 10) * 10, 
-              y: Math.floor(i / 10) * 10, 
-              z: 0 
-            }
+            position: {
+              x: (i % 10) * 10,
+              y: Math.floor(i / 10) * 10,
+              z: 0,
+            },
           })),
-          edges: []
+          edges: [],
         },
         performance: {
           enableCulling: true,
-          enableHierarchicalCulling: true
-        }
+          enableHierarchicalCulling: true,
+        },
       });
 
       await nextTick();
@@ -1722,15 +1788,15 @@ describe('Performance Optimization Tests', () => {
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: Array.from({ length: 20 }, (_, i) => ({
-            id: `n${i}`, 
+            id: `n${i}`,
             type: 'sphere',
-            position: { x: i * 5, y: 0, z: 0 }
+            position: { x: i * 5, y: 0, z: 0 },
           })),
-          edges: []
+          edges: [],
         },
         performance: {
-          enableMemoryManagement: true
-        }
+          enableMemoryManagement: true,
+        },
       });
 
       await nextTick();
@@ -1751,15 +1817,15 @@ describe('Performance Optimization Tests', () => {
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: Array.from({ length: 50 }, (_, i) => ({
-            id: `n${i}`, 
+            id: `n${i}`,
             type: 'sphere',
-            position: { x: i, y: 0, z: 0 }
+            position: { x: i, y: 0, z: 0 },
           })),
-          edges: []
+          edges: [],
         },
         performance: {
-          enableMemoryManagement: true
-        }
+          enableMemoryManagement: true,
+        },
       });
 
       await nextTick();
@@ -1769,7 +1835,7 @@ describe('Performance Optimization Tests', () => {
 
       // Force cleanup
       memoryManager?.performStandardCleanup();
-      
+
       // Verify cleanup completed without errors
       const postCleanupStats = memoryManager?.getMemoryStats();
       expect(postCleanupStats).toBeDefined();
@@ -1787,21 +1853,21 @@ describe('Performance Optimization Tests', () => {
         const { graph, cleanup } = createTestGraph({
           data: {
             nodes: Array.from({ length: count }, (_, i) => ({
-              id: `n${i}`, 
+              id: `n${i}`,
               type: 'sphere',
-              position: { 
-                x: Math.random() * 100, 
-                y: Math.random() * 100, 
-                z: Math.random() * 100 
-              }
+              position: {
+                x: Math.random() * 100,
+                y: Math.random() * 100,
+                z: Math.random() * 100,
+              },
             })),
-            edges: []
+            edges: [],
           },
           performance: {
             enableLOD: true,
             enableCulling: true,
-            instancingThreshold: 50
-          }
+            instancingThreshold: 50,
+          },
         });
 
         // Measure initialization time
@@ -1828,50 +1894,56 @@ describe('Performance Optimization Tests', () => {
       const { graph, cleanup } = createTestGraph({
         data: {
           nodes: Array.from({ length: 200 }, (_, i) => ({
-            id: `n${i}`, 
+            id: `n${i}`,
             type: 'sphere',
-            position: { 
-              x: Math.random() * 100, 
-              y: Math.random() * 100, 
-              z: Math.random() * 100 
-            }
+            position: {
+              x: Math.random() * 100,
+              y: Math.random() * 100,
+              z: Math.random() * 100,
+            },
           })),
           edges: Array.from({ length: 100 }, (_, i) => ({
             id: `e${i}`,
             source: `n${i}`,
-            target: `n${(i + 1) % 200}`
-          }))
+            target: `n${(i + 1) % 200}`,
+          })),
         },
         performance: {
           enableLOD: true,
           enableCulling: true,
-          enableMemoryManagement: true
-        }
+          enableMemoryManagement: true,
+        },
       });
 
       await nextTick();
 
       // Measure interaction response time
       const interactionTimes: number[] = [];
-      
+
       for (let i = 0; i < 10; i++) {
         const startTime = performance.now();
-        
+
         // Simulate interaction
         graph.update({ interaction: { hoveredElementId: `n${i}` } });
         await nextTick();
-        
+
         const interactionTime = performance.now() - startTime;
         interactionTimes.push(interactionTime);
       }
 
       // Calculate average interaction time
-      const avgInteractionTime = interactionTimes.reduce((sum, time) => sum + time, 0) / interactionTimes.length;
-      
+      const avgInteractionTime =
+        interactionTimes.reduce((sum, time) => sum + time, 0) /
+        interactionTimes.length;
+
       // Should maintain < 10ms interaction response time
       expect(avgInteractionTime).toBeLessThan(10);
 
-      console.log('Average interaction time:', avgInteractionTime.toFixed(2), 'ms');
+      console.log(
+        'Average interaction time:',
+        avgInteractionTime.toFixed(2),
+        'ms'
+      );
 
       cleanup();
     });
@@ -1897,22 +1969,22 @@ describe('Feature Integration Tests', () => {
         nodes: [
           { id: 'n1', type: 'sphere' },
           { id: 'n2', type: 'sphere' },
-          { id: 'n3', type: 'sphere' }
+          { id: 'n3', type: 'sphere' },
         ],
         edges: [
           { id: 'e1', source: 'n1', target: 'n2' },
-          { id: 'e2', source: 'n2', target: 'n3' }
-        ]
+          { id: 'e2', source: 'n2', target: 'n3' },
+        ],
       },
       layout: { type: 'circle', radius: 20 },
       style: {
         'node:selected': { color: '#ff0000' },
-        'edge:hover': { color: '#00ff00' }
+        'edge:hover': { color: '#00ff00' },
       },
       performance: {
         enableLOD: true,
-        enableCulling: true
-      }
+        enableCulling: true,
+      },
     });
 
     await nextTick();
@@ -1920,14 +1992,11 @@ describe('Feature Integration Tests', () => {
     // Test layout integration
     const nodes = graph.state.data.nodes;
     expect(nodes).toHaveLength(3);
-    
+
     // Verify circular arrangement
-    nodes.forEach(node => {
+    nodes.forEach((node) => {
       if (node.position) {
-        const distance = Math.sqrt(
-          node.position.x ** 2 + 
-          node.position.y ** 2
-        );
+        const distance = Math.sqrt(node.position.x ** 2 + node.position.y ** 2);
         expect(distance).toBeCloseTo(20, 1);
       }
     });
@@ -1935,7 +2004,7 @@ describe('Feature Integration Tests', () => {
     // Test interaction integration
     graph.update({ interaction: { selectedElementIds: ['n1'] } });
     await nextTick();
-    
+
     graph.update({ interaction: { hoveredElementId: 'e1' } });
     await nextTick();
 
@@ -1948,30 +2017,36 @@ describe('Feature Integration Tests', () => {
 
   it('should coordinate edge and node interactions', async () => {
     const events: any[] = [];
-    
+
     const { graph, cleanup } = createTestGraph({
       data: {
         nodes: [
           { id: 'n1', type: 'sphere' },
           { id: 'n2', type: 'sphere' },
-          { id: 'n3', type: 'sphere' }
+          { id: 'n3', type: 'sphere' },
         ],
         edges: [
           { id: 'e1', source: 'n1', target: 'n2', selectable: true },
-          { id: 'e2', source: 'n2', target: 'n3', selectable: true }
-        ]
+          { id: 'e2', source: 'n2', target: 'n3', selectable: true },
+        ],
       },
       layout: { type: 'grid', spacing: 10 },
       style: {
         'node:selected': { color: '#ff0000' },
-        'edge:selected': { color: '#0000ff' }
-      }
+        'edge:selected': { color: '#0000ff' },
+      },
     });
 
     // Register event listeners
-    graph.on('element:click', (event) => events.push({ type: 'node', data: event }));
-    graph.on('edge:click', (event) => events.push({ type: 'edge', data: event }));
-    graph.on('edge:select', (event) => events.push({ type: 'edge-select', data: event }));
+    graph.on('element:click', (event) =>
+      events.push({ type: 'node', data: event })
+    );
+    graph.on('edge:click', (event) =>
+      events.push({ type: 'edge', data: event })
+    );
+    graph.on('edge:select', (event) =>
+      events.push({ type: 'edge-select', data: event })
+    );
 
     await nextTick();
 
@@ -1980,9 +2055,11 @@ describe('Feature Integration Tests', () => {
     await nextTick();
 
     // Verify both types of interactions work
-    const nodeEvents = events.filter(e => e.type === 'node');
-    const edgeEvents = events.filter(e => e.type === 'edge' || e.type === 'edge-select');
-    
+    const nodeEvents = events.filter((e) => e.type === 'node');
+    const edgeEvents = events.filter(
+      (e) => e.type === 'edge' || e.type === 'edge-select'
+    );
+
     expect(nodeEvents.length + edgeEvents.length).toBeGreaterThan(0);
 
     // Test connected edge highlighting when node selected
@@ -1990,8 +2067,8 @@ describe('Feature Integration Tests', () => {
     await nextTick();
 
     // Both edges connected to n2 should be affected
-    const connectedEdges = graph.state.data.edges.filter(e => 
-      e.source === 'n2' || e.target === 'n2'
+    const connectedEdges = graph.state.data.edges.filter(
+      (e) => e.source === 'n2' || e.target === 'n2'
     );
     expect(connectedEdges.length).toBe(2);
 
@@ -2008,11 +2085,11 @@ describe('Feature Integration Tests', () => {
           width: i % 3 === 1 ? 2 : undefined,
           height: i % 3 === 1 ? 2 : undefined,
           depth: i % 3 === 1 ? 2 : undefined,
-          position: { 
-            x: Math.random() * 200, 
-            y: Math.random() * 200, 
-            z: Math.random() * 200 
-          }
+          position: {
+            x: Math.random() * 200,
+            y: Math.random() * 200,
+            z: Math.random() * 200,
+          },
         })),
         edges: Array.from({ length: 150 }, (_, i) => ({
           id: `e${i}`,
@@ -2021,16 +2098,16 @@ describe('Feature Integration Tests', () => {
           type: i % 2 === 0 ? 'straight' : 'curved',
           curvature: i % 2 === 0 ? undefined : 0.3,
           selectable: true,
-          hoverable: true
-        }))
+          hoverable: true,
+        })),
       },
       layout: { type: 'random' },
       performance: {
         enableLOD: true,
         enableCulling: true,
         enableMemoryManagement: true,
-        instancingThreshold: 50
-      }
+        instancingThreshold: 50,
+      },
     });
 
     await nextTick();
@@ -2078,20 +2155,20 @@ test.describe('New Features Visual Tests', () => {
         nodes: Array.from({ length: 8 }, (_, i) => ({
           id: `n${i}`,
           type: 'sphere',
-          label: `Node ${i}`
+          label: `Node ${i}`,
         })),
-        edges: []
+        edges: [],
       },
       layout: {
         type: 'circle',
         radius: 15,
-        dimensions: 2
+        dimensions: 2,
       },
       style: {
-        'node': { color: '#4ecdc4', size: 1 },
+        node: { color: '#4ecdc4', size: 1 },
         'node:hover': { color: '#ff6b6b' },
-        'node:selected': { color: '#ffd93d' }
-      }
+        'node:selected': { color: '#ffd93d' },
+      },
     });
 
     await waitForGraphReady(page);
@@ -2099,7 +2176,7 @@ test.describe('New Features Visual Tests', () => {
     // Take screenshot of circular layout
     await expect(page).toHaveScreenshot('circle-layout.png', {
       fullPage: true,
-      threshold: 0.2
+      threshold: 0.2,
     });
 
     // Test hover state
@@ -2107,7 +2184,7 @@ test.describe('New Features Visual Tests', () => {
     await page.waitForTimeout(100);
     await expect(page).toHaveScreenshot('circle-layout-hover.png', {
       fullPage: true,
-      threshold: 0.2
+      threshold: 0.2,
     });
 
     // Test selection state
@@ -2115,7 +2192,7 @@ test.describe('New Features Visual Tests', () => {
     await page.waitForTimeout(100);
     await expect(page).toHaveScreenshot('circle-layout-selected.png', {
       fullPage: true,
-      threshold: 0.2
+      threshold: 0.2,
     });
   });
 
@@ -2125,22 +2202,22 @@ test.describe('New Features Visual Tests', () => {
         nodes: Array.from({ length: 50 }, (_, i) => ({
           id: `n${i}`,
           type: 'sphere',
-          label: `Node ${i}`
+          label: `Node ${i}`,
         })),
-        edges: []
+        edges: [],
       },
       layout: {
         type: 'circle',
         radius: 20,
         dimensions: 3,
-        distribution: 'equal'
+        distribution: 'equal',
       },
       camera: {
         target: { x: 0, y: 0, z: 0 },
         phi: 45,
         theta: 45,
-        distance: 50
-      }
+        distance: 50,
+      },
     });
 
     await waitForGraphReady(page);
@@ -2149,7 +2226,7 @@ test.describe('New Features Visual Tests', () => {
     // Take screenshot of 3D spherical layout
     await expect(page).toHaveScreenshot('sphere-layout-3d.png', {
       fullPage: true,
-      threshold: 0.3
+      threshold: 0.3,
     });
   });
 
@@ -2159,23 +2236,23 @@ test.describe('New Features Visual Tests', () => {
         nodes: Array.from({ length: 12 }, (_, i) => ({
           id: `n${i}`,
           type: 'sphere',
-          label: `Node ${i}`
+          label: `Node ${i}`,
         })),
-        edges: []
+        edges: [],
       },
       layout: {
         type: 'column',
         spacing: 4,
         columns: 3,
-        columnSpacing: 8
-      }
+        columnSpacing: 8,
+      },
     });
 
     await waitForGraphReady(page);
 
     await expect(page).toHaveScreenshot('column-layout.png', {
       fullPage: true,
-      threshold: 0.2
+      threshold: 0.2,
     });
   });
 
@@ -2185,23 +2262,23 @@ test.describe('New Features Visual Tests', () => {
         nodes: Array.from({ length: 10 }, (_, i) => ({
           id: `n${i}`,
           type: 'sphere',
-          label: `Node ${i}`
+          label: `Node ${i}`,
         })),
-        edges: []
+        edges: [],
       },
       layout: {
         type: 'row',
         spacing: 5,
         rows: 2,
-        rowSpacing: 10
-      }
+        rowSpacing: 10,
+      },
     });
 
     await waitForGraphReady(page);
 
     await expect(page).toHaveScreenshot('row-layout.png', {
       fullPage: true,
-      threshold: 0.2
+      threshold: 0.2,
     });
   });
 
@@ -2211,22 +2288,22 @@ test.describe('New Features Visual Tests', () => {
         nodes: Array.from({ length: 16 }, (_, i) => ({
           id: `n${i}`,
           type: 'sphere',
-          label: `Node ${i}`
+          label: `Node ${i}`,
         })),
-        edges: []
+        edges: [],
       },
       layout: {
         type: 'grid',
         dimensions: 2,
-        spacing: 6
-      }
+        spacing: 6,
+      },
     });
 
     await waitForGraphReady(page);
 
     await expect(page).toHaveScreenshot('grid-layout.png', {
       fullPage: true,
-      threshold: 0.2
+      threshold: 0.2,
     });
   });
 
@@ -2236,25 +2313,42 @@ test.describe('New Features Visual Tests', () => {
         nodes: [
           { id: 'n1', type: 'sphere', position: { x: -10, y: 0, z: 0 } },
           { id: 'n2', type: 'sphere', position: { x: 10, y: 0, z: 0 } },
-          { id: 'n3', type: 'sphere', position: { x: 0, y: 10, z: 0 } }
+          { id: 'n3', type: 'sphere', position: { x: 0, y: 10, z: 0 } },
         ],
         edges: [
-          { id: 'e1', source: 'n1', target: 'n2', type: 'curved', curvature: 0.3 },
+          {
+            id: 'e1',
+            source: 'n1',
+            target: 'n2',
+            type: 'curved',
+            curvature: 0.3,
+          },
           { id: 'e2', source: 'n2', target: 'n3', type: 'straight' },
-          { id: 'e3', source: 'n3', target: 'n1', type: 'dashed', dashSize: 0.5, gapSize: 0.3 }
-        ]
+          {
+            id: 'e3',
+            source: 'n3',
+            target: 'n1',
+            type: 'dashed',
+            dashSize: 0.5,
+            gapSize: 0.3,
+          },
+        ],
       },
       style: {
-        'edge': { color: '#ffffff', width: 2 },
+        edge: { color: '#ffffff', width: 2 },
         'edge:hover': { color: '#ff6b6b', width: 4 },
-        'edge:selected': { color: '#4ecdc4', width: 6, glow: { color: '#4ecdc4', strength: 0.8 } }
+        'edge:selected': {
+          color: '#4ecdc4',
+          width: 6,
+          glow: { color: '#4ecdc4', strength: 0.8 },
+        },
       },
       camera: {
         target: { x: 0, y: 3, z: 0 },
         phi: 45,
         theta: 45,
-        distance: 30
-      }
+        distance: 30,
+      },
     });
 
     await waitForGraphReady(page);
@@ -2262,7 +2356,7 @@ test.describe('New Features Visual Tests', () => {
     // Base state
     await expect(page).toHaveScreenshot('edge-interaction-base.png', {
       fullPage: true,
-      threshold: 0.2
+      threshold: 0.2,
     });
 
     // Hover over edge
@@ -2270,7 +2364,7 @@ test.describe('New Features Visual Tests', () => {
     await page.waitForTimeout(100);
     await expect(page).toHaveScreenshot('edge-interaction-hover.png', {
       fullPage: true,
-      threshold: 0.2
+      threshold: 0.2,
     });
 
     // Select edge
@@ -2278,7 +2372,7 @@ test.describe('New Features Visual Tests', () => {
     await page.waitForTimeout(100);
     await expect(page).toHaveScreenshot('edge-interaction-selected.png', {
       fullPage: true,
-      threshold: 0.2
+      threshold: 0.2,
     });
   });
 
@@ -2287,18 +2381,38 @@ test.describe('New Features Visual Tests', () => {
       data: {
         nodes: [
           { id: 'sphere1', type: 'sphere', position: { x: -15, y: 0, z: 0 } },
-          { id: 'box1', type: 'box', width: 3, height: 2, depth: 4, position: { x: -5, y: 0, z: 0 } },
-          { id: 'text1', type: 'text', text: 'Hello World', fontSize: 2, position: { x: 5, y: 0, z: 0 } },
-          { id: 'custom1', type: 'custom', geometryData: { /* custom geometry */ }, position: { x: 15, y: 0, z: 0 } }
+          {
+            id: 'box1',
+            type: 'box',
+            width: 3,
+            height: 2,
+            depth: 4,
+            position: { x: -5, y: 0, z: 0 },
+          },
+          {
+            id: 'text1',
+            type: 'text',
+            text: 'Hello World',
+            fontSize: 2,
+            position: { x: 5, y: 0, z: 0 },
+          },
+          {
+            id: 'custom1',
+            type: 'custom',
+            geometryData: {
+              /* custom geometry */
+            },
+            position: { x: 15, y: 0, z: 0 },
+          },
         ],
-        edges: []
+        edges: [],
       },
       camera: {
         target: { x: 0, y: 0, z: 0 },
         phi: 25,
         theta: 45,
-        distance: 40
-      }
+        distance: 40,
+      },
     });
 
     await waitForGraphReady(page);
@@ -2306,7 +2420,7 @@ test.describe('New Features Visual Tests', () => {
 
     await expect(page).toHaveScreenshot('element-actors.png', {
       fullPage: true,
-      threshold: 0.3
+      threshold: 0.3,
     });
   });
 
@@ -2316,15 +2430,15 @@ test.describe('New Features Visual Tests', () => {
         nodes: Array.from({ length: 20 }, (_, i) => ({
           id: `n${i}`,
           type: 'sphere',
-          position: { 
-            x: (i % 5) * 8 - 16, 
-            y: Math.floor(i / 5) * 8 - 12, 
-            z: Math.random() * 10 - 5 
-          }
+          position: {
+            x: (i % 5) * 8 - 16,
+            y: Math.floor(i / 5) * 8 - 12,
+            z: Math.random() * 10 - 5,
+          },
         })),
-        edges: []
+        edges: [],
       },
-      layout: { type: 'random' }
+      layout: { type: 'random' },
     });
 
     await waitForGraphReady(page);
@@ -2336,7 +2450,7 @@ test.describe('New Features Visual Tests', () => {
     await page.waitForTimeout(1000);
     await expect(page).toHaveScreenshot('camera-preset-top.png', {
       fullPage: true,
-      threshold: 0.2
+      threshold: 0.2,
     });
 
     // Isometric view
@@ -2346,7 +2460,7 @@ test.describe('New Features Visual Tests', () => {
     await page.waitForTimeout(1000);
     await expect(page).toHaveScreenshot('camera-preset-isometric.png', {
       fullPage: true,
-      threshold: 0.2
+      threshold: 0.2,
     });
 
     // Side view
@@ -2356,7 +2470,7 @@ test.describe('New Features Visual Tests', () => {
     await page.waitForTimeout(1000);
     await expect(page).toHaveScreenshot('camera-preset-side.png', {
       fullPage: true,
-      threshold: 0.2
+      threshold: 0.2,
     });
   });
 
@@ -2366,31 +2480,31 @@ test.describe('New Features Visual Tests', () => {
         nodes: Array.from({ length: 500 }, (_, i) => ({
           id: `n${i}`,
           type: 'sphere',
-          position: { 
-            x: Math.random() * 200 - 100, 
-            y: Math.random() * 200 - 100, 
-            z: Math.random() * 200 - 100 
-          }
+          position: {
+            x: Math.random() * 200 - 100,
+            y: Math.random() * 200 - 100,
+            z: Math.random() * 200 - 100,
+          },
         })),
         edges: Array.from({ length: 200 }, (_, i) => ({
           id: `e${i}`,
           source: `n${i % 500}`,
-          target: `n${(i + 1) % 500}`
-        }))
+          target: `n${(i + 1) % 500}`,
+        })),
       },
       layout: { type: 'random' },
       performance: {
         enableLOD: true,
         enableCulling: true,
         enableMemoryManagement: true,
-        instancingThreshold: 100
+        instancingThreshold: 100,
       },
       camera: {
         target: { x: 0, y: 0, z: 0 },
         phi: 45,
         theta: 45,
-        distance: 150
-      }
+        distance: 150,
+      },
     });
 
     await waitForGraphReady(page);
@@ -2398,21 +2512,24 @@ test.describe('New Features Visual Tests', () => {
 
     await expect(page).toHaveScreenshot('performance-optimizations.png', {
       fullPage: true,
-      threshold: 0.3
+      threshold: 0.3,
     });
 
     // Test camera movement to see LOD in action
     await page.evaluate(() => {
-      (window as any).graph.camera.flyTo({
-        target: { x: 50, y: 50, z: 50 },
-        distance: 50
-      }, { duration: 2000 });
+      (window as any).graph.camera.flyTo(
+        {
+          target: { x: 50, y: 50, z: 50 },
+          distance: 50,
+        },
+        { duration: 2000 }
+      );
     });
-    
+
     await page.waitForTimeout(2500);
     await expect(page).toHaveScreenshot('performance-optimizations-close.png', {
       fullPage: true,
-      threshold: 0.3
+      threshold: 0.3,
     });
   });
 });
@@ -2439,56 +2556,58 @@ describe('Load Testing', () => {
         nodes: Array.from({ length: nodeCount }, (_, i) => ({
           id: `n${i}`,
           type: 'sphere',
-          position: { 
-            x: Math.random() * 500 - 250, 
-            y: Math.random() * 500 - 250, 
-            z: Math.random() * 500 - 250 
-          }
+          position: {
+            x: Math.random() * 500 - 250,
+            y: Math.random() * 500 - 250,
+            z: Math.random() * 500 - 250,
+          },
         })),
         edges: Array.from({ length: nodeCount * 2 }, (_, i) => ({
           id: `e${i}`,
           source: `n${Math.floor(Math.random() * nodeCount)}`,
-          target: `n${Math.floor(Math.random() * nodeCount)}`
-        }))
+          target: `n${Math.floor(Math.random() * nodeCount)}`,
+        })),
       },
       layout: { type: 'random' },
       performance: {
         enableLOD: true,
         enableCulling: true,
         enableMemoryManagement: true,
-        instancingThreshold: 200
-      }
+        instancingThreshold: 200,
+      },
     });
 
     const initTime = performance.now() - startTime;
-    
+
     // Should initialize within reasonable time (< 5 seconds for 1000 nodes)
     expect(initTime).toBeLessThan(5000);
-    
+
     // Wait for full stabilization
     await nextTick();
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     // Test interaction performance
     const interactionStart = performance.now();
-    
+
     for (let i = 0; i < 10; i++) {
-      graph.update({ 
-        interaction: { 
-          selectedElementIds: [`n${Math.floor(Math.random() * nodeCount)}`] 
-        } 
+      graph.update({
+        interaction: {
+          selectedElementIds: [`n${Math.floor(Math.random() * nodeCount)}`],
+        },
       });
       await nextTick();
     }
-    
+
     const interactionTime = performance.now() - interactionStart;
-    
+
     // Interactions should be responsive (< 100ms average)
     expect(interactionTime / 10).toBeLessThan(100);
 
     console.log(`Load test results for ${nodeCount} nodes:`);
     console.log(`Initialization time: ${initTime.toFixed(2)}ms`);
-    console.log(`Average interaction time: ${(interactionTime / 10).toFixed(2)}ms`);
+    console.log(
+      `Average interaction time: ${(interactionTime / 10).toFixed(2)}ms`
+    );
 
     cleanup();
   }, 30000); // 30 second timeout for large graphs
@@ -2499,49 +2618,55 @@ describe('Load Testing', () => {
         nodes: Array.from({ length: 100 }, (_, i) => ({
           id: `n${i}`,
           type: 'sphere',
-          position: { x: i, y: 0, z: 0 }
+          position: { x: i, y: 0, z: 0 },
         })),
-        edges: []
+        edges: [],
       },
       performance: {
         enableObjectPooling: true,
-        enableLOD: true
-      }
+        enableLOD: true,
+      },
     });
 
     await nextTick();
 
     // Test rapid node additions
     const addStartTime = performance.now();
-    
+
     for (let i = 0; i < 50; i++) {
       graph.update({
         data: {
           nodes: {
-            add: [{ id: `new${i}`, type: 'sphere', position: { x: i + 100, y: 0, z: 0 } }]
-          }
-        }
+            add: [
+              {
+                id: `new${i}`,
+                type: 'sphere',
+                position: { x: i + 100, y: 0, z: 0 },
+              },
+            ],
+          },
+        },
       });
       await nextTick();
     }
-    
+
     const addTime = performance.now() - addStartTime;
     expect(addTime).toBeLessThan(1000); // Should add 50 nodes in under 1 second
 
     // Test rapid node removals
     const removeStartTime = performance.now();
-    
+
     for (let i = 0; i < 25; i++) {
       graph.update({
         data: {
           nodes: {
-            remove: [`n${i}`]
-          }
-        }
+            remove: [`n${i}`],
+          },
+        },
       });
       await nextTick();
     }
-    
+
     const removeTime = performance.now() - removeStartTime;
     expect(removeTime).toBeLessThan(500); // Should remove 25 nodes in under 0.5 seconds
 
@@ -2558,69 +2683,81 @@ describe('Load Testing', () => {
         nodes: Array.from({ length: 200 }, (_, i) => ({
           id: `n${i}`,
           type: 'sphere',
-          position: { x: Math.random() * 100, y: Math.random() * 100, z: 0 }
+          position: { x: Math.random() * 100, y: Math.random() * 100, z: 0 },
         })),
         edges: Array.from({ length: 100 }, (_, i) => ({
           id: `e${i}`,
           source: `n${i}`,
-          target: `n${(i + 1) % 200}`
-        }))
+          target: `n${(i + 1) % 200}`,
+        })),
       },
       performance: {
         enableLOD: true,
         enableCulling: true,
-        enableMemoryManagement: true
-      }
+        enableMemoryManagement: true,
+      },
     });
 
     await nextTick();
 
     const performanceSamples: number[] = [];
-    
+
     // Simulate extended use
     for (let cycle = 0; cycle < 100; cycle++) {
       const cycleStart = performance.now();
-      
+
       // Random interactions
       for (let i = 0; i < 5; i++) {
-        graph.update({ 
-          interaction: { 
-            selectedElementIds: [`n${Math.floor(Math.random() * 200)}`] 
-          } 
+        graph.update({
+          interaction: {
+            selectedElementIds: [`n${Math.floor(Math.random() * 200)}`],
+          },
         });
         await nextTick();
       }
-      
+
       // Random camera movements
-      await graph.camera.flyTo({
-        target: { 
-          x: Math.random() * 100, 
-          y: Math.random() * 100, 
-          z: Math.random() * 50 
+      await graph.camera.flyTo(
+        {
+          target: {
+            x: Math.random() * 100,
+            y: Math.random() * 100,
+            z: Math.random() * 50,
+          },
+          distance: Math.random() * 100 + 50,
         },
-        distance: Math.random() * 100 + 50
-      }, { duration: 50 });
-      
+        { duration: 50 }
+      );
+
       const cycleTime = performance.now() - cycleStart;
       performanceSamples.push(cycleTime);
     }
-    
+
     // Calculate performance metrics
-    const avgCycleTime = performanceSamples.reduce((sum, time) => sum + time, 0) / performanceSamples.length;
+    const avgCycleTime =
+      performanceSamples.reduce((sum, time) => sum + time, 0) /
+      performanceSamples.length;
     const maxCycleTime = Math.max(...performanceSamples);
     const minCycleTime = Math.min(...performanceSamples);
-    
+
     // Performance should remain consistent
     expect(avgCycleTime).toBeLessThan(100); // Average cycle under 100ms
     expect(maxCycleTime).toBeLessThan(200); // Max cycle under 200ms
-    
+
     // Check for performance degradation (last 20% vs first 20%)
-    const first20 = performanceSamples.slice(0, Math.floor(performanceSamples.length * 0.2));
-    const last20 = performanceSamples.slice(-Math.floor(performanceSamples.length * 0.2));
-    
-    const first20Avg = first20.reduce((sum, time) => sum + time, 0) / first20.length;
-    const last20Avg = last20.reduce((sum, time) => sum + time, 0) / last20.length;
-    
+    const first20 = performanceSamples.slice(
+      0,
+      Math.floor(performanceSamples.length * 0.2)
+    );
+    const last20 = performanceSamples.slice(
+      -Math.floor(performanceSamples.length * 0.2)
+    );
+
+    const first20Avg =
+      first20.reduce((sum, time) => sum + time, 0) / first20.length;
+    const last20Avg =
+      last20.reduce((sum, time) => sum + time, 0) / last20.length;
+
     // Should not degrade by more than 50%
     expect(last20Avg).toBeLessThan(first20Avg * 1.5);
 
@@ -2628,7 +2765,9 @@ describe('Load Testing', () => {
     console.log(`Average cycle time: ${avgCycleTime.toFixed(2)}ms`);
     console.log(`Min cycle time: ${minCycleTime.toFixed(2)}ms`);
     console.log(`Max cycle time: ${maxCycleTime.toFixed(2)}ms`);
-    console.log(`Performance degradation: ${((last20Avg / first20Avg - 1) * 100).toFixed(1)}%`);
+    console.log(
+      `Performance degradation: ${((last20Avg / first20Avg - 1) * 100).toFixed(1)}%`
+    );
 
     cleanup();
   }, 60000); // 60 second timeout for extended test
@@ -2675,7 +2814,7 @@ export function createTestGraph(initialSpec: any): TestGraphResult {
         if (container.parentNode) {
           container.parentNode.removeChild(container);
         }
-      }
+      },
     };
   } catch (error) {
     if (container.parentNode) {
@@ -2689,25 +2828,25 @@ export function createTestGraph(initialSpec: any): TestGraphResult {
  * Wait for next reactive update cycle
  */
 export async function nextTick(): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, 16)); // ~1 frame at 60fps
+  return new Promise((resolve) => setTimeout(resolve, 16)); // ~1 frame at 60fps
 }
 
 /**
  * Simulate pointer events for interaction testing
  */
 export async function simulatePointerEvent(
-  graph: SpaceGraph, 
-  type: string, 
+  graph: SpaceGraph,
+  type: string,
   position: { x: number; y: number }
 ): Promise<void> {
   const container = graph.getContainer();
   const rect = container.getBoundingClientRect();
-  
+
   const event = new PointerEvent(type, {
     clientX: rect.left + position.x,
     clientY: rect.top + position.y,
     bubbles: true,
-    cancelable: true
+    cancelable: true,
   });
 
   container.dispatchEvent(event);
@@ -2726,20 +2865,20 @@ export function createMockThreeObject(type: string, props: any = {}) {
         material: props.material || { dispose: () => {} },
         position: props.position || { x: 0, y: 0, z: 0 },
         visible: props.visible !== false,
-        userData: props.userData || {}
+        userData: props.userData || {},
       };
     case 'geometry':
       return {
         dispose: () => {},
         computeBoundingBox: () => {},
-        computeBoundingSphere: () => {}
+        computeBoundingSphere: () => {},
       };
     case 'material':
       return {
         dispose: () => {},
         color: props.color || { set: () => {} },
         opacity: props.opacity || 1,
-        transparent: props.transparent || false
+        transparent: props.transparent || false,
       };
     default:
       return {};
@@ -2795,7 +2934,7 @@ export class PerformanceTimer {
       average: this.getAverage(label),
       min: Math.min(...results),
       max: Math.max(...results),
-      count: results.length
+      count: results.length,
     };
   }
 
@@ -2829,48 +2968,48 @@ export const TestData = {
     nodes: [
       { id: 'n1', type: 'sphere' },
       { id: 'n2', type: 'sphere' },
-      { id: 'n3', type: 'sphere' }
+      { id: 'n3', type: 'sphere' },
     ],
     edges: [
       { id: 'e1', source: 'n1', target: 'n2' },
-      { id: 'e2', source: 'n2', target: 'n3' }
-    ]
+      { id: 'e2', source: 'n2', target: 'n3' },
+    ],
   }),
 
   mediumGraph: () => ({
     nodes: Array.from({ length: 50 }, (_, i) => ({
       id: `n${i}`,
       type: 'sphere',
-      position: { x: Math.random() * 100, y: Math.random() * 100, z: 0 }
+      position: { x: Math.random() * 100, y: Math.random() * 100, z: 0 },
     })),
     edges: Array.from({ length: 75 }, (_, i) => ({
       id: `e${i}`,
       source: `n${Math.floor(Math.random() * 50)}`,
-      target: `n${Math.floor(Math.random() * 50)}`
-    }))
+      target: `n${Math.floor(Math.random() * 50)}`,
+    })),
   }),
 
   largeGraph: () => ({
     nodes: Array.from({ length: 500 }, (_, i) => ({
       id: `n${i}`,
       type: 'sphere',
-      position: { 
-        x: Math.random() * 200, 
-        y: Math.random() * 200, 
-        z: Math.random() * 200 
-      }
+      position: {
+        x: Math.random() * 200,
+        y: Math.random() * 200,
+        z: Math.random() * 200,
+      },
     })),
     edges: Array.from({ length: 750 }, (_, i) => ({
       id: `e${i}`,
       source: `n${Math.floor(Math.random() * 500)}`,
-      target: `n${Math.floor(Math.random() * 500)}`
-    }))
+      target: `n${Math.floor(Math.random() * 500)}`,
+    })),
   }),
 
   hierarchicalGraph: (levels: number = 3) => {
     const nodes: any[] = [];
     const edges: any[] = [];
-    
+
     let nodeId = 0;
     for (let level = 0; level < levels; level++) {
       const nodesInLevel = Math.pow(2, level);
@@ -2878,28 +3017,28 @@ export const TestData = {
         nodes.push({
           id: `n${nodeId}`,
           type: 'sphere',
-          position: { 
-            x: (i - nodesInLevel / 2) * 10, 
-            y: level * 15, 
-            z: 0 
-          }
+          position: {
+            x: (i - nodesInLevel / 2) * 10,
+            y: level * 15,
+            z: 0,
+          },
         });
-        
+
         if (level > 0) {
           const parentId = Math.floor(i / 2);
           edges.push({
             id: `e${nodeId}`,
             source: `n${Math.pow(2, level - 1) - 1 + parentId}`,
-            target: `n${nodeId}`
+            target: `n${nodeId}`,
           });
         }
-        
+
         nodeId++;
       }
     }
-    
+
     return { nodes, edges };
-  }
+  },
 };
 
 /**
@@ -2923,12 +3062,12 @@ export function mockRequestAnimationFrame() {
       time += deltaTime;
       const currentCallbacks = [...callbacks];
       callbacks.length = 0;
-      currentCallbacks.forEach(callback => callback(time));
+      currentCallbacks.forEach((callback) => callback(time));
     },
     reset: () => {
       callbacks.length = 0;
       time = 0;
-    }
+    },
   };
 }
 
@@ -2952,9 +3091,9 @@ export function createTestScene(config: {
       position: config.cameraPosition || { x: 0, y: 0, z: 10 },
       fov: 75,
       near: 0.1,
-      far: 1000
+      far: 1000,
     },
-    backgroundColor: config.backgroundColor || '#000000'
+    backgroundColor: config.backgroundColor || '#000000',
   };
 }
 ```
@@ -2970,9 +3109,9 @@ name: Test Suite
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
   unit-tests:
@@ -2980,125 +3119,125 @@ jobs:
     strategy:
       matrix:
         node-version: [16.x, 18.x, 20.x]
-    
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Run unit tests
-      run: npm run test:unit
-    
-    - name: Upload coverage reports
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage/lcov.info
-        flags: unittests
-        name: codecov-umbrella
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm run test:unit
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
 
   integration-tests:
     runs-on: ubuntu-latest
     needs: unit-tests
-    
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Use Node.js 18.x
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18.x
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Run integration tests
-      run: npm run test:integration
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run integration tests
+        run: npm run test:integration
 
   visual-tests:
     runs-on: ubuntu-latest
     needs: unit-tests
-    
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Use Node.js 18.x
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18.x
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Install Playwright browsers
-      run: npx playwright install --with-deps
-    
-    - name: Run visual tests
-      run: npm run test:visual
-    
-    - name: Upload visual test results
-      uses: actions/upload-artifact@v3
-      if: failure()
-      with:
-        name: visual-test-results
-        path: tests/visual/test-results/
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run visual tests
+        run: npm run test:visual
+
+      - name: Upload visual test results
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: visual-test-results
+          path: tests/visual/test-results/
 
   performance-tests:
     runs-on: ubuntu-latest
     needs: unit-tests
-    
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Use Node.js 18.x
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18.x
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Run performance tests
-      run: npm run test:performance
-    
-    - name: Upload performance results
-      uses: actions/upload-artifact@v3
-      with:
-        name: performance-results
-        path: tests/performance/results/
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run performance tests
+        run: npm run test:performance
+
+      - name: Upload performance results
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-results
+          path: tests/performance/results/
 
   e2e-tests:
     runs-on: ubuntu-latest
     needs: [unit-tests, integration-tests]
-    
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Use Node.js 18.x
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18.x
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Install Playwright browsers
-      run: npx playwright install --with-deps
-    
-    - name: Run E2E tests
-      run: npm run test:e2e
-    
-    - name: Upload E2E test results
-      uses: actions/upload-artifact@v3
-      if: failure()
-      with:
-        name: e2e-test-results
-        path: tests/e2e/test-results/
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+
+      - name: Upload E2E test results
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: e2e-test-results
+          path: tests/e2e/test-results/
 ```
 
 ## Success Metrics and KPIs

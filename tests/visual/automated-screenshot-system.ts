@@ -230,45 +230,41 @@ export class AutomatedScreenshotSystem {
     expectedPath: string,
     threshold: number
   ): Promise<ScreenshotComparisonDetail> {
-    try {
-      // Load images
-      const img1 = PNG.sync.read(await fs.readFile(actualPath));
-      const img2 = PNG.sync.read(await fs.readFile(expectedPath));
+    // Load images
+    const img1 = PNG.sync.read(await fs.readFile(actualPath));
+    const img2 = PNG.sync.read(await fs.readFile(expectedPath));
 
-      // Create diff image
-      const { width, height } = img1;
-      const diff = new PNG({ width, height });
+    // Create diff image
+    const { width, height } = img1;
+    const diff = new PNG({ width, height });
 
-      // Compare images
-      const diffPixels = pixelmatch(
-        img1.data,
-        img2.data,
-        diff.data,
-        width,
-        height,
-        {
-          threshold,
-          includeAA: false,
-        }
-      );
+    // Compare images
+    const diffPixels = pixelmatch(
+      img1.data,
+      img2.data,
+      diff.data,
+      width,
+      height,
+      {
+        threshold,
+        includeAA: false,
+      }
+    );
 
-      const totalPixels = width * height;
-      const diffPercentage = (diffPixels / totalPixels) * 100;
+    const totalPixels = width * height;
+    const diffPercentage = (diffPixels / totalPixels) * 100;
 
-      // Save diff image
-      const diffFileName = path.basename(actualPath, '.png') + '-diff.png';
-      const diffPath = path.join(this.diffPath, diffFileName);
-      await fs.writeFile(diffPath, PNG.sync.write(diff));
+    // Save diff image
+    const diffFileName = path.basename(actualPath, '.png') + '-diff.png';
+    const diffPath = path.join(this.diffPath, diffFileName);
+    await fs.writeFile(diffPath, PNG.sync.write(diff));
 
-      return {
-        passed: diffPercentage < 5.0, // 5% threshold for passing
-        diffPixels,
-        diffPercentage,
-        diffPath,
-      };
-    } catch (error) {
-      throw error;
-    }
+    return {
+      passed: diffPercentage < 5.0, // 5% threshold for passing
+      diffPixels,
+      diffPercentage,
+      diffPath,
+    };
   }
 
   /**

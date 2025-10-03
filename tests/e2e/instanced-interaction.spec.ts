@@ -14,7 +14,7 @@ test.describe('Instanced Renderer Interaction', () => {
         return (
           nodeRenderer && nodeRenderer.constructor.name === 'InstancedRenderer'
         );
-      } catch (_e) {
+      } catch {
         return false;
       }
     });
@@ -39,7 +39,7 @@ test.describe('Instanced Renderer Interaction', () => {
           }
         }
         return false;
-      } catch (_e) {
+      } catch {
         return false;
       }
     });

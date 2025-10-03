@@ -409,9 +409,12 @@ export class EnhancedIntegrationDemo {
         this.hudSystem.showNotification('Auto-rotate enabled', 'info', 2000);
         break;
       case 'p': {
-        const currentLevel = this.performanceOptimizer.getMetrics().qualityLevel;
+        const currentLevel =
+          this.performanceOptimizer.getMetrics().qualityLevel;
         const newLevel = currentLevel > 0 ? 0 : 2; // Toggle between low and high
-        this.performanceOptimizer.setQualityLevel(newLevel === 0 ? 'low' : 'high');
+        this.performanceOptimizer.setQualityLevel(
+          newLevel === 0 ? 'low' : 'high'
+        );
         this.hudSystem.showNotification(
           `Quality level set to ${newLevel === 0 ? 'low' : 'high'}`,
           'info',

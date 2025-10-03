@@ -7,16 +7,19 @@ This directory contains visual documentation of the SpaceGraphJS library feature
 To generate screenshots, you need to have the development server running and then execute the capture scripts:
 
 1. Start the development server:
+
    ```bash
    npm run dev
    ```
 
 2. In a separate terminal, run the capture scripts:
+
    ```bash
    node doc/screenshots/capture-all.js
    ```
 
    Or run individual scripts:
+
    ```bash
    node doc/screenshots/capture-screenshots.js
    node doc/screenshots/capture-basic-renderer-screenshots.js

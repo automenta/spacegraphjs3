@@ -52,10 +52,10 @@ Generic object pooling implementation for recycling objects to reduce garbage co
 ```typescript
 // Create a pool for Vector3 objects
 const vector3Pool = new ObjectPool<THREE.Vector3>(
-  () => new THREE.Vector3(),  // Creation function
-  (vec) => vec.set(0, 0, 0),  // Reset function
-  100,                        // Initial size
-  1000                        // Max size
+  () => new THREE.Vector3(), // Creation function
+  (vec) => vec.set(0, 0, 0), // Reset function
+  100, // Initial size
+  1000 // Max size
 );
 
 // Acquire an object from the pool

@@ -81,7 +81,7 @@ class SelfGeneratingTestSuite {
    */
   private generateCategoryTests(specs: [string, any][]): void {
     for (const [name, spec] of specs) {
-      test(`${this.formatTestName(name)} visual semantics`, async ({}) => {
+      test(`${this.formatTestName(name)} visual semantics`, async () => {
         let controller: VisualSemanticsController | null = null;
 
         try {

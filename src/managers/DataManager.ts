@@ -51,8 +51,8 @@ export class DataManager {
     const edges = Array.from(this.edges.values());
     const groups = Array.from(this.groups.values());
 
-    const nodeIds = new Set(nodes.map(node => node.id));
-    const groupIds = new Set(groups.map(group => group.id));
+    const nodeIds = new Set(nodes.map((node) => node.id));
+    const groupIds = new Set(groups.map((group) => group.id));
 
     // Check edge references
     edges.forEach((edge) => {
@@ -60,8 +60,8 @@ export class DataManager {
         this.showValidationWarning(
           `edge-${edge.id}-source-missing`,
           `Edge "${edge.id}" references non-existent source node "${edge.source}".\n` +
-          '⚠️  This edge will not be rendered correctly.\n' +
-          '💡 Ensure the source node exists or remove this edge'
+            '⚠️  This edge will not be rendered correctly.\n' +
+            '💡 Ensure the source node exists or remove this edge'
         );
       }
 
@@ -69,8 +69,8 @@ export class DataManager {
         this.showValidationWarning(
           `edge-${edge.id}-target-missing`,
           `Edge "${edge.id}" references non-existent target node "${edge.target}".\n` +
-          '⚠️  This edge will not be rendered correctly.\n' +
-          '💡 Ensure the target node exists or remove this edge'
+            '⚠️  This edge will not be rendered correctly.\n' +
+            '💡 Ensure the target node exists or remove this edge'
         );
       }
     });
@@ -82,8 +82,8 @@ export class DataManager {
           this.showValidationWarning(
             `group-${group.id}-node-${nodeId}-missing`,
             `Group "${group.id}" references non-existent node "${nodeId}".\n` +
-            '⚠️  This may cause issues with group operations.\n' +
-            '💡 Ensure all node ids in the group exist or remove them from the group'
+              '⚠️  This may cause issues with group operations.\n' +
+              '💡 Ensure all node ids in the group exist or remove them from the group'
           );
         }
       });
@@ -95,8 +95,8 @@ export class DataManager {
         this.showValidationWarning(
           `node-${node.id}-group-missing`,
           `Node "${node.id}" references non-existent group "${node.groupId}".\n` +
-          '⚠️  Group-based operations may not work correctly.\n' +
-          '💡 Ensure the group exists or remove the groupId reference'
+            '⚠️  Group-based operations may not work correctly.\n' +
+            '💡 Ensure the group exists or remove the groupId reference'
         );
       }
 
@@ -105,8 +105,8 @@ export class DataManager {
         this.showValidationWarning(
           `node-${node.id}-pinning-group-missing`,
           `Node "${node.id}" pinning references non-existent group "${node.pinning}".\n` +
-          '⚠️  Node pinning may not work correctly.\n' +
-          '💡 Ensure the group exists or use position coordinates for pinning'
+            '⚠️  Node pinning may not work correctly.\n' +
+            '💡 Ensure the group exists or use position coordinates for pinning'
         );
       }
     });
@@ -118,17 +118,21 @@ export class DataManager {
   /**
    * Checks for duplicate IDs across nodes, edges, and groups
    */
-  private checkForDuplicateIds(nodes: NodeSpec[], edges: EdgeSpec[], groups: GroupSpec[]): void {
+  private checkForDuplicateIds(
+    nodes: NodeSpec[],
+    edges: EdgeSpec[],
+    groups: GroupSpec[]
+  ): void {
     const allIds = new Map<string, string>();
 
     // Check nodes
-    nodes.forEach(node => {
+    nodes.forEach((node) => {
       if (allIds.has(node.id)) {
         this.showValidationWarning(
           `duplicate-id-${node.id}`,
           `Duplicate ID "${node.id}" found in nodes.\n` +
-          '⚠️  This will cause conflicts and unpredictable behavior.\n' +
-          '💡 Ensure all element IDs are unique across nodes, edges, and groups'
+            '⚠️  This will cause conflicts and unpredictable behavior.\n' +
+            '💡 Ensure all element IDs are unique across nodes, edges, and groups'
         );
       } else {
         allIds.set(node.id, 'node');
@@ -136,14 +140,14 @@ export class DataManager {
     });
 
     // Check edges
-    edges.forEach(edge => {
+    edges.forEach((edge) => {
       if (allIds.has(edge.id)) {
         const existingType = allIds.get(edge.id);
         this.showValidationWarning(
           `duplicate-id-${edge.id}`,
           `Duplicate ID "${edge.id}" found in edges (also exists as ${existingType}).\n` +
-          '⚠️  This will cause conflicts and unpredictable behavior.\n' +
-          '💡 Ensure all element IDs are unique across nodes, edges, and groups'
+            '⚠️  This will cause conflicts and unpredictable behavior.\n' +
+            '💡 Ensure all element IDs are unique across nodes, edges, and groups'
         );
       } else {
         allIds.set(edge.id, 'edge');
@@ -151,14 +155,14 @@ export class DataManager {
     });
 
     // Check groups
-    groups.forEach(group => {
+    groups.forEach((group) => {
       if (allIds.has(group.id)) {
         const existingType = allIds.get(group.id);
         this.showValidationWarning(
           `duplicate-id-${group.id}`,
           `Duplicate ID "${group.id}" found in groups (also exists as ${existingType}).\n` +
-          '⚠️  This will cause conflicts and unpredictable behavior.\n' +
-          '💡 Ensure all element IDs are unique across nodes, edges, and groups'
+            '⚠️  This will cause conflicts and unpredictable behavior.\n' +
+            '💡 Ensure all element IDs are unique across nodes, edges, and groups'
         );
       } else {
         allIds.set(group.id, 'group');

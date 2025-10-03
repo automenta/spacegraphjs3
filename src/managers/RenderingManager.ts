@@ -255,7 +255,10 @@ export class RenderingManager {
         this.graph.state.performance?.useBasicRenderer ?? false;
 
       // Determine which renderer we should be using
-      let targetRendererType: 'NodeRenderer' | 'InstancedRenderer' | 'BasicRenderer';
+      let targetRendererType:
+        | 'NodeRenderer'
+        | 'InstancedRenderer'
+        | 'BasicRenderer';
       if (!shouldUseInstanced) {
         targetRendererType = 'NodeRenderer';
       } else if (useBasicRenderer) {
@@ -266,7 +269,8 @@ export class RenderingManager {
 
       // Check if we need to switch renderers
       const currentRendererType = this.nodeRenderer?.constructor.name;
-      const needsUpdate = !this.nodeRenderer || currentRendererType !== targetRendererType;
+      const needsUpdate =
+        !this.nodeRenderer || currentRendererType !== targetRendererType;
 
       if (needsUpdate) {
         if (this.nodeRenderer) {

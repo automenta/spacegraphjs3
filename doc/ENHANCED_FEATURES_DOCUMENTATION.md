@@ -53,8 +53,8 @@ const cameraControls = new AdvancedCameraControls({
     minDistance: 10,
     maxDistance: 200,
     minPolarAngle: 0,
-    maxPolarAngle: Math.PI
-  }
+    maxPolarAngle: Math.PI,
+  },
 });
 
 // Update in animation loop
@@ -70,7 +70,7 @@ cameraControls.reset();
 ### Configuration Options
 
 | Option            | Type    | Default | Description              |
-|-------------------|---------|---------|--------------------------|
+| ----------------- | ------- | ------- | ------------------------ |
 | `enableDamping`   | boolean | true    | Enable smooth damping    |
 | `dampingFactor`   | number  | 0.05    | Damping intensity (0-1)  |
 | `enableZoom`      | boolean | true    | Enable zoom controls     |
@@ -115,7 +115,7 @@ visualFeedback.applyFeedback(object, {
   intensity: 0.5,
   duration: 0,
   glow: true,
-  pulse: false
+  pulse: false,
 });
 
 // Apply selection feedback
@@ -126,7 +126,7 @@ visualFeedback.applyFeedback(object, {
   glow: true,
   pulse: true,
   particles: true,
-  color: '#00ff00'
+  color: '#00ff00',
 });
 
 // Clear feedback
@@ -136,7 +136,7 @@ visualFeedback.clearFeedback(object.uuid);
 ### Feedback Configuration
 
 | Property    | Type         | Default  | Description                   |
-|-------------|--------------|----------|-------------------------------|
+| ----------- | ------------ | -------- | ----------------------------- |
 | `type`      | FeedbackType | required | Type of feedback              |
 | `color`     | string       | auto     | Feedback color                |
 | `intensity` | number       | 1.0      | Feedback intensity (0-1)      |
@@ -171,21 +171,17 @@ and advanced event management.
 ```typescript
 import { EnhancedInteractionSystem } from './src/utils/EnhancedInteractionSystem';
 
-const interactionSystem = new EnhancedInteractionSystem(
-  scene,
-  camera,
-  {
-    enableVisualFeedback: true,
-    enableHapticFeedback: false,
-    enableSoundFeedback: false,
-    feedbackIntensity: 1.0,
-    hoverDelay: 100,
-    clickThreshold: 200,
-    dragThreshold: 5,
-    multiSelect: true,
-    enableGestures: true
-  }
-);
+const interactionSystem = new EnhancedInteractionSystem(scene, camera, {
+  enableVisualFeedback: true,
+  enableHapticFeedback: false,
+  enableSoundFeedback: false,
+  feedbackIntensity: 1.0,
+  hoverDelay: 100,
+  clickThreshold: 200,
+  dragThreshold: 5,
+  multiSelect: true,
+  enableGestures: true,
+});
 
 // Set camera controls
 interactionSystem.setCameraControls(cameraControls);
@@ -207,7 +203,7 @@ interactionSystem.on('select', (object) => {
 ### Event Types
 
 | Event         | Parameters                             | Description            |
-|---------------|----------------------------------------|------------------------|
+| ------------- | -------------------------------------- | ---------------------- |
 | `hoverstart`  | `object: THREE.Object3D`               | Object hover started   |
 | `hoverend`    | `objectId: string`                     | Object hover ended     |
 | `click`       | `object: THREE.Object3D`               | Object clicked         |
@@ -255,8 +251,8 @@ hudSystem.createElement({
   content: 'Ready',
   style: {
     textColor: '#ffffff',
-    fontSize: 14
-  }
+    fontSize: 14,
+  },
 });
 
 // Update element content
@@ -272,7 +268,7 @@ hudSystem.toggleElement('status-text', true, 500);
 ### Element Types
 
 | Type     | Description        | Properties               |
-|----------|--------------------|--------------------------|
+| -------- | ------------------ | ------------------------ |
 | `text`   | Text display       | `content`, `style`       |
 | `button` | Interactive button | `content`, `interactive` |
 | `slider` | Range input        | `interactive`            |
@@ -305,23 +301,18 @@ LOD management, and adaptive quality.
 ```typescript
 import { PerformanceOptimizer } from './src/utils/PerformanceOptimizer';
 
-const performanceOptimizer = new PerformanceOptimizer(
-  scene,
-  camera,
-  renderer,
-  {
-    enableObjectPooling: true,
-    enableFrustumCulling: true,
-    enableLOD: true,
-    enableMemoryManagement: true,
-    enableBatching: true,
-    enableInstancing: true,
-    maxFPS: 60,
-    targetFrameTime: 16.67,
-    qualityLevel: 'high',
-    adaptiveQuality: true
-  }
-);
+const performanceOptimizer = new PerformanceOptimizer(scene, camera, renderer, {
+  enableObjectPooling: true,
+  enableFrustumCulling: true,
+  enableLOD: true,
+  enableMemoryManagement: true,
+  enableBatching: true,
+  enableInstancing: true,
+  maxFPS: 60,
+  targetFrameTime: 16.67,
+  qualityLevel: 'high',
+  adaptiveQuality: true,
+});
 
 // Get performance metrics
 const metrics = performanceOptimizer.getMetrics();
@@ -334,7 +325,7 @@ performanceOptimizer.setOptimizationEnabled(false);
 ### Configuration Options
 
 | Option                   | Type    | Default | Description              |
-|--------------------------|---------|---------|--------------------------|
+| ------------------------ | ------- | ------- | ------------------------ |
 | `enableObjectPooling`    | boolean | true    | Enable object pooling    |
 | `enableFrustumCulling`   | boolean | true    | Enable frustum culling   |
 | `enableLOD`              | boolean | true    | Enable level of detail   |
@@ -377,7 +368,7 @@ const animationSystem = new EnhancedAnimationSystem(scene);
 const animId = animationSystem.createAnimation(object, {
   type: 'pulse',
   duration: 1000,
-  to: 0.8
+  to: 0.8,
 });
 
 // Create complex sequence
@@ -385,18 +376,18 @@ const sequenceId = animationSystem.createSequence([
   {
     object: object1,
     config: { type: 'scale', duration: 500, to: 1.5 },
-    delay: 0
+    delay: 0,
   },
   {
     object: object1,
     config: { type: 'rotate', duration: 1000, to: Math.PI * 2 },
-    delay: 200
+    delay: 200,
   },
   {
     object: object1,
     config: { type: 'color', duration: 800, to: 0xff0000 },
-    delay: 400
-  }
+    delay: 400,
+  },
 ]);
 
 // Stop animation
@@ -406,7 +397,7 @@ animationSystem.stopAnimation(animId);
 ### Animation Types
 
 | Type        | Description        | Parameters        |
-|-------------|--------------------|-------------------|
+| ----------- | ------------------ | ----------------- |
 | `fade`      | Opacity animation  | `from`, `to`      |
 | `scale`     | Size animation     | `from`, `to`      |
 | `rotate`    | Rotation animation | `from`, `to`      |
@@ -443,10 +434,12 @@ const spaceGraph = new SpaceGraph('#container', {
   data: { nodes: [], edges: [] },
   layout: { type: 'force-directed' },
   camera: { target: { x: 0, y: 0, z: 0 }, phi: 0, theta: 0, distance: 50 },
-  controls: { keyboard: { enabled: true, panSpeed: 1, zoomSpeed: 1, orbitSpeed: 1 } },
+  controls: {
+    keyboard: { enabled: true, panSpeed: 1, zoomSpeed: 1, orbitSpeed: 1 },
+  },
   performance: { instancingThreshold: 100 },
   interaction: { hoveredElementId: null, selectedElementIds: [] },
-  style: {}
+  style: {},
 });
 
 // Get scene and camera
@@ -461,13 +454,13 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 const cameraControls = new AdvancedCameraControls({
   camera,
   domElement: renderer.domElement,
-  options: { enableDamping: true, dampingFactor: 0.05 }
+  options: { enableDamping: true, dampingFactor: 0.05 },
 });
 
 const interactionSystem = new EnhancedInteractionSystem(scene, camera, {
   enableVisualFeedback: true,
   multiSelect: true,
-  enableGestures: true
+  enableGestures: true,
 });
 
 const hudSystem = new EnhancedHUDSystem(container);
@@ -492,14 +485,14 @@ interactionSystem.on('click', (object) => {
 // Animation loop
 function animate() {
   requestAnimationFrame(animate);
-  
+
   cameraControls.update();
   interactionSystem.update();
   animationSystem.update();
-  
+
   const metrics = performanceOptimizer.getMetrics();
   hudSystem.updatePerformanceMetrics(metrics);
-  
+
   renderer.render(scene, camera);
 }
 

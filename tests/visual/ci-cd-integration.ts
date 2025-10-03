@@ -73,13 +73,15 @@ class CiCdIntegration {
       }
 
       // Check ergonomics thresholds if configured
-      if (this.config.ergonomicsThresholds && this.ergonomicsResults.length > 0) {
+      if (
+        this.config.ergonomicsThresholds &&
+        this.ergonomicsResults.length > 0
+      ) {
         const ergonomicsPassed = this.checkErgonomicsThresholds();
         if (!ergonomicsPassed) allPassed = false;
       }
 
       console.log(`All tests completed in ${Date.now() - startTime}ms`);
-
     } catch (error) {
       console.error('Test execution failed:', error);
       allPassed = false;
@@ -155,7 +157,6 @@ class CiCdIntegration {
       // Check if any tests failed
       const failedTests = testResults.filter((result) => !result.passed);
       return failedTests.length === 0;
-
     } catch (error) {
       console.error('Visual test execution failed:', error);
       return false;
@@ -234,7 +235,6 @@ class CiCdIntegration {
       // Check if any ergonomics tests failed
       const failedTests = ergonomicsResults.filter((result) => !result.passed);
       return failedTests.length === 0;
-
     } catch (error) {
       console.error('Ergonomics test execution failed:', error);
       return false;
@@ -254,20 +254,35 @@ class CiCdIntegration {
       const metrics = result.ergonomicsMetrics;
 
       // Check response time threshold
-      if (thresholds.maxResponseTime && metrics.avgResponseTime > thresholds.maxResponseTime) {
-        console.error(`Ergonomics threshold violation: ${result.name} response time ${metrics.avgResponseTime}ms exceeds threshold ${thresholds.maxResponseTime}ms`);
+      if (
+        thresholds.maxResponseTime &&
+        metrics.avgResponseTime > thresholds.maxResponseTime
+      ) {
+        console.error(
+          `Ergonomics threshold violation: ${result.name} response time ${metrics.avgResponseTime}ms exceeds threshold ${thresholds.maxResponseTime}ms`
+        );
         allPassed = false;
       }
 
       // Check compliance rate threshold
-      if (thresholds.minComplianceRate && metrics.complianceRate < thresholds.minComplianceRate) {
-        console.error(`Ergonomics threshold violation: ${result.name} compliance rate ${metrics.complianceRate}% below threshold ${thresholds.minComplianceRate}%`);
+      if (
+        thresholds.minComplianceRate &&
+        metrics.complianceRate < thresholds.minComplianceRate
+      ) {
+        console.error(
+          `Ergonomics threshold violation: ${result.name} compliance rate ${metrics.complianceRate}% below threshold ${thresholds.minComplianceRate}%`
+        );
         allPassed = false;
       }
 
       // Check frame drops threshold
-      if (thresholds.maxFrameDrops && metrics.frameDrops > thresholds.maxFrameDrops) {
-        console.error(`Ergonomics threshold violation: ${result.name} frame drops ${metrics.frameDrops} exceeds threshold ${thresholds.maxFrameDrops}`);
+      if (
+        thresholds.maxFrameDrops &&
+        metrics.frameDrops > thresholds.maxFrameDrops
+      ) {
+        console.error(
+          `Ergonomics threshold violation: ${result.name} frame drops ${metrics.frameDrops} exceeds threshold ${thresholds.maxFrameDrops}`
+        );
         allPassed = false;
       }
     }
@@ -302,12 +317,22 @@ class CiCdIntegration {
             failed: this.results.filter((r) => !r.passed).length,
             ergonomics: {
               total: this.ergonomicsResults.length,
-              avgResponseTime: this.ergonomicsResults.length > 0
-                ? this.ergonomicsResults.reduce((sum, r) => sum + (r.ergonomicsMetrics?.avgResponseTime || 0), 0) / this.ergonomicsResults.length
-                : 0,
-              avgComplianceRate: this.ergonomicsResults.length > 0
-                ? this.ergonomicsResults.reduce((sum, r) => sum + (r.ergonomicsMetrics?.complianceRate || 0), 0) / this.ergonomicsResults.length
-                : 0,
+              avgResponseTime:
+                this.ergonomicsResults.length > 0
+                  ? this.ergonomicsResults.reduce(
+                      (sum, r) =>
+                        sum + (r.ergonomicsMetrics?.avgResponseTime || 0),
+                      0
+                    ) / this.ergonomicsResults.length
+                  : 0,
+              avgComplianceRate:
+                this.ergonomicsResults.length > 0
+                  ? this.ergonomicsResults.reduce(
+                      (sum, r) =>
+                        sum + (r.ergonomicsMetrics?.complianceRate || 0),
+                      0
+                    ) / this.ergonomicsResults.length
+                  : 0,
             },
           },
         },
@@ -360,13 +385,17 @@ class CiCdIntegration {
       const metrics = result.ergonomicsMetrics;
 
       // Weight different aspects for videogame feel
-      const responseTimeScore = Math.max(0, 100 - (metrics.avgResponseTime / 2)); // Response time under 50ms = 100 points
+      const responseTimeScore = Math.max(0, 100 - metrics.avgResponseTime / 2); // Response time under 50ms = 100 points
       const complianceScore = metrics.complianceRate;
-      const frameDropPenalty = Math.max(0, 100 - (metrics.frameDrops * 10)); // Each frame drop reduces score by 10
+      const frameDropPenalty = Math.max(0, 100 - metrics.frameDrops * 10); // Each frame drop reduces score by 10
       const accessibilityScore = metrics.accessibilityScore;
 
       // Weighted average (response time is most important for videogame feel)
-      const weightedScore = (responseTimeScore * 0.4) + (complianceScore * 0.3) + (frameDropPenalty * 0.2) + (accessibilityScore * 0.1);
+      const weightedScore =
+        responseTimeScore * 0.4 +
+        complianceScore * 0.3 +
+        frameDropPenalty * 0.2 +
+        accessibilityScore * 0.1;
 
       totalScore += weightedScore;
       weightSum += 1;
@@ -414,9 +443,13 @@ class CiCdIntegration {
     const videogameScore = this.calculateVideogameCompliance();
 
     if (allPassed) {
-      console.log(`All tests passed! 🎉 Videogame compliance score: ${videogameScore.toFixed(1)}%`);
+      console.log(
+        `All tests passed! 🎉 Videogame compliance score: ${videogameScore.toFixed(1)}%`
+      );
     } else {
-      console.error(`Some tests failed! ❌ Videogame compliance score: ${videogameScore.toFixed(1)}%`);
+      console.error(
+        `Some tests failed! ❌ Videogame compliance score: ${videogameScore.toFixed(1)}%`
+      );
 
       // Send GitHub notification if token is provided
       if (this.config.githubToken) {
@@ -489,7 +522,10 @@ class CiCdIntegration {
  */
 async function runCiCdIntegration(): Promise<void> {
   const config: CiCdConfig = {
-    testPatterns: ['tests/visual/**/*.spec.ts', 'tests/ergonomics/**/*.spec.ts'],
+    testPatterns: [
+      'tests/visual/**/*.spec.ts',
+      'tests/ergonomics/**/*.spec.ts',
+    ],
     reportDir: 'tests/visual/reports',
     failOnRegression: true,
     includeErgonomicsTests: true,

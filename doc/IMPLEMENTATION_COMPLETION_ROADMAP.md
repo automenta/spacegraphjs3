@@ -136,10 +136,27 @@ private static layoutEngineRegistry: Map<string, LayoutEngineClass> = new Map([
 ```typescript
 export type GraphEventMap = {
   // Existing events...
-  'edge:click': { target: EdgeSpec; event: PointerEvent; sourceNode: NodeSpec; targetNode: NodeSpec };
-  'edge:hover:enter': { target: EdgeSpec; sourceNode: NodeSpec; targetNode: NodeSpec };
-  'edge:hover:leave': { target: EdgeSpec; sourceNode: NodeSpec; targetNode: NodeSpec };
-  'edge:select': { target: EdgeSpec; sourceNode: NodeSpec; targetNode: NodeSpec };
+  'edge:click': {
+    target: EdgeSpec;
+    event: PointerEvent;
+    sourceNode: NodeSpec;
+    targetNode: NodeSpec;
+  };
+  'edge:hover:enter': {
+    target: EdgeSpec;
+    sourceNode: NodeSpec;
+    targetNode: NodeSpec;
+  };
+  'edge:hover:leave': {
+    target: EdgeSpec;
+    sourceNode: NodeSpec;
+    targetNode: NodeSpec;
+  };
+  'edge:select': {
+    target: EdgeSpec;
+    sourceNode: NodeSpec;
+    targetNode: NodeSpec;
+  };
 };
 ```
 
@@ -437,8 +454,8 @@ All implementations must maintain:
 
 ### 8-Week Development Schedule
 
-| Week | Phase              | Tasks                            | Effort | Status      |
-|------|--------------------|----------------------------------|--------|-------------|
+| Week | Phase              | Tasks                            | Effort | Status       |
+| ---- | ------------------ | -------------------------------- | ------ | ------------ |
 | 1    | Core Fixes         | Layout engine registration       | 2h     | ✅ Completed |
 | 2    | Element Actors     | Box, CustomGeometry, Text actors | 36h    | ✅ Completed |
 | 3    | Edge Interaction   | Full edge interaction system     | 36h    | ✅ Completed |

@@ -43,24 +43,26 @@ const SphereElementActorSpec: VisualSemanticsSpec = {
   component: 'SphereElementActor',
   states: {
     base: { color: '#ff0000', size: { width: 20, height: 20 } },
-    hover: { color: '#ffffff', boxShadow: '0 0 10px #ffffff' }
+    hover: { color: '#ffffff', boxShadow: '0 0 10px #ffffff' },
   },
   interactions: [
     {
       name: 'Hover Interaction',
       steps: [{ type: 'hover', target: 'canvas' }],
-      expectedOutcomes: [{
-        description: 'Sphere should glow when hovered',
-        screenshot: 'sphere-hover.png',
-        validation: { threshold: 0.1, maxDiffPixels: 5000 }
-      }]
-    }
+      expectedOutcomes: [
+        {
+          description: 'Sphere should glow when hovered',
+          screenshot: 'sphere-hover.png',
+          validation: { threshold: 0.1, maxDiffPixels: 5000 },
+        },
+      ],
+    },
   ],
   ergonomics: {
     minTouchTargetSize: 44,
     minContrastRatio: 4.5,
-    maxResponseTime: 100
-  }
+    maxResponseTime: 100,
+  },
 };
 ```
 
@@ -82,7 +84,7 @@ Automatically generate test cases from specifications:
 ```typescript
 generateVisualSemanticsTests({
   baseUrl: 'http://localhost:5175',
-  defaultViewport: { width: 1280, height: 720 }
+  defaultViewport: { width: 1280, height: 720 },
 });
 ```
 
@@ -95,7 +97,9 @@ const collector = new PerformanceMetricsCollector();
 const metrics = await collector.collectMetrics(
   'SphereElementActor',
   'Hover Interaction',
-  async () => { await controller.hover('canvas'); }
+  async () => {
+    await controller.hover('canvas');
+  }
 );
 ```
 
@@ -108,7 +112,7 @@ const reporter = new VisualRegressionReporter();
 await reporter.reportRegression({
   componentName: 'SphereElementActor',
   failureType: 'visual',
-  description: 'Unexpected color change'
+  description: 'Unexpected color change',
 });
 ```
 
@@ -118,7 +122,9 @@ Display all test results in a single interface:
 
 ```typescript
 const dashboard = new UnifiedDashboard();
-dashboard.addVisualTestResults([{ componentName: 'SphereElementActor', status: 'pass' }]);
+dashboard.addVisualTestResults([
+  { componentName: 'SphereElementActor', status: 'pass' },
+]);
 await dashboard.generateHtmlDashboard();
 ```
 

@@ -53,14 +53,16 @@ Edges support customizable styling for different interaction states.
 
 ```typescript
 interface EdgeStyle {
-  color?: string;           // Edge color
-  width?: number;           // Edge width
-  opacity?: number;         // Edge opacity
-  glow?: {                  // Glow effect
+  color?: string; // Edge color
+  width?: number; // Edge width
+  opacity?: number; // Edge opacity
+  glow?: {
+    // Glow effect
     color: string;
     strength: number;
   };
-  label?: {                 // Label styling
+  label?: {
+    // Label styling
     color: string;
     fontSize: number;
     fontFamily: string;
@@ -158,7 +160,7 @@ const spec = {
     'edge:hover': {
       color: '#ffffff',
       width: 5,
-      opacity: 1.0
+      opacity: 1.0,
     },
     'edge:selected': {
       color: '#ffffff',
@@ -166,25 +168,25 @@ const spec = {
       opacity: 1.0,
       glow: {
         color: '#ffffff',
-        strength: 0.5
-      }
+        strength: 0.5,
+      },
     },
     'edge:source-selected': {
       color: '#ffaa00',
       width: 4,
-      opacity: 0.9
+      opacity: 0.9,
     },
     'edge:target-selected': {
       color: '#00aaff',
       width: 4,
-      opacity: 0.9
+      opacity: 0.9,
     },
     'edge:both-selected': {
       color: '#ff00ff',
       width: 5,
-      opacity: 1.0
-    }
-  }
+      opacity: 1.0,
+    },
+  },
 };
 ```
 
@@ -205,12 +207,14 @@ The system supports interactive editing of curved edges:
 graph.update({
   data: {
     edges: {
-      update: [{
-        id: 'edge-1',
-        curvature: 0.8 // Adjust curvature
-      }]
-    }
-  }
+      update: [
+        {
+          id: 'edge-1',
+          curvature: 0.8, // Adjust curvature
+        },
+      ],
+    },
+  },
 });
 ```
 
@@ -452,3 +456,4 @@ graph.on('edge:select', ({ target, sourceNode, targetNode }) => {
 
 // Expose graph to window for easy debugging and testing
 (window as any).graph = graph;
+```

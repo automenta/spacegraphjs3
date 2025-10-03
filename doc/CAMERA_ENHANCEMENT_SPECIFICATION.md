@@ -85,7 +85,9 @@ build upon the existing solid camera foundation to provide professional-grade ca
 
 ```typescript
 export interface FramingOptions {
-  padding?: number | { top: number; right: number; bottom: number; left: number }; // Padding in world units
+  padding?:
+    | number
+    | { top: number; right: number; bottom: number; left: number }; // Padding in world units
   aspectRatio?: number; // Target aspect ratio (width/height)
   minDistance?: number; // Minimum camera distance
   maxDistance?: number; // Maximum camera distance
@@ -107,7 +109,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
    * Enhanced frame method with intelligent framing options
    */
   public async frame(
-    elements: Array<{ position: Vector3; size?: number }>, 
+    elements: Array<{ position: Vector3; size?: number }>,
     options: FramingOptions = {}
   ): Promise<void> {
     if (elements.length === 0) return;
@@ -115,11 +117,13 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     const config = this.mergeFramingOptions(options);
     const boundingInfo = this.calculateBoundingInfo(elements);
     const cameraState = this.calculateOptimalCameraState(boundingInfo, config);
-    
+
     await this.flyTo(cameraState, config.animation);
   }
 
-  private mergeFramingOptions(options: FramingOptions): Required<FramingOptions> {
+  private mergeFramingOptions(
+    options: FramingOptions
+  ): Required<FramingOptions> {
     return {
       padding: options.padding ?? 2.0,
       aspectRatio: options.aspectRatio ?? this.getViewportAspectRatio(),
@@ -130,14 +134,16 @@ export class CameraPlugin implements ISpaceGraphPlugin {
       animation: {
         duration: options.animation?.duration ?? 1000,
         easing: options.animation?.easing ?? 'easeInOut',
-        curve: options.animation?.curve ?? 'sine'
+        curve: options.animation?.curve ?? 'sine',
       },
       focusPoint: options.focusPoint ?? 'center',
-      upVector: options.upVector ?? new Vector3(0, 1, 0)
+      upVector: options.upVector ?? new Vector3(0, 1, 0),
     };
   }
 
-  private calculateBoundingInfo(elements: Array<{ position: Vector3; size?: number }>): {
+  private calculateBoundingInfo(
+    elements: Array<{ position: Vector3; size?: number }>
+  ): {
     center: Vector3;
     size: Vector3;
     radius: number;
@@ -150,12 +156,16 @@ export class CameraPlugin implements ISpaceGraphPlugin {
         size: new Vector3(0, 0, 0),
         radius: 0,
         min: new Vector3(0, 0, 0),
-        max: new Vector3(0, 0, 0)
+        max: new Vector3(0, 0, 0),
       };
     }
 
-    let minX = Infinity, minY = Infinity, minZ = Infinity;
-    let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
+    let minX = Infinity,
+      minY = Infinity,
+      minZ = Infinity;
+    let maxX = -Infinity,
+      maxY = -Infinity,
+      maxZ = -Infinity;
 
     for (const element of elements) {
       const pos = element.position;
@@ -184,34 +194,55 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     options: Required<FramingOptions>
   ): CameraSpec {
     const { center, size, radius, min, max } = boundingInfo;
-    
+
     // Calculate required distance based on field of view and bounding size
     const fovRad = (options.viewAngle * Math.PI) / 180;
     const aspectRatio = options.aspectRatio;
-    
+
     // Calculate the required distance to fit the bounding box
     let requiredDistance: number;
-    
+
     switch (options.strategy) {
       case 'tight':
-        requiredDistance = this.calculateTightDistance(size, fovRad, aspectRatio);
+        requiredDistance = this.calculateTightDistance(
+          size,
+          fovRad,
+          aspectRatio
+        );
         break;
       case 'loose':
-        requiredDistance = this.calculateLooseDistance(size, fovRad, aspectRatio, 1.5);
+        requiredDistance = this.calculateLooseDistance(
+          size,
+          fovRad,
+          aspectRatio,
+          1.5
+        );
         break;
       case 'optimal':
       default:
-        requiredDistance = this.calculateOptimalDistance(size, fovRad, aspectRatio);
+        requiredDistance = this.calculateOptimalDistance(
+          size,
+          fovRad,
+          aspectRatio
+        );
         break;
     }
 
     // Apply padding
     const padding = this.normalizePadding(options.padding);
-    const paddedRadius = radius + Math.max(padding.top, padding.right, padding.bottom, padding.left);
-    const paddedDistance = Math.max(requiredDistance, paddedRadius / Math.tan(fovRad * 0.5));
+    const paddedRadius =
+      radius +
+      Math.max(padding.top, padding.right, padding.bottom, padding.left);
+    const paddedDistance = Math.max(
+      requiredDistance,
+      paddedRadius / Math.tan(fovRad * 0.5)
+    );
 
     // Clamp to min/max distance
-    const finalDistance = Math.max(options.minDistance, Math.min(options.maxDistance, paddedDistance));
+    const finalDistance = Math.max(
+      options.minDistance,
+      Math.min(options.maxDistance, paddedDistance)
+    );
 
     // Calculate focus point
     let focusPoint: Vector3;
@@ -235,38 +266,62 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     // Calculate camera position
     const currentCameraState = this.graph.state.camera;
     const currentDirection = this.calculateCameraDirection(currentCameraState);
-    
-    const cameraPosition = focusPoint.clone().add(
-      currentDirection.multiplyScalar(finalDistance)
-    );
+
+    const cameraPosition = focusPoint
+      .clone()
+      .add(currentDirection.multiplyScalar(finalDistance));
 
     return {
       target: { x: focusPoint.x, y: focusPoint.y, z: focusPoint.z },
       phi: currentCameraState.phi,
       theta: currentCameraState.theta,
-      distance: finalDistance
+      distance: finalDistance,
     };
   }
 
-  private calculateTightDistance(size: Vector3, fovRad: number, aspectRatio: number): number {
+  private calculateTightDistance(
+    size: Vector3,
+    fovRad: number,
+    aspectRatio: number
+  ): number {
     // Calculate minimum distance to fit the bounding box tightly
     const maxDimension = Math.max(size.x, size.y, size.z);
     return maxDimension / (2 * Math.tan(fovRad * 0.5));
   }
 
-  private calculateLooseDistance(size: Vector3, fovRad: number, aspectRatio: number, multiplier: number): number {
+  private calculateLooseDistance(
+    size: Vector3,
+    fovRad: number,
+    aspectRatio: number,
+    multiplier: number
+  ): number {
     // Calculate distance with additional margin
     return this.calculateTightDistance(size, fovRad, aspectRatio) * multiplier;
   }
 
-  private calculateOptimalDistance(size: Vector3, fovRad: number, aspectRatio: number): number {
+  private calculateOptimalDistance(
+    size: Vector3,
+    fovRad: number,
+    aspectRatio: number
+  ): number {
     // Calculate optimal distance considering viewing comfort
-    const tightDistance = this.calculateTightDistance(size, fovRad, aspectRatio);
+    const tightDistance = this.calculateTightDistance(
+      size,
+      fovRad,
+      aspectRatio
+    );
     return tightDistance * 1.2; // 20% additional margin
   }
 
-  private normalizePadding(padding: number | { top: number; right: number; bottom: number; left: number }): {
-    top: number; right: number; bottom: number; left: number;
+  private normalizePadding(
+    padding:
+      | number
+      | { top: number; right: number; bottom: number; left: number }
+  ): {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
   } {
     if (typeof padding === 'number') {
       return { top: padding, right: padding, bottom: padding, left: padding };
@@ -280,9 +335,9 @@ export class CameraPlugin implements ISpaceGraphPlugin {
   }
 
   private calculateCameraDirection(cameraState: CameraSpec): Vector3 {
-    const phi = cameraState.phi * Math.PI / 180;
-    const theta = cameraState.theta * Math.PI / 180;
-    
+    const phi = (cameraState.phi * Math.PI) / 180;
+    const theta = (cameraState.theta * Math.PI) / 180;
+
     return new Vector3(
       Math.sin(phi) * Math.cos(theta),
       Math.cos(phi),
@@ -315,8 +370,9 @@ export class CameraPlugin implements ISpaceGraphPlugin {
   private setupAutoFrameWatcher(): void {
     createEffect(() => {
       const selectedIds = this.graph.state.interaction.selectedElementIds;
-      const autoFrameEnabled = this.graph.state.camera.autoFrameEnabled ?? false;
-      
+      const autoFrameEnabled =
+        this.graph.state.camera.autoFrameEnabled ?? false;
+
       if (autoFrameEnabled && selectedIds.length > 0) {
         // Debounce to avoid rapid framing during multi-selection
         this.debouncedFrameSelected();
@@ -327,11 +383,14 @@ export class CameraPlugin implements ISpaceGraphPlugin {
   private debouncedFrameSelected = this.debounce(async () => {
     await this.frameSelected({
       animation: { duration: 500 },
-      strategy: 'optimal'
+      strategy: 'optimal',
     });
   }, 300);
 
-  private debounce<T extends (...args: any[]) => any>(func: T, wait: number): T {
+  private debounce<T extends (...args: any[]) => any>(
+    func: T,
+    wait: number
+  ): T {
     let timeout: NodeJS.Timeout;
     return ((...args: Parameters<T>) => {
       clearTimeout(timeout);
@@ -339,22 +398,27 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     }) as T;
   }
 
-  private getElementsByIds(ids: string[]): Array<{ position: Vector3; size?: number }> {
-    return ids.map(id => {
-      const element = this.graph.state.data.nodes.find(n => n.id === id) ||
-                     this.graph.state.data.edges.find(e => e.id === id);
-      
-      if (!element) return null;
+  private getElementsByIds(
+    ids: string[]
+  ): Array<{ position: Vector3; size?: number }> {
+    return ids
+      .map((id) => {
+        const element =
+          this.graph.state.data.nodes.find((n) => n.id === id) ||
+          this.graph.state.data.edges.find((e) => e.id === id);
 
-      return {
-        position: new Vector3(
-          element.position?.x || 0,
-          element.position?.y || 0,
-          element.position?.z || 0
-        ),
-        size: (element as any).size || 1.0
-      };
-    }).filter(Boolean) as Array<{ position: Vector3; size?: number }>;
+        if (!element) return null;
+
+        return {
+          position: new Vector3(
+            element.position?.x || 0,
+            element.position?.y || 0,
+            element.position?.z || 0
+          ),
+          size: (element as any).size || 1.0,
+        };
+      })
+      .filter(Boolean) as Array<{ position: Vector3; size?: number }>;
   }
 }
 ```
@@ -398,14 +462,17 @@ export class CameraPresetsManager {
   /**
    * Create a new camera preset from current camera state
    */
-  public async createPreset(name: string, options: {
-    description?: string;
-    category?: string;
-    tags?: string[];
-    generateThumbnail?: boolean;
-  } = {}): Promise<CameraPreset> {
+  public async createPreset(
+    name: string,
+    options: {
+      description?: string;
+      category?: string;
+      tags?: string[];
+      generateThumbnail?: boolean;
+    } = {}
+  ): Promise<CameraPreset> {
     const currentState = this.graph.state.camera;
-    const thumbnail = options.generateThumbnail 
+    const thumbnail = options.generateThumbnail
       ? await this.generateThumbnail()
       : undefined;
 
@@ -418,11 +485,11 @@ export class CameraPresetsManager {
       category: options.category,
       tags: options.tags,
       createdAt: Date.now(),
-      updatedAt: Date.now()
+      updatedAt: Date.now(),
     };
 
     this.presets.set(preset.id, preset);
-    
+
     if (preset.category) {
       this.categories.add(preset.category);
     }
@@ -434,7 +501,10 @@ export class CameraPresetsManager {
   /**
    * Apply a camera preset
    */
-  public async applyPreset(presetId: string, animation: boolean = true): Promise<void> {
+  public async applyPreset(
+    presetId: string,
+    animation: boolean = true
+  ): Promise<void> {
     const preset = this.presets.get(presetId);
     if (!preset) {
       throw new Error(`Camera preset with ID ${presetId} not found`);
@@ -443,7 +513,7 @@ export class CameraPresetsManager {
     if (animation) {
       await this.graph.cameraPlugin?.flyTo(preset.cameraState, {
         duration: 1000,
-        easing: 'easeInOut'
+        easing: 'easeInOut',
       });
     } else {
       this.graph.update({ camera: preset.cameraState });
@@ -457,17 +527,17 @@ export class CameraPresetsManager {
     // Render current scene to canvas
     const renderer = this.graph.render.getRenderer();
     const canvas = renderer.domElement;
-    
+
     // Create thumbnail at reduced resolution
     const thumbnailCanvas = document.createElement('canvas');
     thumbnailCanvas.width = 200;
     thumbnailCanvas.height = 150;
-    
+
     const ctx = thumbnailCanvas.getContext('2d');
     if (!ctx) throw new Error('Could not get canvas context');
-    
+
     ctx.drawImage(canvas, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
-    
+
     return thumbnailCanvas.toDataURL('image/png');
   }
 
@@ -476,7 +546,7 @@ export class CameraPresetsManager {
    */
   public getPresetsByCategory(category: string): CameraPreset[] {
     return Array.from(this.presets.values())
-      .filter(preset => preset.category === category)
+      .filter((preset) => preset.category === category)
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 
@@ -485,12 +555,13 @@ export class CameraPresetsManager {
    */
   public searchPresets(query: string): CameraPreset[] {
     const lowercaseQuery = query.toLowerCase();
-    
+
     return Array.from(this.presets.values())
-      .filter(preset => 
-        preset.name.toLowerCase().includes(lowercaseQuery) ||
-        preset.description?.toLowerCase().includes(lowercaseQuery) ||
-        preset.tags?.some(tag => tag.toLowerCase().includes(lowercaseQuery))
+      .filter(
+        (preset) =>
+          preset.name.toLowerCase().includes(lowercaseQuery) ||
+          preset.description?.toLowerCase().includes(lowercaseQuery) ||
+          preset.tags?.some((tag) => tag.toLowerCase().includes(lowercaseQuery))
       )
       .sort((a, b) => a.name.localeCompare(b.name));
   }
@@ -502,9 +573,9 @@ export class CameraPresetsManager {
     const collection: CameraPresetsCollection = {
       version: '1.0',
       presets: Array.from(this.presets.values()),
-      categories: Array.from(this.categories)
+      categories: Array.from(this.categories),
     };
-    
+
     return JSON.stringify(collection, null, 2);
   }
 
@@ -514,23 +585,23 @@ export class CameraPresetsManager {
   public importPresets(jsonString: string): void {
     try {
       const collection: CameraPresetsCollection = JSON.parse(jsonString);
-      
+
       if (collection.presets) {
         for (const preset of collection.presets) {
           this.presets.set(preset.id, preset);
-          
+
           if (preset.category) {
             this.categories.add(preset.category);
           }
         }
       }
-      
+
       if (collection.categories) {
         for (const category of collection.categories) {
           this.categories.add(category);
         }
       }
-      
+
       this.savePresets();
     } catch (error) {
       throw new Error(`Failed to import camera presets: ${error.message}`);
@@ -545,9 +616,9 @@ export class CameraPresetsManager {
       const collection: CameraPresetsCollection = {
         version: '1.0',
         presets: Array.from(this.presets.values()),
-        categories: Array.from(this.categories)
+        categories: Array.from(this.categories),
       };
-      
+
       localStorage.setItem(this.storageKey, JSON.stringify(collection));
     } catch (error) {
       console.warn('Failed to save camera presets:', error);
@@ -563,17 +634,17 @@ export class CameraPresetsManager {
       if (!stored) return;
 
       const collection: CameraPresetsCollection = JSON.parse(stored);
-      
+
       if (collection.presets) {
         for (const preset of collection.presets) {
           this.presets.set(preset.id, preset);
-          
+
           if (preset.category) {
             this.categories.add(preset.category);
           }
         }
       }
-      
+
       if (collection.categories) {
         for (const category of collection.categories) {
           this.categories.add(category);
@@ -600,7 +671,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
   public init(graph: SpaceGraph): void {
     this.graph = graph;
     this.presetsManager = new CameraPresetsManager(graph);
-    
+
     // ... existing initialization
     this.setupPresetCommands();
   }
@@ -612,27 +683,29 @@ export class CameraPlugin implements ISpaceGraphPlugin {
         'preset-save': async (args: string) => {
           const [name, ...options] = args.split(' ');
           const preset = await this.presetsManager.createPreset(name, {
-            generateThumbnail: options.includes('--thumbnail')
+            generateThumbnail: options.includes('--thumbnail'),
           });
           return `Camera preset saved: ${preset.name} (ID: ${preset.id})`;
         },
-        
+
         'preset-load': async (args: string) => {
           const presetId = args.trim();
           await this.presetsManager.applyPreset(presetId);
           return `Applied camera preset: ${presetId}`;
         },
-        
+
         'preset-list': () => {
           const presets = this.presetsManager.getAllPresets();
-          return presets.map(p => `${p.name} (${p.id})`).join('\n');
+          return presets.map((p) => `${p.name} (${p.id})`).join('\n');
         },
-        
+
         'preset-search': (args: string) => {
           const query = args.trim();
           const results = this.presetsManager.searchPresets(query);
-          return results.map(p => `${p.name} - ${p.description || 'No description'}`).join('\n');
-        }
+          return results
+            .map((p) => `${p.name} - ${p.description || 'No description'}`)
+            .join('\n');
+        },
       };
 
       // Register commands with REPL (assuming REPL system exists)
@@ -645,32 +718,34 @@ export class CameraPlugin implements ISpaceGraphPlugin {
   /**
    * Quick access to common camera presets
    */
-  public async applyQuickPreset(presetName: 'top' | 'front' | 'side' | 'isometric'): Promise<void> {
+  public async applyQuickPreset(
+    presetName: 'top' | 'front' | 'side' | 'isometric'
+  ): Promise<void> {
     const presets = {
       top: {
         target: { x: 0, y: 0, z: 0 },
         phi: 0,
         theta: 0,
-        distance: 10
+        distance: 10,
       },
       front: {
         target: { x: 0, y: 0, z: 0 },
         phi: 90,
         theta: 0,
-        distance: 10
+        distance: 10,
       },
       side: {
         target: { x: 0, y: 0, z: 0 },
         phi: 90,
         theta: 90,
-        distance: 10
+        distance: 10,
       },
       isometric: {
         target: { x: 0, y: 0, z: 0 },
         phi: 45,
         theta: 45,
-        distance: 15
-      }
+        distance: 15,
+      },
     };
 
     const preset = presets[presetName];
@@ -716,7 +791,11 @@ export class CameraPlugin implements ISpaceGraphPlugin {
       // Pivot around a specific element
       const element = this.graph.getElement(pivot);
       if (element && element.position) {
-        this.rotationPivot.set(element.position.x, element.position.y, element.position.z);
+        this.rotationPivot.set(
+          element.position.x,
+          element.position.y,
+          element.position.z
+        );
       }
     } else {
       this.rotationPivot.copy(pivot);
@@ -727,8 +806,8 @@ export class CameraPlugin implements ISpaceGraphPlugin {
    * Smooth rotation animation
    */
   public async rotateTo(
-    phi: number, 
-    theta: number, 
+    phi: number,
+    theta: number,
     options: {
       duration?: number;
       easing?: string;
@@ -746,23 +825,29 @@ export class CameraPlugin implements ISpaceGraphPlugin {
 
     // Apply constraints
     const constrained = this.applyRotationConstraints(targetPhi, targetTheta);
-    
-    await this.flyTo({
-      ...currentState,
-      phi: constrained.phi,
-      theta: constrained.theta
-    }, {
-      duration: options.duration ?? 1000,
-      easing: options.easing ?? 'easeInOut'
-    });
+
+    await this.flyTo(
+      {
+        ...currentState,
+        phi: constrained.phi,
+        theta: constrained.theta,
+      },
+      {
+        duration: options.duration ?? 1000,
+        easing: options.easing ?? 'easeInOut',
+      }
+    );
   }
 
   /**
    * Apply rotation constraints to angles
    */
-  private applyRotationConstraints(phi: number, theta: number): { phi: number; theta: number } {
+  private applyRotationConstraints(
+    phi: number,
+    theta: number
+  ): { phi: number; theta: number } {
     const constraints = this.rotationConstraints;
-    
+
     let constrainedPhi = phi;
     let constrainedTheta = theta;
 
@@ -783,8 +868,16 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     // Apply snapping
     if (constraints.snapAngles && constraints.snapAngles.length > 0) {
       const snapThreshold = constraints.snapThreshold ?? 5;
-      constrainedPhi = this.snapToAngles(constrainedPhi, constraints.snapAngles, snapThreshold);
-      constrainedTheta = this.snapToAngles(constrainedTheta, constraints.snapAngles, snapThreshold);
+      constrainedPhi = this.snapToAngles(
+        constrainedPhi,
+        constraints.snapAngles,
+        snapThreshold
+      );
+      constrainedTheta = this.snapToAngles(
+        constrainedTheta,
+        constraints.snapAngles,
+        snapThreshold
+      );
     }
 
     return { phi: constrainedPhi, theta: constrainedTheta };
@@ -793,7 +886,11 @@ export class CameraPlugin implements ISpaceGraphPlugin {
   /**
    * Snap angle to nearest angle in array
    */
-  private snapToAngles(angle: number, snapAngles: number[], threshold: number): number {
+  private snapToAngles(
+    angle: number,
+    snapAngles: number[],
+    threshold: number
+  ): number {
     for (const snapAngle of snapAngles) {
       const diff = Math.abs(angle - snapAngle);
       if (diff <= threshold) {
@@ -815,36 +912,46 @@ export class CameraPlugin implements ISpaceGraphPlugin {
       pivot?: Vector3 | string; // Pivot point or element ID
     } = {}
   ): Promise<void> {
-    const pivot = options.pivot ? this.resolvePivot(options.pivot) : this.rotationPivot;
+    const pivot = options.pivot
+      ? this.resolvePivot(options.pivot)
+      : this.rotationPivot;
     const currentState = this.graph.state.camera;
-    
+
     // Calculate new camera position
     const currentPos = this.calculateCameraPosition(currentState);
     const newPos = this.rotatePointAroundAxis(currentPos, pivot, axis, angle);
-    
+
     // Calculate new target (keep looking at pivot)
     const newDirection = new Vector3().subVectors(pivot, newPos).normalize();
-    const newPhi = Math.acos(newDirection.y) * 180 / Math.PI;
-    const newTheta = Math.atan2(newDirection.z, newDirection.x) * 180 / Math.PI;
-    
+    const newPhi = (Math.acos(newDirection.y) * 180) / Math.PI;
+    const newTheta =
+      (Math.atan2(newDirection.z, newDirection.x) * 180) / Math.PI;
+
     const distance = newPos.distanceTo(pivot);
-    
-    await this.flyTo({
-      target: { x: pivot.x, y: pivot.y, z: pivot.z },
-      phi: newPhi,
-      theta: newTheta,
-      distance
-    }, {
-      duration: options.duration ?? 1000,
-      easing: options.easing ?? 'easeInOut'
-    });
+
+    await this.flyTo(
+      {
+        target: { x: pivot.x, y: pivot.y, z: pivot.z },
+        phi: newPhi,
+        theta: newTheta,
+        distance,
+      },
+      {
+        duration: options.duration ?? 1000,
+        easing: options.easing ?? 'easeInOut',
+      }
+    );
   }
 
   private resolvePivot(pivot: Vector3 | string): Vector3 {
     if (typeof pivot === 'string') {
       const element = this.graph.getElement(pivot);
       if (element && element.position) {
-        return new Vector3(element.position.x, element.position.y, element.position.z);
+        return new Vector3(
+          element.position.x,
+          element.position.y,
+          element.position.z
+        );
       }
       return new Vector3(0, 0, 0);
     }
@@ -852,14 +959,14 @@ export class CameraPlugin implements ISpaceGraphPlugin {
   }
 
   private rotatePointAroundAxis(
-    point: Vector3, 
-    center: Vector3, 
-    axis: 'x' | 'y' | 'z' | Vector3, 
+    point: Vector3,
+    center: Vector3,
+    axis: 'x' | 'y' | 'z' | Vector3,
     angle: number
   ): Vector3 {
     const translated = point.clone().sub(center);
     const rotation = new THREE.Matrix4();
-    const angleRad = angle * Math.PI / 180;
+    const angleRad = (angle * Math.PI) / 180;
 
     if (typeof axis === 'string') {
       switch (axis) {
@@ -894,29 +1001,32 @@ export interface AnimationCurve {
 }
 
 export const AnimationCurves: Record<string, AnimationCurve> = {
-  linear: { name: 'Linear', easing: t => t },
-  easeInOut: { name: 'Ease In Out', easing: t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t },
-  easeIn: { name: 'Ease In', easing: t => t * t },
-  easeOut: { name: 'Ease Out', easing: t => t * (2 - t) },
-  bounce: { 
-    name: 'Bounce', 
-    easing: t => {
-      if (t < 1/2.75) return 7.5625 * t * t;
-      if (t < 2/2.75) return 7.5625 * (t -= 1.5/2.75) * t + 0.75;
-      if (t < 2.5/2.75) return 7.5625 * (t -= 2.25/2.75) * t + 0.9375;
-      return 7.5625 * (t -= 2.625/2.75) * t + 0.984375;
-    }
+  linear: { name: 'Linear', easing: (t) => t },
+  easeInOut: {
+    name: 'Ease In Out',
+    easing: (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t),
+  },
+  easeIn: { name: 'Ease In', easing: (t) => t * t },
+  easeOut: { name: 'Ease Out', easing: (t) => t * (2 - t) },
+  bounce: {
+    name: 'Bounce',
+    easing: (t) => {
+      if (t < 1 / 2.75) return 7.5625 * t * t;
+      if (t < 2 / 2.75) return 7.5625 * (t -= 1.5 / 2.75) * t + 0.75;
+      if (t < 2.5 / 2.75) return 7.5625 * (t -= 2.25 / 2.75) * t + 0.9375;
+      return 7.5625 * (t -= 2.625 / 2.75) * t + 0.984375;
+    },
   },
   elastic: {
     name: 'Elastic',
-    easing: t => {
+    easing: (t) => {
       if (t === 0) return 0;
       if (t === 1) return 1;
       const p = 0.3;
       const s = p / 4;
-      return Math.pow(2, -10 * t) * Math.sin((t - s) * (2 * Math.PI) / p) + 1;
-    }
-  }
+      return Math.pow(2, -10 * t) * Math.sin(((t - s) * (2 * Math.PI)) / p) + 1;
+    },
+  },
 };
 
 export class CameraPlugin implements ISpaceGraphPlugin {
@@ -935,11 +1045,13 @@ export class CameraPlugin implements ISpaceGraphPlugin {
   ): Promise<void> {
     const startState = { ...this.graph.state.camera };
     const endState = { ...startState, ...targetState };
-    
+
     const duration = options.duration ?? 1000;
-    const easing = typeof options.easing === 'string' 
-      ? AnimationCurves[options.easing]?.easing ?? AnimationCurves.easeInOut.easing
-      : options.easing?.easing ?? AnimationCurves.easeInOut.easing;
+    const easing =
+      typeof options.easing === 'string'
+        ? (AnimationCurves[options.easing]?.easing ??
+          AnimationCurves.easeInOut.easing)
+        : (options.easing?.easing ?? AnimationCurves.easeInOut.easing);
 
     // Handle interruptible animations
     if (this.currentAnimation && options.interruptible !== false) {
@@ -948,18 +1060,22 @@ export class CameraPlugin implements ISpaceGraphPlugin {
 
     return new Promise((resolve) => {
       const startTime = performance.now();
-      
+
       const animate = (currentTime: number) => {
         const elapsed = currentTime - startTime;
         const progress = Math.min(elapsed / duration, 1);
         const easedProgress = easing(progress);
 
         // Interpolate camera state
-        const currentState = this.interpolateCameraState(startState, endState, easedProgress);
-        
+        const currentState = this.interpolateCameraState(
+          startState,
+          endState,
+          easedProgress
+        );
+
         // Update camera
         this.graph.update({ camera: currentState });
-        
+
         // Call update callback
         options.onUpdate?.(easedProgress);
 
@@ -986,11 +1102,11 @@ export class CameraPlugin implements ISpaceGraphPlugin {
       target: {
         x: this.lerp(start.target.x, end.target.x, progress),
         y: this.lerp(start.target.y, end.target.y, progress),
-        z: this.lerp(start.target.z, end.target.z, progress)
+        z: this.lerp(start.target.z, end.target.z, progress),
       },
       phi: this.lerp(start.phi, end.phi, progress),
       theta: this.lerp(start.theta, end.theta, progress),
-      distance: this.lerp(start.distance, end.distance, progress)
+      distance: this.lerp(start.distance, end.distance, progress),
     };
   }
 
@@ -1006,21 +1122,26 @@ export class CameraPlugin implements ISpaceGraphPlugin {
 
 ```typescript
 const graph = new SpaceGraph('#container', {
-  data: { /* your data */ },
+  data: {
+    /* your data */
+  },
   camera: {
-    autoFrameEnabled: true // Enable automatic framing on selection
-  }
+    autoFrameEnabled: true, // Enable automatic framing on selection
+  },
 });
 
 // Frame specific elements
-await graph.camera.frame([
-  { position: new Vector3(0, 0, 0), size: 1 },
-  { position: new Vector3(10, 10, 10), size: 2 }
-], {
-  padding: 5,
-  strategy: 'optimal',
-  animation: { duration: 1000 }
-});
+await graph.camera.frame(
+  [
+    { position: new Vector3(0, 0, 0), size: 1 },
+    { position: new Vector3(10, 10, 10), size: 2 },
+  ],
+  {
+    padding: 5,
+    strategy: 'optimal',
+    animation: { duration: 1000 },
+  }
+);
 ```
 
 ### Camera Presets
@@ -1030,7 +1151,7 @@ await graph.camera.frame([
 const preset = await graph.camera.presetsManager.createPreset('My View', {
   description: 'Overview of the main cluster',
   category: 'Analysis',
-  generateThumbnail: true
+  generateThumbnail: true,
 });
 
 // Apply preset later
@@ -1051,21 +1172,21 @@ graph.camera.setRotationConstraints({
   maxPhi: 170,
   constrainPhi: true,
   snapAngles: [0, 45, 90, 135, 180, 225, 270, 315],
-  snapThreshold: 5
+  snapThreshold: 5,
 });
 
 // Smooth rotation animation
 await graph.camera.rotateTo(45, 90, {
   duration: 2000,
   easing: 'bounce',
-  relative: false
+  relative: false,
 });
 
 // Orbit around specific point
 await graph.camera.orbitAround('y', 360, {
   duration: 3000,
   pivot: new Vector3(5, 5, 5),
-  easing: 'linear'
+  easing: 'linear',
 });
 ```
 
@@ -1073,21 +1194,24 @@ await graph.camera.orbitAround('y', 360, {
 
 ```typescript
 // Use custom animation curves
-await graph.camera.flyTo({
-  target: { x: 10, y: 10, z: 10 },
-  phi: 45,
-  theta: 45,
-  distance: 20
-}, {
-  duration: 2000,
-  easing: 'elastic',
-  onUpdate: (progress) => {
-    console.log(`Animation progress: ${(progress * 100).toFixed(1)}%`);
+await graph.camera.flyTo(
+  {
+    target: { x: 10, y: 10, z: 10 },
+    phi: 45,
+    theta: 45,
+    distance: 20,
   },
-  onComplete: () => {
-    console.log('Camera animation completed');
+  {
+    duration: 2000,
+    easing: 'elastic',
+    onUpdate: (progress) => {
+      console.log(`Animation progress: ${(progress * 100).toFixed(1)}%`);
+    },
+    onComplete: () => {
+      console.log('Camera animation completed');
+    },
   }
-});
+);
 ```
 
 This specification provides a comprehensive blueprint for implementing advanced camera features that enhance the user

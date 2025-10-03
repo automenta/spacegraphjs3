@@ -1,116 +1,118 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>SpaceGraphJS - Edge Interaction Demo</title>
-  <style>
+  <head>
+    <meta charset="UTF-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>SpaceGraphJS - Edge Interaction Demo</title>
+    <style>
       body {
-          margin: 0;
-          padding: 0;
-          overflow: hidden;
-          font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
       }
 
       #controls {
-          position: absolute;
-          top: 10px;
-          left: 10px;
-          z-index: 100;
-          background: rgba(0, 0, 0, 0.7);
-          padding: 10px;
-          border-radius: 5px;
-          color: white;
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 100;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 10px;
+        border-radius: 5px;
+        color: white;
       }
 
       #controls h3 {
-          margin: 0 0 10px 0;
+        margin: 0 0 10px 0;
       }
 
       #controls p {
-          margin: 5px 0;
-          font-size: 14px;
+        margin: 5px 0;
+        font-size: 14px;
       }
 
       #controls button {
-          margin: 5px;
-          padding: 5px 10px;
-          border: none;
-          border-radius: 3px;
-          background: #4a4a4a;
-          color: white;
-          cursor: pointer;
+        margin: 5px;
+        padding: 5px 10px;
+        border: none;
+        border-radius: 3px;
+        background: #4a4a4a;
+        color: white;
+        cursor: pointer;
       }
 
       #controls button:hover {
-          background: #6a6a6a;
+        background: #6a6a6a;
       }
 
       #controls button.active {
-          background: #007acc;
+        background: #007acc;
       }
 
       #instructions {
-          position: absolute;
-          bottom: 10px;
-          left: 10px;
-          z-index: 100;
-          background: rgba(0, 0, 0, 0.7);
-          padding: 10px;
-          border-radius: 5px;
-          color: white;
-          max-width: 300px;
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        z-index: 100;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 10px;
+        border-radius: 5px;
+        color: white;
+        max-width: 300px;
       }
 
       #instructions h3 {
-          margin: 0 0 10px 0;
+        margin: 0 0 10px 0;
       }
 
       #instructions ul {
-          margin: 0;
-          padding-left: 20px;
+        margin: 0;
+        padding-left: 20px;
       }
 
       #instructions li {
-          margin-bottom: 5px;
-          font-size: 14px;
+        margin-bottom: 5px;
+        font-size: 14px;
       }
-  </style>
-</head>
-<body>
-<div id="controls">
-  <h3>Edge Interaction Demo</h3>
-  <p>Filter by edge type:</p>
-  <button class="active" id="all">All Types</button>
-  <button id="straight">Straight</button>
-  <button id="curved">Curved</button>
-  <button id="dashed">Dashed</button>
-  <p>Node interactions:</p>
-  <button id="reset">Reset View</button>
-  <p>Click and drag to rotate view<br>
-    Scroll to zoom in/out</p>
-</div>
+    </style>
+  </head>
+  <body>
+    <div id="controls">
+      <h3>Edge Interaction Demo</h3>
+      <p>Filter by edge type:</p>
+      <button class="active" id="all">All Types</button>
+      <button id="straight">Straight</button>
+      <button id="curved">Curved</button>
+      <button id="dashed">Dashed</button>
+      <p>Node interactions:</p>
+      <button id="reset">Reset View</button>
+      <p>
+        Click and drag to rotate view<br />
+        Scroll to zoom in/out
+      </p>
+    </div>
 
-<div id="instructions">
-  <h3>Interaction Guide</h3>
-  <ul>
-    <li><strong>Hover over edges</strong> to highlight them</li>
-    <li><strong>Click on edges</strong> to select them</li>
-    <li><strong>Ctrl+Click</strong> to multi-select edges</li>
-    <li><strong>Hover over nodes</strong> to highlight them</li>
-    <li><strong>Click on nodes</strong> to select them</li>
-    <li><strong>Ctrl+Click</strong> to multi-select nodes</li>
-    <li><strong>Drag nodes</strong> to reposition them</li>
-    <li><strong>Drag background</strong> to pan the view</li>
-  </ul>
-</div>
+    <div id="instructions">
+      <h3>Interaction Guide</h3>
+      <ul>
+        <li><strong>Hover over edges</strong> to highlight them</li>
+        <li><strong>Click on edges</strong> to select them</li>
+        <li><strong>Ctrl+Click</strong> to multi-select edges</li>
+        <li><strong>Hover over nodes</strong> to highlight them</li>
+        <li><strong>Click on nodes</strong> to select them</li>
+        <li><strong>Ctrl+Click</strong> to multi-select nodes</li>
+        <li><strong>Drag nodes</strong> to reposition them</li>
+        <li><strong>Drag background</strong> to pan the view</li>
+      </ul>
+    </div>
 
-<div id="graph"></div>
+    <div id="graph"></div>
 
-<script type="module">
-  import init from './edge-interaction-demo.ts';
+    <script type="module">
+      import init from './edge-interaction-demo.ts';
 
-  init();
-</script>
-</body>
+      init();
+    </script>
+  </body>
 </html>

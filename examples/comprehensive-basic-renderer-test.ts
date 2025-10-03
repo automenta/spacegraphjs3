@@ -75,13 +75,15 @@ const nodes: NodeSpec[] = [
   {
     id: 'html1',
     type: 'html',
-    content: '<div style="background: gray; color: white; padding: 5px; border-radius: 3px;">HTML Node 1</div>',
+    content:
+      '<div style="background: gray; color: white; padding: 5px; border-radius: 3px;">HTML Node 1</div>',
     position: { x: -25, y: -25, z: 0 },
   } as NodeSpec,
   {
     id: 'html2',
     type: 'html',
-    content: '<div style="background: gray; color: white; padding: 5px; border-radius: 3px;">HTML Node 2</div>',
+    content:
+      '<div style="background: gray; color: white; padding: 5px; border-radius: 3px;">HTML Node 2</div>',
     position: { x: 25, y: -25, z: 0 },
   } as NodeSpec,
 ];
@@ -134,7 +136,7 @@ const initialSpec: Spec = {
       color: '#ffffff',
       glow: { color: '#ffffff', strength: 1.5 },
     },
-    
+
     'edge:hover': {
       color: '#ffffff',
       width: 3,

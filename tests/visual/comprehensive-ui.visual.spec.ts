@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 import { VisualSemanticsController } from './visual-semantics-controller';
 import { ComprehensiveUISemanticsSpecs } from './specs/comprehensive-ui.semantics';
 

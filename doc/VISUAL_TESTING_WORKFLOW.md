@@ -19,38 +19,36 @@ const SphereElementActorSpec: VisualSemanticsSpec = {
   states: {
     base: {
       color: '#ff0000',
-      size: { width: 20, height: 20 }
+      size: { width: 20, height: 20 },
     },
     hover: {
       color: '#ffffff',
-      boxShadow: '0 0 10px #ffffff'
-    }
+      boxShadow: '0 0 10px #ffffff',
+    },
   },
   interactions: [
     {
       name: 'Hover Interaction',
-      steps: [
-        { type: 'hover', target: 'canvas' }
-      ],
+      steps: [{ type: 'hover', target: 'canvas' }],
       expectedOutcomes: [
         {
           description: 'Sphere element actor should glow when hovered',
           screenshot: 'sphere-element-actor-hover.png',
           validation: {
             threshold: 0.1,
-            maxDiffPixels: 5000
-          }
-        }
-      ]
-    }
+            maxDiffPixels: 5000,
+          },
+        },
+      ],
+    },
   ],
   ergonomics: {
     minTouchTargetSize: 44,
     minContrastRatio: 4.5,
     keyboardNavigation: true,
     screenReaderSupport: true,
-    maxResponseTime: 100
-  }
+    maxResponseTime: 100,
+  },
 };
 ```
 
@@ -79,7 +77,7 @@ await reporter.reportRegression({
   failureType: 'visual',
   description: 'Unexpected color change detected',
   screenshotPath: 'tests/visual/screenshots/sphere-hover-actual.png',
-  diffPath: 'tests/visual/screenshots/sphere-hover-diff.png'
+  diffPath: 'tests/visual/screenshots/sphere-hover-diff.png',
 });
 ```
 
@@ -99,7 +97,10 @@ const metrics = await collector.collectMetrics(
 );
 
 // Compare with baseline
-const benchmark = collector.compareWithBaseline('SphereElementActor-Hover', metrics);
+const benchmark = collector.compareWithBaseline(
+  'SphereElementActor-Hover',
+  metrics
+);
 ```
 
 ### 5. Unified Dashboard
@@ -110,11 +111,13 @@ The unified dashboard displays all test results in a single interface:
 const dashboard = new UnifiedDashboard();
 
 // Add test results
-dashboard.addVisualTestResults([{
-  componentName: 'SphereElementActor',
-  testName: 'Visual Semantics',
-  status: 'pass'
-}]);
+dashboard.addVisualTestResults([
+  {
+    componentName: 'SphereElementActor',
+    testName: 'Visual Semantics',
+    status: 'pass',
+  },
+]);
 
 // Generate HTML dashboard
 await dashboard.generateHtmlDashboard();
@@ -197,13 +200,11 @@ Create a `visual-test.config.ts` file in the project root:
 import { CiCdConfig } from './tests/visual/ci-cd-integration';
 
 const config: CiCdConfig = {
-  testPatterns: [
-    'tests/visual/**/*.spec.ts'
-  ],
+  testPatterns: ['tests/visual/**/*.spec.ts'],
   reportDir: 'tests/visual/reports',
   failOnRegression: true,
   githubToken: process.env.GITHUB_TOKEN,
-  slackWebhookUrl: process.env.SLACK_WEBHOOK_URL
+  slackWebhookUrl: process.env.SLACK_WEBHOOK_URL,
 };
 
 export default config;
@@ -244,16 +245,16 @@ export default config;
 ### Common Issues
 
 1. **Flaky Visual Tests**
-    - Solution: Increase thresholds for dynamic content
-    - Solution: Wait for animations to complete
+   - Solution: Increase thresholds for dynamic content
+   - Solution: Wait for animations to complete
 
 2. **Environment Differences**
-    - Solution: Use consistent test environments
-    - Solution: Normalize rendering settings
+   - Solution: Use consistent test environments
+   - Solution: Normalize rendering settings
 
 3. **False Positives**
-    - Solution: Fine-tune comparison thresholds
-    - Solution: Exclude non-essential UI elements
+   - Solution: Fine-tune comparison thresholds
+   - Solution: Exclude non-essential UI elements
 
 ### Debugging Tips
 

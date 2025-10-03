@@ -107,8 +107,14 @@ export class SpaceGraph {
       }
 
       // Log warnings in development mode
-      if (validationResult.warnings.length > 0 && SpaceGraph.isDevelopmentMode()) {
-        console.warn('Spec validation warnings:', formatValidationResult(validationResult));
+      if (
+        validationResult.warnings.length > 0 &&
+        SpaceGraph.isDevelopmentMode()
+      ) {
+        console.warn(
+          'Spec validation warnings:',
+          formatValidationResult(validationResult)
+        );
       }
 
       const container = this.initContainer(containerSelector);
@@ -142,13 +148,83 @@ export class SpaceGraph {
       // Re-throw the error to allow the caller to handle it.
       throw error;
     }
+  /**
+   * Validates the initial spec and logs warnings if needed
+   */
+  private validateInitialSpec(initialSpec: Spec): void {
+    const validationResult = validateSpec(initialSpec);
+    if (!validationResult.isValid) {
+      const errorMessage = `Invalid Spec provided:\n${formatValidationResult(validationResult)}`;
+      throw new Error(errorMessage);
+    }
+
+    // Log warnings in development mode
+    if (
+      validationResult.warnings.length > 0 &&
+      SpaceGraph.isDevelopmentMode()
+    ) {
+      console.warn(
+        'Spec validation warnings:',
+        formatValidationResult(validationResult)
+      );
+    }
+  }
+
+  /**
+   * Initializes the core components: container, state, managers, and plugins
+   */
+  private initializeCore(
+    containerSelector: string,
+    initialSpec: Spec,
+    plugins: ISpaceGraphPlugin[]
+  ): void {
+    const container = this.initContainer(containerSelector);
+    this.container = container;
+
+    this.dispose = createRoot((dispose) => {
+      this.initReactiveState(initialSpec);
+      this.initManagers();
+      this.initPlugins(plugins);
+      return dispose;
+    });
+  }
+
+  /**
+   * Sets up scene and camera references from the rendering manager
+   */
+  private setupSceneAndCamera(): void {
+    this.scene = this.render.getScene();
+    this.camera = this.render.getCamera();
+  }
+
+  /**
+   * Handles initialization errors by displaying them in the container
+   */
+  private handleInitializationError(error: any, containerSelector: string): never {
+    console.error('Failed to initialize SpaceGraph:', error);
+    // If we have a container reference, display the error in it
+    const container = document.querySelector(
+      containerSelector
+    ) as HTMLElement;
+    if (container) {
+      container.innerHTML = `<div style="color: red; padding: 20px; font-family: monospace;">
+        <h2>Failed to initialize</h2>
+        <p>${(error as Error).message}</p>
+        <pre>${(error as Error).stack}</pre>
+      </div>`;
+    }
+    // Re-throw the error to allow the caller to handle it.
+    throw error;
+  }
   }
 
   /**
    * Checks if the application is running in development mode
    */
   private static isDevelopmentMode(): boolean {
-    return typeof process !== 'undefined' && process.env.NODE_ENV === 'development';
+    return (
+      typeof process !== 'undefined' && process.env.NODE_ENV === 'development'
+    );
   }
 
   /**
@@ -169,8 +245,8 @@ export class SpaceGraph {
       this.showPerformanceWarning(
         'large-dataset',
         `Large dataset detected: ${nodes.length} nodes, ${edges.length} edges.\n` +
-        '⚠️  Consider enabling useBasicRenderer for better performance with large datasets.\n' +
-        '💡 Add { performance: { useBasicRenderer: true } } to your spec'
+          '⚠️  Consider enabling useBasicRenderer for better performance with large datasets.\n' +
+          '💡 Add { performance: { useBasicRenderer: true } } to your spec'
       );
     }
 
@@ -179,11 +255,15 @@ export class SpaceGraph {
       const missingOptimizations: string[] = [];
 
       if (!performance?.enableLOD) {
-        missingOptimizations.push('LOD (Level of Detail) - reduces geometry complexity at distance');
+        missingOptimizations.push(
+          'LOD (Level of Detail) - reduces geometry complexity at distance'
+        );
       }
 
       if (!performance?.enableCulling) {
-        missingOptimizations.push('frustum culling - hides objects outside camera view');
+        missingOptimizations.push(
+          'frustum culling - hides objects outside camera view'
+        );
       }
 
       if (!performance?.enableMemoryManagement) {
@@ -193,8 +273,8 @@ export class SpaceGraph {
       if (missingOptimizations.length > 0) {
         this.showPerformanceWarning(
           'missing-optimizations',
-          `Performance optimizations available but not enabled:\n${missingOptimizations.map(opt => `  • ${opt}`).join('\n')}\n` +
-          '💡 Enable in performance settings: { enableLOD: true, enableCulling: true, enableMemoryManagement: true }'
+          `Performance optimizations available but not enabled:\n${missingOptimizations.map((opt) => `  • ${opt}`).join('\n')}\n` +
+            '💡 Enable in performance settings: { enableLOD: true, enableCulling: true, enableMemoryManagement: true }'
         );
       }
     }
@@ -205,45 +285,50 @@ export class SpaceGraph {
       this.showPerformanceWarning(
         'high-edge-ratio',
         `High edge-to-node ratio detected: ${edgeToNodeRatio.toFixed(1)} edges per node.\n` +
-        '⚠️  This may cause performance issues with edge rendering.\n' +
-        '💡 Consider reducing edge density or using edge filtering'
+          '⚠️  This may cause performance issues with edge rendering.\n' +
+          '💡 Consider reducing edge density or using edge filtering'
       );
     }
 
     // Check for nodes without positions (layout not applied)
-    const nodesWithoutPosition = nodes.filter(node => !node.position).length;
+    const nodesWithoutPosition = nodes.filter((node) => !node.position).length;
     if (nodesWithoutPosition > 0 && nodesWithoutPosition === nodes.length) {
       this.showPerformanceWarning(
         'no-layout',
         `No node positions detected. Layout engine may not be running.\n` +
-        '⚠️  Nodes will not be visible until positioned.\n' +
-        '💡 Ensure a layout plugin is enabled and running'
+          '⚠️  Nodes will not be visible until positioned.\n' +
+          '💡 Ensure a layout plugin is enabled and running'
       );
     }
 
     // Check for very high node count with complex node types
-    const complexNodes = nodes.filter(node =>
-      node.type === 'custom' ||
-      node.type === 'html' ||
-      (node.type === 'text' && node.data)
+    const complexNodes = nodes.filter(
+      (node) =>
+        node.type === 'custom' ||
+        node.type === 'html' ||
+        (node.type === 'text' && node.data)
     ).length;
 
     if (complexNodes > 200) {
       this.showPerformanceWarning(
         'complex-nodes',
         `High number of complex nodes detected: ${complexNodes}.\n` +
-        '⚠️  Custom, HTML, and text nodes are more expensive to render.\n' +
-        '💡 Consider using simpler node types (sphere, box) for better performance'
+          '⚠️  Custom, HTML, and text nodes are more expensive to render.\n' +
+          '💡 Consider using simpler node types (sphere, box) for better performance'
       );
     }
 
     // Check for disabled performance features that should be enabled
-    if (performance && performance.instancingThreshold > 1000 && nodes.length > 500) {
+    if (
+      performance &&
+      performance.instancingThreshold > 1000 &&
+      nodes.length > 500
+    ) {
       this.showPerformanceWarning(
         'high-instancing-threshold',
         `Instancing threshold is very high: ${performance.instancingThreshold}.\n` +
-        '⚠️  Consider lowering to 100-200 for better performance with many nodes.\n' +
-        '💡 Instanced rendering is more efficient for large numbers of similar objects'
+          '⚠️  Consider lowering to 100-200 for better performance with many nodes.\n' +
+          '💡 Instanced rendering is more efficient for large numbers of similar objects'
       );
     }
   }
@@ -270,7 +355,8 @@ export class SpaceGraph {
 
     // Auto-select layout based on data size
     const nodeCount = simpleSpec.nodes?.length || 0;
-    const layout = simpleSpec.layout || SpaceGraph.selectLayoutForDataSize(nodeCount);
+    const layout =
+      simpleSpec.layout || SpaceGraph.selectLayoutForDataSize(nodeCount);
 
     // Create full spec with defaults
     const fullSpec: Spec = {
@@ -319,14 +405,17 @@ export class SpaceGraph {
     ];
 
     // Create and return the SpaceGraph instance
-    const containerSelector = typeof container === 'string' ? container : container.id || '#spacegraph';
+    const containerSelector =
+      typeof container === 'string' ? container : container.id || '#spacegraph';
     return new SpaceGraph(containerSelector, fullSpec, plugins);
   }
 
   /**
    * Automatically selects the best layout based on data size
    */
-  private static selectLayoutForDataSize(nodeCount: number): 'force-directed' | 'grid' | 'circle' | 'column' | 'row' | 'random' {
+  private static selectLayoutForDataSize(
+    nodeCount: number
+  ): 'force-directed' | 'grid' | 'circle' | 'column' | 'row' | 'random' {
     if (nodeCount === 0) return 'random';
     if (nodeCount <= 10) return 'force-directed';
     if (nodeCount <= 50) return 'circle';
@@ -459,14 +548,35 @@ export class SpaceGraph {
           data: spec.data,
           style: {},
           layout: { type: 'random' },
-          camera: { target: { x: 0, y: 0, z: 0 }, phi: 0, theta: 0, distance: 1 },
-          controls: { keyboard: { enabled: false, panSpeed: 1, zoomSpeed: 1, orbitSpeed: 1 } },
-          performance: { instancingThreshold: 100, enableLOD: false, enableCulling: false, enableMemoryManagement: false, useBasicRenderer: false },
-          interaction: { hoveredElementId: null, selectedElementIds: [] }
+          camera: {
+            target: { x: 0, y: 0, z: 0 },
+            phi: 0,
+            theta: 0,
+            distance: 1,
+          },
+          controls: {
+            keyboard: {
+              enabled: false,
+              panSpeed: 1,
+              zoomSpeed: 1,
+              orbitSpeed: 1,
+            },
+          },
+          performance: {
+            instancingThreshold: 100,
+            enableLOD: false,
+            enableCulling: false,
+            enableMemoryManagement: false,
+            useBasicRenderer: false,
+          },
+          interaction: { hoveredElementId: null, selectedElementIds: [] },
         });
 
         if (!validationResult.isValid) {
-          console.warn('Spec update validation warnings:', formatValidationResult(validationResult));
+          console.warn(
+            'Spec update validation warnings:',
+            formatValidationResult(validationResult)
+          );
         }
       }
 
@@ -483,7 +593,10 @@ export class SpaceGraph {
         try {
           plugin.onStateUpdate(spec);
         } catch (error) {
-          console.warn(`Plugin ${plugin.id} failed to handle state update, continuing without it:`, error);
+          console.warn(
+            `Plugin ${plugin.id} failed to handle state update, continuing without it:`,
+            error
+          );
           // Continue with other plugins rather than failing completely
         }
       }
@@ -516,10 +629,14 @@ export class SpaceGraph {
 
   private initContainer(containerSelector: string): HTMLElement {
     // Validate container selector
-    if (!containerSelector || typeof containerSelector !== 'string' || containerSelector.trim() === '') {
+    if (
+      !containerSelector ||
+      typeof containerSelector !== 'string' ||
+      containerSelector.trim() === ''
+    ) {
       throw new Error(
         'Container selector must be a non-empty string.\n' +
-        '💡 Valid examples: "#my-container", ".graph-container", "body"'
+          '💡 Valid examples: "#my-container", ".graph-container", "body"'
       );
     }
 
@@ -527,7 +644,7 @@ export class SpaceGraph {
     if (typeof document === 'undefined') {
       throw new Error(
         'DOM is not available. SpaceGraph requires a browser environment.\n' +
-        '💡 Make sure this code runs in a browser, not in Node.js'
+          '💡 Make sure this code runs in a browser, not in Node.js'
       );
     }
 
@@ -538,13 +655,13 @@ export class SpaceGraph {
         `Check if element with selector "${containerSelector}" exists in the DOM`,
         'Verify the selector is correct (case-sensitive)',
         'Ensure the element is not inside a shadow DOM',
-        'Try using a different selector like "#app", ".container", or "body"'
+        'Try using a different selector like "#app", ".container", or "body"',
       ];
 
       throw new Error(
         `Container element '${containerSelector}' not found in DOM.\n` +
-        '💡 Suggestions:\n' +
-        suggestions.map(s => `   • ${s}`).join('\n')
+          '💡 Suggestions:\n' +
+          suggestions.map((s) => `   • ${s}`).join('\n')
       );
     }
 
@@ -552,8 +669,8 @@ export class SpaceGraph {
     if (!(container instanceof HTMLElement)) {
       throw new Error(
         `Container element '${containerSelector}' is not an HTMLElement.\n` +
-        `💡 Found: ${container.constructor.name}\n` +
-        '💡 Container must be a valid HTML element that can hold child elements'
+          `💡 Found: ${container.constructor.name}\n` +
+          '💡 Container must be a valid HTML element that can hold child elements'
       );
     }
 
@@ -562,7 +679,7 @@ export class SpaceGraph {
     if (rect.width === 0 || rect.height === 0) {
       console.warn(
         `Container element '${containerSelector}' has zero width or height.\n` +
-        '⚠️  This may cause rendering issues. Consider setting explicit dimensions.'
+          '⚠️  This may cause rendering issues. Consider setting explicit dimensions.'
       );
     }
 
@@ -599,13 +716,14 @@ export class SpaceGraph {
     if (!Array.isArray(plugins)) {
       throw new Error(
         'Plugins must be an array of ISpaceGraphPlugin instances.\n' +
-        '💡 Pass an empty array [] or an array of plugin instances'
+          '💡 Pass an empty array [] or an array of plugin instances'
       );
     }
 
     this.plugins = plugins;
     const initializedPlugins: string[] = [];
-    const failedPlugins: Array<{plugin: ISpaceGraphPlugin, error: Error}> = [];
+    const failedPlugins: Array<{ plugin: ISpaceGraphPlugin; error: Error }> =
+      [];
 
     for (let i = 0; i < this.plugins.length; i++) {
       const plugin = this.plugins[i];
@@ -614,7 +732,7 @@ export class SpaceGraph {
       if (!plugin || typeof plugin !== 'object') {
         const error = new Error(
           `Plugin at index ${i} is not a valid object.\n` +
-          '💡 Plugins must implement the ISpaceGraphPlugin interface'
+            '💡 Plugins must implement the ISpaceGraphPlugin interface'
         );
         failedPlugins.push({ plugin, error });
         continue;
@@ -623,7 +741,7 @@ export class SpaceGraph {
       if (!plugin.id || typeof plugin.id !== 'string') {
         const error = new Error(
           `Plugin at index ${i} is missing a valid id property.\n` +
-          '💡 Plugin id must be a non-empty string'
+            '💡 Plugin id must be a non-empty string'
         );
         failedPlugins.push({ plugin, error });
         continue;
@@ -632,7 +750,7 @@ export class SpaceGraph {
       if (!plugin.name || typeof plugin.name !== 'string') {
         const error = new Error(
           `Plugin "${plugin.id}" is missing a valid name property.\n` +
-          '💡 Plugin name must be a non-empty string'
+            '💡 Plugin name must be a non-empty string'
         );
         failedPlugins.push({ plugin, error });
         continue;
@@ -641,7 +759,7 @@ export class SpaceGraph {
       if (!plugin.version || typeof plugin.version !== 'string') {
         const error = new Error(
           `Plugin "${plugin.id}" is missing a valid version property.\n` +
-          '💡 Plugin version must be a non-empty string'
+            '💡 Plugin version must be a non-empty string'
         );
         failedPlugins.push({ plugin, error });
         continue;
@@ -650,7 +768,7 @@ export class SpaceGraph {
       if (typeof plugin.init !== 'function') {
         const error = new Error(
           `Plugin "${plugin.id}" is missing the required init() method.\n` +
-          '💡 Plugins must implement the ISpaceGraphPlugin interface'
+            '💡 Plugins must implement the ISpaceGraphPlugin interface'
         );
         failedPlugins.push({ plugin, error });
         continue;
@@ -660,7 +778,7 @@ export class SpaceGraph {
       if (initializedPlugins.includes(plugin.id)) {
         const error = new Error(
           `Duplicate plugin ID "${plugin.id}".\n` +
-          '💡 Each plugin must have a unique id'
+            '💡 Each plugin must have a unique id'
         );
         failedPlugins.push({ plugin, error });
         continue;
@@ -676,13 +794,15 @@ export class SpaceGraph {
 
         // Log successful initialization in development mode
         if (SpaceGraph.isDevelopmentMode()) {
-          console.log(`✅ Plugin "${plugin.id}" (${plugin.name} v${plugin.version}) initialized successfully`);
+          console.log(
+            `✅ Plugin "${plugin.id}" (${plugin.name} v${plugin.version}) initialized successfully`
+          );
         }
       } catch (error) {
         const initError = new Error(
           `Failed to initialize plugin "${plugin.id}" (${plugin.name} v${plugin.version}).\n` +
-          `💡 Error: ${(error as Error).message}\n` +
-          '💡 Check plugin dependencies and configuration'
+            `💡 Error: ${(error as Error).message}\n` +
+            '💡 Check plugin dependencies and configuration'
         );
         failedPlugins.push({ plugin, error: initError });
       }
@@ -690,13 +810,15 @@ export class SpaceGraph {
 
     // If any plugins failed to initialize, throw an error with details
     if (failedPlugins.length > 0) {
-      const errorMessages = failedPlugins.map(({ error }, index) => {
-        return `${index + 1}. ${error.message}`;
-      }).join('\n\n');
+      const errorMessages = failedPlugins
+        .map(({ error }, index) => {
+          return `${index + 1}. ${error.message}`;
+        })
+        .join('\n\n');
 
       throw new Error(
         `Failed to initialize ${failedPlugins.length} out of ${plugins.length} plugins:\n\n${errorMessages}\n\n` +
-        `✅ ${initializedPlugins.length} plugins initialized successfully: ${initializedPlugins.join(', ')}`
+          `✅ ${initializedPlugins.length} plugins initialized successfully: ${initializedPlugins.join(', ')}`
       );
     }
   }

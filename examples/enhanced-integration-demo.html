@@ -1,235 +1,242 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Enhanced SpaceGraph Integration Demo</title>
-  <style>
+  <head>
+    <meta charset="UTF-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Enhanced SpaceGraph Integration Demo</title>
+    <style>
       body {
-          margin: 0;
-          padding: 0;
-          font-family: 'Arial', sans-serif;
-          background: #0a0a0a;
-          color: #ffffff;
-          overflow: hidden;
+        margin: 0;
+        padding: 0;
+        font-family: 'Arial', sans-serif;
+        background: #0a0a0a;
+        color: #ffffff;
+        overflow: hidden;
       }
 
       #enhanced-demo-container {
-          width: 100vw;
-          height: 100vh;
-          position: relative;
+        width: 100vw;
+        height: 100vh;
+        position: relative;
       }
 
       .demo-header {
-          position: absolute;
-          top: 20px;
-          left: 20px;
-          z-index: 1001;
-          background: rgba(0, 0, 0, 0.8);
-          padding: 15px;
-          border-radius: 8px;
-          border: 1px solid #333;
-          max-width: 400px;
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 1001;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #333;
+        max-width: 400px;
       }
 
       .demo-header h1 {
-          margin: 0 0 10px 0;
-          font-size: 18px;
-          color: #00ff88;
+        margin: 0 0 10px 0;
+        font-size: 18px;
+        color: #00ff88;
       }
 
       .demo-header p {
-          margin: 5px 0;
-          font-size: 12px;
-          color: #ccc;
-          line-height: 1.4;
+        margin: 5px 0;
+        font-size: 12px;
+        color: #ccc;
+        line-height: 1.4;
       }
 
       .keyboard-shortcuts {
-          margin-top: 10px;
-          font-size: 11px;
+        margin-top: 10px;
+        font-size: 11px;
       }
 
       .keyboard-shortcuts strong {
-          color: #00ff88;
+        color: #00ff88;
       }
 
       .loading-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: rgba(0, 0, 0, 0.9);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 2000;
-          transition: opacity 0.5s ease;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        transition: opacity 0.5s ease;
       }
 
       .loading-overlay.hidden {
-          opacity: 0;
-          pointer-events: none;
+        opacity: 0;
+        pointer-events: none;
       }
 
       .loading-spinner {
-          width: 50px;
-          height: 50px;
-          border: 3px solid #333;
-          border-top: 3px solid #00ff88;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
+        width: 50px;
+        height: 50px;
+        border: 3px solid #333;
+        border-top: 3px solid #00ff88;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
       }
 
       @keyframes spin {
-          0% {
-              transform: rotate(0deg);
-          }
-          100% {
-              transform: rotate(360deg);
-          }
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
       }
 
       .performance-info {
-          position: absolute;
-          bottom: 20px;
-          right: 20px;
-          background: rgba(0, 0, 0, 0.8);
-          padding: 10px;
-          border-radius: 5px;
-          border: 1px solid #333;
-          font-size: 11px;
-          color: #ccc;
-          z-index: 1001;
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #333;
+        font-size: 11px;
+        color: #ccc;
+        z-index: 1001;
       }
 
       .fps-counter {
-          color: #00ff88;
-          font-weight: bold;
+        color: #00ff88;
+        font-weight: bold;
       }
 
       .memory-usage {
-          color: #ffaa00;
+        color: #ffaa00;
       }
-  </style>
-</head>
-<body>
-<div id="enhanced-demo-container">
-  <div class="demo-header">
-    <h1>Enhanced SpaceGraph Integration Demo</h1>
-    <p>This demo showcases the enhanced camera controls, interaction system, visual feedback, HUD, performance
-      optimization, and animation systems.</p>
+    </style>
+  </head>
+  <body>
+    <div id="enhanced-demo-container">
+      <div class="demo-header">
+        <h1>Enhanced SpaceGraph Integration Demo</h1>
+        <p>
+          This demo showcases the enhanced camera controls, interaction system,
+          visual feedback, HUD, performance optimization, and animation systems.
+        </p>
 
-    <div class="keyboard-shortcuts">
-      <strong>Keyboard Shortcuts:</strong><br>
-      • R - Reset camera<br>
-      • F - Focus selected objects<br>
-      • Ctrl+A - Select all<br>
-      • Space - Enable auto-rotate<br>
-      • P - Toggle performance monitoring<br>
-      • Escape - Clear selection<br>
-      • Mouse - Hover, click, drag objects<br>
-      • Right-click - Context menu
+        <div class="keyboard-shortcuts">
+          <strong>Keyboard Shortcuts:</strong><br />
+          • R - Reset camera<br />
+          • F - Focus selected objects<br />
+          • Ctrl+A - Select all<br />
+          • Space - Enable auto-rotate<br />
+          • P - Toggle performance monitoring<br />
+          • Escape - Clear selection<br />
+          • Mouse - Hover, click, drag objects<br />
+          • Right-click - Context menu
+        </div>
+      </div>
+
+      <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+      </div>
+
+      <div class="performance-info" id="performance-info">
+        <div class="fps-counter">FPS: <span id="fps-value">0</span></div>
+        <div class="memory-usage">
+          Memory: <span id="memory-value">0</span> MB
+        </div>
+      </div>
     </div>
-  </div>
 
-  <div class="loading-overlay" id="loading-overlay">
-    <div class="loading-spinner"></div>
-  </div>
+    <script type="module">
+      // Import the demo module
+      import { createEnhancedIntegrationDemo } from './enhanced-integration-demo.js';
 
-  <div class="performance-info" id="performance-info">
-    <div class="fps-counter">FPS: <span id="fps-value">0</span></div>
-    <div class="memory-usage">Memory: <span id="memory-value">0</span> MB</div>
-  </div>
-</div>
+      // Initialize the demo when the page loads
+      document.addEventListener('DOMContentLoaded', () => {
+        const container = document.getElementById('enhanced-demo-container');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const fpsValue = document.getElementById('fps-value');
+        const memoryValue = document.getElementById('memory-value');
 
-<script type="module">
-  // Import the demo module
-  import { createEnhancedIntegrationDemo } from './enhanced-integration-demo.js';
+        if (container) {
+          try {
+            // Create the enhanced integration demo
+            const demo = createEnhancedIntegrationDemo(container);
 
-  // Initialize the demo when the page loads
-  document.addEventListener('DOMContentLoaded', () => {
-    const container = document.getElementById('enhanced-demo-container');
-    const loadingOverlay = document.getElementById('loading-overlay');
-    const fpsValue = document.getElementById('fps-value');
-    const memoryValue = document.getElementById('memory-value');
+            // Expose demo to window for debugging
+            window.enhancedDemo = demo;
 
-    if (container) {
-      try {
-        // Create the enhanced integration demo
-        const demo = createEnhancedIntegrationDemo(container);
+            // Hide loading overlay after a short delay
+            setTimeout(() => {
+              loadingOverlay.classList.add('hidden');
+            }, 2000);
 
-        // Expose demo to window for debugging
-        window.enhancedDemo = demo;
+            // Update performance info periodically
+            setInterval(() => {
+              if (demo.performanceOptimizer) {
+                const metrics = demo.performanceOptimizer.getMetrics();
+                fpsValue.textContent = Math.round(metrics.fps).toString();
+                memoryValue.textContent = Math.round(
+                  metrics.memoryUsage
+                ).toString();
+              }
+            }, 1000);
 
-        // Hide loading overlay after a short delay
-        setTimeout(() => {
-          loadingOverlay.classList.add('hidden');
-        }, 2000);
+            // Add cleanup handler
+            window.addEventListener('beforeunload', () => {
+              if (demo) {
+                demo.stop();
+              }
+            });
 
-        // Update performance info periodically
-        setInterval(() => {
-          if (demo.performanceOptimizer) {
-            const metrics = demo.performanceOptimizer.getMetrics();
-            fpsValue.textContent = Math.round(metrics.fps).toString();
-            memoryValue.textContent = Math.round(metrics.memoryUsage).toString();
-          }
-        }, 1000);
-
-        // Add cleanup handler
-        window.addEventListener('beforeunload', () => {
-          if (demo) {
-            demo.stop();
-          }
-        });
-
-        console.log('Enhanced SpaceGraph Integration Demo initialized successfully');
-
-      } catch (error) {
-        console.error('Failed to initialize enhanced demo:', error);
-        loadingOverlay.innerHTML = `
+            console.log(
+              'Enhanced SpaceGraph Integration Demo initialized successfully'
+            );
+          } catch (error) {
+            console.error('Failed to initialize enhanced demo:', error);
+            loadingOverlay.innerHTML = `
                         <div style="color: #ff4444; text-align: center;">
                             <h3>Failed to initialize demo</h3>
                             <p>${error.message}</p>
                             <p>Check console for details</p>
                         </div>
                     `;
-      }
-    } else {
-      console.error('Enhanced demo container not found');
-    }
-  });
-
-  // Add some interactive features to the header
-  document.addEventListener('DOMContentLoaded', () => {
-    const header = document.querySelector('.demo-header');
-    if (header) {
-      let isDragging = false;
-      let dragOffset = { x: 0, y: 0 };
-
-      header.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        dragOffset.x = e.clientX - header.offsetLeft;
-        dragOffset.y = e.clientY - header.offsetTop;
-        header.style.cursor = 'grabbing';
-      });
-
-      document.addEventListener('mousemove', (e) => {
-        if (isDragging) {
-          header.style.left = (e.clientX - dragOffset.x) + 'px';
-          header.style.top = (e.clientY - dragOffset.y) + 'px';
+          }
+        } else {
+          console.error('Enhanced demo container not found');
         }
       });
 
-      document.addEventListener('mouseup', () => {
-        isDragging = false;
-        header.style.cursor = 'grab';
-      });
+      // Add some interactive features to the header
+      document.addEventListener('DOMContentLoaded', () => {
+        const header = document.querySelector('.demo-header');
+        if (header) {
+          let isDragging = false;
+          let dragOffset = { x: 0, y: 0 };
 
-      header.style.cursor = 'grab';
-    }
-  });
-</script>
-</body>
+          header.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            dragOffset.x = e.clientX - header.offsetLeft;
+            dragOffset.y = e.clientY - header.offsetTop;
+            header.style.cursor = 'grabbing';
+          });
+
+          document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+              header.style.left = e.clientX - dragOffset.x + 'px';
+              header.style.top = e.clientY - dragOffset.y + 'px';
+            }
+          });
+
+          document.addEventListener('mouseup', () => {
+            isDragging = false;
+            header.style.cursor = 'grab';
+          });
+
+          header.style.cursor = 'grab';
+        }
+      });
+    </script>
+  </body>
 </html>

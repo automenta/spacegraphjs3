@@ -79,7 +79,7 @@ const graph = new SpaceGraph({
   }
 });
 
-graph.render();`
+graph.render();`,
 };
 
 function initializeEditor() {
@@ -93,7 +93,7 @@ function initializeEditor() {
     fontSize: 14,
     minimap: { enabled: false },
     scrollBeyondLastLine: false,
-    automaticLayout: true
+    automaticLayout: true,
   });
 
   setCode(templates.basic);
@@ -119,7 +119,10 @@ function runCode() {
   } catch (error) {
     console.error('Error executing code:', error);
     // Display error in preview
-    graphContainer.innerHTML = '<div style="color: red; padding: 20px;">Error: ' + (error as Error).message + '</div>';
+    graphContainer.innerHTML =
+      '<div style="color: red; padding: 20px;">Error: ' +
+      (error as Error).message +
+      '</div>';
   }
 }
 
@@ -133,20 +136,20 @@ function loadTemplate(template: string) {
 
 function _parseCSV(csvText: string) {
   const lines = csvText.trim().split('\n');
-  const headers = lines[0].split(',').map(h => h.trim());
+  const headers = lines[0].split(',').map((h) => h.trim());
 
   const nodes = [];
   const links = [];
 
   // Assume first column is node ID, second is label, third/fourth are x/y coordinates
   for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(',').map(v => v.trim());
+    const values = lines[i].split(',').map((v) => v.trim());
     if (values.length >= 2) {
       nodes.push({
         id: values[0],
         label: values[1] || values[0],
         x: values[2] ? parseFloat(values[2]) : Math.random() * 400 - 200,
-        y: values[3] ? parseFloat(values[3]) : Math.random() * 400 - 200
+        y: values[3] ? parseFloat(values[3]) : Math.random() * 400 - 200,
       });
     }
   }
@@ -154,11 +157,11 @@ function _parseCSV(csvText: string) {
   // If there are link columns (source,target), create links
   if (headers.length >= 5) {
     for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(',').map(v => v.trim());
+      const values = lines[i].split(',').map((v) => v.trim());
       if (values[4] && values[5]) {
         links.push({
           source: values[4],
-          target: values[5]
+          target: values[5],
         });
       }
     }
@@ -222,64 +225,72 @@ function loadFromURL() {
       console.error('Error loading code from URL:', error);
     }
   }
-function _startTutorial() {
-  const steps = [
-    {
-      title: "Welcome to SpaceGraphJS Playground!",
-      content: "This interactive playground lets you create and visualize graphs using SpaceGraphJS. Let's walk through the main features.",
-      target: null
-    },
-    {
-      title: "Code Editor",
-      content: "This is the Monaco code editor where you write JavaScript code to create your graphs. Try editing the code and see the preview update automatically!",
-      target: ".editor-container"
-    },
-    {
-      title: "Template Selection",
-      content: "Choose from pre-built templates to get started quickly. Select different templates from the dropdown to see various graph examples.",
-      target: "#template-select"
-    },
-    {
-      title: "Run Button",
-      content: "Click 'Run' to execute your code and update the graph preview. The preview updates automatically, but you can also run manually.",
-      target: "#run-btn"
-    },
-    {
-      title: "Import Data",
-      content: "Import your own data from JSON or CSV files. The playground will generate code based on your data structure.",
-      target: "#import-btn"
-    },
-    {
-      title: "Share Your Creations",
-      content: "Share your graphs with others using the shareable URL feature. Your code gets encoded in the URL for easy sharing.",
-      target: "#share-btn"
-    },
-    {
-      title: "Live Preview",
-      content: "See your graph come to life in the preview panel. Interact with nodes and edges, zoom and pan to explore your data.",
-      target: ".preview-container"
-    },
-    {
-      title: "Ready to Explore!",
-      content: "Now you're ready to create amazing graphs! Try the different templates, import your own data, or write custom code. Have fun exploring SpaceGraphJS!",
-      target: null
-    }
-  ];
+  function _startTutorial() {
+    const steps = [
+      {
+        title: 'Welcome to SpaceGraphJS Playground!',
+        content:
+          "This interactive playground lets you create and visualize graphs using SpaceGraphJS. Let's walk through the main features.",
+        target: null,
+      },
+      {
+        title: 'Code Editor',
+        content:
+          'This is the Monaco code editor where you write JavaScript code to create your graphs. Try editing the code and see the preview update automatically!',
+        target: '.editor-container',
+      },
+      {
+        title: 'Template Selection',
+        content:
+          'Choose from pre-built templates to get started quickly. Select different templates from the dropdown to see various graph examples.',
+        target: '#template-select',
+      },
+      {
+        title: 'Run Button',
+        content:
+          "Click 'Run' to execute your code and update the graph preview. The preview updates automatically, but you can also run manually.",
+        target: '#run-btn',
+      },
+      {
+        title: 'Import Data',
+        content:
+          'Import your own data from JSON or CSV files. The playground will generate code based on your data structure.',
+        target: '#import-btn',
+      },
+      {
+        title: 'Share Your Creations',
+        content:
+          'Share your graphs with others using the shareable URL feature. Your code gets encoded in the URL for easy sharing.',
+        target: '#share-btn',
+      },
+      {
+        title: 'Live Preview',
+        content:
+          'See your graph come to life in the preview panel. Interact with nodes and edges, zoom and pan to explore your data.',
+        target: '.preview-container',
+      },
+      {
+        title: 'Ready to Explore!',
+        content:
+          "Now you're ready to create amazing graphs! Try the different templates, import your own data, or write custom code. Have fun exploring SpaceGraphJS!",
+        target: null,
+      },
+    ];
 
-  const _currentStep = 0;
+    const _currentStep = 0;
 
-  function showStep(stepIndex: number) {
-    // Remove previous highlights
-    document.querySelectorAll('.tutorial-highlight').forEach(el => {
-      el.classList.remove('tutorial-highlight');
-    });
+    function showStep(stepIndex: number) {
+      // Remove previous highlights
+      document.querySelectorAll('.tutorial-highlight').forEach((el) => {
+        el.classList.remove('tutorial-highlight');
+      });
 
-    const step = steps[stepIndex];
+      const step = steps[stepIndex];
 
-    // Create modal
-    const modal = document.createElement('div');
-    modal.className = 'tutorial-modal';
-    modal.innerHTML = `
+      // Create modal
+      const modal = document.createElement('div');
+      modal.className = 'tutorial-modal';
+      modal.innerHTML = `
       <div class="tutorial-content">
         <h2>${step.title}</h2>
         <p>${step.content}</p>
@@ -291,44 +302,43 @@ function _startTutorial() {
       </div>
     `;
 
-    document.body.appendChild(modal);
+      document.body.appendChild(modal);
 
-    // Highlight target element
-    if (step.target) {
-      const targetElement = document.querySelector(step.target);
-      if (targetElement) {
-        targetElement.classList.add('tutorial-highlight');
-        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Highlight target element
+      if (step.target) {
+        const targetElement = document.querySelector(step.target);
+        if (targetElement) {
+          targetElement.classList.add('tutorial-highlight');
+          targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
       }
+
+      // Event listeners
+      document.getElementById('next-btn')?.addEventListener('click', () => {
+        document.body.removeChild(modal);
+        if (stepIndex < steps.length - 1) {
+          showStep(stepIndex + 1);
+        }
+      });
+
+      document.getElementById('prev-btn')?.addEventListener('click', () => {
+        document.body.removeChild(modal);
+        if (stepIndex > 0) {
+          showStep(stepIndex - 1);
+        }
+      });
+
+      document.getElementById('skip-btn')?.addEventListener('click', () => {
+        document.body.removeChild(modal);
+        // Remove highlights
+        document.querySelectorAll('.tutorial-highlight').forEach((el) => {
+          el.classList.remove('tutorial-highlight');
+        });
+      });
     }
 
-    // Event listeners
-    document.getElementById('next-btn')?.addEventListener('click', () => {
-      document.body.removeChild(modal);
-      if (stepIndex < steps.length - 1) {
-        showStep(stepIndex + 1);
-      }
-    });
-
-    document.getElementById('prev-btn')?.addEventListener('click', () => {
-      document.body.removeChild(modal);
-      if (stepIndex > 0) {
-        showStep(stepIndex - 1);
-      }
-    });
-
-    document.getElementById('skip-btn')?.addEventListener('click', () => {
-      document.body.removeChild(modal);
-      // Remove highlights
-      document.querySelectorAll('.tutorial-highlight').forEach(el => {
-        el.classList.remove('tutorial-highlight');
-      });
-    });
+    showStep(0);
   }
-
-  showStep(0);
-}
-
 }
 
 onMount(() => {
@@ -338,9 +348,11 @@ onMount(() => {
 
   // Event listeners
   document.getElementById('run-btn')?.addEventListener('click', runCode);
-  document.getElementById('template-select')?.addEventListener('change', (e) => {
-    loadTemplate((e.target as HTMLSelectElement).value);
-  });
+  document
+    .getElementById('template-select')
+    ?.addEventListener('change', (e) => {
+      loadTemplate((e.target as HTMLSelectElement).value);
+    });
   document.getElementById('import-btn')?.addEventListener('click', importData);
   document.getElementById('share-btn')?.addEventListener('click', shareCode);
 

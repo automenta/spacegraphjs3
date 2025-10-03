@@ -78,19 +78,23 @@ class REPLCommands {
     return this.graph.state;
   }
 
-  nodes(): Array<{id: string, type: string, position?: {x: number, y: number, z: number}}> {
-    return this.graph.state.data.nodes.map(node => ({
+  nodes(): Array<{
+    id: string;
+    type: string;
+    position?: { x: number; y: number; z: number };
+  }> {
+    return this.graph.state.data.nodes.map((node) => ({
       id: node.id,
       type: node.type,
-      position: node.position
+      position: node.position,
     }));
   }
 
-  edges(): Array<{id: string, source: string, target: string}> {
-    return this.graph.state.data.edges.map(edge => ({
+  edges(): Array<{ id: string; source: string; target: string }> {
+    return this.graph.state.data.edges.map((edge) => ({
       id: edge.id,
       source: edge.source,
-      target: edge.target
+      target: edge.target,
     }));
   }
 
@@ -104,14 +108,14 @@ class REPLCommands {
 
   select(id: string): string {
     this.graph.updateState({
-      interaction: { selectedElementIds: [id] }
+      interaction: { selectedElementIds: [id] },
     });
     return `Selected node: ${id}`;
   }
 
   hover(id: string): string {
     this.graph.updateState({
-      interaction: { hoveredElementId: id }
+      interaction: { hoveredElementId: id },
     });
     return `Hovering over node: ${id}`;
   }
@@ -129,7 +133,9 @@ class REPLCommands {
   frame(ids: string): string {
     try {
       const nodeIds = JSON.parse(ids);
-      const nodes = this.graph.state.data.nodes.filter(n => nodeIds.includes(n.id));
+      const nodes = this.graph.state.data.nodes.filter((n) =>
+        nodeIds.includes(n.id)
+      );
       this.graph.camera.frame(nodes);
       return `Framing nodes: ${ids}`;
     } catch (error) {
@@ -155,13 +161,15 @@ class REPLCommands {
     const themes = {
       dark: { bg: '#1a1a1a', text: '#ffffff', accent: '#00ff00' },
       light: { bg: '#ffffff', text: '#000000', accent: '#0066cc' },
-      matrix: { bg: '#000000', text: '#00ff00', accent: '#00ff00' }
+      matrix: { bg: '#000000', text: '#00ff00', accent: '#00ff00' },
     };
-    
+
     if (themes[name]) {
       return `THEME:${name}`; // Special signal to apply theme
     }
-    throw new Error(`Unknown theme: ${name}. Available: ${Object.keys(themes).join(', ')}`);
+    throw new Error(
+      `Unknown theme: ${name}. Available: ${Object.keys(themes).join(', ')}`
+    );
   }
 }
 ```
@@ -182,11 +190,11 @@ export class HUDPlugin implements ISpaceGraphPlugin {
   public init(graph: SpaceGraph): void {
     this.graph = graph;
     this.replCommands = new REPLCommands(graph);
-    
+
     const container = this.graph.render.getContainer();
     this.createHUDElements(container);
     this.setupEventListeners();
-    
+
     createEffect(() => this.updateHUD());
   }
 
@@ -204,11 +212,11 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     this.hudContainer.style.borderRadius = '5px';
     this.hudContainer.style.minWidth = '300px';
     this.hudContainer.style.maxWidth = '500px';
-    
+
     // Console container
     this.consoleContainer = document.createElement('div');
     this.consoleContainer.style.display = 'none';
-    
+
     // Output area
     this.outputElement = document.createElement('div');
     this.outputElement.style.height = '200px';
@@ -217,16 +225,16 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     this.outputElement.style.padding = '5px';
     this.outputElement.style.marginBottom = '5px';
     this.outputElement.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-    
+
     // Input area
     const inputContainer = document.createElement('div');
     inputContainer.style.display = 'flex';
     inputContainer.style.alignItems = 'center';
-    
+
     const prompt = document.createElement('span');
     prompt.textContent = '>>> ';
     prompt.style.color = '#00ff00';
-    
+
     this.inputElement = document.createElement('input');
     this.inputElement.type = 'text';
     this.inputElement.style.flex = '1';
@@ -236,13 +244,13 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     this.inputElement.style.fontFamily = 'monospace';
     this.inputElement.style.fontSize = '12px';
     this.inputElement.style.outline = 'none';
-    
+
     inputContainer.appendChild(prompt);
     inputContainer.appendChild(this.inputElement);
-    
+
     this.consoleContainer.appendChild(this.outputElement);
     this.consoleContainer.appendChild(inputContainer);
-    
+
     this.hudContainer.appendChild(this.consoleContainer);
     container.appendChild(this.hudContainer);
   }
@@ -270,11 +278,11 @@ export class HUDPlugin implements ISpaceGraphPlugin {
   private executeCommand(): void {
     const command = this.inputElement.value.trim();
     if (!command) return;
-    
+
     this.addOutput('command', `>>> ${command}`);
     this.commandHistory.push(command);
     this.historyIndex = this.commandHistory.length;
-    
+
     try {
       const result = this.evaluateCommand(command);
       if (result === 'CLEAR_CONSOLE') {
@@ -282,12 +290,17 @@ export class HUDPlugin implements ISpaceGraphPlugin {
       } else if (result.startsWith('THEME:')) {
         this.applyTheme(result.split(':')[1]);
       } else {
-        this.addOutput('result', typeof result === 'object' ? JSON.stringify(result, null, 2) : String(result));
+        this.addOutput(
+          'result',
+          typeof result === 'object'
+            ? JSON.stringify(result, null, 2)
+            : String(result)
+        );
       }
     } catch (error) {
       this.addOutput('error', `Error: ${error.message}`);
     }
-    
+
     this.inputElement.value = '';
     this.scrollToBottom();
   }
@@ -297,20 +310,25 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     const parts = command.split(' ');
     const cmd = parts[0];
     const args = parts.slice(1).join(' ');
-    
+
     if (cmd in this.replCommands) {
       const commandFn = (this.replCommands as any)[cmd];
       return args ? commandFn(args) : commandFn();
     } else {
-      throw new Error(`Unknown command: ${cmd}. Type 'help' for available commands.`);
+      throw new Error(
+        `Unknown command: ${cmd}. Type 'help' for available commands.`
+      );
     }
   }
 
-  private addOutput(type: 'command' | 'result' | 'error' | 'info', content: string): void {
+  private addOutput(
+    type: 'command' | 'result' | 'error' | 'info',
+    content: string
+  ): void {
     const line = document.createElement('div');
     line.style.marginBottom = '2px';
     line.style.whiteSpace = 'pre-wrap';
-    
+
     switch (type) {
       case 'command':
         line.style.color = '#00ff00';
@@ -325,7 +343,7 @@ export class HUDPlugin implements ISpaceGraphPlugin {
         line.style.color = '#888888';
         break;
     }
-    
+
     line.textContent = content;
     this.outputElement.appendChild(line);
   }
@@ -350,8 +368,8 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     // Basic auto-complete implementation
     const input = this.inputElement.value;
     const commands = Object.keys(this.replCommands);
-    const matches = commands.filter(cmd => cmd.startsWith(input));
-    
+    const matches = commands.filter((cmd) => cmd.startsWith(input));
+
     if (matches.length === 1) {
       this.inputElement.value = matches[0];
     } else if (matches.length > 1) {
@@ -363,9 +381,9 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     const themes: Record<string, any> = {
       dark: { bg: '#1a1a1a', text: '#ffffff', accent: '#00ff00' },
       light: { bg: '#ffffff', text: '#000000', accent: '#0066cc' },
-      matrix: { bg: '#000000', text: '#00ff00', accent: '#00ff00' }
+      matrix: { bg: '#000000', text: '#00ff00', accent: '#00ff00' },
     };
-    
+
     const theme = themes[themeName];
     if (theme) {
       this.hudContainer.style.backgroundColor = theme.bg;
@@ -380,17 +398,17 @@ export class HUDPlugin implements ISpaceGraphPlugin {
       this.hudContainer.style.display = 'none';
       return;
     }
-    
+
     if (hudState.visible) {
       this.hudContainer.style.display = 'block';
-      
+
       // Handle console visibility
       if (hudState.console?.enabled) {
         this.consoleContainer.style.display = 'block';
       } else {
         this.consoleContainer.style.display = 'none';
       }
-      
+
       // Handle legacy content
       if (hudState.content && !hudState.console?.enabled) {
         this.hudContainer.innerHTML = `<div>${hudState.content}</div>`;
@@ -420,9 +438,9 @@ const spec = {
       enabled: true,
       history: [],
       currentInput: '',
-      output: []
-    }
-  }
+      output: [],
+    },
+  },
 };
 
 // Programmatic usage
@@ -430,9 +448,9 @@ graph.update({
   hud: {
     visible: true,
     console: {
-      enabled: true
-    }
-  }
+      enabled: true,
+    },
+  },
 });
 
 // Console commands users can type:

@@ -133,4 +133,81 @@ export class ErrorHandler {
       }
     };
   }
+
+  /**
+   * Safely dispose of an object with error handling
+   * @param source - The source of the operation
+   * @param object - The object to dispose
+   * @param disposeMethod - The dispose method name (default: 'dispose')
+   */
+  public safeDispose(
+    source: string,
+    object: any,
+    disposeMethod: string = 'dispose'
+  ): void {
+    if (!object || typeof object[disposeMethod] !== 'function') {
+      return;
+    }
+
+    try {
+      object[disposeMethod]();
+    } catch (error) {
+      this.handleWarning(source, `Failed to dispose object`, { error });
+    }
+  }
+
+  /**
+   * Safely execute a cleanup function
+   * @param source - The source of the operation
+   * @param cleanupFn - The cleanup function to execute
+   */
+  public safeCleanup(source: string, cleanupFn: () => void): void {
+    if (typeof cleanupFn !== 'function') {
+      return;
+    }
+
+    try {
+      cleanupFn();
+    } catch (error) {
+      this.handleWarning(source, 'Cleanup function failed', { error });
+    }
+  }
+
+  /**
+   * Handle plugin execution with standardized error handling
+   * @param pluginId - The plugin identifier
+   * @param methodName - The method being executed
+   * @param operation - The operation to execute
+   */
+  public async executePluginMethod<T>(
+    pluginId: string,
+    methodName: string,
+    operation: () => Promise<T>
+  ): Promise<T | null> {
+    try {
+      return await operation();
+    } catch (error) {
+      this.handleError(`Plugin:${pluginId}`, `${methodName} failed`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Handle synchronous plugin execution
+   * @param pluginId - The plugin identifier
+   * @param methodName - The method being executed
+   * @param operation - The operation to execute
+   */
+  public executePluginMethodSync<T>(
+    pluginId: string,
+    methodName: string,
+    operation: () => T
+  ): T | null {
+    try {
+      return operation();
+    } catch (error) {
+      this.handleError(`Plugin:${pluginId}`, `${methodName} failed`, error);
+      return null;
+    }
+  }
 }

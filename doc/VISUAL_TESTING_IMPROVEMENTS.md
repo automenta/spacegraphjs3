@@ -29,15 +29,19 @@ class AIEnhancedVisualAnalyzer {
   async analyzeComponentChanges(oldScreenshot: string, newScreenshot: string) {
     // Use computer vision to identify components
     const components = await this.identifyComponents(newScreenshot);
-    
+
     // Compare semantically similar components
-    const changes = await this.semanticComparison(oldScreenshot, newScreenshot, components);
-    
+    const changes = await this.semanticComparison(
+      oldScreenshot,
+      newScreenshot,
+      components
+    );
+
     return {
       layoutShifts: changes.layoutShifts,
       styleChanges: changes.styleChanges,
       contentChanges: changes.contentChanges,
-      accessibilityIssues: changes.accessibilityIssues
+      accessibilityIssues: changes.accessibilityIssues,
     };
   }
 }
@@ -72,7 +76,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         browser: [chromium, firefox, webkit]
         viewport: [desktop, tablet, mobile]
-    
+
     runs-on: ${{ matrix.os }}
     steps:
       # ... test steps with browser/viewport configuration
@@ -101,16 +105,16 @@ class RealisticUserSimulator {
   async simulateUserJourney(scenario: UserScenario) {
     // Simulate realistic timing
     await this.naturalPause();
-    
+
     // Simulate mouse movement patterns
     await this.humanLikeMouseMove(scenario.targets);
-    
+
     // Simulate cognitive pauses
     await this.thinkingPause();
-    
+
     // Execute interaction
     await this.interactWithElement(scenario.action);
-    
+
     // Validate outcome
     return await this.analyzeUserExperience();
   }
@@ -142,17 +146,17 @@ class PerformanceVisualTester {
       frameRate: await this.measureFrameRate(),
       memoryUsage: await this.measureMemory(),
       loadTime: await this.measureLoadTime(),
-      interactionLatency: await this.measureInteractionLatency()
+      interactionLatency: await this.measureInteractionLatency(),
     };
-    
+
     // Run visual test
     const visualResult = await this.runVisualTest(testCase);
-    
+
     // Correlate performance with visual quality
     return {
       visual: visualResult,
       performance: perfMetrics,
-      correlation: this.analyzeCorrelation(visualResult, perfMetrics)
+      correlation: this.analyzeCorrelation(visualResult, perfMetrics),
     };
   }
 }
@@ -184,9 +188,9 @@ class AccessibilityVisualTester {
       ariaValidity: await this.validateARIA(),
       colorContrast: await this.checkColorContrast(),
       screenReaderCompatibility: await this.testScreenReaderPaths(),
-      keyboardNavigation: await this.validateKeyboardFlow()
+      keyboardNavigation: await this.validateKeyboardFlow(),
     };
-    
+
     return this.generateAccessibilityReport(auditResults);
   }
 }
@@ -215,13 +219,13 @@ class IntelligentVisualDiff {
   async analyzeVisualChanges(baseline: string, current: string) {
     const rawDiff = await this.pixelDiff(baseline, current);
     const semanticDiff = await this.semanticAnalysis(baseline, current);
-    
+
     return {
       pixelChanges: rawDiff.changes,
       semanticChanges: semanticDiff.changes,
       criticality: this.assessCriticality(semanticDiff),
       recommendations: this.generateRecommendations(semanticDiff),
-      visualPreview: await this.generateDiffPreview(rawDiff, semanticDiff)
+      visualPreview: await this.generateDiffPreview(rawDiff, semanticDiff),
     };
   }
 }
@@ -252,12 +256,12 @@ class ScenarioGenerator {
     const edgeCases = this.discoverEdgeCases(component);
     const accessibilityScenarios = this.generateAccessibilityTests(component);
     const performanceScenarios = this.createPerformanceTests(component);
-    
+
     return [
       ...baseScenarios,
       ...edgeCases,
       ...accessibilityScenarios,
-      ...performanceScenarios
+      ...performanceScenarios,
     ].slice(0, complexity * 10); // Limit based on complexity
   }
 }
@@ -286,16 +290,16 @@ class StableVisualTester {
   async runStableTest(testCase: TestCase) {
     // Wait for UI to stabilize
     await this.waitForStableState();
-    
+
     // Mask dynamic elements
     await this.maskDynamicContent();
-    
+
     // Run test with retry logic
-    const result = await this.withRetry(() => 
-      this.executeVisualTest(testCase), 
+    const result = await this.withRetry(
+      () => this.executeVisualTest(testCase),
       { maxRetries: 3, backoff: 'exponential' }
     );
-    
+
     return result;
   }
 }
@@ -326,9 +330,9 @@ class DesignSystemValidator {
       colorPalette: await this.checkColorCompliance(screenshot),
       typography: await this.validateTypography(screenshot),
       spacing: await this.checkSpacingConsistency(screenshot),
-      components: await this.validateComponentUsage(screenshot)
+      components: await this.validateComponentUsage(screenshot),
     };
-    
+
     return this.generateDesignComplianceReport(designViolations);
   }
 }
@@ -357,20 +361,20 @@ class MobileVisualTester {
   async runMobileTest(testCase: TestCase, deviceProfile: DeviceProfile) {
     // Configure mobile environment
     await this.setupMobileEmulation(deviceProfile);
-    
+
     // Test touch interactions
     const touchResults = await this.testTouchInteractions(testCase);
-    
+
     // Validate responsive behavior
     const responsiveResults = await this.testResponsiveDesign(testCase);
-    
+
     // Check mobile performance
     const perfResults = await this.measureMobilePerformance();
-    
+
     return {
       touch: touchResults,
       responsive: responsiveResults,
-      performance: perfResults
+      performance: perfResults,
     };
   }
 }

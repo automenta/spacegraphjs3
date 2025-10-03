@@ -9,11 +9,13 @@ import { test, expect } from '@playwright/test';
  */
 
 test.describe('UI/UX Ergonomics Validation', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({}) => {
     test.setTimeout(30000);
   });
 
-  test('Camera control responsiveness - videogame-like movement', async ({ page }) => {
+  test('Camera control responsiveness - videogame-like movement', async ({
+    page,
+  }) => {
     // Navigate to element actors demo for comprehensive testing
     await page.goto('/element-actors-demo.html');
 
@@ -57,10 +59,14 @@ test.describe('UI/UX Ergonomics Validation', () => {
     }
 
     // Test average response time (should be under 50ms for videogame feel)
-    const avgResponseTime = cameraMovementTimes.reduce((a, b) => a + b, 0) / cameraMovementTimes.length;
+    const avgResponseTime =
+      cameraMovementTimes.reduce((a, b) => a + b, 0) /
+      cameraMovementTimes.length;
     expect(avgResponseTime).toBeLessThan(50);
 
-    console.log(`Camera movement average response time: ${avgResponseTime.toFixed(2)}ms`);
+    console.log(
+      `Camera movement average response time: ${avgResponseTime.toFixed(2)}ms`
+    );
   });
 
   test('Camera flyTo animation smoothness', async ({ page }) => {
@@ -77,14 +83,17 @@ test.describe('UI/UX Ergonomics Validation', () => {
     await page.evaluate(() => {
       const graph = (window as any).graph;
       if (graph?.cameraPlugin) {
-        graph.cameraPlugin.flyTo({
-          target: { x: 10, y: 10, z: 10 },
-          distance: 30,
-          phi: Math.PI / 3,
-          theta: Math.PI / 4,
-        }, {
-          duration: 500,
-        });
+        graph.cameraPlugin.flyTo(
+          {
+            target: { x: 10, y: 10, z: 10 },
+            distance: 30,
+            phi: Math.PI / 3,
+            theta: Math.PI / 4,
+          },
+          {
+            duration: 500,
+          }
+        );
       }
     });
 
@@ -140,7 +149,7 @@ test.describe('UI/UX Ergonomics Validation', () => {
           id: node.id,
           size,
           position: node.position,
-          type: node.type
+          type: node.type,
         };
       });
     });
@@ -150,7 +159,9 @@ test.describe('UI/UX Ergonomics Validation', () => {
       expect(target.size).toBeGreaterThanOrEqual(20); // More lenient for 3D but still reasonable
     }
 
-    console.log(`Evaluated ${touchTargets.length} touch targets for compliance`);
+    console.log(
+      `Evaluated ${touchTargets.length} touch targets for compliance`
+    );
   });
 
   test('Visibility and occlusion testing', async ({ page }) => {
@@ -193,14 +204,20 @@ test.describe('UI/UX Ergonomics Validation', () => {
         return nodes.filter((node: any) => {
           if (!node.position) return false;
           const distance = camera.position.distanceTo(
-            new (window as any).THREE.Vector3(node.position.x, node.position.y, node.position.z)
+            new (window as any).THREE.Vector3(
+              node.position.x,
+              node.position.y,
+              node.position.z
+            )
           );
           return distance < 200; // Arbitrary visibility threshold
         }).length;
       });
 
       expect(visibleCount).toBeGreaterThanOrEqual(test.expectedVisible * 0.5); // At least 50% visible
-      console.log(`At distance ${test.distance}: ${visibleCount} items visible`);
+      console.log(
+        `At distance ${test.distance}: ${visibleCount} items visible`
+      );
     }
   });
   test('Text readability and font accessibility', async ({ page }) => {
@@ -216,7 +233,9 @@ test.describe('UI/UX Ergonomics Validation', () => {
       const graph = (window as any).graph;
       if (!graph) return null;
 
-      const textElements = graph.state.data.nodes?.filter((node: any) => node.type === 'text') || [];
+      const textElements =
+        graph.state.data.nodes?.filter((node: any) => node.type === 'text') ||
+        [];
       const results = {
         textElements: [] as any[],
         fontSizeCompliance: 0,
@@ -238,8 +257,11 @@ test.describe('UI/UX Ergonomics Validation', () => {
         element.isReadable = element.fontSize >= 14;
 
         // Simple contrast check (in production would use proper WCAG calculations)
-        const isDarkText = element.color.includes('0') || element.color.includes('1');
-        const isDarkBg = element.backgroundColor.includes('0') || element.backgroundColor.includes('1');
+        const isDarkText =
+          element.color.includes('0') || element.color.includes('1');
+        const isDarkBg =
+          element.backgroundColor.includes('0') ||
+          element.backgroundColor.includes('1');
         const hasContrast = isDarkText !== isDarkBg;
 
         element.isReadable = element.isReadable && hasContrast;
@@ -255,16 +277,21 @@ test.describe('UI/UX Ergonomics Validation', () => {
 
     if (textReadabilityResults && textReadabilityResults.totalElements > 0) {
       // At least 80% of text elements should meet accessibility standards
-      const fontComplianceRate = textReadabilityResults.fontSizeCompliance / textReadabilityResults.totalElements;
-      const contrastComplianceRate = textReadabilityResults.contrastCompliance / textReadabilityResults.totalElements;
+      const fontComplianceRate =
+        textReadabilityResults.fontSizeCompliance /
+        textReadabilityResults.totalElements;
+      const contrastComplianceRate =
+        textReadabilityResults.contrastCompliance /
+        textReadabilityResults.totalElements;
 
       expect(fontComplianceRate).toBeGreaterThanOrEqual(0.8);
       expect(contrastComplianceRate).toBeGreaterThanOrEqual(0.8);
 
-      console.log(`Text Readability - Font size compliance: ${(fontComplianceRate * 100).toFixed(1)}%, Contrast compliance: ${(contrastComplianceRate * 100).toFixed(1)}%`);
+      console.log(
+        `Text Readability - Font size compliance: ${(fontComplianceRate * 100).toFixed(1)}%, Contrast compliance: ${(contrastComplianceRate * 100).toFixed(1)}%`
+      );
     }
   });
-
 
   test('Interaction feedback responsiveness', async ({ page }) => {
     await page.goto('/element-actors-demo.html');
@@ -302,10 +329,13 @@ test.describe('UI/UX Ergonomics Validation', () => {
       }
     }
 
-    const avgFeedbackTime = feedbackTimes.reduce((a, b) => a + b, 0) / feedbackTimes.length;
+    const avgFeedbackTime =
+      feedbackTimes.reduce((a, b) => a + b, 0) / feedbackTimes.length;
     expect(avgFeedbackTime).toBeLessThan(50); // Should feel instantaneous
 
-    console.log(`Average interaction feedback time: ${avgFeedbackTime.toFixed(2)}ms`);
+    console.log(
+      `Average interaction feedback time: ${avgFeedbackTime.toFixed(2)}ms`
+    );
   });
 
   test('Animation smoothness and frame rate', async ({ page }) => {
@@ -327,7 +357,8 @@ test.describe('UI/UX Ergonomics Validation', () => {
         (window as any).frameTimes.push(delta);
         (window as any).lastFrameTime = now;
 
-        if ((window as any).frameTimes.length < 120) { // Monitor for ~2 seconds at 60fps
+        if ((window as any).frameTimes.length < 120) {
+          // Monitor for ~2 seconds at 60fps
           requestAnimationFrame(monitorFrames);
         }
       };
@@ -339,10 +370,13 @@ test.describe('UI/UX Ergonomics Validation', () => {
       const graph = (window as any).graph;
       if (graph?.cameraPlugin) {
         // Trigger camera animation
-        graph.cameraPlugin.flyTo({
-          target: { x: 5, y: 5, z: 5 },
-          distance: 25,
-        }, { duration: 1000 });
+        graph.cameraPlugin.flyTo(
+          {
+            target: { x: 5, y: 5, z: 5 },
+            distance: 25,
+          },
+          { duration: 1000 }
+        );
       }
     });
 
@@ -354,7 +388,8 @@ test.describe('UI/UX Ergonomics Validation', () => {
       const times = (window as any).frameTimes || [];
       if (times.length === 0) return null;
 
-      const avgFrameTime = times.reduce((a: number, b: number) => a + b, 0) / times.length;
+      const avgFrameTime =
+        times.reduce((a: number, b: number) => a + b, 0) / times.length;
       const fps = 1000 / avgFrameTime;
       const frameDrops = times.filter((t: number) => t > 33).length; // Frames taking >33ms (30fps)
 
@@ -362,7 +397,7 @@ test.describe('UI/UX Ergonomics Validation', () => {
         averageFrameTime: avgFrameTime,
         fps: fps,
         frameDrops: frameDrops,
-        totalFrames: times.length
+        totalFrames: times.length,
       };
     });
 
@@ -373,7 +408,9 @@ test.describe('UI/UX Ergonomics Validation', () => {
       // Should have minimal frame drops
       expect(frameStats.frameDrops / frameStats.totalFrames).toBeLessThan(0.1); // Less than 10% frame drops
 
-      console.log(`Animation performance: ${frameStats.fps.toFixed(1)} FPS, ${frameStats.frameDrops} frame drops`);
+      console.log(
+        `Animation performance: ${frameStats.fps.toFixed(1)} FPS, ${frameStats.frameDrops} frame drops`
+      );
     }
   });
 
@@ -390,10 +427,13 @@ test.describe('UI/UX Ergonomics Validation', () => {
       const container = document.getElementById('container');
       const graph = (window as any).graph;
 
-      const backgroundColor = container ?
-        window.getComputedStyle(container).backgroundColor : '#000000';
+      const backgroundColor = container
+        ? window.getComputedStyle(container).backgroundColor
+        : '#000000';
 
-      const nodeColors = graph?.state.data.nodes?.map((node: any) => node.color || '#ffffff') || [];
+      const nodeColors =
+        graph?.state.data.nodes?.map((node: any) => node.color || '#ffffff') ||
+        [];
 
       return { backgroundColor, nodeColors };
     });
@@ -401,18 +441,23 @@ test.describe('UI/UX Ergonomics Validation', () => {
     // Function to calculate contrast ratio
     const getContrastRatio = (color1: string, color2: string): number => {
       // Simple implementation - in production would use proper color parsing
-      const isDark1 = color1.includes('0') || color1.includes('1') || color1.includes('2');
-      const isDark2 = color2.includes('0') || color2.includes('1') || color2.includes('2');
+      const isDark1 =
+        color1.includes('0') || color1.includes('1') || color1.includes('2');
+      const isDark2 =
+        color2.includes('0') || color2.includes('1') || color2.includes('2');
       return isDark1 !== isDark2 ? 4.5 : 1.2; // Mock contrast ratios
     };
 
     // Test contrast ratios
-    for (const nodeColor of colorData.nodeColors.slice(0, 5)) { // Test first 5 nodes
+    for (const nodeColor of colorData.nodeColors.slice(0, 5)) {
+      // Test first 5 nodes
       const contrast = getContrastRatio(colorData.backgroundColor, nodeColor);
       expect(contrast).toBeGreaterThan(1.1); // Minimum contrast for accessibility
     }
 
-    console.log(`Background: ${colorData.backgroundColor}, Node colors: ${colorData.nodeColors.length}`);
+    console.log(
+      `Background: ${colorData.backgroundColor}, Node colors: ${colorData.nodeColors.length}`
+    );
   });
 
   test('Keyboard navigation support', async ({ page }) => {
@@ -484,13 +529,17 @@ test.describe('UI/UX Ergonomics Validation', () => {
         hasLabels: !!container.querySelector('[aria-label], [aria-labelledby]'),
         hasDescriptions: !!container.querySelector('[aria-describedby]'),
         hasLiveRegions: !!container.querySelector('[aria-live]'),
-        hasFocusManagement: !!container.querySelector('[tabindex], canvas[tabindex]'),
+        hasFocusManagement: !!container.querySelector(
+          '[tabindex], canvas[tabindex]'
+        ),
       };
 
       return {
         ariaAttributes: ariaAttrs,
         semanticElements,
-        canvasFocusable: container.querySelector('canvas')?.hasAttribute('tabindex'),
+        canvasFocusable: container
+          .querySelector('canvas')
+          ?.hasAttribute('tabindex'),
       };
     });
 
@@ -521,7 +570,10 @@ test.describe('UI/UX Ergonomics Validation', () => {
       for (let i = 0; i < 3; i++) {
         const startTime = Date.now();
         await page.hover('canvas', {
-          position: { x: viewport.width / 2 + i * 10, y: viewport.height / 2 + i * 10 },
+          position: {
+            x: viewport.width / 2 + i * 10,
+            y: viewport.height / 2 + i * 10,
+          },
         });
         await page.waitForTimeout(50);
         const endTime = Date.now();
@@ -532,7 +584,10 @@ test.describe('UI/UX Ergonomics Validation', () => {
       for (let i = 0; i < 3; i++) {
         const startTime = Date.now();
         await page.click('canvas', {
-          position: { x: viewport.width / 2 + i * 5, y: viewport.height / 2 + i * 5 },
+          position: {
+            x: viewport.width / 2 + i * 5,
+            y: viewport.height / 2 + i * 5,
+          },
         });
         await page.waitForTimeout(50);
         const endTime = Date.now();
@@ -551,16 +606,24 @@ test.describe('UI/UX Ergonomics Validation', () => {
     }
 
     // Calculate averages
-    const avgHover = responseTimes.hover.reduce((a, b) => a + b, 0) / responseTimes.hover.length;
-    const avgClick = responseTimes.click.reduce((a, b) => a + b, 0) / responseTimes.click.length;
-    const avgKeyboard = responseTimes.keyboard.reduce((a, b) => a + b, 0) / responseTimes.keyboard.length;
+    const avgHover =
+      responseTimes.hover.reduce((a, b) => a + b, 0) /
+      responseTimes.hover.length;
+    const avgClick =
+      responseTimes.click.reduce((a, b) => a + b, 0) /
+      responseTimes.click.length;
+    const avgKeyboard =
+      responseTimes.keyboard.reduce((a, b) => a + b, 0) /
+      responseTimes.keyboard.length;
 
     // All should be under 100ms for good responsiveness
     expect(avgHover).toBeLessThan(100);
     expect(avgClick).toBeLessThan(100);
     expect(avgKeyboard).toBeLessThan(100);
 
-    console.log(`Response times - Hover: ${avgHover.toFixed(1)}ms, Click: ${avgClick.toFixed(1)}ms, Keyboard: ${avgKeyboard.toFixed(1)}ms`);
+    console.log(
+      `Response times - Hover: ${avgHover.toFixed(1)}ms, Click: ${avgClick.toFixed(1)}ms, Keyboard: ${avgKeyboard.toFixed(1)}ms`
+    );
   });
 
   test('Visual feedback for interactions', async ({ page }) => {
@@ -585,9 +648,11 @@ test.describe('UI/UX Ergonomics Validation', () => {
       const graph = (window as any).graph;
       return {
         hovered: graph?.state.interaction?.hoveredElementId || null,
-        visualEffects: graph?.render?.getScene()?.children?.some((child: any) =>
-          child.userData?.isHoverEffect
-        ) || false,
+        visualEffects:
+          graph?.render
+            ?.getScene()
+            ?.children?.some((child: any) => child.userData?.isHoverEffect) ||
+          false,
       };
     });
 
@@ -603,14 +668,19 @@ test.describe('UI/UX Ergonomics Validation', () => {
       const graph = (window as any).graph;
       return {
         selected: graph?.state.interaction?.selectedElementIds?.length || 0,
-        visualEffects: graph?.render?.getScene()?.children?.some((child: any) =>
-          child.userData?.isSelectionEffect
-        ) || false,
+        visualEffects:
+          graph?.render
+            ?.getScene()
+            ?.children?.some(
+              (child: any) => child.userData?.isSelectionEffect
+            ) || false,
       };
     });
 
     expect(selectionFeedback.selected).toBeGreaterThan(0);
 
-    console.log(`Visual feedback - Hover: ${!!hoverFeedback.hovered}, Selection: ${selectionFeedback.selected > 0}`);
+    console.log(
+      `Visual feedback - Hover: ${!!hoverFeedback.hovered}, Selection: ${selectionFeedback.selected > 0}`
+    );
   });
 });

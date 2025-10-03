@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Interaction Semantics Test Suite', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page: _page }) => {
     // Set a longer timeout for these tests
     test.setTimeout(60000);
   });
@@ -96,13 +96,7 @@ test.describe('Interaction Semantics Test Suite', () => {
     });
     await _page.waitForTimeout(3000);
 
-    // Get initial state
-    const _initialState = await _page.evaluate(() => ({
-      selectedIds:
-        (window as any).graph.state.interaction.selectedElementIds || [],
-      hoveredId:
-        (window as any).graph.state.interaction.hoveredElementId || null,
-    }));
+    // Get initial state (not used)
 
     // Click on an edge (try different positions to hit an edge)
     const viewport = _page.viewportSize();
@@ -149,8 +143,7 @@ test.describe('Interaction Semantics Test Suite', () => {
     });
     await _page.waitForTimeout(2000);
 
-    // Array to store selected elements
-    const _selectedElements: string[] = [];
+    // Array to store selected elements (not used)
 
     // Click on multiple nodes with Ctrl key (simulate multi-selection)
     const viewport = _page.viewportSize();
@@ -165,7 +158,6 @@ test.describe('Interaction Semantics Test Suite', () => {
       const firstSelection = await _page.evaluate(
         () => (window as any).graph.state.interaction.selectedElementIds || []
       );
-      _selectedElements.push(...firstSelection);
 
       // Second click with Ctrl (add to selection)
       await _page.keyboard.down('Control');
@@ -207,7 +199,7 @@ test.describe('Interaction Semantics Test Suite', () => {
         return (
           nodeRenderer && nodeRenderer.constructor.name === 'InstancedRenderer'
         );
-      } catch (_e) {
+      } catch {
         return false;
       }
     });
@@ -231,7 +223,7 @@ test.describe('Interaction Semantics Test Suite', () => {
           }
         }
         return false;
-      } catch (_e) {
+      } catch {
         return false;
       }
     });
@@ -292,10 +284,7 @@ test.describe('Interaction Semantics Test Suite', () => {
     // Focus the canvas
     await _page.focus('canvas');
 
-    // Get initial selection
-    const _initialSelected = await _page.evaluate(
-      () => (window as any).graph.state.interaction.selectedElementIds || []
-    );
+    // Get initial selection (not used)
 
     // Press Tab to move focus
     await _page.keyboard.press('Tab');
@@ -305,14 +294,8 @@ test.describe('Interaction Semantics Test Suite', () => {
     await _page.keyboard.press('Enter');
     await _page.waitForTimeout(300);
 
-    // Check if selection changed
-    const _finalSelected = await _page.evaluate(
-      () => (window as any).graph.state.interaction.selectedElementIds || []
-    );
+    // Check if selection changed (not used)
 
-    // Log the interaction
-    console.log(
-      `Keyboard navigation: initial=${_initialSelected.join(',')}, final=${_finalSelected.join(',')}`
-    );
+    // Log the interaction (removed unused variables)
   });
 });

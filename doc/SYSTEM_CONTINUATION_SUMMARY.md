@@ -66,26 +66,26 @@ Complete implementation guide for:
 ### 🟡 **High Priority (Week 1-2)**
 
 2. **Implement Enhanced HUDPlugin**
-    - Add REPL console functionality
-    - Implement command system (help, state, nodes, etc.)
-    - Add auto-completion and history navigation
+   - Add REPL console functionality
+   - Implement command system (help, state, nodes, etc.)
+   - Add auto-completion and history navigation
 
 3. **Add GridLayout Engine**
-    - Implement 2D/3D grid positioning
-    - Add configuration options (spacing, dimensions)
-    - Create comprehensive tests
+   - Implement 2D/3D grid positioning
+   - Add configuration options (spacing, dimensions)
+   - Create comprehensive tests
 
 ### 🟢 **Medium Priority (Week 3-4)**
 
 4. **Implement CircleLayout Engine**
-    - Circular and spherical arrangements
-    - Fibonacci spiral distribution for 3D
-    - Configurable radius and center positioning
+   - Circular and spherical arrangements
+   - Fibonacci spiral distribution for 3D
+   - Configurable radius and center positioning
 
 5. **Add Edge Interaction System**
-    - Edge hover effects
-    - Edge selection capabilities
-    - Edge-specific events
+   - Edge hover effects
+   - Edge selection capabilities
+   - Edge-specific events
 
 ## 🎯 Strategic Implementation Approach
 

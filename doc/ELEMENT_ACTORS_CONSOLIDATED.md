@@ -82,7 +82,7 @@ Renders nodes as Three.js SphereGeometry with customizable properties.
 
 ```typescript
 interface NodeSpec {
-  radius?: number;  // Sphere radius (default: 0.5)
+  radius?: number; // Sphere radius (default: 0.5)
 }
 ```
 
@@ -103,9 +103,9 @@ Renders nodes as Three.js BoxGeometry with customizable dimensions and rounded c
 
 ```typescript
 interface BoxNodeSpec extends NodeSpec {
-  width?: number;    // Box width (default: 1.0)
-  height?: number;   // Box height (default: 1.0)  
-  depth?: number;    // Box depth (default: 1.0)
+  width?: number; // Box width (default: 1.0)
+  height?: number; // Box height (default: 1.0)
+  depth?: number; // Box depth (default: 1.0)
   rounded?: boolean; // Use rounded box geometry (default: false)
 }
 ```
@@ -130,16 +130,16 @@ Renders nodes as 3D text labels with advanced text features.
 
 ```typescript
 interface TextNodeSpec extends NodeSpec {
-  text?: string;                 // Text content (defaults to label or ID)
-  font?: string;                 // Font family (default: 'helvetiker')
-  size?: number;                 // Text size (default: 0.5)
-  depth?: number;                // Text depth/extrusion (default: 0.1)
-  color?: string;                // Text color (defaults to node color)
+  text?: string; // Text content (defaults to label or ID)
+  font?: string; // Font family (default: 'helvetiker')
+  size?: number; // Text size (default: 0.5)
+  depth?: number; // Text depth/extrusion (default: 0.1)
+  color?: string; // Text color (defaults to node color)
   align?: 'left' | 'center' | 'right'; // Text alignment (default: 'center')
-  lineHeight?: number;           // Line height for multi-line text (default: 1.2)
-  maxWidth?: number;             // Maximum width for text wrapping (default: Infinity)
-  bold?: boolean;                // Bold text (default: false)
-  italic?: boolean;              // Italic text (default: false)
+  lineHeight?: number; // Line height for multi-line text (default: 1.2)
+  maxWidth?: number; // Maximum width for text wrapping (default: Infinity)
+  bold?: boolean; // Bold text (default: false)
+  italic?: boolean; // Italic text (default: false)
 }
 ```
 
@@ -160,7 +160,7 @@ Renders nodes using custom Three.js geometries from various formats.
 
 ```typescript
 interface CustomGeometryNodeSpec extends NodeSpec {
-  url: string;                    // URL to load the geometry from
+  url: string; // URL to load the geometry from
   format?: 'gltf' | 'glb' | 'obj' | 'fbx' | 'ply' | 'stl'; // Format of the geometry file
   material?: THREE.MaterialParameters; // Material properties for the geometry
 }
@@ -183,7 +183,7 @@ Renders nodes as HTML elements in 3D space.
 
 ```typescript
 interface HtmlNodeSpec extends NodeSpec {
-  content?: string;   // HTML string content to display
+  content?: string; // HTML string content to display
   className?: string; // CSS class name to apply to the node container
 }
 ```
@@ -218,11 +218,11 @@ To create a new element actor type:
 
 1. Extend either `BaseElementActor` or `BaseGeometryActor`
 2. Implement required abstract methods:
-    - `init()`: Create the Three.js object
-    - `getRaycastableObject()`: Return the object for raycasting
-    - `dispose()`: Custom cleanup logic
+   - `init()`: Create the Three.js object
+   - `getRaycastableObject()`: Return the object for raycasting
+   - `dispose()`: Custom cleanup logic
 3. Override optional methods as needed:
-    - `update()`: Handle state changes
+   - `update()`: Handle state changes
 4. Register the actor with `SpaceGraph.registerType()`
 
 ### Example Custom Actor
@@ -232,7 +232,7 @@ class CustomActor extends BaseGeometryActor {
   protected createGeometry(): THREE.BufferGeometry {
     // Create and return the geometry
   }
-  
+
   protected createGlowGeometry(): THREE.BufferGeometry {
     // Create and return the glow geometry (optional override)
   }
@@ -265,9 +265,9 @@ const node: NodeSpec = {
     radius: 0.5,
     glow: {
       color: '#ff0000',
-      strength: 0.8
-    }
-  }
+      strength: 0.8,
+    },
+  },
 };
 ```
 
@@ -277,19 +277,45 @@ const node: NodeSpec = {
 const spec = {
   data: {
     nodes: [
-      { id: '1', type: 'sphere', position: { x: -2, y: 0, z: 0 }, color: '#ff0000' },
-      { id: '2', type: 'box', position: { x: 0, y: 0, z: 0 }, color: '#00ff00' },
-      { id: '3', type: 'text', position: { x: 2, y: 0, z: 0 }, text: 'Hello', color: '#0000ff' },
-      { id: '4', type: 'custom', position: { x: 4, y: 0, z: 0 }, url: '/models/my-model.glb' },
-      { id: '5', type: 'html', position: { x: 6, y: 0, z: 0 }, content: '<div>HTML Node</div>' }
+      {
+        id: '1',
+        type: 'sphere',
+        position: { x: -2, y: 0, z: 0 },
+        color: '#ff0000',
+      },
+      {
+        id: '2',
+        type: 'box',
+        position: { x: 0, y: 0, z: 0 },
+        color: '#00ff00',
+      },
+      {
+        id: '3',
+        type: 'text',
+        position: { x: 2, y: 0, z: 0 },
+        text: 'Hello',
+        color: '#0000ff',
+      },
+      {
+        id: '4',
+        type: 'custom',
+        position: { x: 4, y: 0, z: 0 },
+        url: '/models/my-model.glb',
+      },
+      {
+        id: '5',
+        type: 'html',
+        position: { x: 6, y: 0, z: 0 },
+        content: '<div>HTML Node</div>',
+      },
     ],
     edges: [
       { id: 'e1', source: '1', target: '2' },
       { id: 'e2', source: '2', target: '3' },
       { id: 'e3', source: '3', target: '4' },
-      { id: 'e4', source: '4', target: '5' }
-    ]
-  }
+      { id: 'e4', source: '4', target: '5' },
+    ],
+  },
 };
 ```
 

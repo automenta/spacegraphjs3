@@ -25,7 +25,7 @@ describe('Utility Systems Integration', () => {
     camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
     camera.position.set(0, 0, 10);
 
-        // Mock renderer for testing
+    // Mock renderer for testing
     renderer = {
       domElement: document.createElement('canvas'),
       getSize: () => ({ width: 800, height: 600 }),
@@ -42,7 +42,6 @@ describe('Utility Systems Integration', () => {
     } as any;
 
     // Note: renderer is created but not directly used in tests</search>
-
 
     // Create utility system
     utilitySystem = createUtilitySystem({

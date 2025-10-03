@@ -46,7 +46,8 @@ test.describe('Performance Benchmarking for Ergonomics', () => {
         lastFrameTime = now;
         frameCount++;
 
-        if (frameCount < 300) { // Monitor for 5 seconds at 60fps
+        if (frameCount < 300) {
+          // Monitor for 5 seconds at 60fps
           requestAnimationFrame(frameMonitor);
         }
       };
@@ -107,13 +108,14 @@ test.describe('Performance Benchmarking for Ergonomics', () => {
       }
 
       // Wait for frame monitoring to complete
-      await new Promise(resolve => setTimeout(resolve, 5100));
+      await new Promise((resolve) => setTimeout(resolve, 5100));
 
       // Calculate frame statistics
       if (frameTimes.length > 0) {
-        const avgFrameTime = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length;
+        const avgFrameTime =
+          frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length;
         results.averageFps = 1000 / avgFrameTime;
-        results.frameDrops = frameTimes.filter(time => time > 16.67).length; // Frames over 16.67ms (60fps)
+        results.frameDrops = frameTimes.filter((time) => time > 16.67).length; // Frames over 16.67ms (60fps)
       }
 
       return results;
@@ -122,19 +124,27 @@ test.describe('Performance Benchmarking for Ergonomics', () => {
     expect(benchmarkResults).not.toBeNull();
     if (benchmarkResults) {
       // Camera movement should be very fast (< 10ms)
-      const avgWASDMovement = benchmarkResults.wasdMovement.reduce((a, b) => a + b, 0) / benchmarkResults.wasdMovement.length;
+      const avgWASDMovement =
+        benchmarkResults.wasdMovement.reduce((a, b) => a + b, 0) /
+        benchmarkResults.wasdMovement.length;
       expect(avgWASDMovement).toBeLessThan(10);
 
       // FlyTo animations should complete within expected time bounds
-      const avgFlyToTime = benchmarkResults.flyToAnimations.reduce((a, b) => a + b, 0) / benchmarkResults.flyToAnimations.length;
+      const avgFlyToTime =
+        benchmarkResults.flyToAnimations.reduce((a, b) => a + b, 0) /
+        benchmarkResults.flyToAnimations.length;
       expect(avgFlyToTime).toBeGreaterThan(250); // At least 250ms
       expect(avgFlyToTime).toBeLessThan(500); // Less than 500ms
 
       // Should maintain reasonable frame rate
       expect(benchmarkResults.averageFps).toBeGreaterThan(30);
-      expect(benchmarkResults.frameDrops / benchmarkResults.wasdMovement.length).toBeLessThan(0.2); // Less than 20% frame drops
+      expect(
+        benchmarkResults.frameDrops / benchmarkResults.wasdMovement.length
+      ).toBeLessThan(0.2); // Less than 20% frame drops
 
-      console.log(`Camera Performance - WASD: ${avgWASDMovement.toFixed(2)}ms, FlyTo: ${avgFlyToTime.toFixed(2)}ms, FPS: ${benchmarkResults.averageFps.toFixed(1)}, Frame drops: ${benchmarkResults.frameDrops}`);
+      console.log(
+        `Camera Performance - WASD: ${avgWASDMovement.toFixed(2)}ms, FlyTo: ${avgFlyToTime.toFixed(2)}ms, FPS: ${benchmarkResults.averageFps.toFixed(1)}, Frame drops: ${benchmarkResults.frameDrops}`
+      );
     }
   });
 
@@ -169,7 +179,8 @@ test.describe('Performance Benchmarking for Ergonomics', () => {
         lastFrameTime = now;
         frameCount++;
 
-        if (frameCount < 180) { // Monitor for 3 seconds
+        if (frameCount < 180) {
+          // Monitor for 3 seconds
           requestAnimationFrame(frameMonitor);
         }
       };
@@ -182,11 +193,11 @@ test.describe('Performance Benchmarking for Ergonomics', () => {
 
         // Simulate hover by updating interaction state
         graph.update({
-          interaction: { hoveredElementId: nodes[i].id }
+          interaction: { hoveredElementId: nodes[i].id },
         });
 
         // Wait a bit for processing
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise((resolve) => setTimeout(resolve, 10));
 
         const endTime = performance.now();
         results.hoverResponseTimes.push(endTime - startTime);
@@ -197,29 +208,34 @@ test.describe('Performance Benchmarking for Ergonomics', () => {
         const startTime = performance.now();
 
         // Simulate click by updating selection
-        const currentSelection = graph.state.interaction?.selectedElementIds || [];
+        const currentSelection =
+          graph.state.interaction?.selectedElementIds || [];
         graph.update({
-          interaction: { selectedElementIds: [...currentSelection, nodes[i].id] }
+          interaction: {
+            selectedElementIds: [...currentSelection, nodes[i].id],
+          },
         });
 
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise((resolve) => setTimeout(resolve, 10));
 
         const endTime = performance.now();
         results.clickResponseTimes.push(endTime - startTime);
       }
 
       // Wait for monitoring to complete
-      await new Promise(resolve => setTimeout(resolve, 3100));
+      await new Promise((resolve) => setTimeout(resolve, 3100));
 
       // Calculate results
       if (frameTimes.length > 0) {
-        const avgFrameTime = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length;
+        const avgFrameTime =
+          frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length;
         results.averageFps = 1000 / avgFrameTime;
       }
 
       // Memory usage (if available)
       if ('memory' in performance) {
-        results.memoryUsage = (performance as any).memory.usedJSHeapSize / 1024 / 1024; // MB
+        results.memoryUsage =
+          (performance as any).memory.usedJSHeapSize / 1024 / 1024; // MB
       }
 
       return results;
@@ -228,17 +244,23 @@ test.describe('Performance Benchmarking for Ergonomics', () => {
     expect(benchmarkResults).not.toBeNull();
     if (benchmarkResults) {
       // Hover should be very responsive
-      const avgHoverTime = benchmarkResults.hoverResponseTimes.reduce((a, b) => a + b, 0) / benchmarkResults.hoverResponseTimes.length;
+      const avgHoverTime =
+        benchmarkResults.hoverResponseTimes.reduce((a, b) => a + b, 0) /
+        benchmarkResults.hoverResponseTimes.length;
       expect(avgHoverTime).toBeLessThan(20);
 
       // Click should be reasonably responsive
-      const avgClickTime = benchmarkResults.clickResponseTimes.reduce((a, b) => a + b, 0) / benchmarkResults.clickResponseTimes.length;
+      const avgClickTime =
+        benchmarkResults.clickResponseTimes.reduce((a, b) => a + b, 0) /
+        benchmarkResults.clickResponseTimes.length;
       expect(avgClickTime).toBeLessThan(50);
 
       // Should maintain good frame rate during interactions
       expect(benchmarkResults.averageFps).toBeGreaterThan(40);
 
-      console.log(`Interaction Performance - Hover: ${avgHoverTime.toFixed(2)}ms, Click: ${avgClickTime.toFixed(2)}ms, FPS: ${benchmarkResults.averageFps.toFixed(1)}, Memory: ${benchmarkResults.memoryUsage.toFixed(1)}MB`);
+      console.log(
+        `Interaction Performance - Hover: ${avgHoverTime.toFixed(2)}ms, Click: ${avgClickTime.toFixed(2)}ms, FPS: ${benchmarkResults.averageFps.toFixed(1)}, Memory: ${benchmarkResults.memoryUsage.toFixed(1)}MB`
+      );
     }
   });
 
@@ -279,27 +301,32 @@ test.describe('Performance Benchmarking for Ergonomics', () => {
         const elapsed = now - startMonitorTime;
 
         if (frameCount > 1) {
-          frameTimes.push(performance.now() - startMonitorTime - ((frameCount - 1) * 16.67));
+          frameTimes.push(
+            performance.now() - startMonitorTime - (frameCount - 1) * 16.67
+          );
         }
 
-        if (elapsed < 2000) { // Monitor for 2 seconds
+        if (elapsed < 2000) {
+          // Monitor for 2 seconds
           requestAnimationFrame(monitorFrames);
         }
       };
       requestAnimationFrame(monitorFrames);
 
       // Wait for monitoring
-      await new Promise(resolve => setTimeout(resolve, 2100));
+      await new Promise((resolve) => setTimeout(resolve, 2100));
 
       // Calculate performance metrics
       if (frameTimes.length > 0) {
-        results.averageFrameTime = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length;
+        results.averageFrameTime =
+          frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length;
         results.fps = 1000 / results.averageFrameTime;
       }
 
       // Memory usage
       if ('memory' in performance) {
-        results.memoryUsage = (performance as any).memory.usedJSHeapSize / 1024 / 1024;
+        results.memoryUsage =
+          (performance as any).memory.usedJSHeapSize / 1024 / 1024;
       }
 
       return results;
@@ -311,7 +338,9 @@ test.describe('Performance Benchmarking for Ergonomics', () => {
       expect(performanceResults.fps).toBeGreaterThan(20); // At least 20 FPS for large graphs
       expect(performanceResults.averageFrameTime).toBeLessThan(50); // Less than 50ms frame time
 
-      console.log(`Large Graph Performance - Nodes: ${performanceResults.nodeCount}, Edges: ${performanceResults.edgeCount}, FPS: ${performanceResults.fps.toFixed(1)}, Memory: ${performanceResults.memoryUsage.toFixed(1)}MB`);
+      console.log(
+        `Large Graph Performance - Nodes: ${performanceResults.nodeCount}, Edges: ${performanceResults.edgeCount}, FPS: ${performanceResults.fps.toFixed(1)}, Memory: ${performanceResults.memoryUsage.toFixed(1)}MB`
+      );
     }
   });
 
@@ -348,7 +377,8 @@ test.describe('Performance Benchmarking for Ergonomics', () => {
           frameTimes.push(now);
         }
 
-        if (frameTimes.length < 120) { // Monitor for ~2 seconds
+        if (frameTimes.length < 120) {
+          // Monitor for ~2 seconds
           requestAnimationFrame(monitorFrames);
         } else {
           monitoring = false;
@@ -360,15 +390,18 @@ test.describe('Performance Benchmarking for Ergonomics', () => {
       const flyToStart = performance.now();
 
       await new Promise<void>((resolve) => {
-        graph.cameraPlugin.flyTo({
-          target: { x: 10, y: 0, z: 0 },
-          distance: 35,
-          phi: Math.PI / 4,
-          theta: Math.PI / 6,
-        }, {
-          duration: 800,
-          onComplete: () => resolve(),
-        });
+        graph.cameraPlugin.flyTo(
+          {
+            target: { x: 10, y: 0, z: 0 },
+            distance: 35,
+            phi: Math.PI / 4,
+            theta: Math.PI / 6,
+          },
+          {
+            duration: 800,
+            onComplete: () => resolve(),
+          }
+        );
       });
 
       const flyToEnd = performance.now();
@@ -376,7 +409,7 @@ test.describe('Performance Benchmarking for Ergonomics', () => {
 
       // Wait for frame monitoring to complete
       while (monitoring) {
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise((resolve) => setTimeout(resolve, 10));
       }
 
       // Calculate FPS during animation
@@ -395,14 +428,18 @@ test.describe('Performance Benchmarking for Ergonomics', () => {
     expect(animationResults).not.toBeNull();
     if (animationResults) {
       // Animation should complete within expected time
-      const avgTweenTime = animationResults.tweenPerformance.reduce((a, b) => a + b, 0) / animationResults.tweenPerformance.length;
+      const avgTweenTime =
+        animationResults.tweenPerformance.reduce((a, b) => a + b, 0) /
+        animationResults.tweenPerformance.length;
       expect(avgTweenTime).toBeGreaterThan(700); // At least 700ms
       expect(avgTweenTime).toBeLessThan(1200); // Less than 1200ms
 
       // Should maintain good FPS during animation
       expect(animationResults.fpsDuringAnimation).toBeGreaterThan(30);
 
-      console.log(`Animation Performance - Tween: ${avgTweenTime.toFixed(2)}ms, FPS during animation: ${animationResults.fpsDuringAnimation.toFixed(1)}`);
+      console.log(
+        `Animation Performance - Tween: ${avgTweenTime.toFixed(2)}ms, FPS during animation: ${animationResults.fpsDuringAnimation.toFixed(1)}`
+      );
     }
   });
 
@@ -431,9 +468,9 @@ test.describe('Performance Benchmarking for Ergonomics', () => {
       const graph = (window as any).graph;
       for (let i = 0; i < 50; i++) {
         graph.update({
-          interaction: { hoveredElementId: `node-${i % 10}` }
+          interaction: { hoveredElementId: `node-${i % 10}` },
         });
-        await new Promise(resolve => setTimeout(resolve, 5));
+        await new Promise((resolve) => setTimeout(resolve, 5));
       }
 
       results.afterInteractions = mem.usedJSHeapSize / 1024 / 1024;
@@ -441,7 +478,7 @@ test.describe('Performance Benchmarking for Ergonomics', () => {
       // Force garbage collection if available
       if ('gc' in window) {
         (window as any).gc();
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
 
       results.afterCleanup = mem.usedJSHeapSize / 1024 / 1024;
@@ -454,7 +491,9 @@ test.describe('Performance Benchmarking for Ergonomics', () => {
       // Memory leak should be minimal
       expect(memoryResults.memoryLeak).toBeLessThan(10); // Less than 10MB leak
 
-      console.log(`Memory Usage - Initial: ${memoryResults.initialMemory.toFixed(1)}MB, After interactions: ${memoryResults.afterInteractions.toFixed(1)}MB, After cleanup: ${memoryResults.afterCleanup.toFixed(1)}MB, Leak: ${memoryResults.memoryLeak.toFixed(1)}MB`);
+      console.log(
+        `Memory Usage - Initial: ${memoryResults.initialMemory.toFixed(1)}MB, After interactions: ${memoryResults.afterInteractions.toFixed(1)}MB, After cleanup: ${memoryResults.afterCleanup.toFixed(1)}MB, Leak: ${memoryResults.memoryLeak.toFixed(1)}MB`
+      );
     }
   });
 });

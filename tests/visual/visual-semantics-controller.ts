@@ -414,7 +414,10 @@ export class VisualSemanticsController {
    * @param fn Function to evaluate
    * @param options Wait options
    */
-  async waitForFunction(fn: () => any, options?: { timeout?: number }): Promise<void> {
+  async waitForFunction(
+    fn: () => any,
+    options?: { timeout?: number }
+  ): Promise<void> {
     this.ensureInitialized();
     await this.page!.waitForFunction(fn, options);
   }

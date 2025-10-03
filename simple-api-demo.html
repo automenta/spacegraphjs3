@@ -1,333 +1,343 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SpaceGraph - Simplified Getting Started API Demo</title>
     <style>
-        body {
-            margin: 0;
-            padding: 20px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
-        }
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #f5f5f5;
+      }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
 
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
 
-        .demo-section {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
+      .demo-section {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
 
-        .graph-container {
-            width: 100%;
-            height: 400px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background: #fafafa;
-        }
+      .graph-container {
+        width: 100%;
+        height: 400px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: #fafafa;
+      }
 
-        .controls {
-            margin-top: 15px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
+      .controls {
+        margin-top: 15px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
 
-        button {
-            padding: 8px 16px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-        }
+      button {
+        padding: 8px 16px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+      }
 
-        button:hover {
-            background: #0056b3;
-        }
+      button:hover {
+        background: #0056b3;
+      }
 
-        button.secondary {
-            background: #6c757d;
-        }
+      button.secondary {
+        background: #6c757d;
+      }
 
-        button.secondary:hover {
-            background: #545b62;
-        }
+      button.secondary:hover {
+        background: #545b62;
+      }
 
-        .code-block {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 4px;
-            padding: 15px;
-            margin: 15px 0;
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-            font-size: 14px;
-            overflow-x: auto;
-        }
+      .code-block {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 4px;
+        padding: 15px;
+        margin: 15px 0;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: 14px;
+        overflow-x: auto;
+      }
 
-        .feature-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
-        }
+      .feature-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+      }
 
-        .feature-item {
-            background: #e9ecef;
-            padding: 15px;
-            border-radius: 4px;
-            border-left: 4px solid #007bff;
-        }
+      .feature-item {
+        background: #e9ecef;
+        padding: 15px;
+        border-radius: 4px;
+        border-left: 4px solid #007bff;
+      }
 
-        .feature-item h4 {
-            margin: 0 0 10px 0;
-            color: #007bff;
-        }
+      .feature-item h4 {
+        margin: 0 0 10px 0;
+        color: #007bff;
+      }
 
-        .feature-item p {
-            margin: 0;
-            font-size: 14px;
-        }
+      .feature-item p {
+        margin: 0;
+        font-size: 14px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <div class="header">
-            <h1>🚀 SpaceGraph - Simplified Getting Started API</h1>
-            <p>Create beautiful 3D graph visualizations with just a few lines of code!</p>
+      <div class="header">
+        <h1>🚀 SpaceGraph - Simplified Getting Started API</h1>
+        <p>
+          Create beautiful 3D graph visualizations with just a few lines of
+          code!
+        </p>
+      </div>
+
+      <div class="feature-list">
+        <div class="feature-item">
+          <h4>✨ Auto-Setup</h4>
+          <p>
+            Automatic BVH acceleration, default plugins, and smart defaults -
+            just provide your data!
+          </p>
+        </div>
+        <div class="feature-item">
+          <h4>🎯 Smart Layouts</h4>
+          <p>
+            Auto-selects the best layout based on your data size, or specify
+            your preference.
+          </p>
+        </div>
+        <div class="feature-item">
+          <h4>📷 Zero-Config Camera</h4>
+          <p>Intelligent camera positioning that frames your data perfectly.</p>
+        </div>
+        <div class="feature-item">
+          <h4>🎨 Default Styling</h4>
+          <p>
+            Beautiful default color schemes and hover effects out of the box.
+          </p>
+        </div>
+      </div>
+
+      <div class="demo-section">
+        <h2>Simple Graph Demo</h2>
+        <p>
+          This demonstrates creating a basic graph with just nodes and edges.
+        </p>
+
+        <div class="code-block">
+          // Create a simple graph with automatic setup const graph =
+          SpaceGraph.create({ nodes: [ { id: '1', type: 'sphere', label: 'Node
+          1', position: { x: 0, y: 0, z: 0 } }, { id: '2', type: 'sphere',
+          label: 'Node 2', position: { x: 10, y: 0, z: 0 } }, { id: '3', type:
+          'sphere', label: 'Node 3', position: { x: 5, y: 10, z: 0 } }, ],
+          edges: [ { id: 'e1', source: '1', target: '2', color: '#ff6b6b' }, {
+          id: 'e2', source: '2', target: '3', color: '#4ecdc4' }, { id: 'e3',
+          source: '3', target: '1', color: '#45b7d1' }, ], container:
+          '#simple-graph', });
         </div>
 
-        <div class="feature-list">
-            <div class="feature-item">
-                <h4>✨ Auto-Setup</h4>
-                <p>Automatic BVH acceleration, default plugins, and smart defaults - just provide your data!</p>
-            </div>
-            <div class="feature-item">
-                <h4>🎯 Smart Layouts</h4>
-                <p>Auto-selects the best layout based on your data size, or specify your preference.</p>
-            </div>
-            <div class="feature-item">
-                <h4>📷 Zero-Config Camera</h4>
-                <p>Intelligent camera positioning that frames your data perfectly.</p>
-            </div>
-            <div class="feature-item">
-                <h4>🎨 Default Styling</h4>
-                <p>Beautiful default color schemes and hover effects out of the box.</p>
-            </div>
+        <div id="simple-graph" class="graph-container"></div>
+
+        <div class="controls">
+          <button onclick="createSimpleGraph()">Create Simple Graph</button>
+          <button onclick="clearGraph('simple-graph')" class="secondary">
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <div class="demo-section">
+        <h2>Large Graph Demo</h2>
+        <p>
+          This shows how the API automatically handles larger datasets with
+          appropriate optimizations.
+        </p>
+
+        <div class="code-block">
+          // Large graph with 100 nodes automatically uses grid layout and basic
+          renderer const largeGraph = SpaceGraph.create({ nodes: Array.from({
+          length: 100 }, (_, i) => ({ id: `node-${i}`, type: 'sphere', label:
+          `Node ${i}`, })), edges: Array.from({ length: 150 }, (_, i) => ({ id:
+          `edge-${i}`, source: `node-${Math.floor(Math.random() * 100)}`,
+          target: `node-${(Math.floor(Math.random() * 100) + 1) % 100}`, })),
+          layout: 'grid', // Explicitly choose grid for large datasets
+          useBasicRenderer: true, // Better performance for large graphs
+          container: '#large-graph', });
         </div>
 
-        <div class="demo-section">
-            <h2>Simple Graph Demo</h2>
-            <p>This demonstrates creating a basic graph with just nodes and edges.</p>
+        <div id="large-graph" class="graph-container"></div>
 
-            <div class="code-block">
-// Create a simple graph with automatic setup
-const graph = SpaceGraph.create({
-  nodes: [
-    { id: '1', type: 'sphere', label: 'Node 1', position: { x: 0, y: 0, z: 0 } },
-    { id: '2', type: 'sphere', label: 'Node 2', position: { x: 10, y: 0, z: 0 } },
-    { id: '3', type: 'sphere', label: 'Node 3', position: { x: 5, y: 10, z: 0 } },
-  ],
-  edges: [
-    { id: 'e1', source: '1', target: '2', color: '#ff6b6b' },
-    { id: 'e2', source: '2', target: '3', color: '#4ecdc4' },
-    { id: 'e3', source: '3', target: '1', color: '#45b7d1' },
-  ],
-  container: '#simple-graph',
-});
-            </div>
+        <div class="controls">
+          <button onclick="createLargeGraph()">Create Large Graph</button>
+          <button onclick="clearGraph('large-graph')" class="secondary">
+            Clear
+          </button>
+        </div>
+      </div>
 
-            <div id="simple-graph" class="graph-container"></div>
+      <div class="demo-section">
+        <h2>Custom Styling Demo</h2>
+        <p>Override default styles while still benefiting from auto-setup.</p>
 
-            <div class="controls">
-                <button onclick="createSimpleGraph()">Create Simple Graph</button>
-                <button onclick="clearGraph('simple-graph')" class="secondary">Clear</button>
-            </div>
+        <div class="code-block">
+          // Custom styling with auto-setup const customGraph =
+          SpaceGraph.create({ nodes: [ { id: 'a', type: 'sphere', label: 'A' },
+          { id: 'b', type: 'sphere', label: 'B' }, { id: 'c', type: 'sphere',
+          label: 'C' }, ], edges: [ { id: 'ab', source: 'a', target: 'b' }, {
+          id: 'bc', source: 'b', target: 'c' }, { id: 'ca', source: 'c', target:
+          'a' }, ], style: { 'node:hover': { color: '#ff0000', glow: { color:
+          '#ff0000', strength: 1.0 }, }, 'edge:selected': { color: '#00ff00',
+          width: 5, }, }, camera: { distance: 30, }, container: '#custom-graph',
+          });
         </div>
 
-        <div class="demo-section">
-            <h2>Large Graph Demo</h2>
-            <p>This shows how the API automatically handles larger datasets with appropriate optimizations.</p>
+        <div id="custom-graph" class="graph-container"></div>
 
-            <div class="code-block">
-// Large graph with 100 nodes automatically uses grid layout and basic renderer
-const largeGraph = SpaceGraph.create({
-  nodes: Array.from({ length: 100 }, (_, i) => ({
-    id: `node-${i}`,
-    type: 'sphere',
-    label: `Node ${i}`,
-  })),
-  edges: Array.from({ length: 150 }, (_, i) => ({
-    id: `edge-${i}`,
-    source: `node-${Math.floor(Math.random() * 100)}`,
-    target: `node-${(Math.floor(Math.random() * 100) + 1) % 100}`,
-  })),
-  layout: 'grid', // Explicitly choose grid for large datasets
-  useBasicRenderer: true, // Better performance for large graphs
-  container: '#large-graph',
-});
-            </div>
-
-            <div id="large-graph" class="graph-container"></div>
-
-            <div class="controls">
-                <button onclick="createLargeGraph()">Create Large Graph</button>
-                <button onclick="clearGraph('large-graph')" class="secondary">Clear</button>
-            </div>
+        <div class="controls">
+          <button onclick="createCustomGraph()">Create Custom Graph</button>
+          <button onclick="clearGraph('custom-graph')" class="secondary">
+            Clear
+          </button>
         </div>
-
-        <div class="demo-section">
-            <h2>Custom Styling Demo</h2>
-            <p>Override default styles while still benefiting from auto-setup.</p>
-
-            <div class="code-block">
-// Custom styling with auto-setup
-const customGraph = SpaceGraph.create({
-  nodes: [
-    { id: 'a', type: 'sphere', label: 'A' },
-    { id: 'b', type: 'sphere', label: 'B' },
-    { id: 'c', type: 'sphere', label: 'C' },
-  ],
-  edges: [
-    { id: 'ab', source: 'a', target: 'b' },
-    { id: 'bc', source: 'b', target: 'c' },
-    { id: 'ca', source: 'c', target: 'a' },
-  ],
-  style: {
-    'node:hover': {
-      color: '#ff0000',
-      glow: { color: '#ff0000', strength: 1.0 },
-    },
-    'edge:selected': {
-      color: '#00ff00',
-      width: 5,
-    },
-  },
-  camera: {
-    distance: 30,
-  },
-  container: '#custom-graph',
-});
-            </div>
-
-            <div id="custom-graph" class="graph-container"></div>
-
-            <div class="controls">
-                <button onclick="createCustomGraph()">Create Custom Graph</button>
-                <button onclick="clearGraph('custom-graph')" class="secondary">Clear</button>
-            </div>
-        </div>
+      </div>
     </div>
 
     <script type="module">
-        import { SpaceGraph } from './src/index.ts';
+      import { SpaceGraph } from './src/index.ts';
 
-        let graphs = new Map();
+      let graphs = new Map();
 
-        window.createSimpleGraph = async function() {
-            if (graphs.has('simple')) {
-                graphs.get('simple').destroy();
-            }
+      window.createSimpleGraph = async function () {
+        if (graphs.has('simple')) {
+          graphs.get('simple').destroy();
+        }
 
-            const graph = SpaceGraph.create({
-                nodes: [
-                    { id: '1', type: 'sphere', label: 'Node 1', position: { x: 0, y: 0, z: 0 } },
-                    { id: '2', type: 'sphere', label: 'Node 2', position: { x: 10, y: 0, z: 0 } },
-                    { id: '3', type: 'sphere', label: 'Node 3', position: { x: 5, y: 10, z: 0 } },
-                ],
-                edges: [
-                    { id: 'e1', source: '1', target: '2', color: '#ff6b6b' },
-                    { id: 'e2', source: '2', target: '3', color: '#4ecdc4' },
-                    { id: 'e3', source: '3', target: '1', color: '#45b7d1' },
-                ],
-                container: '#simple-graph',
-            });
+        const graph = SpaceGraph.create({
+          nodes: [
+            {
+              id: '1',
+              type: 'sphere',
+              label: 'Node 1',
+              position: { x: 0, y: 0, z: 0 },
+            },
+            {
+              id: '2',
+              type: 'sphere',
+              label: 'Node 2',
+              position: { x: 10, y: 0, z: 0 },
+            },
+            {
+              id: '3',
+              type: 'sphere',
+              label: 'Node 3',
+              position: { x: 5, y: 10, z: 0 },
+            },
+          ],
+          edges: [
+            { id: 'e1', source: '1', target: '2', color: '#ff6b6b' },
+            { id: 'e2', source: '2', target: '3', color: '#4ecdc4' },
+            { id: 'e3', source: '3', target: '1', color: '#45b7d1' },
+          ],
+          container: '#simple-graph',
+        });
 
-            graphs.set('simple', graph);
-            console.log('Simple graph created!');
-        };
+        graphs.set('simple', graph);
+        console.log('Simple graph created!');
+      };
 
-        window.createLargeGraph = async function() {
-            if (graphs.has('large')) {
-                graphs.get('large').destroy();
-            }
+      window.createLargeGraph = async function () {
+        if (graphs.has('large')) {
+          graphs.get('large').destroy();
+        }
 
-            const graph = SpaceGraph.create({
-                nodes: Array.from({ length: 100 }, (_, i) => ({
-                    id: `node-${i}`,
-                    type: 'sphere',
-                    label: `Node ${i}`,
-                })),
-                edges: Array.from({ length: 150 }, (_, i) => ({
-                    id: `edge-${i}`,
-                    source: `node-${Math.floor(Math.random() * 100)}`,
-                    target: `node-${(Math.floor(Math.random() * 100) + 1) % 100}`,
-                })),
-                layout: 'grid',
-                useBasicRenderer: true,
-                container: '#large-graph',
-            });
+        const graph = SpaceGraph.create({
+          nodes: Array.from({ length: 100 }, (_, i) => ({
+            id: `node-${i}`,
+            type: 'sphere',
+            label: `Node ${i}`,
+          })),
+          edges: Array.from({ length: 150 }, (_, i) => ({
+            id: `edge-${i}`,
+            source: `node-${Math.floor(Math.random() * 100)}`,
+            target: `node-${(Math.floor(Math.random() * 100) + 1) % 100}`,
+          })),
+          layout: 'grid',
+          useBasicRenderer: true,
+          container: '#large-graph',
+        });
 
-            graphs.set('large', graph);
-            console.log('Large graph created!');
-        };
+        graphs.set('large', graph);
+        console.log('Large graph created!');
+      };
 
-        window.createCustomGraph = async function() {
-            if (graphs.has('custom')) {
-                graphs.get('custom').destroy();
-            }
+      window.createCustomGraph = async function () {
+        if (graphs.has('custom')) {
+          graphs.get('custom').destroy();
+        }
 
-            const graph = SpaceGraph.create({
-                nodes: [
-                    { id: 'a', type: 'sphere', label: 'A' },
-                    { id: 'b', type: 'sphere', label: 'B' },
-                    { id: 'c', type: 'sphere', label: 'C' },
-                ],
-                edges: [
-                    { id: 'ab', source: 'a', target: 'b' },
-                    { id: 'bc', source: 'b', target: 'c' },
-                    { id: 'ca', source: 'c', target: 'a' },
-                ],
-                style: {
-                    'node:hover': {
-                        color: '#ff0000',
-                        glow: { color: '#ff0000', strength: 1.0 },
-                    },
-                    'edge:selected': {
-                        color: '#00ff00',
-                        width: 5,
-                    },
-                },
-                camera: {
-                    distance: 30,
-                },
-                container: '#custom-graph',
-            });
+        const graph = SpaceGraph.create({
+          nodes: [
+            { id: 'a', type: 'sphere', label: 'A' },
+            { id: 'b', type: 'sphere', label: 'B' },
+            { id: 'c', type: 'sphere', label: 'C' },
+          ],
+          edges: [
+            { id: 'ab', source: 'a', target: 'b' },
+            { id: 'bc', source: 'b', target: 'c' },
+            { id: 'ca', source: 'c', target: 'a' },
+          ],
+          style: {
+            'node:hover': {
+              color: '#ff0000',
+              glow: { color: '#ff0000', strength: 1.0 },
+            },
+            'edge:selected': {
+              color: '#00ff00',
+              width: 5,
+            },
+          },
+          camera: {
+            distance: 30,
+          },
+          container: '#custom-graph',
+        });
 
-            graphs.set('custom', graph);
-            console.log('Custom graph created!');
-        };
+        graphs.set('custom', graph);
+        console.log('Custom graph created!');
+      };
 
-        window.clearGraph = function(containerId) {
-            const graph = graphs.get(containerId.replace('#', '').replace('-graph', ''));
-            if (graph) {
-                graph.destroy();
-                graphs.delete(containerId.replace('#', '').replace('-graph', ''));
-            }
-        };
+      window.clearGraph = function (containerId) {
+        const graph = graphs.get(
+          containerId.replace('#', '').replace('-graph', '')
+        );
+        if (graph) {
+          graph.destroy();
+          graphs.delete(containerId.replace('#', '').replace('-graph', ''));
+        }
+      };
     </script>
-</body>
+  </body>
 </html>

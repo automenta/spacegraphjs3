@@ -1,65 +1,67 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>SpaceGraphJS - Element Actors Demo</title>
-  <style>
+  <head>
+    <meta charset="UTF-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>SpaceGraphJS - Element Actors Demo</title>
+    <style>
       body {
-          margin: 0;
-          padding: 0;
-          overflow: hidden;
-          font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
       }
 
       #controls {
-          position: absolute;
-          top: 10px;
-          left: 10px;
-          z-index: 100;
-          background: rgba(0, 0, 0, 0.7);
-          padding: 10px;
-          border-radius: 5px;
-          color: white;
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 100;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 10px;
+        border-radius: 5px;
+        color: white;
       }
 
       #controls button {
-          margin: 5px;
-          padding: 5px 10px;
-          border: none;
-          border-radius: 3px;
-          background: #4a4a4a;
-          color: white;
-          cursor: pointer;
+        margin: 5px;
+        padding: 5px 10px;
+        border: none;
+        border-radius: 3px;
+        background: #4a4a4a;
+        color: white;
+        cursor: pointer;
       }
 
       #controls button:hover {
-          background: #6a6a6a;
+        background: #6a6a6a;
       }
 
       #controls button.active {
-          background: #007acc;
+        background: #007acc;
       }
-  </style>
-</head>
-<body>
-<div id="controls">
-  <h3>Element Actors Demo</h3>
-  <p>Filter by actor type:</p>
-  <button class="active" id="all">All Types</button>
-  <button id="sphere">Spheres</button>
-  <button id="box">Boxes</button>
-  <button id="text">Text</button>
-  <button id="custom">Custom Geometry</button>
-  <p>Click and drag to rotate view<br>
-    Scroll to zoom in/out</p>
-</div>
-<div id="graph"></div>
+    </style>
+  </head>
+  <body>
+    <div id="controls">
+      <h3>Element Actors Demo</h3>
+      <p>Filter by actor type:</p>
+      <button class="active" id="all">All Types</button>
+      <button id="sphere">Spheres</button>
+      <button id="box">Boxes</button>
+      <button id="text">Text</button>
+      <button id="custom">Custom Geometry</button>
+      <p>
+        Click and drag to rotate view<br />
+        Scroll to zoom in/out
+      </p>
+    </div>
+    <div id="graph"></div>
 
-<script type="module">
-  import init from './element-actors-demo.ts';
+    <script type="module">
+      import init from './element-actors-demo.ts';
 
-  init();
-</script>
-</body>
+      init();
+    </script>
+  </body>
 </html>

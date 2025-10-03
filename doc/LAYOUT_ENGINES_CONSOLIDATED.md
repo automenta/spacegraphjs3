@@ -24,9 +24,9 @@ A physics-based layout that simulates forces between nodes to create organic-loo
 ```typescript
 interface ForceDirectedLayoutSpec {
   type: 'force-directed';
-  charge?: number;        // Repulsive force between nodes (default: -30)
-  linkDistance?: number;  // Optimal distance between linked nodes (default: 30)
-  linkStrength?: number;  // Strength of the link force (default: 1)
+  charge?: number; // Repulsive force between nodes (default: -30)
+  linkDistance?: number; // Optimal distance between linked nodes (default: 30)
+  linkStrength?: number; // Strength of the link force (default: 1)
 }
 ```
 
@@ -46,8 +46,8 @@ const spec = {
     type: 'force-directed',
     charge: -50,
     linkDistance: 20,
-    linkStrength: 0.5
-  }
+    linkStrength: 0.5,
+  },
 };
 ```
 
@@ -68,11 +68,11 @@ Arranges nodes in a 2D or 3D grid pattern for structured layouts.
 ```typescript
 interface GridLayoutSpec {
   type: 'grid';
-  dimensions?: 2 | 3;                    // 2D or 3D grid (default: 2)
-  spacing?: number;                      // Distance between nodes (default: 5)
-  columns?: number;                      // Number of columns (auto-calculated if not specified)
-  rows?: number;                         // Number of rows (auto-calculated if not specified)
-  depth?: number;                        // Number of depth layers for 3D (auto-calculated if not specified)
+  dimensions?: 2 | 3; // 2D or 3D grid (default: 2)
+  spacing?: number; // Distance between nodes (default: 5)
+  columns?: number; // Number of columns (auto-calculated if not specified)
+  rows?: number; // Number of rows (auto-calculated if not specified)
+  depth?: number; // Number of depth layers for 3D (auto-calculated if not specified)
   origin?: { x: number; y: number; z: number }; // Starting position (default: { x: 0, y: 0, z: 0 })
   axisOrder?: ['x' | 'y' | 'z', 'x' | 'y' | 'z', 'x' | 'y' | 'z']; // Traversal order (default: ['x', 'y', 'z'])
 }
@@ -87,8 +87,8 @@ const spec = {
     dimensions: 2,
     spacing: 5,
     columns: 4,
-    origin: { x: 0, y: 0, z: 0 }
-  }
+    origin: { x: 0, y: 0, z: 0 },
+  },
 };
 ```
 
@@ -109,12 +109,12 @@ Arranges nodes in a circular or spherical pattern.
 ```typescript
 interface CircleLayoutSpec {
   type: 'circle';
-  radius?: number;                       // Circle/sphere radius (default: 10)
-  dimensions?: 2 | 3;                    // 2D circle or 3D sphere (default: 2)
+  radius?: number; // Circle/sphere radius (default: 10)
+  dimensions?: 2 | 3; // 2D circle or 3D sphere (default: 2)
   center?: { x: number; y: number; z: number }; // Center position (default: { x: 0, y: 0, z: 0 })
-  startAngle?: number;                   // Starting angle in radians (default: 0)
+  startAngle?: number; // Starting angle in radians (default: 0)
   direction?: 'clockwise' | 'counterclockwise'; // Direction of node placement (default: 'clockwise')
-  distribution?: 'equal' | 'random';     // How to distribute nodes (default: 'equal')
+  distribution?: 'equal' | 'random'; // How to distribute nodes (default: 'equal')
 }
 ```
 
@@ -127,8 +127,8 @@ const spec = {
     radius: 15,
     dimensions: 3,
     center: { x: 0, y: 0, z: 0 },
-    startAngle: Math.PI / 2
-  }
+    startAngle: Math.PI / 2,
+  },
 };
 ```
 
@@ -149,11 +149,11 @@ Arranges nodes in vertical columns for structured vertical organization.
 ```typescript
 interface ColumnLayoutSpec {
   type: 'column';
-  spacing?: number;                      // Vertical spacing between nodes (default: 3)
-  columns?: number;                      // Number of columns (auto-calculated if not specified)
-  columnSpacing?: number;                // Horizontal spacing between columns (default: 8)
+  spacing?: number; // Vertical spacing between nodes (default: 3)
+  columns?: number; // Number of columns (auto-calculated if not specified)
+  columnSpacing?: number; // Horizontal spacing between columns (default: 8)
   origin?: { x: number; y: number; z: number }; // Starting position (default: { x: 0, y: 0, z: 0 })
-  maxNodesPerColumn?: number;            // Maximum nodes per column (no limit if not specified)
+  maxNodesPerColumn?: number; // Maximum nodes per column (no limit if not specified)
 }
 ```
 
@@ -166,8 +166,8 @@ const spec = {
     spacing: 4,
     columns: 3,
     columnSpacing: 10,
-    origin: { x: 0, y: 0, z: 0 }
-  }
+    origin: { x: 0, y: 0, z: 0 },
+  },
 };
 ```
 
@@ -188,11 +188,11 @@ Arranges nodes in horizontal rows for structured horizontal organization.
 ```typescript
 interface RowLayoutSpec {
   type: 'row';
-  spacing?: number;                      // Horizontal spacing between nodes (default: 4)
-  rows?: number;                         // Number of rows (auto-calculated if not specified)
-  rowSpacing?: number;                   // Vertical spacing between rows (default: 6)
+  spacing?: number; // Horizontal spacing between nodes (default: 4)
+  rows?: number; // Number of rows (auto-calculated if not specified)
+  rowSpacing?: number; // Vertical spacing between rows (default: 6)
   origin?: { x: number; y: number; z: number }; // Starting position (default: { x: 0, y: 0, z: 0 })
-  maxNodesPerRow?: number;               // Maximum nodes per row (no limit if not specified)
+  maxNodesPerRow?: number; // Maximum nodes per row (no limit if not specified)
 }
 ```
 
@@ -205,8 +205,8 @@ const spec = {
     spacing: 5,
     rows: 2,
     rowSpacing: 8,
-    origin: { x: 0, y: 0, z: 0 }
-  }
+    origin: { x: 0, y: 0, z: 0 },
+  },
 };
 ```
 
@@ -235,8 +235,8 @@ interface RandomLayoutSpec {
 ```javascript
 const spec = {
   layout: {
-    type: 'random'
-  }
+    type: 'random',
+  },
 };
 ```
 
@@ -309,10 +309,11 @@ class CustomLayout extends BaseLayoutEngine {
   protected setupLayout(): void {
     // Setup your layout
   }
-  
+
   public tick(iterations = 1): void {
     // Implement layout algorithm
   }
 }
 
 SpaceGraph.registerLayout('custom', CustomLayout);
+```

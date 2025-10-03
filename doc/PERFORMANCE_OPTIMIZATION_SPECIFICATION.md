@@ -129,7 +129,7 @@ export class ObjectPool<T> {
       growthStrategy: config.growthStrategy ?? 'fixed',
       growthFactor: config.growthFactor ?? 2,
       cleanupInterval: config.cleanupInterval ?? 30000,
-      maxIdleTime: config.maxIdleTime ?? 60000
+      maxIdleTime: config.maxIdleTime ?? 60000,
     };
 
     this.initializePool();
@@ -146,7 +146,7 @@ export class ObjectPool<T> {
         object: obj,
         inUse: false,
         lastUsed: Date.now(),
-        useCount: 0
+        useCount: 0,
       });
     }
   }
@@ -156,13 +156,13 @@ export class ObjectPool<T> {
    */
   public acquire(): T {
     // Find available object
-    let pooledObj = this.pool.find(obj => !obj.inUse);
-    
+    let pooledObj = this.pool.find((obj) => !obj.inUse);
+
     if (!pooledObj) {
       // No available objects, try to grow pool
       if (this.canGrow()) {
         this.growPool();
-        pooledObj = this.pool.find(obj => !obj.inUse);
+        pooledObj = this.pool.find((obj) => !obj.inUse);
       } else {
         // Pool at maximum size, wait for available object
         pooledObj = this.waitForAvailableObject();
@@ -187,7 +187,7 @@ export class ObjectPool<T> {
    * Release an object back to the pool
    */
   public release(obj: T): void {
-    const pooledObj = this.pool.find(p => p.object === obj);
+    const pooledObj = this.pool.find((p) => p.object === obj);
     if (!pooledObj) {
       console.warn('Attempting to release object not from this pool');
       return;
@@ -221,11 +221,15 @@ export class ObjectPool<T> {
 
     switch (this.config.growthStrategy) {
       case 'exponential':
-        newSize = Math.min(currentSize * this.config.growthFactor, this.config.maxSize);
+        newSize = Math.min(
+          currentSize * this.config.growthFactor,
+          this.config.maxSize
+        );
         break;
       case 'adaptive':
         // Adapt growth based on usage patterns
-        const avgUseCount = this.pool.reduce((sum, obj) => sum + obj.useCount, 0) / currentSize;
+        const avgUseCount =
+          this.pool.reduce((sum, obj) => sum + obj.useCount, 0) / currentSize;
         newSize = Math.min(
           currentSize + Math.ceil(avgUseCount * this.config.growthFactor),
           this.config.maxSize
@@ -233,7 +237,10 @@ export class ObjectPool<T> {
         break;
       case 'fixed':
       default:
-        newSize = Math.min(currentSize + this.config.growthFactor, this.config.maxSize);
+        newSize = Math.min(
+          currentSize + this.config.growthFactor,
+          this.config.maxSize
+        );
         break;
     }
 
@@ -244,7 +251,7 @@ export class ObjectPool<T> {
         object: obj,
         inUse: false,
         lastUsed: Date.now(),
-        useCount: 0
+        useCount: 0,
       });
     }
   }
@@ -257,12 +264,14 @@ export class ObjectPool<T> {
     const startTime = Date.now();
 
     while (Date.now() - startTime < timeout) {
-      const obj = this.pool.find(p => !p.inUse);
+      const obj = this.pool.find((p) => !p.inUse);
       if (obj) return obj;
-      
+
       // Small delay to avoid busy waiting
       const start = Date.now();
-      while (Date.now() - start < 10) { /* busy wait */ }
+      while (Date.now() - start < 10) {
+        /* busy wait */
+      }
     }
 
     return null;
@@ -285,7 +294,10 @@ export class ObjectPool<T> {
     const objectsToRemove: PooledObject<T>[] = [];
 
     for (const pooledObj of this.pool) {
-      if (!pooledObj.inUse && (now - pooledObj.lastUsed) > this.config.maxIdleTime) {
+      if (
+        !pooledObj.inUse &&
+        now - pooledObj.lastUsed > this.config.maxIdleTime
+      ) {
         objectsToRemove.push(pooledObj);
       }
     }
@@ -314,9 +326,10 @@ export class ObjectPool<T> {
     poolUtilization: number;
   } {
     const totalObjects = this.pool.length;
-    const inUseObjects = this.pool.filter(obj => obj.inUse).length;
+    const inUseObjects = this.pool.filter((obj) => obj.inUse).length;
     const availableObjects = totalObjects - inUseObjects;
-    const averageUseCount = this.pool.reduce((sum, obj) => sum + obj.useCount, 0) / totalObjects;
+    const averageUseCount =
+      this.pool.reduce((sum, obj) => sum + obj.useCount, 0) / totalObjects;
     const poolUtilization = inUseObjects / totalObjects;
 
     return {
@@ -324,7 +337,7 @@ export class ObjectPool<T> {
       inUseObjects,
       availableObjects,
       averageUseCount,
-      poolUtilization
+      poolUtilization,
     };
   }
 
@@ -361,13 +374,15 @@ export class Vector3Pool extends ObjectPool<THREE.Vector3> {
     super(
       () => new THREE.Vector3(),
       (vec) => vec.set(0, 0, 0),
-      (vec) => { /* Vector3 doesn't need disposal */ },
+      (vec) => {
+        /* Vector3 doesn't need disposal */
+      },
       {
         initialSize: 100,
         maxSize: 1000,
         growthStrategy: 'fixed',
         growthFactor: 50,
-        ...config
+        ...config,
       }
     );
   }
@@ -381,13 +396,15 @@ export class Matrix4Pool extends ObjectPool<THREE.Matrix4> {
     super(
       () => new THREE.Matrix4(),
       (mat) => mat.identity(),
-      (mat) => { /* Matrix4 doesn't need disposal */ },
+      (mat) => {
+        /* Matrix4 doesn't need disposal */
+      },
       {
         initialSize: 50,
         maxSize: 500,
         growthStrategy: 'fixed',
         growthFactor: 25,
-        ...config
+        ...config,
       }
     );
   }
@@ -401,7 +418,12 @@ export class BoxGeometryPool extends ObjectPool<THREE.BoxGeometry> {
   private height: number;
   private depth: number;
 
-  constructor(width = 1, height = 1, depth = 1, config: Partial<PoolConfig> = {}) {
+  constructor(
+    width = 1,
+    height = 1,
+    depth = 1,
+    config: Partial<PoolConfig> = {}
+  ) {
     super(
       () => new THREE.BoxGeometry(width, height, depth),
       (geom) => {
@@ -415,7 +437,7 @@ export class BoxGeometryPool extends ObjectPool<THREE.BoxGeometry> {
         maxSize: 200,
         growthStrategy: 'adaptive',
         growthFactor: 2,
-        ...config
+        ...config,
       }
     );
 
@@ -433,7 +455,12 @@ export class SphereGeometryPool extends ObjectPool<THREE.SphereGeometry> {
   private widthSegments: number;
   private heightSegments: number;
 
-  constructor(radius = 1, widthSegments = 32, heightSegments = 32, config: Partial<PoolConfig> = {}) {
+  constructor(
+    radius = 1,
+    widthSegments = 32,
+    heightSegments = 32,
+    config: Partial<PoolConfig> = {}
+  ) {
     super(
       () => new THREE.SphereGeometry(radius, widthSegments, heightSegments),
       (geom) => {
@@ -446,7 +473,7 @@ export class SphereGeometryPool extends ObjectPool<THREE.SphereGeometry> {
         maxSize: 500,
         growthStrategy: 'adaptive',
         growthFactor: 2,
-        ...config
+        ...config,
       }
     );
 
@@ -462,7 +489,10 @@ export class SphereGeometryPool extends ObjectPool<THREE.SphereGeometry> {
 export class MaterialPool extends ObjectPool<THREE.MeshBasicMaterial> {
   private defaultColor: THREE.Color;
 
-  constructor(defaultColor = new THREE.Color(0xffffff), config: Partial<PoolConfig> = {}) {
+  constructor(
+    defaultColor = new THREE.Color(0xffffff),
+    config: Partial<PoolConfig> = {}
+  ) {
     super(
       () => new THREE.MeshBasicMaterial({ color: defaultColor }),
       (mat) => {
@@ -476,7 +506,7 @@ export class MaterialPool extends ObjectPool<THREE.MeshBasicMaterial> {
         maxSize: 1000,
         growthStrategy: 'adaptive',
         growthFactor: 2,
-        ...config
+        ...config,
       }
     );
 
@@ -547,22 +577,27 @@ export class ThreeObjectPoolManager {
   public getBoxGeometry(width = 1, height = 1, depth = 1): THREE.BoxGeometry {
     const poolName = `boxGeometry_${width}_${height}_${depth}`;
     let pool = this.pools.get(poolName) as BoxGeometryPool;
-    
+
     if (!pool) {
       pool = new BoxGeometryPool(width, height, depth);
       this.pools.set(poolName, pool);
     }
-    
+
     return pool.acquire();
   }
 
   /**
    * Release pooled BoxGeometry
    */
-  public releaseBoxGeometry(geom: THREE.BoxGeometry, width = 1, height = 1, depth = 1): void {
+  public releaseBoxGeometry(
+    geom: THREE.BoxGeometry,
+    width = 1,
+    height = 1,
+    depth = 1
+  ): void {
     const poolName = `boxGeometry_${width}_${height}_${depth}`;
     const pool = this.pools.get(poolName) as BoxGeometryPool;
-    
+
     if (pool) {
       pool.release(geom);
     }
@@ -571,13 +606,16 @@ export class ThreeObjectPoolManager {
   /**
    * Get all pool statistics
    */
-  public getAllStats(): Record<string, ReturnType<ObjectPool<any>['getStats']>> {
+  public getAllStats(): Record<
+    string,
+    ReturnType<ObjectPool<any>['getStats']>
+  > {
     const stats: Record<string, ReturnType<ObjectPool<any>['getStats']>> = {};
-    
+
     for (const [name, pool] of this.pools) {
       stats[name] = pool.getStats();
     }
-    
+
     return stats;
   }
 
@@ -619,13 +657,16 @@ export interface LODConfig {
 export class LODManager {
   private graph: SpaceGraph;
   private config: LODConfig;
-  private lodObjects: Map<string, {
-    currentLevel: number;
-    targetLevel: number;
-    transitionProgress: number;
-    mesh: THREE.Mesh;
-    levels: LODLevel[];
-  }> = new Map();
+  private lodObjects: Map<
+    string,
+    {
+      currentLevel: number;
+      targetLevel: number;
+      transitionProgress: number;
+      mesh: THREE.Mesh;
+      levels: LODLevel[];
+    }
+  > = new Map();
   private updateTimer?: NodeJS.Timeout;
 
   constructor(graph: SpaceGraph, config: LODConfig) {
@@ -637,16 +678,20 @@ export class LODManager {
   /**
    * Register an object for LOD management
    */
-  public registerObject(id: string, mesh: THREE.Mesh, levels: LODLevel[]): void {
+  public registerObject(
+    id: string,
+    mesh: THREE.Mesh,
+    levels: LODLevel[]
+  ): void {
     // Sort levels by distance
     const sortedLevels = [...levels].sort((a, b) => a.distance - b.distance);
-    
+
     this.lodObjects.set(id, {
       currentLevel: 0,
       targetLevel: 0,
       transitionProgress: 1,
       mesh,
-      levels: sortedLevels
+      levels: sortedLevels,
     });
 
     // Set initial LOD level
@@ -669,7 +714,7 @@ export class LODManager {
         }
       }
     }
-    
+
     this.lodObjects.delete(id);
   }
 
@@ -678,7 +723,7 @@ export class LODManager {
    */
   private updateAllObjectsLOD(): void {
     const cameraPosition = this.getCameraPosition();
-    
+
     for (const [id] of this.lodObjects) {
       this.updateObjectLOD(id, cameraPosition);
     }
@@ -697,7 +742,7 @@ export class LODManager {
 
     // Determine appropriate LOD level based on distance
     let targetLevel = lodData.levels.length - 1; // Default to lowest detail
-    
+
     for (let i = 0; i < lodData.levels.length; i++) {
       if (distance <= lodData.levels[i].distance) {
         targetLevel = i;
@@ -712,7 +757,10 @@ export class LODManager {
     }
 
     // Handle smooth transitions
-    if (this.config.transitionSmoothing && lodData.currentLevel !== lodData.targetLevel) {
+    if (
+      this.config.transitionSmoothing &&
+      lodData.currentLevel !== lodData.targetLevel
+    ) {
       this.handleLODTransition(id);
     } else if (lodData.currentLevel !== lodData.targetLevel) {
       // Instant transition
@@ -729,7 +777,7 @@ export class LODManager {
 
     // Update transition progress
     lodData.transitionProgress += 0.1; // Adjust for desired transition speed
-    
+
     if (lodData.transitionProgress >= 1) {
       // Transition complete
       lodData.transitionProgress = 1;
@@ -754,7 +802,7 @@ export class LODManager {
     // Update mesh geometry and material
     lodData.mesh.geometry = level.geometry;
     lodData.mesh.material = level.material;
-    
+
     lodData.currentLevel = levelIndex;
   }
 
@@ -767,24 +815,27 @@ export class LODManager {
 
     const currentLevel = lodData.levels[lodData.currentLevel];
     const targetLevel = lodData.levels[lodData.targetLevel];
-    
+
     if (!currentLevel || !targetLevel) return;
 
     // Create interpolated material properties
-    if (currentLevel.material instanceof THREE.MeshBasicMaterial && 
-        targetLevel.material instanceof THREE.MeshBasicMaterial) {
-      
+    if (
+      currentLevel.material instanceof THREE.MeshBasicMaterial &&
+      targetLevel.material instanceof THREE.MeshBasicMaterial
+    ) {
       const currentMaterial = currentLevel.material as THREE.MeshBasicMaterial;
       const targetMaterial = targetLevel.material as THREE.MeshBasicMaterial;
-      
+
       // Interpolate opacity for smooth transition
-      const interpolatedOpacity = currentMaterial.opacity * (1 - progress) + targetMaterial.opacity * progress;
-      
+      const interpolatedOpacity =
+        currentMaterial.opacity * (1 - progress) +
+        targetMaterial.opacity * progress;
+
       // Create temporary material for transition
       const transitionMaterial = currentMaterial.clone();
       transitionMaterial.opacity = interpolatedOpacity;
       transitionMaterial.transparent = interpolatedOpacity < 1;
-      
+
       lodData.mesh.material = transitionMaterial;
     }
   }
@@ -807,9 +858,9 @@ export class LODManager {
    * Calculate camera direction from camera state
    */
   private calculateCameraDirection(cameraState: any): THREE.Vector3 {
-    const phi = cameraState.phi * Math.PI / 180;
-    const theta = cameraState.theta * Math.PI / 180;
-    
+    const phi = (cameraState.phi * Math.PI) / 180;
+    const theta = (cameraState.theta * Math.PI) / 180;
+
     return new THREE.Vector3(
       Math.sin(phi) * Math.cos(theta),
       Math.cos(phi),
@@ -835,58 +886,74 @@ export class LODManager {
         distance: 0,
         geometry: new THREE.SphereGeometry(radius, 32, 32),
         material: new THREE.MeshBasicMaterial({ color: 0xffffff }),
-        complexity: 1.0
+        complexity: 1.0,
       },
       {
         distance: 50,
         geometry: new THREE.SphereGeometry(radius, 16, 16),
         material: new THREE.MeshBasicMaterial({ color: 0xffffff }),
-        complexity: 0.5
+        complexity: 0.5,
       },
       {
         distance: 100,
         geometry: new THREE.SphereGeometry(radius, 8, 8),
         material: new THREE.MeshBasicMaterial({ color: 0xffffff }),
-        complexity: 0.25
+        complexity: 0.25,
       },
       {
         distance: 200,
         geometry: new THREE.SphereGeometry(radius, 4, 4),
         material: new THREE.MeshBasicMaterial({ color: 0xffffff }),
-        complexity: 0.125
-      }
+        complexity: 0.125,
+      },
     ];
   }
 
   /**
    * Create LOD levels for box geometry
    */
-  public static createBoxLODs(width: number, height: number, depth: number): LODLevel[] {
+  public static createBoxLODs(
+    width: number,
+    height: number,
+    depth: number
+  ): LODLevel[] {
     return [
       {
         distance: 0,
         geometry: new THREE.BoxGeometry(width, height, depth),
         material: new THREE.MeshBasicMaterial({ color: 0xffffff }),
-        complexity: 1.0
+        complexity: 1.0,
       },
       {
         distance: 75,
         geometry: new THREE.BoxGeometry(width, height, depth),
-        material: new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8 }),
-        complexity: 0.8
+        material: new THREE.MeshBasicMaterial({
+          color: 0xffffff,
+          transparent: true,
+          opacity: 0.8,
+        }),
+        complexity: 0.8,
       },
       {
         distance: 150,
         geometry: new THREE.BoxGeometry(width * 0.8, height * 0.8, depth * 0.8),
-        material: new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.6 }),
-        complexity: 0.5
+        material: new THREE.MeshBasicMaterial({
+          color: 0xffffff,
+          transparent: true,
+          opacity: 0.6,
+        }),
+        complexity: 0.5,
       },
       {
         distance: 300,
         geometry: new THREE.BoxGeometry(width * 0.5, height * 0.5, depth * 0.5),
-        material: new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.4 }),
-        complexity: 0.25
-      }
+        material: new THREE.MeshBasicMaterial({
+          color: 0xffffff,
+          transparent: true,
+          opacity: 0.4,
+        }),
+        complexity: 0.25,
+      },
     ];
   }
 
@@ -929,9 +996,13 @@ export abstract class BaseElementActor {
    */
   public setLODManager(lodManager: LODManager, lodLevels: LODLevel[]): void {
     this.lodManager = lodManager;
-    
+
     if (this.threeObject && this.lodId) {
-      this.lodManager.registerObject(this.lodId, this.threeObject as THREE.Mesh, lodLevels);
+      this.lodManager.registerObject(
+        this.lodId,
+        this.threeObject as THREE.Mesh,
+        lodLevels
+      );
     }
   }
 
@@ -947,7 +1018,11 @@ export abstract class BaseElementActor {
     if (this.lodManager && this.threeObject) {
       this.lodId = `${this.elementState.id}_lod`;
       const lodLevels = this.createLODLayers();
-      this.lodManager.registerObject(this.lodId, this.threeObject as THREE.Mesh, lodLevels);
+      this.lodManager.registerObject(
+        this.lodId,
+        this.threeObject as THREE.Mesh,
+        lodLevels
+      );
     }
   }
 
@@ -1045,7 +1120,7 @@ export class CullingManager {
    */
   private updateAllObjectsVisibility(): void {
     this.updateFrustum();
-    
+
     for (const [id] of this.objects) {
       this.updateObjectVisibility(id);
     }
@@ -1103,7 +1178,7 @@ export class CullingManager {
    */
   private isInFrustum(object: CullableObject): boolean {
     const sphere = object.boundingSphere;
-    
+
     // Check sphere against frustum planes
     return this.frustum.intersectsSphere(sphere);
   }
@@ -1114,7 +1189,7 @@ export class CullingManager {
   private isWithinDistance(object: CullableObject): boolean {
     const cameraPosition = this.getCameraPosition();
     const distance = cameraPosition.distanceTo(object.boundingSphere.center);
-    
+
     return distance <= this.config.maxDistance;
   }
 
@@ -1126,7 +1201,7 @@ export class CullingManager {
     const cameraPosition = this.getCameraPosition();
     const distance = cameraPosition.distanceTo(object.boundingSphere.center);
     const apparentSize = object.boundingSphere.radius / distance;
-    
+
     // Object is considered occluded if it's too small to be visible
     return apparentSize < this.config.occlusionThreshold;
   }
@@ -1138,7 +1213,7 @@ export class CullingManager {
     const camera = this.graph.camera;
     const projectionMatrix = camera.projectionMatrix;
     const viewMatrix = camera.matrixWorldInverse;
-    
+
     this.cameraMatrix.multiplyMatrices(projectionMatrix, viewMatrix);
     this.frustum.setFromProjectionMatrix(this.cameraMatrix);
   }
@@ -1149,7 +1224,7 @@ export class CullingManager {
   private getCameraPosition(): THREE.Vector3 {
     const cameraState = this.graph.state.camera;
     const direction = this.calculateCameraDirection(cameraState);
-    
+
     return new THREE.Vector3(
       cameraState.target.x + direction.x * cameraState.distance,
       cameraState.target.y + direction.y * cameraState.distance,
@@ -1161,9 +1236,9 @@ export class CullingManager {
    * Calculate camera direction from camera state
    */
   private calculateCameraDirection(cameraState: any): THREE.Vector3 {
-    const phi = cameraState.phi * Math.PI / 180;
-    const theta = cameraState.theta * Math.PI / 180;
-    
+    const phi = (cameraState.phi * Math.PI) / 180;
+    const theta = (cameraState.theta * Math.PI) / 180;
+
     return new THREE.Vector3(
       Math.sin(phi) * Math.cos(theta),
       Math.cos(phi),
@@ -1192,13 +1267,14 @@ export class CullingManager {
     const totalObjects = this.objects.size;
     const visibleObjects = this.visibleObjects.size;
     const culledObjects = totalObjects - visibleObjects;
-    const cullingEfficiency = totalObjects > 0 ? culledObjects / totalObjects : 0;
+    const cullingEfficiency =
+      totalObjects > 0 ? culledObjects / totalObjects : 0;
 
     return {
       totalObjects,
       visibleObjects,
       culledObjects,
-      cullingEfficiency
+      cullingEfficiency,
     };
   }
 
@@ -1239,7 +1315,12 @@ export class HierarchicalCulling extends CullingManager {
   private maxDepth: number;
   private objectsPerNode: number;
 
-  constructor(graph: SpaceGraph, config: CullingConfig, maxDepth = 4, objectsPerNode = 50) {
+  constructor(
+    graph: SpaceGraph,
+    config: CullingConfig,
+    maxDepth = 4,
+    objectsPerNode = 50
+  ) {
     super(graph, config);
     this.maxDepth = maxDepth;
     this.objectsPerNode = objectsPerNode;
@@ -1256,7 +1337,7 @@ export class HierarchicalCulling extends CullingManager {
       boundingSphere: new THREE.Sphere(),
       objects: [],
       children: [],
-      level: 0
+      level: 0,
     };
 
     // Build hierarchy from all registered objects
@@ -1269,7 +1350,11 @@ export class HierarchicalCulling extends CullingManager {
   /**
    * Recursively build spatial hierarchy
    */
-  private buildHierarchyRecursive(node: HierarchicalNode, objects: CullableObject[], level: number): void {
+  private buildHierarchyRecursive(
+    node: HierarchicalNode,
+    objects: CullableObject[],
+    level: number
+  ): void {
     if (objects.length <= this.objectsPerNode || level >= this.maxDepth) {
       // Leaf node - add objects directly
       node.objects = objects;
@@ -1279,7 +1364,7 @@ export class HierarchicalCulling extends CullingManager {
 
     // Split space and create child nodes
     const subregions = this.splitSpace(node.boundingBox);
-    
+
     for (const subregion of subregions) {
       const childNode: HierarchicalNode = {
         id: `${node.id}_child_${node.children.length}`,
@@ -1288,11 +1373,11 @@ export class HierarchicalCulling extends CullingManager {
         objects: [],
         children: [],
         parent: node,
-        level: level + 1
+        level: level + 1,
       };
 
       // Find objects in this subregion
-      const objectsInSubregion = objects.filter(obj => 
+      const objectsInSubregion = objects.filter((obj) =>
         subregion.intersectsBox(new THREE.Box3().setFromObject(obj.object))
       );
 
@@ -1303,9 +1388,11 @@ export class HierarchicalCulling extends CullingManager {
     }
 
     // Handle objects that don't fit neatly into subregions
-    const assignedObjects = new Set(node.children.flatMap(child => child.objects));
-    const remainingObjects = objects.filter(obj => !assignedObjects.has(obj));
-    
+    const assignedObjects = new Set(
+      node.children.flatMap((child) => child.objects)
+    );
+    const remainingObjects = objects.filter((obj) => !assignedObjects.has(obj));
+
     if (remainingObjects.length > 0) {
       node.objects = remainingObjects;
       this.updateNodeBounds(node);
@@ -1318,12 +1405,12 @@ export class HierarchicalCulling extends CullingManager {
   private splitSpace(box: THREE.Box3): THREE.Box3[] {
     const center = box.getCenter(new THREE.Vector3());
     const size = box.getSize(new THREE.Vector3());
-    
+
     const subregions: THREE.Box3[] = [];
 
     // Split into 8 octants (3D) or 4 quadrants (2D)
     const dimensions = size.x > 0 && size.z > 0 ? 3 : 2; // Determine if 3D or 2D
-    
+
     if (dimensions === 3) {
       // 3D octree subdivision
       for (let x = 0; x < 2; x++) {
@@ -1399,7 +1486,7 @@ export class HierarchicalCulling extends CullingManager {
    */
   protected updateAllObjectsVisibility(): void {
     this.updateFrustum();
-    
+
     // Test hierarchy from top down
     this.updateNodeVisibility(this.hierarchy);
   }
@@ -1410,7 +1497,7 @@ export class HierarchicalCulling extends CullingManager {
   private updateNodeVisibility(node: HierarchicalNode): void {
     // Test if node bounding box is visible
     const nodeVisible = this.isNodeVisible(node);
-    
+
     if (!nodeVisible) {
       // Node and all children are culled
       this.setNodeVisibility(node, false);
@@ -1480,12 +1567,14 @@ export class HierarchicalCulling extends CullingManager {
     cullingEfficiency: number;
   } {
     const stats = this.traverseHierarchy(this.hierarchy);
-    
+
     return {
       ...stats,
       visibleObjects: this.visibleObjects.size,
-      cullingEfficiency: stats.totalObjects > 0 ? 
-        (stats.totalObjects - this.visibleObjects.size) / stats.totalObjects : 0
+      cullingEfficiency:
+        stats.totalObjects > 0
+          ? (stats.totalObjects - this.visibleObjects.size) / stats.totalObjects
+          : 0,
     };
   }
 
@@ -1515,7 +1604,7 @@ export class HierarchicalCulling extends CullingManager {
       totalNodes,
       maxDepth,
       objectsPerNode,
-      totalObjects
+      totalObjects,
     };
   }
 }
@@ -1565,7 +1654,7 @@ export class MemoryManager {
    */
   private getInitialMemoryStats(): MemoryStats {
     const memoryInfo = (performance as any).memory;
-    
+
     return {
       usedJSHeapSize: memoryInfo?.usedJSHeapSize || 0,
       totalJSHeapSize: memoryInfo?.totalJSHeapSize || 0,
@@ -1573,7 +1662,7 @@ export class MemoryManager {
       textureMemory: 0,
       geometryMemory: 0,
       materialMemory: 0,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
   }
 
@@ -1592,7 +1681,7 @@ export class MemoryManager {
    */
   private updateMemoryStats(): void {
     const memoryInfo = (performance as any).memory;
-    
+
     if (memoryInfo) {
       this.stats = {
         usedJSHeapSize: memoryInfo.usedJSHeapSize,
@@ -1601,7 +1690,7 @@ export class MemoryManager {
         textureMemory: this.textureMemory,
         geometryMemory: this.geometryMemory,
         materialMemory: this.materialMemory,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
     }
   }
@@ -1628,10 +1717,10 @@ export class MemoryManager {
    */
   private performStandardCleanup(): void {
     console.log('Performing standard memory cleanup...');
-    
+
     // Clean up unused resources
     this.cleanupUnusedResources();
-    
+
     // Trigger garbage collection if available
     if ((window as any).gc) {
       (window as any).gc();
@@ -1643,16 +1732,16 @@ export class MemoryManager {
    */
   private performAggressiveCleanup(): void {
     console.warn('Performing aggressive memory cleanup...');
-    
+
     // Clean up all unused resources
     this.cleanupUnusedResources();
-    
+
     // Clear object pools
     this.clearObjectPools();
-    
+
     // Dispose of distant LOD levels
     this.cleanupLODLevels();
-    
+
     // Force garbage collection
     if ((window as any).gc) {
       (window as any).gc();
@@ -1664,10 +1753,10 @@ export class MemoryManager {
    */
   private cleanupUnusedResources(): void {
     const scene = this.graph.scene;
-    
+
     // Traverse scene and identify unused resources
     const unusedResources = this.identifyUnusedResources(scene);
-    
+
     // Dispose of unused resources
     for (const resource of unusedResources) {
       this.disposeResource(resource);
@@ -1679,7 +1768,7 @@ export class MemoryManager {
    */
   private identifyUnusedResources(scene: THREE.Scene): any[] {
     const unusedResources: any[] = [];
-    
+
     scene.traverse((object) => {
       if (object instanceof THREE.Mesh) {
         // Check if geometry is used by other meshes
@@ -1687,7 +1776,7 @@ export class MemoryManager {
         if (!geometryUsed) {
           unusedResources.push({ type: 'geometry', resource: object.geometry });
         }
-        
+
         // Check if material is used by other meshes
         const materialUsed = this.isMaterialUsed(object.material, scene);
         if (!materialUsed) {
@@ -1695,41 +1784,49 @@ export class MemoryManager {
         }
       }
     });
-    
+
     return unusedResources;
   }
 
   /**
    * Check if geometry is used by other meshes
    */
-  private isGeometryUsed(geometry: THREE.BufferGeometry, scene: THREE.Scene): boolean {
+  private isGeometryUsed(
+    geometry: THREE.BufferGeometry,
+    scene: THREE.Scene
+  ): boolean {
     let usageCount = 0;
-    
+
     scene.traverse((object) => {
       if (object instanceof THREE.Mesh && object.geometry === geometry) {
         usageCount++;
       }
     });
-    
+
     return usageCount > 1; // More than current mesh
   }
 
   /**
    * Check if material is used by other meshes
    */
-  private isMaterialUsed(material: THREE.Material | THREE.Material[], scene: THREE.Scene): boolean {
+  private isMaterialUsed(
+    material: THREE.Material | THREE.Material[],
+    scene: THREE.Scene
+  ): boolean {
     const materials = Array.isArray(material) ? material : [material];
     const usageCounts = new Map<THREE.Material, number>();
-    
+
     // Initialize usage counts
     for (const mat of materials) {
       usageCounts.set(mat, 0);
     }
-    
+
     // Count usage
     scene.traverse((object) => {
       if (object instanceof THREE.Mesh) {
-        const meshMaterials = Array.isArray(object.material) ? object.material : [object.material];
+        const meshMaterials = Array.isArray(object.material)
+          ? object.material
+          : [object.material];
         for (const mat of meshMaterials) {
           if (usageCounts.has(mat)) {
             usageCounts.set(mat, usageCounts.get(mat)! + 1);
@@ -1737,12 +1834,12 @@ export class MemoryManager {
         }
       }
     });
-    
+
     // Check if any material is used by other meshes
     for (const count of usageCounts.values()) {
       if (count > 1) return true;
     }
-    
+
     return false;
   }
 
@@ -1820,7 +1917,9 @@ export class MemoryManager {
     if ((window as any).gc) {
       (window as any).gc();
     } else {
-      console.warn('Garbage collection not available. Run with --expose-gc flag.');
+      console.warn(
+        'Garbage collection not available. Run with --expose-gc flag.'
+      );
     }
   }
 
@@ -1861,7 +1960,7 @@ export class RenderingManager {
         levels: [],
         transitionSmoothing: true,
         smoothingDistance: 10,
-        updateInterval: 100
+        updateInterval: 100,
       });
     }
 
@@ -1874,7 +1973,7 @@ export class RenderingManager {
         updateInterval: 100,
         frustumFovMultiplier: 1.1,
         occlusionThreshold: 0.01,
-        maxDistance: 1000
+        maxDistance: 1000,
       });
     }
 
@@ -1884,7 +1983,7 @@ export class RenderingManager {
         maxMemoryMB: 512,
         warningThreshold: 0.8,
         cleanupInterval: 30000,
-        aggressiveCleanup: true
+        aggressiveCleanup: true,
       });
     }
   }
@@ -1896,16 +1995,16 @@ export class RenderingManager {
     // Use object pools for geometries and materials
     const geometry = this.objectPoolManager.getSphereGeometry();
     const material = this.objectPoolManager.getMaterial();
-    
+
     // Create mesh with pooled resources
     const mesh = new THREE.Mesh(geometry, material);
-    
+
     // Register with LOD system if enabled
     if (this.lodManager) {
       const lodLevels = LODManager.createSphereLODs(0.5);
       this.lodManager.registerObject(node.id, mesh, lodLevels);
     }
-    
+
     // Register with culling system if enabled
     if (this.cullingManager) {
       const cullableObject: CullableObject = {
@@ -1913,11 +2012,11 @@ export class RenderingManager {
         object: mesh,
         boundingBox: new THREE.Box3().setFromObject(mesh),
         boundingSphere: new THREE.Sphere().setFromObject(mesh),
-        layers: 1
+        layers: 1,
       };
       this.cullingManager.registerObject(cullableObject);
     }
-    
+
     // ... rest of node creation
   }
 }
@@ -1940,11 +2039,11 @@ export class PerformanceMonitor {
   public endMeasurement(name: string): number {
     const startTime = this.startTimes.get(name);
     if (!startTime) return 0;
-    
+
     const duration = performance.now() - startTime;
     this.recordMetric(name, duration);
     this.startTimes.delete(name);
-    
+
     return duration;
   }
 
@@ -1952,10 +2051,10 @@ export class PerformanceMonitor {
     if (!this.metrics.has(name)) {
       this.metrics.set(name, []);
     }
-    
+
     const values = this.metrics.get(name)!;
     values.push(value);
-    
+
     // Keep only last 1000 values
     if (values.length > 1000) {
       values.shift();
@@ -1965,29 +2064,32 @@ export class PerformanceMonitor {
   public getAverageMetric(name: string): number {
     const values = this.metrics.get(name);
     if (!values || values.length === 0) return 0;
-    
+
     return values.reduce((sum, val) => sum + val, 0) / values.length;
   }
 
-  public getMetricsReport(): Record<string, {
-    average: number;
-    min: number;
-    max: number;
-    count: number;
-  }> {
+  public getMetricsReport(): Record<
+    string,
+    {
+      average: number;
+      min: number;
+      max: number;
+      count: number;
+    }
+  > {
     const report: Record<string, any> = {};
-    
+
     for (const [name, values] of this.metrics) {
       if (values.length === 0) continue;
-      
+
       report[name] = {
         average: this.getAverageMetric(name),
         min: Math.min(...values),
         max: Math.max(...values),
-        count: values.length
+        count: values.length,
       };
     }
-    
+
     return report;
   }
 }
@@ -1999,13 +2101,15 @@ export class PerformanceMonitor {
 
 ```typescript
 const graph = new SpaceGraph('#container', {
-  data: { /* your data */ },
+  data: {
+    /* your data */
+  },
   performance: {
     enableLOD: true,
     enableCulling: true,
     enableMemoryManagement: true,
-    instancingThreshold: 100
-  }
+    instancingThreshold: 100,
+  },
 });
 ```
 
@@ -2018,20 +2122,20 @@ const customLODs: LODLevel[] = [
     distance: 0,
     geometry: new THREE.SphereGeometry(1, 32, 32),
     material: new THREE.MeshBasicMaterial({ color: 0xffffff }),
-    complexity: 1.0
+    complexity: 1.0,
   },
   {
     distance: 100,
     geometry: new THREE.SphereGeometry(1, 16, 16),
     material: new THREE.MeshBasicMaterial({ color: 0xffffff }),
-    complexity: 0.5
+    complexity: 0.5,
   },
   {
     distance: 200,
     geometry: new THREE.SphereGeometry(1, 8, 8),
     material: new THREE.MeshBasicMaterial({ color: 0xffffff }),
-    complexity: 0.25
-  }
+    complexity: 0.25,
+  },
 ];
 
 // Apply to specific objects
@@ -2060,7 +2164,9 @@ console.log('Performance Report:', report);
 ```typescript
 // Check memory usage
 const memoryStats = memoryManager.getMemoryStats();
-console.log(`Memory usage: ${(memoryStats.usedJSHeapSize / 1024 / 1024).toFixed(2)} MB`);
+console.log(
+  `Memory usage: ${(memoryStats.usedJSHeapSize / 1024 / 1024).toFixed(2)} MB`
+);
 
 // Force cleanup if needed
 if (memoryManager.isMemoryCritical()) {

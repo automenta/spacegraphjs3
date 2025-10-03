@@ -64,36 +64,34 @@ const SphereNodeSpec: VisualSemanticsSpec = {
   states: {
     base: {
       color: '#ff0000',
-      size: { width: 20, height: 20 }
+      size: { width: 20, height: 20 },
     },
     hover: {
       color: '#ffffff',
-      boxShadow: '0 0 10px #ffffff'
-    }
+      boxShadow: '0 0 10px #ffffff',
+    },
   },
   interactions: [
     {
       name: 'Hover Interaction',
-      steps: [
-        { type: 'hover', target: 'canvas' }
-      ],
+      steps: [{ type: 'hover', target: 'canvas' }],
       expectedOutcomes: [
         {
           description: 'Sphere node should glow when hovered',
           screenshot: 'sphere-node-hover.png',
           validation: {
             threshold: 0.1,
-            maxDiffPixels: 5000
-          }
-        }
-      ]
-    }
+            maxDiffPixels: 5000,
+          },
+        },
+      ],
+    },
   ],
   ergonomics: {
     minTouchTargetSize: 44,
     minContrastRatio: 4.5,
-    maxResponseTime: 100
-  }
+    maxResponseTime: 100,
+  },
 };
 ```
 
@@ -190,16 +188,16 @@ Integrated performance metrics help identify interaction bottlenecks.
 ### Common Issues
 
 1. **Flaky Visual Tests**
-    - Solution: Increase thresholds for dynamic content
-    - Solution: Wait for animations to complete
+   - Solution: Increase thresholds for dynamic content
+   - Solution: Wait for animations to complete
 
 2. **Environment Differences**
-    - Solution: Use consistent test environments
-    - Solution: Normalize rendering settings
+   - Solution: Use consistent test environments
+   - Solution: Normalize rendering settings
 
 3. **False Positives**
-    - Solution: Fine-tune comparison thresholds
-    - Solution: Exclude non-essential UI elements
+   - Solution: Fine-tune comparison thresholds
+   - Solution: Exclude non-essential UI elements
 
 ### Debugging Tips
 

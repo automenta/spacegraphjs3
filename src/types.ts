@@ -411,7 +411,13 @@ export interface ConfigPreset {
   id: string;
   name: string;
   description: string;
-  category: 'network' | 'mindmap' | 'flowchart' | 'minimal' | 'performance' | 'custom';
+  category:
+    | 'network'
+    | 'mindmap'
+    | 'flowchart'
+    | 'minimal'
+    | 'performance'
+    | 'custom';
   spec: DeepPartial<Spec>;
   thumbnail?: string; // Base64 encoded thumbnail
   tags?: string[];

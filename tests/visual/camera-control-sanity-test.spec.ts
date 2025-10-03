@@ -14,7 +14,7 @@ test.describe('Camera Control Sanity Tests', () => {
 
   test.beforeEach(async () => {
     controller = await VisualSemanticsController.init({
-      viewport: { width: 1280, height: 720 }
+      viewport: { width: 1280, height: 720 },
     });
   });
 
@@ -24,10 +24,14 @@ test.describe('Camera Control Sanity Tests', () => {
 
   test('panning left moves object to the right', async () => {
     // Navigate to element actors demo
-    await controller.navigateTo('http://localhost:5174/element-actors-demo.html');
+    await controller.navigateTo(
+      'http://localhost:5174/element-actors-demo.html'
+    );
 
     // Wait for graph to be ready
-    await controller.waitForFunction(() => (window as any).graph, { timeout: 10000 });
+    await controller.waitForFunction(() => (window as any).graph, {
+      timeout: 10000,
+    });
 
     // Set camera to focus on the center text node (text2 at {x:0, y:0, z:0})
     await controller.evaluate(() => {
@@ -37,8 +41,8 @@ test.describe('Camera Control Sanity Tests', () => {
           target: { x: 0, y: 0, z: 0 },
           distance: 15,
           phi: Math.PI / 2,
-          theta: 0
-        }
+          theta: 0,
+        },
       });
     });
 
@@ -46,7 +50,9 @@ test.describe('Camera Control Sanity Tests', () => {
     await controller.waitForTimeout(1000);
 
     // Capture initial screenshot
-    const initialScreenshot = await controller.captureScreenshot('camera-sanity-initial.png');
+    const initialScreenshot = await controller.captureScreenshot(
+      'camera-sanity-initial.png'
+    );
 
     // Simulate panning left by moving camera target right (which makes objects appear to move left on screen)
     // Actually, to simulate "panning left", we move the camera target in the positive X direction
@@ -55,8 +61,12 @@ test.describe('Camera Control Sanity Tests', () => {
       const currentTarget = graph.state.camera.target;
       graph.update({
         camera: {
-          target: { x: currentTarget.x + 2, y: currentTarget.y, z: currentTarget.z }
-        }
+          target: {
+            x: currentTarget.x + 2,
+            y: currentTarget.y,
+            z: currentTarget.z,
+          },
+        },
       });
     });
 
@@ -64,7 +74,9 @@ test.describe('Camera Control Sanity Tests', () => {
     await controller.waitForTimeout(500);
 
     // Capture screenshot after panning
-    const afterPanScreenshot = await controller.captureScreenshot('camera-sanity-after-pan-left.png');
+    const afterPanScreenshot = await controller.captureScreenshot(
+      'camera-sanity-after-pan-left.png'
+    );
 
     // For sanity test, we mainly verify the test runs without errors
     // In a full implementation, we would compare screenshots or check specific pixel regions
@@ -83,10 +95,14 @@ test.describe('Camera Control Sanity Tests', () => {
 
   test('zooming in makes objects appear larger', async () => {
     // Navigate to element actors demo
-    await controller.navigateTo('http://localhost:5174/element-actors-demo.html');
+    await controller.navigateTo(
+      'http://localhost:5174/element-actors-demo.html'
+    );
 
     // Wait for graph to be ready
-    await controller.waitForFunction(() => (window as any).graph, { timeout: 10000 });
+    await controller.waitForFunction(() => (window as any).graph, {
+      timeout: 10000,
+    });
 
     // Set camera to focus on the center text node
     await controller.evaluate(() => {
@@ -96,23 +112,25 @@ test.describe('Camera Control Sanity Tests', () => {
           target: { x: 0, y: 0, z: 0 },
           distance: 20,
           phi: Math.PI / 2,
-          theta: 0
-        }
+          theta: 0,
+        },
       });
     });
 
     await controller.waitForTimeout(1000);
 
     // Capture initial screenshot
-    const initialScreenshot = await controller.captureScreenshot('camera-sanity-zoom-initial.png');
+    const initialScreenshot = await controller.captureScreenshot(
+      'camera-sanity-zoom-initial.png'
+    );
 
     // Simulate zooming in by decreasing distance
     await controller.evaluate(() => {
       const graph = (window as any).graph;
       graph.update({
         camera: {
-          distance: 10
-        }
+          distance: 10,
+        },
       });
     });
 
@@ -120,7 +138,9 @@ test.describe('Camera Control Sanity Tests', () => {
     await controller.waitForTimeout(500);
 
     // Capture after zoom
-    const afterZoomScreenshot = await controller.captureScreenshot('camera-sanity-zoom-in.png');
+    const afterZoomScreenshot = await controller.captureScreenshot(
+      'camera-sanity-zoom-in.png'
+    );
 
     expect(initialScreenshot).toBeTruthy();
     expect(afterZoomScreenshot).toBeTruthy();
@@ -136,10 +156,14 @@ test.describe('Camera Control Sanity Tests', () => {
 
   test('orbiting left rotates camera around target', async () => {
     // Navigate to element actors demo
-    await controller.navigateTo('http://localhost:5174/element-actors-demo.html');
+    await controller.navigateTo(
+      'http://localhost:5174/element-actors-demo.html'
+    );
 
     // Wait for graph to be ready
-    await controller.waitForFunction(() => (window as any).graph, { timeout: 10000 });
+    await controller.waitForFunction(() => (window as any).graph, {
+      timeout: 10000,
+    });
 
     // Set initial camera position
     await controller.evaluate(() => {
@@ -149,8 +173,8 @@ test.describe('Camera Control Sanity Tests', () => {
           target: { x: 0, y: 0, z: 0 },
           distance: 15,
           phi: Math.PI / 2,
-          theta: 0
-        }
+          theta: 0,
+        },
       });
     });
 
@@ -166,8 +190,8 @@ test.describe('Camera Control Sanity Tests', () => {
       const graph = (window as any).graph;
       graph.update({
         camera: {
-          theta: Math.PI / 4
-        }
+          theta: Math.PI / 4,
+        },
       });
     });
 
@@ -185,10 +209,14 @@ test.describe('Camera Control Sanity Tests', () => {
 
   test('camera maintains sensible constraints', async () => {
     // Navigate to element actors demo
-    await controller.navigateTo('http://localhost:5174/element-actors-demo.html');
+    await controller.navigateTo(
+      'http://localhost:5174/element-actors-demo.html'
+    );
 
     // Wait for graph to be ready
-    await controller.waitForFunction(() => (window as any).graph, { timeout: 10000 });
+    await controller.waitForFunction(() => (window as any).graph, {
+      timeout: 10000,
+    });
 
     // Set camera with extreme values to test constraints
     await controller.evaluate(() => {
@@ -198,8 +226,8 @@ test.describe('Camera Control Sanity Tests', () => {
           target: { x: 0, y: 0, z: 0 },
           distance: 1000, // Very far
           phi: Math.PI * 2, // Multiple rotations
-          theta: Math.PI * 4 // Multiple rotations
-        }
+          theta: Math.PI * 4, // Multiple rotations
+        },
       });
     });
 

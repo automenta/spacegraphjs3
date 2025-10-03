@@ -97,11 +97,15 @@ private static layoutEngineRegistry: Map<string, LayoutEngineClass> = new Map(
 ```typescript
 export class BoxElementActor extends BaseElementActor {
   private glowMesh!: THREE.Mesh;
-  
-  constructor(scene: THREE.Scene, elementState: Element, graphState: Store<Spec>) {
+
+  constructor(
+    scene: THREE.Scene,
+    elementState: Element,
+    graphState: Store<Spec>
+  ) {
     super(scene, elementState, graphState);
   }
-  
+
   public init(): void {
     // Create box geometry with configurable dimensions
     // Set up materials and glow effects
