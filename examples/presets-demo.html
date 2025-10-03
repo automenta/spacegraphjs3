@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpaceGraph Presets Demo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .container {
+            display: flex;
+            height: calc(100vh - 40px);
+        }
+
+        .sidebar {
+            width: 300px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-right: 20px;
+            overflow-y: auto;
+        }
+
+        .graph-container {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        #spacegraph {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+        }
+
+        .preset-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .preset-button:hover {
+            border-color: #007bff;
+            background: #f8f9fa;
+        }
+
+        .preset-button.active {
+            border-color: #007bff;
+            background: #007bff;
+            color: white;
+        }
+
+        .preset-description {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>Configuration Presets</h2>
+
+            <button class="preset-button active" data-preset="network">
+                Network Graph
+                <div class="preset-description">Dark theme with force-directed layout</div>
+            </button>
+
+            <button class="preset-button" data-preset="mindmap">
+                Mind Map
+                <div class="preset-description">Organic layout with hierarchical styling</div>
+            </button>
+
+            <button class="preset-button" data-preset="flowchart">
+                Flowchart
+                <div class="preset-description">Grid layout with directional edges</div>
+            </button>
+
+            <button class="preset-button" data-preset="minimal">
+                Minimal
+                <div class="preset-description">Clean, minimal styling for basic graphs</div>
+            </button>
+
+            <button class="preset-button" data-preset="performance">
+                High Performance
+                <div class="preset-description">Optimized settings for large datasets</div>
+            </button>
+
+            <div class="status" id="status">
+                Loading SpaceGraph...
+            </div>
+        </div>
+
+        <div class="graph-container">
+            <div id="spacegraph"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { SpaceGraph } from '../src/index.ts';
+        import { ConfigPresetsManager } from '../src/presets/ConfigPresetsManager.ts';
+
+        // Sample data for demonstration
+        const sampleData = {
+            nodes: [
+                { id: '1', label: 'Node 1', type: 'sphere' },
+                { id: '2', label: 'Node 2', type: 'sphere' },
+                { id: '3', label: 'Node 3', type: 'sphere' },
+                { id: '4', label: 'Node 4', type: 'sphere' },
+                { id: '5', label: 'Node 5', type: 'sphere' },
+                { id: '6', label: 'Node 6', type: 'sphere' },
+                { id: '7', label: 'Node 7', type: 'sphere' },
+                { id: '8', label: 'Node 8', type: 'sphere' },
+            ],
+            edges: [
+                { id: 'e1', source: '1', target: '2' },
+                { id: 'e2', source: '1', target: '3' },
+                { id: 'e3', source: '2', target: '4' },
+                { id: 'e4', source: '3', target: '5' },
+                { id: 'e5', source: '4', target: '6' },
+                { id: 'e6', source: '5', target: '7' },
+                { id: 'e7', source: '6', target: '8' },
+                { id: 'e8', source: '7', target: '8' },
+            ]
+        };
+
+        let graph;
+        let presetsManager;
+
+        async function init() {
+            try {
+                // Create SpaceGraph instance
+                graph = SpaceGraph.create({
+                    container: '#spacegraph',
+                    nodes: sampleData.nodes,
+                    edges: sampleData.edges,
+                    layout: 'force-directed'
+                });
+
+                // Initialize presets manager
+                presetsManager = new ConfigPresetsManager(graph);
+
+                // Set up preset buttons
+                document.querySelectorAll('.preset-button').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const presetId = button.dataset.preset;
+                        applyPreset(presetId);
+
+                        // Update active button
+                        document.querySelectorAll('.preset-button').forEach(btn => {
+                            btn.classList.remove('active');
+                        });
+                        button.classList.add('active');
+                    });
+                });
+
+                document.getElementById('status').textContent = 'SpaceGraph initialized with Network preset';
+
+            } catch (error) {
+                console.error('Failed to initialize:', error);
+                document.getElementById('status').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        function applyPreset(presetId) {
+            try {
+                presetsManager.applyPreset(presetId);
+                const preset = presetsManager.getAllPresets().find(p => p.id === presetId);
+                document.getElementById('status').textContent = `Applied ${preset.name} preset`;
+            } catch (error) {
+                console.error('Failed to apply preset:', error);
+                document.getElementById('status').textContent = 'Error applying preset: ' + error.message;
+            }
+        }
+
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>

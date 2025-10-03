@@ -403,3 +403,27 @@ export interface SimpleSpec {
   /** Camera configuration */
   camera?: DeepPartial<CameraSpec>;
 }
+
+/**
+ * Configuration preset for different visualization use cases
+ */
+export interface ConfigPreset {
+  id: string;
+  name: string;
+  description: string;
+  category: 'network' | 'mindmap' | 'flowchart' | 'minimal' | 'performance' | 'custom';
+  spec: DeepPartial<Spec>;
+  thumbnail?: string; // Base64 encoded thumbnail
+  tags?: string[];
+  createdAt: number;
+  updatedAt: number;
+}
+
+/**
+ * Collection of configuration presets
+ */
+export interface ConfigPresetsCollection {
+  version: string;
+  presets: ConfigPreset[];
+  categories: string[];
+}

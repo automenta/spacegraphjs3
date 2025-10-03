@@ -112,6 +112,8 @@ export * from './ObjectPool';
 export * from './ThreeObjectPoolManager';
 export * from './ThreeObjectPools';
 export * from './threeUtils';
+// Re-export presets
+export * from '../presets';
 export * from './ErrorHandler';
 
 // Utility function to create a complete utility system instance
