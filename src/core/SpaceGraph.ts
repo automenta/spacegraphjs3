@@ -690,7 +690,7 @@ export class SpaceGraph {
 
     // If any plugins failed to initialize, throw an error with details
     if (failedPlugins.length > 0) {
-      const errorMessages = failedPlugins.map(({ plugin, error }, index) => {
+      const errorMessages = failedPlugins.map(({ error }, index) => {
         return `${index + 1}. ${error.message}`;
       }).join('\n\n');
 

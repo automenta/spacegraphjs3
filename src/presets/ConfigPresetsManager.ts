@@ -1,5 +1,5 @@
 import { SpaceGraph } from '../core/SpaceGraph';
-import { ConfigPreset, ConfigPresetsCollection, DeepPartial, Spec } from '../types';
+import { ConfigPreset, ConfigPresetsCollection } from '../types';
 import { deepMerge } from '../utils/deepMerge';
 
 export class ConfigPresetsManager {

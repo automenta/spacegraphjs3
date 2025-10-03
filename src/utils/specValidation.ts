@@ -1,4 +1,4 @@
-import { Spec, NodeSpec, EdgeSpec, GroupSpec } from '../types';
+import { NodeSpec, EdgeSpec, GroupSpec } from '../types';
 
 /**
  * Validation error with detailed information
@@ -404,7 +404,7 @@ function validateStyleStructure(spec: any, errors: ValidationError[], warnings: 
 /**
  * Validates layout structure
  */
-function validateLayoutStructure(spec: any, errors: ValidationError[], warnings: ValidationError[]) {
+function validateLayoutStructure(spec: any, errors: ValidationError[], _warnings: ValidationError[]) {
   if (!spec.layout || typeof spec.layout !== 'object') {
     errors.push({
       field: 'layout',
@@ -559,7 +559,7 @@ function validatePerformanceStructure(spec: any, errors: ValidationError[], warn
 /**
  * Validates interaction structure
  */
-function validateInteractionStructure(spec: any, errors: ValidationError[], warnings: ValidationError[]) {
+function validateInteractionStructure(spec: any, errors: ValidationError[], _warnings: ValidationError[]) {
   if (!spec.interaction || typeof spec.interaction !== 'object') {
     errors.push({
       field: 'interaction',

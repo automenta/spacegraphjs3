@@ -249,7 +249,9 @@ class WidgetGenerator {
 }
 
 // Export for use in modules
+// eslint-disable-next-line no-undef
 if (typeof module !== 'undefined' && module.exports) {
+  // eslint-disable-next-line no-undef
   module.exports = WidgetGenerator;
 }
 

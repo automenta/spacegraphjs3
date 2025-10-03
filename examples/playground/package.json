@@ -1,0 +1,22 @@
+{
+  "name": "spacegraphjs-playground",
+  "version": "1.0.0",
+  "description": "Interactive playground for SpaceGraphJS",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "monaco-editor": "^0.52.0",
+    "solid-js": "^1.9.9",
+    "spacegraphjs": "file:../.."
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.5",
+    "vite-plugin-solid": "^2.11.0"
+  }
+}
