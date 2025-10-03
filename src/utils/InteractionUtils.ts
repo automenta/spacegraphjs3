@@ -4,6 +4,7 @@
  */
 
 import * as THREE from 'three';
+import { screenToWorld, worldToScreen, raycastFromScreen, getObjectAtPosition } from './threeUtils';
 // Vector3 is imported for type definitions but not directly used in this file
 
 export interface InteractionEvent {
@@ -89,62 +90,11 @@ export class InteractionUtils {
     );
   }
 
-  /**
-   * Convert screen coordinates to world coordinates
-   */
-  screenToWorld(screenPos: THREE.Vector2, distance: number = 1): THREE.Vector3 {
-    const vector = new THREE.Vector3(
-      (screenPos.x / window.innerWidth) * 2 - 1,
-      -(screenPos.y / window.innerHeight) * 2 + 1,
-      0.5
-    );
+  
 
-    vector.unproject(this.camera);
-    const dir = vector.sub(this.camera.position).normalize();
-    return this.camera.position.clone().add(dir.multiplyScalar(distance));
-  }
+  
 
-  /**
-   * Convert world coordinates to screen coordinates
-   */
-  worldToScreen(worldPos: THREE.Vector3): THREE.Vector2 {
-    const vector = worldPos.clone();
-    vector.project(this.camera);
-
-    return new THREE.Vector2(
-      ((vector.x + 1) / 2) * window.innerWidth,
-      (-(vector.y - 1) / 2) * window.innerHeight
-    );
-  }
-
-  /**
-   * Raycast from screen position
-   */
-  raycastFromScreen(
-    screenPos: THREE.Vector2,
-    objects: THREE.Object3D[] = []
-  ): THREE.Intersection[] {
-    const mouse = new THREE.Vector2(
-      (screenPos.x / window.innerWidth) * 2 - 1,
-      -(screenPos.y / window.innerHeight) * 2 + 1
-    );
-
-    this.raycaster.setFromCamera(mouse, this.camera);
-
-    const targetObjects = objects.length > 0 ? objects : this.scene.children;
-    return this.raycaster.intersectObjects(targetObjects, true);
-  }
-
-  /**
-   * Get object at screen position
-   */
-  getObjectAtPosition(
-    screenPos: THREE.Vector2,
-    objects: THREE.Object3D[] = []
-  ): THREE.Object3D | null {
-    const intersections = this.raycastFromScreen(screenPos, objects);
-    return intersections.length > 0 ? intersections[0].object : null;
-  }
+  
 
   /**
    * Calculate distance between two screen positions
@@ -370,7 +320,7 @@ export class InteractionUtils {
    */
   handleMouseEvent(event: MouseEvent): InteractionEvent {
     const position = new THREE.Vector2(event.clientX, event.clientY);
-    const worldPosition = this.screenToWorld(position);
+    const worldPosition = screenToWorld(position, this.camera);
 
     return {
       type: this.getMouseEventType(event),
@@ -390,7 +340,7 @@ export class InteractionUtils {
     for (let i = 0; i < event.touches.length; i++) {
       const touch = event.touches[i];
       const position = new THREE.Vector2(touch.clientX, touch.clientY);
-      const worldPosition = this.screenToWorld(position);
+      const worldPosition = screenToWorld(position, this.camera);
 
       events.push({
         type: 'tap', // Default type, will be refined by gesture recognition

@@ -1,5 +1,6 @@
 import { SpaceGraph } from '../core/SpaceGraph';
 import { ILayoutEngine, NodeSpec } from '../types';
+import { produce } from 'solid-js/store';
 
 /**
  * Abstract base class for all layout engines.
@@ -86,6 +87,56 @@ export abstract class BaseLayoutEngine implements ILayoutEngine {
   protected isPinned(node: NodeSpec): boolean {
     // A node is considered pinned if it has a pinning property defined
     return node.pinning !== undefined;
+  }
+
+  /**
+   * Helper method to update node positions using the reactive state system.
+   * @param positions - Map of node IDs to new positions
+   */
+  protected updateNodePositions(positions: Map<string, { x: number; y: number; z: number }>): void {
+    this.graph.updateStateWithProducer(
+      produce((s) => {
+        const updatedNodes = [...s.data.nodes];
+        for (const [nodeId, position] of positions.entries()) {
+          const nodeIndex = updatedNodes.findIndex((n) => n.id === nodeId);
+          if (nodeIndex !== -1) {
+            updatedNodes[nodeIndex] = {
+              ...updatedNodes[nodeIndex],
+              position: { ...position },
+            };
+          }
+        }
+        s.data.nodes = updatedNodes;
+      })
+    );
+  }
+
+  /**
+   * Helper method to get non-pinned nodes and calculate their positions.
+   * @param calculatePositions - Function that takes node count and returns positions array
+   */
+  protected arrangeNonPinnedNodes(
+    calculatePositions: (count: number) => Array<{ x: number; y: number; z: number }>
+  ): void {
+    const nodes = this.graph.state.data?.nodes ?? [];
+    const nonPinnedNodes = nodes.filter(node => !this.isPinned(node));
+    const positions = calculatePositions(nonPinnedNodes.length);
+
+    const positionMap = new Map<string, { x: number; y: number; z: number }>();
+    nonPinnedNodes.forEach((node, index) => {
+      if (positions[index]) {
+        positionMap.set(node.id, positions[index]);
+      }
+    });
+
+    // Handle pinned nodes
+    nodes.forEach(node => {
+      if (this.isPinned(node) && node.pinning && typeof node.pinning === 'object') {
+        positionMap.set(node.id, { ...node.pinning });
+      }
+    });
+
+    this.updateNodePositions(positionMap);
   }
 
   /**
