@@ -853,6 +853,15 @@ export class UnifiedPerformanceSystem extends BaseUtilitySystem {
     return this.throttling;
   }
 
+  // Compatibility methods for tests
+  public startMonitoring(): void {
+    this.startPerformanceMonitoring();
+  }
+
+  public stopMonitoring(): void {
+    this.stopPerformanceMonitoring();
+  }
+
   // Rendering optimization methods
   public applyFrustumCulling(objects: THREE.Object3D[], camera: THREE.Camera): THREE.Object3D[] {
     if (!this.config.enableFrustumCulling) {
@@ -1166,3 +1175,18 @@ export function createUnifiedPerformanceSystem(
 }
 
 export default UnifiedPerformanceSystem;
+/**
+ * Advanced Rendering Optimizer - Stub implementation
+ * TODO: Implement full advanced rendering optimization features
+ */
+export class AdvancedRenderingOptimizer {
+  constructor(private graph: any) {}
+
+  update(_deltaTime: number): void {
+    // Stub implementation
+  }
+
+  dispose(): void {
+    // Stub implementation
+  }
+}

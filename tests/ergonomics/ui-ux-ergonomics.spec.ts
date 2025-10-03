@@ -9,7 +9,7 @@ import { test, expect } from '@playwright/test';
  */
 
 test.describe('UI/UX Ergonomics Validation', () => {
-  test.beforeEach(async (_fixtures) => {
+  test.beforeEach(async () => {
     test.setTimeout(30000);
   });
 

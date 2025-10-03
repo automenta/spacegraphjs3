@@ -21,7 +21,7 @@ test.describe('Automated Screenshot System Demo', () => {
     const generatedScreenshots =
       await screenshotSystem.generateInteractionScreenshots(
         interactions.slice(0, 5), // Limit to first 5 for demo
-        'http://localhost:5175/element-actors-demo.html'
+        'http://localhost:5174/element-actors-demo.html'
       );
 
     console.log(`Generated ${generatedScreenshots.length} screenshots`);
@@ -83,7 +83,7 @@ test.describe('Automated Screenshot System Demo', () => {
     const generatedScreenshots =
       await screenshotSystem.generateInteractionScreenshots(
         performanceInteractions,
-        'http://localhost:5175/performance-optimizations.html'
+        'http://localhost:5174/performance-optimizations.html'
       );
 
     console.log(

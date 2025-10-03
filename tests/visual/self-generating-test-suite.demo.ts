@@ -9,7 +9,7 @@ import { generateVisualSemanticsTests } from './self-generating-test-suite';
 
 // Generate all visual semantics tests
 generateVisualSemanticsTests({
-  baseUrl: 'http://localhost:5175',
+  baseUrl: 'http://localhost:5174',
   defaultViewport: { width: 1280, height: 720 },
   deviceScaleFactor: 1,
 });

@@ -1,7 +1,5 @@
 import { createEffect } from 'solid-js';
-import { produce } from 'solid-js/store';
-import { SpaceGraph as _SpaceGraph } from '../core/SpaceGraph';
-import { NodeSpec as _NodeSpec, CircleLayoutSpec } from '../types';
+import { CircleLayoutSpec } from '../types';
 import { BaseLayoutEngine } from './BaseLayoutEngine';
 
 /**
@@ -24,14 +22,11 @@ export class CircleLayout extends BaseLayoutEngine {
         distribution: layoutConfig.distribution ?? 'equal',
       };
 
-      console.log('CircleLayout: Initializing with config:', this.config);
-
       // Run arrangement immediately when initialized
       this.arrangeNodes();
 
       // Also set up effect for reactive updates
       createEffect(() => {
-        console.log('CircleLayout: arrangeNodes effect triggered');
         this.arrangeNodes();
       });
     }
@@ -39,17 +34,10 @@ export class CircleLayout extends BaseLayoutEngine {
 
   private arrangeNodes(): void {
     const nodes = this.graph.state.data?.nodes ?? [];
-    console.log(
-      'CircleLayout: arrangeNodes called with',
-      nodes.length,
-      'nodes'
-    );
     if (nodes.length === 0) return;
 
     this.arrangeNodesWithPositions((count) => {
-      const positions = this.calculateCirclePositions(count);
-      console.log('CircleLayout: calculated positions:', positions);
-      return positions;
+      return this.calculateCirclePositions(count);
     });
   }
 
@@ -114,15 +102,7 @@ export class CircleLayout extends BaseLayoutEngine {
     return positions;
   }
 
-  public onTick(): void {
+  public tick(_iterations = 1): void {
     // Circle layout doesn't need continuous updates
-  }
-
-  public tick(iterations = 1): void {
-    // Circle layout doesn't need continuous updates
-    // Use iterations parameter to avoid linting error
-    if (iterations > 0) {
-      // No operation needed for circle layout
-    }
   }
 }

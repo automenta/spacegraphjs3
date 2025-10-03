@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as THREE from 'three';
 import { InteractionPlugin } from '../../src/plugins/InteractionPlugin';
 import { SpaceGraph } from '../../src/core/SpaceGraph';
-import { createTestGraph } from './test-utils';
 import { Spec } from '../../src/types';
 
 // Mock PointerEvent for test environment
@@ -50,7 +49,6 @@ describe('InteractionPlugin Edge Cases', () => {
   let plugin: InteractionPlugin;
   let mockRendererEl: HTMLElement;
   let mockUpdateState: ReturnType<typeof vi.fn>;
-  let mockGetIntersectedElement: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     // Create a mock renderer element
@@ -156,7 +154,6 @@ describe('InteractionPlugin Edge Cases', () => {
       };
 
       // Override getIntersectedElement to return a node element
-      const originalMethod = (plugin as any).getIntersectedElement;
       (plugin as any).getIntersectedElement = (event: any) => {
         return { type: 'node', element: mockElement };
       };
@@ -177,7 +174,6 @@ describe('InteractionPlugin Edge Cases', () => {
 
     it('should handle background click when no element is intersected', () => {
       // Override getIntersectedElement to return null
-      const originalMethod = (plugin as any).getIntersectedElement;
       (plugin as any).getIntersectedElement = (event: any) => null;
 
       const clickEvent = new MockPointerEvent('click', {
@@ -201,7 +197,6 @@ describe('InteractionPlugin Edge Cases', () => {
       };
 
       // Override getIntersectedElement to return a node element
-      const originalMethod = (plugin as any).getIntersectedElement;
       (plugin as any).getIntersectedElement = (event: any) => {
         return { type: 'node', element: mockElement };
       };
@@ -241,7 +236,6 @@ describe('InteractionPlugin Edge Cases', () => {
       };
 
       // Override getIntersectedElement to return a node element
-      const originalMethod = (plugin as any).getIntersectedElement;
       (plugin as any).getIntersectedElement = (event: any) => {
         return { type: 'node', element: mockElement };
       };
@@ -268,7 +262,6 @@ describe('InteractionPlugin Edge Cases', () => {
       };
 
       // Override getIntersectedElement to return a node element
-      const originalMethod = (plugin as any).getIntersectedElement;
       (plugin as any).getIntersectedElement = (event: any) => {
         return { type: 'node', element: mockElement };
       };
@@ -310,7 +303,6 @@ describe('InteractionPlugin Edge Cases', () => {
       };
 
       // Override getIntersectedElement to return a node element
-      const originalMethod = (plugin as any).getIntersectedElement;
       (plugin as any).getIntersectedElement = (event: any) => {
         return { type: 'node', element: mockElement };
       };
@@ -355,7 +347,6 @@ describe('InteractionPlugin Edge Cases', () => {
       (plugin as any).draggedElementId = 'n1';
 
       // Override getIntersectedElement to return a node element
-      const originalMethod = (plugin as any).getIntersectedElement;
       (plugin as any).getIntersectedElement = (event: any) => {
         return { type: 'node', element: mockElement };
       };
@@ -380,7 +371,6 @@ describe('InteractionPlugin Edge Cases', () => {
       };
 
       // Override getIntersectedElement to return a node element
-      const originalMethod = (plugin as any).getIntersectedElement;
       (plugin as any).getIntersectedElement = (event: any) => {
         // Return element when hovering over it, null when hovering away
         return event === 'hoverEnter'
@@ -437,7 +427,6 @@ describe('InteractionPlugin Edge Cases', () => {
       graph.state.interaction.selectedElementIds = ['n1'];
 
       // Override getIntersectedElement to return a node element
-      const originalMethod = (plugin as any).getIntersectedElement;
       (plugin as any).getIntersectedElement = (event: any) => {
         return { type: 'node', element: mockElement };
       };
@@ -471,7 +460,6 @@ describe('InteractionPlugin Edge Cases', () => {
       graph.state.interaction.selectedElementIds = ['n1'];
 
       // Override getIntersectedElement to return a node element
-      const originalMethod = (plugin as any).getIntersectedElement;
       (plugin as any).getIntersectedElement = (event: any) => {
         return { type: 'node', element: mockElement };
       };
@@ -591,7 +579,6 @@ describe('InteractionPlugin Edge Cases', () => {
       };
 
       // Override getIntersectedElement to return a node element
-      const originalMethod = (plugin as any).getIntersectedElement;
       (plugin as any).getIntersectedElement = (event: any) => {
         return { type: 'node', element: mockElement };
       };
@@ -621,7 +608,6 @@ describe('InteractionPlugin Edge Cases', () => {
       };
 
       // Override getIntersectedElement to return a node element
-      const originalMethod = (plugin as any).getIntersectedElement;
       (plugin as any).getIntersectedElement = (event: any) => {
         return { type: 'node', element: mockElement };
       };

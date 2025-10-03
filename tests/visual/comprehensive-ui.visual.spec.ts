@@ -22,7 +22,7 @@ test.describe('Comprehensive UI Visual Semantics', () => {
   test('Sphere Element Actor visual semantics', async () => {
     // Navigate to the element actors demo
     await controller.navigateTo(
-      'http://localhost:5175/element-actors-demo.html'
+      'http://localhost:5174/element-actors-demo.html'
     );
 
     // Test sphere element actor visual semantics
@@ -37,7 +37,7 @@ test.describe('Comprehensive UI Visual Semantics', () => {
   test('Box Element Actor visual semantics', async () => {
     // Navigate to the element actors demo
     await controller.navigateTo(
-      'http://localhost:5175/element-actors-demo.html'
+      'http://localhost:5174/element-actors-demo.html'
     );
 
     // Test box element actor visual semantics
@@ -52,7 +52,7 @@ test.describe('Comprehensive UI Visual Semantics', () => {
   test('Text Element Actor visual semantics', async () => {
     // Navigate to the element actors demo
     await controller.navigateTo(
-      'http://localhost:5175/element-actors-demo.html'
+      'http://localhost:5174/element-actors-demo.html'
     );
 
     // Test text element actor visual semantics
@@ -67,7 +67,7 @@ test.describe('Comprehensive UI Visual Semantics', () => {
   test('HTML Node Element Actor visual semantics', async () => {
     // Navigate to the element actors demo
     await controller.navigateTo(
-      'http://localhost:5175/element-actors-demo.html'
+      'http://localhost:5174/element-actors-demo.html'
     );
 
     // Test HTML node element actor visual semantics
@@ -82,7 +82,7 @@ test.describe('Comprehensive UI Visual Semantics', () => {
   // Test Renderers
   test('Edge Renderer visual semantics', async () => {
     // Navigate to the edge interaction demo
-    await controller.navigateTo('http://localhost:5175/edge-interaction.html');
+    await controller.navigateTo('http://localhost:5174/edge-interaction.html');
 
     // Test edge renderer visual semantics
     await controller.assertVisualState(
@@ -95,7 +95,7 @@ test.describe('Comprehensive UI Visual Semantics', () => {
 
   test('Edge Label visual semantics', async () => {
     // Navigate to the edge interaction demo
-    await controller.navigateTo('http://localhost:5175/edge-interaction.html');
+    await controller.navigateTo('http://localhost:5174/edge-interaction.html');
 
     // Test edge label visual semantics
     await controller.assertVisualState(
@@ -110,7 +110,7 @@ test.describe('Comprehensive UI Visual Semantics', () => {
   test('Selection Manager visual semantics', async () => {
     // Navigate to the instanced interaction demo
     await controller.navigateTo(
-      'http://localhost:5175/instanced-interaction.html'
+      'http://localhost:5174/instanced-interaction.html'
     );
 
     // Test selection manager visual semantics
@@ -125,7 +125,7 @@ test.describe('Comprehensive UI Visual Semantics', () => {
   test('Context Menu visual semantics', async () => {
     // Navigate to the element actors demo
     await controller.navigateTo(
-      'http://localhost:5175/element-actors-demo.html'
+      'http://localhost:5174/element-actors-demo.html'
     );
 
     // Test context menu visual semantics
@@ -141,7 +141,7 @@ test.describe('Comprehensive UI Visual Semantics', () => {
   test('D3 Force Layout visual semantics', async () => {
     // Navigate to the layout engines demo
     await controller.navigateTo(
-      'http://localhost:5175/layout-engines-demo.html'
+      'http://localhost:5174/layout-engines-demo.html'
     );
 
     // Test D3 force layout visual semantics
@@ -156,7 +156,7 @@ test.describe('Comprehensive UI Visual Semantics', () => {
   test('Circle Layout visual semantics', async () => {
     // Navigate to the layout engines demo
     await controller.navigateTo(
-      'http://localhost:5175/layout-engines-demo.html'
+      'http://localhost:5174/layout-engines-demo.html'
     );
 
     // Test circle layout visual semantics
@@ -171,7 +171,7 @@ test.describe('Comprehensive UI Visual Semantics', () => {
   test('Grid Layout visual semantics', async () => {
     // Navigate to the layout engines demo
     await controller.navigateTo(
-      'http://localhost:5175/layout-engines-demo.html'
+      'http://localhost:5174/layout-engines-demo.html'
     );
 
     // Test grid layout visual semantics
@@ -187,7 +187,7 @@ test.describe('Comprehensive UI Visual Semantics', () => {
   test('HUD visual semantics', async () => {
     // Navigate to the element actors demo
     await controller.navigateTo(
-      'http://localhost:5175/element-actors-demo.html'
+      'http://localhost:5174/element-actors-demo.html'
     );
 
     // Test HUD visual semantics
@@ -200,7 +200,7 @@ test.describe('Comprehensive UI Visual Semantics', () => {
   test('Performance Overlay visual semantics', async () => {
     // Navigate to the element actors demo
     await controller.navigateTo(
-      'http://localhost:5175/element-actors-demo.html'
+      'http://localhost:5174/element-actors-demo.html'
     );
 
     // Test performance overlay visual semantics
@@ -215,7 +215,7 @@ test.describe('Comprehensive UI Visual Semantics', () => {
   test('Search Filter visual semantics', async () => {
     // Navigate to the element actors demo
     await controller.navigateTo(
-      'http://localhost:5175/element-actors-demo.html'
+      'http://localhost:5174/element-actors-demo.html'
     );
 
     // Test search filter visual semantics
@@ -231,7 +231,7 @@ test.describe('Comprehensive UI Visual Semantics', () => {
   test('Camera Controls visual semantics', async () => {
     // Navigate to the element actors demo
     await controller.navigateTo(
-      'http://localhost:5175/element-actors-demo.html'
+      'http://localhost:5174/element-actors-demo.html'
     );
 
     // Test camera controls visual semantics
@@ -247,7 +247,7 @@ test.describe('Comprehensive UI Visual Semantics', () => {
   test('Instanced Renderer visual semantics', async () => {
     // Navigate to the instanced interaction demo
     await controller.navigateTo(
-      'http://localhost:5175/instanced-interaction.html'
+      'http://localhost:5174/instanced-interaction.html'
     );
 
     // Test instanced renderer visual semantics

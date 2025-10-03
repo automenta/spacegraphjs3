@@ -100,6 +100,7 @@ export {
   HUDElementConfig,
   HUDPerformanceMetrics,
 };
+export { UnifiedHUDSystemClass as HUDUtils };
 export {
   InteractionUtilsClass as InteractionUtils,
   InteractionEvent,
@@ -111,6 +112,7 @@ export {
   PerformanceMetrics,
   IOptimizationStrategy,
 };
+export { UnifiedPerformanceSystemClass as PerformanceUtils };
 export { ThemeSystemClass as ThemeSystem, Theme, ThemeConfig };
 export {
   VisualEffectsSystemClass as VisualEffectsSystem,
@@ -159,12 +161,12 @@ export interface UtilitySystemConfig {
 export class UtilitySystem {
   public animation: UnifiedAnimationSystem;
   public camera: CameraUtils;
-  public hud: UnifiedHUDSystem;
-  public interaction: InteractionUtils;
-  public performance: UnifiedPerformanceSystem;
+  public hud: UnifiedHUDSystem | null = null;
+  public interaction: InteractionUtils | null = null;
+  public performance: UnifiedPerformanceSystem | null = null;
   public theme: ThemeSystem;
-  public visualEffects: VisualEffectsSystem;
-  public visualFeedback: VisualFeedbackSystem;
+  public visualEffects: VisualEffectsSystem | null = null;
+  public visualFeedback: VisualFeedbackSystem | null = null;
   public disposal: UnifiedDisposalSystem;
   public errorHandler: ErrorHandler;
 
@@ -181,8 +183,6 @@ export class UtilitySystem {
       hudContainer.id = 'hud-container';
       document.body.appendChild(hudContainer);
       this.hud = new UnifiedHUDSystemClass(hudContainer);
-    } else {
-      this.hud = null as any;
     }
 
     if (config.camera && config.scene) {
@@ -191,14 +191,29 @@ export class UtilitySystem {
         config.scene,
         config.interactionConfig
       );
-    } else {
-      this.interaction = null as any;
     }
 
     if (config.scene && config.camera) {
-      this.performance = new UnifiedPerformanceSystemClass(config.scene, config.camera, null as any);
-    } else {
-      this.performance = null as any;
+      // Create performance system even without renderer for basic functionality
+      // In a real application, this should be initialized with a proper renderer
+      this.performance = new UnifiedPerformanceSystemClass(config.scene, config.camera, {
+        domElement: document.createElement('canvas'),
+        getSize: () => ({ width: 800, height: 600 }),
+        setSize: () => {},
+        render: () => {},
+        info: {
+          render: {
+            calls: 0,
+            triangles: 0,
+          },
+          memory: {
+            textures: 0,
+          },
+          programs: [],
+        },
+      } as any);
+      // Initialize the performance system to prevent warnings
+      (this.performance as any).init();
     }
 
     this.theme = new ThemeSystemClass(config.themeConfig);
@@ -206,9 +221,6 @@ export class UtilitySystem {
     if (config.scene) {
       this.visualEffects = new VisualEffectsSystemClass(config.scene);
       this.visualFeedback = new VisualFeedbackSystem(config.scene);
-    } else {
-      this.visualEffects = null as any;
-      this.visualFeedback = null as any;
     }
   }
 

@@ -420,7 +420,7 @@ describe('Edge Interaction', () => {
       };
 
       // Override getIntersectedElement to return an edge element
-      const originalMethod = (plugin as any).getIntersectedElement;
+      const _originalMethod = (plugin as any).getIntersectedElement;
       (plugin as any).getIntersectedElement = (event: any) => {
         return {
           type: 'edge',

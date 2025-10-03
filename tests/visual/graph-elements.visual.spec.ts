@@ -21,7 +21,7 @@ test.describe('Graph Elements Visual Semantics', () => {
   test('Sphere node visual semantics', async () => {
     // Navigate to the element actors demo
     await controller.navigateTo(
-      'http://localhost:5175/element-actors-demo.html'
+      'http://localhost:5174/element-actors-demo.html'
     );
 
     // Test sphere node visual semantics
@@ -34,7 +34,7 @@ test.describe('Graph Elements Visual Semantics', () => {
   test('Box node visual semantics', async () => {
     // Navigate to the element actors demo
     await controller.navigateTo(
-      'http://localhost:5175/element-actors-demo.html'
+      'http://localhost:5174/element-actors-demo.html'
     );
 
     // Test box node visual semantics
@@ -47,7 +47,7 @@ test.describe('Graph Elements Visual Semantics', () => {
   test('Text node visual semantics', async () => {
     // Navigate to the element actors demo
     await controller.navigateTo(
-      'http://localhost:5175/element-actors-demo.html'
+      'http://localhost:5174/element-actors-demo.html'
     );
 
     // Test text node visual semantics
@@ -59,7 +59,7 @@ test.describe('Graph Elements Visual Semantics', () => {
 
   test('Edge visual semantics', async () => {
     // Navigate to the edge interaction demo
-    await controller.navigateTo('http://localhost:5175/edge-interaction.html');
+    await controller.navigateTo('http://localhost:5174/edge-interaction.html');
 
     // Test edge visual semantics
     await controller.assertVisualState(GraphNodeSemanticsSpecs.EdgeSpec);
@@ -71,7 +71,7 @@ test.describe('Graph Elements Visual Semantics', () => {
   test('Drag interaction visual semantics', async () => {
     // Navigate to the instanced interaction demo
     await controller.navigateTo(
-      'http://localhost:5175/instanced-interaction.html'
+      'http://localhost:5174/instanced-interaction.html'
     );
 
     // Perform drag interaction

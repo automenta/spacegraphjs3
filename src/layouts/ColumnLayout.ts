@@ -1,7 +1,5 @@
 import { createEffect } from 'solid-js';
-import { produce } from 'solid-js/store';
-import { SpaceGraph as _SpaceGraph } from '../core/SpaceGraph';
-import { NodeSpec as _NodeSpec, ColumnLayoutSpec } from '../types';
+import { ColumnLayoutSpec } from '../types';
 import { BaseLayoutEngine } from './BaseLayoutEngine';
 
 /**
@@ -72,15 +70,7 @@ export class ColumnLayout extends BaseLayoutEngine {
     return positions;
   }
 
-  public onTick(): void {
+  public tick(_iterations = 1): void {
     // Column layout doesn't need continuous updates
-  }
-
-  public tick(iterations = 1): void {
-    // Column layout doesn't need continuous updates
-    // Use iterations parameter to avoid linting error
-    if (iterations > 0) {
-      // No operation needed for column layout
-    }
   }
 }

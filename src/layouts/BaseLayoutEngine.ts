@@ -112,33 +112,6 @@ export abstract class BaseLayoutEngine implements ILayoutEngine {
   }
 
   /**
-   * Helper method to get non-pinned nodes and calculate their positions.
-   * @param calculatePositions - Function that takes node count and returns positions array
-   */
-  protected arrangeNonPinnedNodes(
-    calculatePositions: (count: number) => Array<{ x: number; y: number; z: number }>
-  ): void {
-    const nodes = this.graph.state.data?.nodes ?? [];
-    const nonPinnedNodes = nodes.filter(node => !this.isPinned(node));
-    const positions = calculatePositions(nonPinnedNodes.length);
-
-    const positionMap = new Map<string, { x: number; y: number; z: number }>();
-    nonPinnedNodes.forEach((node, index) => {
-      if (positions[index]) {
-        positionMap.set(node.id, positions[index]);
-      }
-    });
-
-    // Handle pinned nodes
-    nodes.forEach(node => {
-      if (this.isPinned(node) && node.pinning && typeof node.pinning === 'object') {
-        positionMap.set(node.id, { ...node.pinning });
-      }
-    });
-
-    this.updateNodePositions(positionMap);
-  }
-  /**
    * Helper method to arrange nodes using calculated positions.
    * Handles both pinned and non-pinned nodes automatically.
    * @param calculatePositions - Function that takes node count and returns positions array
@@ -149,13 +122,14 @@ export abstract class BaseLayoutEngine implements ILayoutEngine {
     const nodes = this.graph.state.data?.nodes ?? [];
     if (nodes.length === 0) return;
 
-    const positions = calculatePositions(nodes.length);
+    const nonPinnedNodes = nodes.filter(node => !this.isPinned(node));
+    const positions = calculatePositions(nonPinnedNodes.length);
 
     // Update node positions using the reactive state update mechanism
     this.graph.updateStateWithProducer(
       produce((s) => {
         const updatedNodes = [...s.data.nodes];
-        let positionIndex = 0; // Track position index for non-pinned nodes
+        let positionIndex = 0;
         for (let i = 0; i < nodes.length; i++) {
           const node = nodes[i];
           const nodeIndex = updatedNodes.findIndex((n) => n.id === node.id);
@@ -174,7 +148,7 @@ export abstract class BaseLayoutEngine implements ILayoutEngine {
                 ...updatedNodes[nodeIndex],
                 position: positions[positionIndex],
               };
-              positionIndex++; // Only increment for non-pinned nodes
+              positionIndex++;
             }
           }
         }

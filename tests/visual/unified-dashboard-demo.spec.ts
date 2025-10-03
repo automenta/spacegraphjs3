@@ -48,7 +48,7 @@ test.describe('Unified Dashboard Demo', () => {
   test('Sphere Element Actor comprehensive test', async () => {
     // Navigate to the element actors demo
     await controller.navigateTo(
-      'http://localhost:5175/element-actors-demo.html'
+      'http://localhost:5174/element-actors-demo.html'
     );
 
     try {
@@ -135,7 +135,7 @@ test.describe('Unified Dashboard Demo', () => {
   test('Box Element Actor comprehensive test', async () => {
     // Navigate to the element actors demo
     await controller.navigateTo(
-      'http://localhost:5175/element-actors-demo.html'
+      'http://localhost:5174/element-actors-demo.html'
     );
 
     try {
@@ -222,7 +222,7 @@ test.describe('Unified Dashboard Demo', () => {
   test('D3 Force Layout comprehensive test', async () => {
     // Navigate to the layout engines demo
     await controller.navigateTo(
-      'http://localhost:5175/layout-engines-demo.html'
+      'http://localhost:5174/layout-engines-demo.html'
     );
 
     try {

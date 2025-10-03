@@ -166,7 +166,7 @@ export { SelfGeneratingTestSuite };
 
 // Example usage:
 // generateVisualSemanticsTests({
-//   baseUrl: 'http://localhost:5175',
+//   baseUrl: 'http://localhost:5174',
 //   defaultViewport: { width: 1280, height: 720 },
 //   deviceScaleFactor: 1,
 // });

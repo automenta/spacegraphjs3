@@ -4,7 +4,7 @@
  */
 
 import * as THREE from 'three';
-import { screenToWorld, worldToScreen, raycastFromScreen, getObjectAtPosition } from './threeUtils';
+import { screenToWorld } from './threeUtils';
 // Vector3 is imported for type definitions but not directly used in this file
 
 export interface InteractionEvent {

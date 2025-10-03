@@ -52,7 +52,7 @@ test.describe('End-to-End Visual Semantics Workflow', () => {
       // Step 1: Navigate to test page
       console.log('📍 Navigating to element actors demo');
       await controller.navigateTo(
-        'http://localhost:5175/element-actors-demo.html'
+        'http://localhost:5174/element-actors-demo.html'
       );
 
       // Step 2: Visual semantics testing
@@ -149,7 +149,7 @@ test.describe('End-to-End Visual Semantics Workflow', () => {
       // Step 1: Navigate to test page
       console.log('📍 Navigating to layout engines demo');
       await controller.navigateTo(
-        'http://localhost:5175/layout-engines-demo.html'
+        'http://localhost:5174/layout-engines-demo.html'
       );
 
       // Step 2: Visual semantics testing

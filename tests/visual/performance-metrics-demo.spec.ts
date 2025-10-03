@@ -32,7 +32,7 @@ test.describe('Performance Metrics Collection', () => {
   test('Measure Sphere Element Actor hover performance', async () => {
     // Navigate to the element actors demo
     await controller.navigateTo(
-      'http://localhost:5175/element-actors-demo.html'
+      'http://localhost:5174/element-actors-demo.html'
     );
 
     // Collect performance metrics for hover interaction
@@ -74,7 +74,7 @@ test.describe('Performance Metrics Collection', () => {
   test('Measure Box Element Actor drag performance', async () => {
     // Navigate to the instanced interaction demo
     await controller.navigateTo(
-      'http://localhost:5175/instanced-interaction.html'
+      'http://localhost:5174/instanced-interaction.html'
     );
 
     // Collect performance metrics for drag interaction
@@ -95,7 +95,7 @@ test.describe('Performance Metrics Collection', () => {
   test('Measure Layout Engine performance', async () => {
     // Navigate to the layout engines demo
     await controller.navigateTo(
-      'http://localhost:5175/layout-engines-demo.html'
+      'http://localhost:5174/layout-engines-demo.html'
     );
 
     // Collect performance metrics for layout execution

@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test';
  */
 
 test.describe('Performance Benchmarking for Ergonomics', () => {
-  test.beforeEach(async (_fixtures) => {
+  test.beforeEach(async () => {
     test.setTimeout(60000); // Extended timeout for performance tests
   });
 

@@ -162,7 +162,7 @@ async function runAllTests(): Promise<void> {
 
 async function checkDevServer(): Promise<boolean> {
   try {
-    const response = await fetch('http://localhost:5175');
+    const response = await fetch('http://localhost:5174');
     return response.ok;
   } catch (error) {
     return false;
