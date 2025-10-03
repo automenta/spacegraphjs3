@@ -5,7 +5,7 @@
 
 import * as THREE from 'three';
 import { BaseUtilitySystem } from './abstractions/BaseUtilitySystem';
-import { ObjectPool } from './ObjectPool';
+import { ThreeObjectPoolManager } from './ThreeObjectPoolManager';
 import { CullingManager } from './CullingManager';
 import { LODManager, LODSettings } from './LODManager';
 import { MemoryManager } from './MemoryManager';
@@ -53,20 +53,22 @@ export interface IOptimizationStrategy {
 }
 
 /**
- * Object Pooling Strategy
+ * Object Pooling Strategy - Uses ThreeObjectPoolManager for consistency
  */
 export class ObjectPoolingStrategy implements IOptimizationStrategy {
-  private pools: Map<string, ObjectPool<any>> = new Map();
+  private poolManager: ThreeObjectPoolManager;
   private enabled = true;
 
-  constructor(private config: { maxPoolSize?: number } = {}) {}
+  constructor(private config: { maxPoolSize?: number } = {}) {
+    this.poolManager = ThreeObjectPoolManager.getInstance();
+  }
 
   init(
     _scene: THREE.Scene,
     _camera: THREE.Camera,
     _renderer: THREE.WebGLRenderer
   ): void {
-    this.setupDefaultPools();
+    // ThreeObjectPoolManager is already initialized globally
   }
 
   update(): void {
@@ -74,10 +76,7 @@ export class ObjectPoolingStrategy implements IOptimizationStrategy {
   }
 
   dispose(): void {
-    for (const pool of this.pools.values()) {
-      pool.clear();
-    }
-    this.pools.clear();
+    // ThreeObjectPoolManager is managed globally, don't dispose here
   }
 
   getName(): string {
@@ -92,37 +91,29 @@ export class ObjectPoolingStrategy implements IOptimizationStrategy {
     this.enabled = enabled;
   }
 
-  private setupDefaultPools(): void {
-    const maxSize = this.config.maxPoolSize || 100;
-
-    this.pools.set(
-      'vector3',
-      new ObjectPool(() => new THREE.Vector3(), undefined, maxSize)
-    );
-    this.pools.set(
-      'matrix4',
-      new ObjectPool(() => new THREE.Matrix4(), undefined, maxSize)
-    );
-    this.pools.set(
-      'color',
-      new ObjectPool(() => new THREE.Color(), undefined, maxSize)
-    );
-    this.pools.set(
-      'mesh',
-      new ObjectPool(() => new THREE.Mesh(), undefined, maxSize / 2)
-    );
-    this.pools.set(
-      'group',
-      new ObjectPool(() => new THREE.Group(), undefined, maxSize / 4)
-    );
+  public getPool(name: string) {
+    return this.poolManager.getPool(name);
   }
 
-  public getPool<T>(name: string): ObjectPool<T> | undefined {
-    return this.pools.get(name);
+  public registerPool(name: string, pool: any): void {
+    this.poolManager.registerPool(name, pool);
   }
 
-  public registerPool<T>(name: string, pool: ObjectPool<T>): void {
-    this.pools.set(name, pool);
+  // Convenience methods for common Three.js objects
+  public getVector3(): THREE.Vector3 {
+    return this.poolManager.getVector3();
+  }
+
+  public releaseVector3(vec: THREE.Vector3): void {
+    this.poolManager.releaseVector3(vec);
+  }
+
+  public getMaterial(color?: THREE.Color): THREE.MeshBasicMaterial {
+    return this.poolManager.getMaterial(color);
+  }
+
+  public releaseMaterial(mat: THREE.MeshBasicMaterial): void {
+    this.poolManager.releaseMaterial(mat);
   }
 }
 
