@@ -5,7 +5,7 @@ test('comprehensive basic renderer test', async ({ page }) => {
 
   // Wait for the graph to be initialized
   await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
-  
+
   // Simple wait for rendering to complete
   await page.waitForTimeout(3000);
 
@@ -14,12 +14,12 @@ test('comprehensive basic renderer test', async ({ page }) => {
     const graph = (window as any).graph;
     return {
       nodeRendererType: graph.render.getNodeRenderer().constructor.name,
-      useBasicRenderer: graph.state.performance?.useBasicRenderer || false
+      useBasicRenderer: graph.state.performance?.useBasicRenderer || false,
     };
   });
-  
+
   console.log('Renderer info:', rendererInfo);
-  
+
   // Verify that we're using the BasicRenderer
   expect(rendererInfo.nodeRendererType).toBe('BasicRenderer');
   expect(rendererInfo.useBasicRenderer).toBe(true);
@@ -30,7 +30,7 @@ test('comprehensive basic renderer test', async ({ page }) => {
     const nodes = graph.state.data.nodes;
     return nodes.map((node: any) => node.type);
   });
-  
+
   expect(nodeTypes).toContain('sphere');
   expect(nodeTypes).toContain('box');
   expect(nodeTypes).toContain('text');
@@ -43,7 +43,7 @@ test('comprehensive basic renderer test', async ({ page }) => {
     const edges = graph.state.data.edges;
     return edges.map((edge: any) => edge.type);
   });
-  
+
   expect(edgeTypes).toContain('straight');
   expect(edgeTypes).toContain('curved');
   expect(edgeTypes).toContain('dashed');

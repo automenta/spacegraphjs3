@@ -9,11 +9,7 @@ import { createRoot } from 'solid-js';
 
 // Extend SphereElementActor to disable animations in tests
 class TestSphereElementActor extends SphereElementActor {
-  constructor(
-    scene: THREE.Scene,
-    elementState: any,
-    graphState: any
-  ) {
+  constructor(scene: THREE.Scene, elementState: any, graphState: any) {
     super(scene, elementState, graphState);
     // Disable animations for tests
     (this as any).useAnimations = false;
@@ -55,7 +51,12 @@ describe('NodeRenderer', () => {
       });
 
       const css3DScene = new THREE.Scene();
-      const nodeRenderer = new NodeRenderer(scene, css3DScene, state, testElementActorRegistry);
+      const nodeRenderer = new NodeRenderer(
+        scene,
+        css3DScene,
+        state,
+        testElementActorRegistry
+      );
       nodeRenderer.updateNodes();
 
       expect(scene.children.length).toBe(0);
@@ -119,7 +120,12 @@ describe('NodeRenderer', () => {
       });
 
       const css3DScene = new THREE.Scene();
-      const nodeRenderer = new NodeRenderer(scene, css3DScene, state, testElementActorRegistry);
+      const nodeRenderer = new NodeRenderer(
+        scene,
+        css3DScene,
+        state,
+        testElementActorRegistry
+      );
       nodeRenderer.updateNodes();
       (nodeRenderer.elementActors.get('n1') as any)?.update();
       await nextTick();
@@ -198,7 +204,12 @@ describe('NodeRenderer', () => {
       });
 
       const css3DScene = new THREE.Scene();
-      const nodeRenderer = new NodeRenderer(scene, css3DScene, state, testElementActorRegistry);
+      const nodeRenderer = new NodeRenderer(
+        scene,
+        css3DScene,
+        state,
+        testElementActorRegistry
+      );
       nodeRenderer.updateNodes();
       (nodeRenderer.elementActors.get('n1') as any)?.update();
       await nextTick();

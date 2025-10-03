@@ -10,3 +10,4 @@ playwright-report
 *.d.ts
 *.d.ts.map
 !src/**/*.d.ts
+.vscode

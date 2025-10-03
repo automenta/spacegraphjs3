@@ -8,7 +8,9 @@ import { LODManager } from '../src/utils/LODManager';
 import { CullingManager } from '../src/utils/CullingManager';
 
 // Create a container for the graph
-const container = document.getElementById('graph-container') || document.body.appendChild(document.createElement('div'));
+const container =
+  document.getElementById('graph-container') ||
+  document.body.appendChild(document.createElement('div'));
 container.id = 'graph-container';
 container.style.width = '100vw';
 container.style.height = '100vh';
@@ -26,7 +28,7 @@ for (let x = 0; x < gridSize; x++) {
       id: nodeId,
       type: 'sphere',
       position: { x: x * 2 - gridSize, y: y * 2 - gridSize, z: 0 },
-      color: `hsl(${(x / gridSize) * 360}, 70%, 60%)`
+      color: `hsl(${(x / gridSize) * 360}, 70%, 60%)`,
     });
 
     // Connect to adjacent nodes
@@ -34,48 +36,52 @@ for (let x = 0; x < gridSize; x++) {
       edges.push({
         id: `edge-${x}-${y}-left`,
         source: nodeId,
-        target: `node-${x - 1}-${y}`
+        target: `node-${x - 1}-${y}`,
       });
     }
     if (y > 0) {
       edges.push({
         id: `edge-${x}-${y}-top`,
         source: nodeId,
-        target: `node-${x}-${y - 1}`
+        target: `node-${x}-${y - 1}`,
       });
     }
   }
 }
 
 // Initialize the graph with performance optimizations
-const graph = new SpaceGraph('#graph-container', {
-  data: { nodes, edges },
-  layout: { type: 'force-directed' },
-  style: {},
-  camera: {
-    target: { x: 0, y: 0, z: 0 },
-    phi: Math.PI / 3,
-    theta: Math.PI / 4,
-    distance: 30
+const graph = new SpaceGraph(
+  '#graph-container',
+  {
+    data: { nodes, edges },
+    layout: { type: 'force-directed' },
+    style: {},
+    camera: {
+      target: { x: 0, y: 0, z: 0 },
+      phi: Math.PI / 3,
+      theta: Math.PI / 4,
+      distance: 30,
+    },
+    controls: {
+      keyboard: {
+        enabled: true,
+        panSpeed: 1,
+        zoomSpeed: 1,
+        orbitSpeed: 1,
+      },
+    },
+    performance: {
+      instancingThreshold: 100,
+      enableLOD: true,
+      enableCulling: true,
+    },
+    interaction: {
+      hoveredElementId: null,
+      selectedElementIds: [],
+    },
   },
-  controls: {
-    keyboard: {
-      enabled: true,
-      panSpeed: 1,
-      zoomSpeed: 1,
-      orbitSpeed: 1
-    }
-  },
-  performance: {
-    instancingThreshold: 100,
-    enableLOD: true,
-    enableCulling: true
-  },
-  interaction: {
-    hoveredElementId: null,
-    selectedElementIds: []
-  }
-}, [new CameraPlugin()]);
+  [new CameraPlugin()]
+);
 
 // Initialize performance optimization managers
 const poolManager = ThreeObjectPoolManager.getInstance();
@@ -86,7 +92,7 @@ const cullingManager = new CullingManager();
 console.log('Performance optimization managers initialized:', {
   poolManager: !!poolManager,
   lodManager: !!lodManager,
-  cullingManager: !!cullingManager
+  cullingManager: !!cullingManager,
 });
 
 // Set camera for LOD and culling managers
@@ -146,7 +152,9 @@ const togglePoolingButton = document.createElement('button');
 togglePoolingButton.textContent = 'Toggle Object Pooling';
 togglePoolingButton.onclick = () => {
   // In a real implementation, this would toggle the pooling system
-  alert('Object pooling toggle clicked. In a full implementation, this would enable/disable object pooling.');
+  alert(
+    'Object pooling toggle clicked. In a full implementation, this would enable/disable object pooling.'
+  );
 };
 toggleContainer.appendChild(togglePoolingButton);
 
@@ -155,7 +163,9 @@ const toggleLODButton = document.createElement('button');
 toggleLODButton.textContent = 'Toggle LOD';
 toggleLODButton.onclick = () => {
   // In a real implementation, this would toggle the LOD system
-  alert('LOD toggle clicked. In a full implementation, this would enable/disable level-of-detail rendering.');
+  alert(
+    'LOD toggle clicked. In a full implementation, this would enable/disable level-of-detail rendering.'
+  );
 };
 toggleContainer.appendChild(toggleLODButton);
 
@@ -164,7 +174,9 @@ const toggleCullingButton = document.createElement('button');
 toggleCullingButton.textContent = 'Toggle Frustum Culling';
 toggleCullingButton.onclick = () => {
   // In a real implementation, this would toggle the culling system
-  alert('Frustum culling toggle clicked. In a full implementation, this would enable/disable frustum culling.');
+  alert(
+    'Frustum culling toggle clicked. In a full implementation, this would enable/disable frustum culling.'
+  );
 };
 toggleContainer.appendChild(toggleCullingButton);
 

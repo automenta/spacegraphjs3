@@ -27,7 +27,7 @@ function generateHtmlContent(id: string, title: string): string {
   const cpu = Math.floor(Math.random() * 100);
   const memory = Math.floor(Math.random() * 100);
   const network = Math.floor(Math.random() * 100);
-  
+
   return `
     <div class="spacegraph-html-node">
       <h4>${title} (${id})</h4>
@@ -56,50 +56,50 @@ const nodes: NodeSpec[] = [
     type: 'sphere',
     position: { x: -10, y: 0, z: 0 },
     color: '#ff0000',
-    label: 'Sphere Node'
+    label: 'Sphere Node',
   },
   {
     id: 'node-2',
     type: 'box',
     position: { x: 0, y: 10, z: 0 },
     color: '#00ff00',
-    label: 'Box Node'
+    label: 'Box Node',
   },
   {
     id: 'node-3',
     type: 'sphere',
     position: { x: 10, y: 0, z: 0 },
     color: '#0000ff',
-    label: 'Sphere Node'
+    label: 'Sphere Node',
   },
   {
     id: 'node-4',
     type: 'text',
     position: { x: 0, y: -10, z: 0 },
     color: '#ffff00',
-    label: 'Text Node'
+    label: 'Text Node',
   },
   {
     id: 'html-node-1',
     type: 'html',
     position: { x: -5, y: 5, z: 5 },
     content: generateHtmlContent('html-node-1', 'Server Node'),
-    className: 'spacegraph-html-node'
+    className: 'spacegraph-html-node',
   } as HtmlNodeSpec,
   {
     id: 'html-node-2',
     type: 'html',
     position: { x: 5, y: -5, z: -5 },
     content: generateHtmlContent('html-node-2', 'Database Node'),
-    className: 'spacegraph-html-node'
+    className: 'spacegraph-html-node',
   } as HtmlNodeSpec,
   {
     id: 'html-node-3',
     type: 'html',
     position: { x: 5, y: 5, z: 5 },
     content: generateHtmlContent('html-node-3', 'API Gateway'),
-    className: 'spacegraph-html-node'
-  } as HtmlNodeSpec
+    className: 'spacegraph-html-node',
+  } as HtmlNodeSpec,
 ];
 
 // Create edges connecting nodes
@@ -111,7 +111,7 @@ const edges: EdgeSpec[] = [
     color: '#ff0000',
     width: 3,
     type: 'straight',
-    label: 'Connection'
+    label: 'Connection',
   },
   {
     id: 'edge-2',
@@ -121,7 +121,7 @@ const edges: EdgeSpec[] = [
     width: 2,
     type: 'curved',
     curvature: 0.5,
-    label: 'Data Flow'
+    label: 'Data Flow',
   },
   {
     id: 'edge-3',
@@ -132,7 +132,7 @@ const edges: EdgeSpec[] = [
     type: 'dashed',
     dashSize: 0.5,
     gapSize: 0.3,
-    label: 'Backup Link'
+    label: 'Backup Link',
   },
   {
     id: 'edge-4',
@@ -141,7 +141,7 @@ const edges: EdgeSpec[] = [
     color: '#ff00ff',
     width: 2,
     type: 'straight',
-    label: 'Control'
+    label: 'Control',
   },
   {
     id: 'edge-5',
@@ -151,7 +151,7 @@ const edges: EdgeSpec[] = [
     width: 2,
     type: 'curved',
     curvature: -0.3,
-    label: 'Database'
+    label: 'Database',
   },
   {
     id: 'edge-6',
@@ -160,8 +160,8 @@ const edges: EdgeSpec[] = [
     color: '#ffff00',
     width: 3,
     type: 'straight',
-    label: 'API Calls'
-  }
+    label: 'API Calls',
+  },
 ];
 
 const spec: Spec = {
@@ -174,20 +174,20 @@ const spec: Spec = {
       color: '#ffffff',
       glow: {
         color: '#ffffff',
-        strength: 0.8
-      }
+        strength: 0.8,
+      },
     },
     'node:selected': {
       color: '#ffffff',
       glow: {
         color: '#ffffff',
-        strength: 1.0
-      }
+        strength: 1.0,
+      },
     },
     'edge:hover': {
       color: '#ffffff',
       width: 5,
-      opacity: 1.0
+      opacity: 1.0,
     },
     'edge:selected': {
       color: '#ffffff',
@@ -195,24 +195,24 @@ const spec: Spec = {
       opacity: 1.0,
       glow: {
         color: '#ffffff',
-        strength: 0.5
-      }
+        strength: 0.5,
+      },
     },
     'edge:source-selected': {
       color: '#ffaa00',
       width: 4,
-      opacity: 0.9
+      opacity: 0.9,
     },
     'edge:target-selected': {
       color: '#00aaff',
       width: 4,
-      opacity: 0.9
+      opacity: 0.9,
     },
     'edge:both-selected': {
       color: '#ff00ff',
       width: 5,
-      opacity: 1.0
-    }
+      opacity: 1.0,
+    },
   },
   layout: {
     type: 'force-directed',
@@ -252,7 +252,7 @@ const plugins = [
 export default function init() {
   const container = document.getElementById('graph')!;
   const graph = new SpaceGraph('#graph', spec, plugins);
-  
+
   // Use container to avoid linting error
   console.log('Graph initialized in container:', container.id);
 
@@ -260,7 +260,7 @@ export default function init() {
   graph.on('element:click', ({ target, event }) => {
     console.log('Element clicked:', target.id);
     console.log('Event:', event);
-    
+
     // If it's an HTML node, we might want to handle specific interactions
     if (target.type === 'html') {
       console.log('HTML node clicked:', target.id);
@@ -283,21 +283,21 @@ export default function init() {
       const newNode: HtmlNodeSpec = {
         id: newNodeId,
         type: 'html',
-        position: { 
-          x: (Math.random() - 0.5) * 20, 
-          y: (Math.random() - 0.5) * 20, 
-          z: (Math.random() - 0.5) * 20 
+        position: {
+          x: (Math.random() - 0.5) * 20,
+          y: (Math.random() - 0.5) * 20,
+          z: (Math.random() - 0.5) * 20,
         },
         content: generateHtmlContent(newNodeId, 'New Node'),
-        className: 'spacegraph-html-node'
+        className: 'spacegraph-html-node',
       };
-      
+
       graph.update({
         data: {
           nodes: {
-            add: [newNode]
-          }
-        }
+            add: [newNode],
+          },
+        },
       });
     });
   }
@@ -312,32 +312,35 @@ export default function init() {
           phi: Math.PI / 4,
           theta: Math.PI / 4,
           distance: 50,
-        }
+        },
       });
     });
   }
 
   // Expose graph to window for easy debugging and testing
   (window as any).graph = graph;
-  
+
   // Update node data periodically to simulate real-time data
   setInterval(() => {
     const updates = nodes
-      .filter(node => node.type === 'html')
-      .map(node => {
+      .filter((node) => node.type === 'html')
+      .map((node) => {
         return {
           id: node.id,
-          content: generateHtmlContent(node.id, `${node.id.split('-')[0]} Node`)
+          content: generateHtmlContent(
+            node.id,
+            `${node.id.split('-')[0]} Node`
+          ),
         };
       });
-      
+
     if (updates.length > 0) {
       graph.update({
         data: {
           nodes: {
-            update: updates
-          }
-        }
+            update: updates,
+          },
+        },
       });
     }
   }, 3000);

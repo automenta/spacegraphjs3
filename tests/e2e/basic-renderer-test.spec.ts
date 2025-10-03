@@ -5,7 +5,7 @@ test('basic renderer test', async ({ page }) => {
 
   // Wait for the graph to be initialized
   await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
-  
+
   // Simple wait for rendering to complete
   await page.waitForTimeout(3000);
 
@@ -14,12 +14,12 @@ test('basic renderer test', async ({ page }) => {
     const graph = (window as any).graph;
     return {
       nodeRendererType: graph.render.getNodeRenderer().constructor.name,
-      useBasicRenderer: graph.state.performance?.useBasicRenderer || false
+      useBasicRenderer: graph.state.performance?.useBasicRenderer || false,
     };
   });
-  
+
   console.log('Renderer info:', rendererInfo);
-  
+
   // Verify that we're using the BasicRenderer
   expect(rendererInfo.nodeRendererType).toBe('BasicRenderer');
   expect(rendererInfo.useBasicRenderer).toBe(true);

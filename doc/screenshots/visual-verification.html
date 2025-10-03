@@ -1,306 +1,308 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SpaceGraphJS - Visual Verification</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            font-family: Arial, sans-serif;
-            background-color: #1a1a1a;
-            color: #ffffff;
-        }
-        #container {
-            width: 100vw;
-            height: 100vh;
-        }
-        #info {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 100;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 10px;
-            border-radius: 5px;
-            color: white;
-            font-size: 14px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>SpaceGraphJS - Visual Verification</title>
+  <style>
+      body {
+          margin: 0;
+          padding: 0;
+          overflow: hidden;
+          font-family: Arial, sans-serif;
+          background-color: #1a1a1a;
+          color: #ffffff;
+      }
+
+      #container {
+          width: 100vw;
+          height: 100vh;
+      }
+
+      #info {
+          position: absolute;
+          top: 10px;
+          left: 10px;
+          z-index: 100;
+          background: rgba(0, 0, 0, 0.8);
+          padding: 10px;
+          border-radius: 5px;
+          color: white;
+          font-size: 14px;
+      }
+  </style>
 </head>
 <body>
-    <div id="container"></div>
-    <div id="info">
-        <h3>SpaceGraphJS Visual Verification</h3>
-        <p>Demonstrating all element actors, edge types, and interactions</p>
-    </div>
+<div id="container"></div>
+<div id="info">
+  <h3>SpaceGraphJS Visual Verification</h3>
+  <p>Demonstrating all element actors, edge types, and interactions</p>
+</div>
 
-    <script type="module">
-        import * as THREE from 'three';
-        import {
-            acceleratedRaycast,
-            computeBoundsTree,
-            disposeBoundsTree,
-        } from 'three-mesh-bvh';
-        import {
-            CameraPlugin,
-            HUDPlugin,
-            InteractionPlugin,
-            LayoutPlugin,
-            SpaceGraph,
-        } from '../../dist/spacegraph.js';
+<script type="module">
+  import * as THREE from 'three';
+  import {
+    acceleratedRaycast,
+    computeBoundsTree,
+    disposeBoundsTree,
+  } from 'three-mesh-bvh';
+  import {
+    CameraPlugin,
+    HUDPlugin,
+    InteractionPlugin,
+    LayoutPlugin,
+    SpaceGraph,
+  } from '../../dist/spacegraph.js';
 
-        // Add the bvh properties to the THREE objects
-        THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
-        THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
-        THREE.Mesh.prototype.raycast = acceleratedRaycast;
+  // Add the bvh properties to the THREE objects
+  THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
+  THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
+  THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
-        // Create nodes with all element actor types
-        const nodes = [
-            // Sphere nodes
-            {
-                id: 'node-1',
-                type: 'sphere',
-                position: { x: -10, y: 5, z: 0 },
-                color: '#ff0000',
-                label: 'Red Sphere'
-            },
-            {
-                id: 'node-2',
-                type: 'sphere',
-                position: { x: 0, y: 10, z: 0 },
-                color: '#00ff00',
-                label: 'Green Sphere'
-            },
-            {
-                id: 'node-3',
-                type: 'sphere',
-                position: { x: 10, y: 5, z: 0 },
-                color: '#0000ff',
-                label: 'Blue Sphere'
-            },
-            
-            // Box nodes
-            {
-                id: 'node-4',
-                type: 'box',
-                position: { x: -10, y: -5, z: 0 },
-                color: '#ffff00',
-                label: 'Yellow Box'
-            },
-            {
-                id: 'node-5',
-                type: 'box',
-                position: { x: 0, y: -10, z: 0 },
-                color: '#ff00ff',
-                label: 'Magenta Box'
-            },
-            
-            // Text nodes
-            {
-                id: 'node-6',
-                type: 'text',
-                position: { x: 10, y: -5, z: 0 },
-                color: '#00ffff',
-                label: 'Cyan Text'
-            },
-            
-            // Custom geometry nodes
-            {
-                id: 'node-7',
-                type: 'custom',
-                position: { x: 0, y: 0, z: 10 },
-                color: '#ffa500',
-                label: 'Orange Custom'
-            }
-        ];
+  // Create nodes with all element actor types
+  const nodes = [
+    // Sphere nodes
+    {
+      id: 'node-1',
+      type: 'sphere',
+      position: { x: -10, y: 5, z: 0 },
+      color: '#ff0000',
+      label: 'Red Sphere',
+    },
+    {
+      id: 'node-2',
+      type: 'sphere',
+      position: { x: 0, y: 10, z: 0 },
+      color: '#00ff00',
+      label: 'Green Sphere',
+    },
+    {
+      id: 'node-3',
+      type: 'sphere',
+      position: { x: 10, y: 5, z: 0 },
+      color: '#0000ff',
+      label: 'Blue Sphere',
+    },
 
-        // Create edges with all types
-        const edges = [
-            // Straight edges
-            {
-                id: 'edge-1',
-                source: 'node-1',
-                target: 'node-2',
-                color: '#ff0000',
-                width: 3,
-                type: 'straight',
-                label: 'Straight Red'
-            },
-            {
-                id: 'edge-2',
-                source: 'node-2',
-                target: 'node-3',
-                color: '#00ff00',
-                width: 2,
-                type: 'straight',
-                label: 'Straight Green'
-            },
-            
-            // Curved edges
-            {
-                id: 'edge-3',
-                source: 'node-3',
-                target: 'node-4',
-                color: '#0000ff',
-                width: 4,
-                type: 'curved',
-                curvature: 0.5,
-                label: 'Curved Blue'
-            },
-            {
-                id: 'edge-4',
-                source: 'node-4',
-                target: 'node-1',
-                color: '#ffff00',
-                width: 1,
-                type: 'curved',
-                curvature: -0.3,
-                label: 'Curved Yellow'
-            },
-            
-            // Dashed edges
-            {
-                id: 'edge-5',
-                source: 'node-1',
-                target: 'node-5',
-                color: '#ff00ff',
-                width: 3,
-                type: 'dashed',
-                dashSize: 0.5,
-                gapSize: 0.3,
-                label: 'Dashed Magenta'
-            },
-            {
-                id: 'edge-6',
-                source: 'node-2',
-                target: 'node-5',
-                color: '#00ffff',
-                width: 2,
-                type: 'dashed',
-                dashSize: 0.3,
-                gapSize: 0.7,
-                label: 'Dashed Cyan'
-            },
-            
-            // Additional connections
-            {
-                id: 'edge-7',
-                source: 'node-3',
-                target: 'node-5',
-                color: '#ffa500',
-                width: 2,
-                type: 'straight',
-                label: 'Orange Connection'
-            },
-            {
-                id: 'edge-8',
-                source: 'node-6',
-                target: 'node-7',
-                color: '#800080',
-                width: 3,
-                type: 'curved',
-                curvature: 0.7,
-                label: 'Purple Curve'
-            }
-        ];
+    // Box nodes
+    {
+      id: 'node-4',
+      type: 'box',
+      position: { x: -10, y: -5, z: 0 },
+      color: '#ffff00',
+      label: 'Yellow Box',
+    },
+    {
+      id: 'node-5',
+      type: 'box',
+      position: { x: 0, y: -10, z: 0 },
+      color: '#ff00ff',
+      label: 'Magenta Box',
+    },
 
-        const spec = {
-            data: {
-                nodes,
-                edges,
-            },
-            style: {
-                // Node styles
-                'node:hover': {
-                    color: '#ffffff',
-                    glow: {
-                        color: '#ffffff',
-                        strength: 0.8
-                    }
-                },
-                'node:selected': {
-                    color: '#ffffff',
-                    glow: {
-                        color: '#ffffff',
-                        strength: 1.0
-                    }
-                },
-                
-                // Edge styles
-                'edge:hover': {
-                    color: '#ffffff',
-                    width: 5,
-                    opacity: 1.0
-                },
-                'edge:selected': {
-                    color: '#ffffff',
-                    width: 6,
-                    opacity: 1.0,
-                    glow: {
-                        color: '#ffffff',
-                        strength: 0.5
-                    }
-                }
-            },
-            layout: {
-                type: 'force-directed',
-                charge: -30,
-                linkDistance: 20,
-            },
-            camera: {
-                target: { x: 0, y: 0, z: 0 },
-                phi: Math.PI / 4,
-                theta: Math.PI / 4,
-                distance: 50,
-            },
-            controls: {
-                keyboard: {
-                    enabled: true,
-                    panSpeed: 0.1,
-                    zoomSpeed: 0.1,
-                    orbitSpeed: 0.1,
-                },
-            },
-            performance: {
-                instancingThreshold: 100,
-            },
-            interaction: {
-                hoveredElementId: null,
-                selectedElementIds: [],
-            },
-            hud: {
-                visible: false
-            }
-        };
+    // Text nodes
+    {
+      id: 'node-6',
+      type: 'text',
+      position: { x: 10, y: -5, z: 0 },
+      color: '#00ffff',
+      label: 'Cyan Text',
+    },
 
-        const plugins = [
-            new LayoutPlugin(),
-            new CameraPlugin(),
-            new InteractionPlugin(),
-            new HUDPlugin(),
-        ];
+    // Custom geometry nodes
+    {
+      id: 'node-7',
+      type: 'custom',
+      position: { x: 0, y: 0, z: 10 },
+      color: '#ffa500',
+      label: 'Orange Custom',
+    },
+  ];
 
-        // Initialize the graph
-        const graph = new SpaceGraph('#container', spec, plugins);
+  // Create edges with all types
+  const edges = [
+    // Straight edges
+    {
+      id: 'edge-1',
+      source: 'node-1',
+      target: 'node-2',
+      color: '#ff0000',
+      width: 3,
+      type: 'straight',
+      label: 'Straight Red',
+    },
+    {
+      id: 'edge-2',
+      source: 'node-2',
+      target: 'node-3',
+      color: '#00ff00',
+      width: 2,
+      type: 'straight',
+      label: 'Straight Green',
+    },
 
-        // Expose graph to window for easy debugging and testing
-        window.graph = graph;
+    // Curved edges
+    {
+      id: 'edge-3',
+      source: 'node-3',
+      target: 'node-4',
+      color: '#0000ff',
+      width: 4,
+      type: 'curved',
+      curvature: 0.5,
+      label: 'Curved Blue',
+    },
+    {
+      id: 'edge-4',
+      source: 'node-4',
+      target: 'node-1',
+      color: '#ffff00',
+      width: 1,
+      type: 'curved',
+      curvature: -0.3,
+      label: 'Curved Yellow',
+    },
 
-        // Auto-rotate the camera slowly to show different angles
-        let angle = 0;
-        const animate = () => {
-            angle += 0.005;
-            if (graph.cameraPlugin) {
-                graph.cameraPlugin.orbit(angle, 0, 0);
-            }
-            requestAnimationFrame(animate);
-        };
-        animate();
+    // Dashed edges
+    {
+      id: 'edge-5',
+      source: 'node-1',
+      target: 'node-5',
+      color: '#ff00ff',
+      width: 3,
+      type: 'dashed',
+      dashSize: 0.5,
+      gapSize: 0.3,
+      label: 'Dashed Magenta',
+    },
+    {
+      id: 'edge-6',
+      source: 'node-2',
+      target: 'node-5',
+      color: '#00ffff',
+      width: 2,
+      type: 'dashed',
+      dashSize: 0.3,
+      gapSize: 0.7,
+      label: 'Dashed Cyan',
+    },
 
-        console.log('SpaceGraphJS Visual Verification Demo Loaded');
-    </script>
+    // Additional connections
+    {
+      id: 'edge-7',
+      source: 'node-3',
+      target: 'node-5',
+      color: '#ffa500',
+      width: 2,
+      type: 'straight',
+      label: 'Orange Connection',
+    },
+    {
+      id: 'edge-8',
+      source: 'node-6',
+      target: 'node-7',
+      color: '#800080',
+      width: 3,
+      type: 'curved',
+      curvature: 0.7,
+      label: 'Purple Curve',
+    },
+  ];
+
+  const spec = {
+    data: {
+      nodes,
+      edges,
+    },
+    style: {
+      // Node styles
+      'node:hover': {
+        color: '#ffffff',
+        glow: {
+          color: '#ffffff',
+          strength: 0.8,
+        },
+      },
+      'node:selected': {
+        color: '#ffffff',
+        glow: {
+          color: '#ffffff',
+          strength: 1.0,
+        },
+      },
+
+      // Edge styles
+      'edge:hover': {
+        color: '#ffffff',
+        width: 5,
+        opacity: 1.0,
+      },
+      'edge:selected': {
+        color: '#ffffff',
+        width: 6,
+        opacity: 1.0,
+        glow: {
+          color: '#ffffff',
+          strength: 0.5,
+        },
+      },
+    },
+    layout: {
+      type: 'force-directed',
+      charge: -30,
+      linkDistance: 20,
+    },
+    camera: {
+      target: { x: 0, y: 0, z: 0 },
+      phi: Math.PI / 4,
+      theta: Math.PI / 4,
+      distance: 50,
+    },
+    controls: {
+      keyboard: {
+        enabled: true,
+        panSpeed: 0.1,
+        zoomSpeed: 0.1,
+        orbitSpeed: 0.1,
+      },
+    },
+    performance: {
+      instancingThreshold: 100,
+    },
+    interaction: {
+      hoveredElementId: null,
+      selectedElementIds: [],
+    },
+    hud: {
+      visible: false,
+    },
+  };
+
+  const plugins = [
+    new LayoutPlugin(),
+    new CameraPlugin(),
+    new InteractionPlugin(),
+    new HUDPlugin(),
+  ];
+
+  // Initialize the graph
+  const graph = new SpaceGraph('#container', spec, plugins);
+
+  // Expose graph to window for easy debugging and testing
+  window.graph = graph;
+
+  // Auto-rotate the camera slowly to show different angles
+  let angle = 0;
+  const animate = () => {
+    angle += 0.005;
+    if (graph.cameraPlugin) {
+      graph.cameraPlugin.orbit(angle, 0, 0);
+    }
+    requestAnimationFrame(animate);
+  };
+  animate();
+
+  console.log('SpaceGraphJS Visual Verification Demo Loaded');
+</script>
 </body>
 </html>

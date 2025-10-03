@@ -1,6 +1,6 @@
 /**
  * Performance Metrics Collector
- * 
+ *
  * This module collects and analyzes performance metrics for visual interactions
  * to detect performance regressions and optimize user experience.
  */
@@ -41,15 +41,15 @@ class PerformanceMetricsCollector {
     const startTime = performance.now();
     const startMemory = this.getMemoryUsage();
     const startCpu = this.getCpuUsage();
-    
+
     // Execute the interaction
     await interactionFn();
-    
+
     // Record final state
     const endTime = performance.now();
     const endMemory = this.getMemoryUsage();
     const endCpu = this.getCpuUsage();
-    
+
     // Calculate metrics
     const metrics: PerformanceMetrics = {
       componentName,
@@ -60,12 +60,12 @@ class PerformanceMetricsCollector {
       frameRate: this.estimateFrameRate(endTime - startTime),
       interactionLatency: this.calculateLatency(),
       renderTime: this.calculateRenderTime(),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
-    
+
     // Store metrics
     this.metricsHistory.push(metrics);
-    
+
     return metrics;
   }
 
@@ -79,45 +79,54 @@ class PerformanceMetricsCollector {
   /**
    * Compare current metrics with baseline to detect regressions
    */
-  compareWithBaseline(identifier: string, currentMetrics: PerformanceMetrics): PerformanceBenchmark | null {
+  compareWithBaseline(
+    identifier: string,
+    currentMetrics: PerformanceMetrics
+  ): PerformanceBenchmark | null {
     const baseline = this.baselines.get(identifier);
     if (!baseline) {
       console.warn(`No baseline found for ${identifier}`);
       return null;
     }
-    
+
     const benchmark: PerformanceBenchmark = {
       baseline,
       current: currentMetrics,
       regression: false,
-      regressionPercentage: 0
+      regressionPercentage: 0,
     };
-    
+
     // Check for regressions in key metrics
     const responseTimeRegression = this.calculateRegressionPercentage(
       baseline.responseTime,
       currentMetrics.responseTime
     );
-    
+
     const memoryRegression = this.calculateRegressionPercentage(
       baseline.memoryUsage,
       currentMetrics.memoryUsage
     );
-    
+
     const cpuRegression = this.calculateRegressionPercentage(
       baseline.cpuUsage,
       currentMetrics.cpuUsage
     );
-    
+
     // Determine if there's a significant regression
-    const maxRegression = Math.max(responseTimeRegression, memoryRegression, cpuRegression);
+    const maxRegression = Math.max(
+      responseTimeRegression,
+      memoryRegression,
+      cpuRegression
+    );
     benchmark.regressionPercentage = maxRegression;
-    
+
     if (maxRegression > this.threshold) {
       benchmark.regression = true;
-      console.warn(`Performance regression detected in ${identifier}: ${maxRegression.toFixed(2)}% worse`);
+      console.warn(
+        `Performance regression detected in ${identifier}: ${maxRegression.toFixed(2)}% worse`
+      );
     }
-    
+
     return benchmark;
   }
 
@@ -148,9 +157,12 @@ class PerformanceMetricsCollector {
   /**
    * Get performance trend analysis
    */
-  getTrendAnalysis(metricName: keyof PerformanceMetrics, limit?: number): number[] {
+  getTrendAnalysis(
+    metricName: keyof PerformanceMetrics,
+    limit?: number
+  ): number[] {
     const history = this.getMetricsHistory(limit);
-    return history.map(metrics => metrics[metricName] as number);
+    return history.map((metrics) => metrics[metricName] as number);
   }
 
   /**
@@ -200,7 +212,10 @@ class PerformanceMetricsCollector {
   /**
    * Calculate regression percentage
    */
-  private calculateRegressionPercentage(baseline: number, current: number): number {
+  private calculateRegressionPercentage(
+    baseline: number,
+    current: number
+  ): number {
     if (baseline === 0) return 0;
     return ((current - baseline) / baseline) * 100;
   }
@@ -210,14 +225,20 @@ class PerformanceMetricsCollector {
    */
   generateReport(): string {
     if (this.metricsHistory.length === 0) {
-      return "No performance metrics collected.";
+      return 'No performance metrics collected.';
     }
-    
+
     const latest = this.metricsHistory[this.metricsHistory.length - 1];
-    const avgResponseTime = this.metricsHistory.reduce((sum, m) => sum + m.responseTime, 0) / this.metricsHistory.length;
-    const avgMemoryUsage = this.metricsHistory.reduce((sum, m) => sum + m.memoryUsage, 0) / this.metricsHistory.length;
-    const avgCpuUsage = this.metricsHistory.reduce((sum, m) => sum + m.cpuUsage, 0) / this.metricsHistory.length;
-    
+    const avgResponseTime =
+      this.metricsHistory.reduce((sum, m) => sum + m.responseTime, 0) /
+      this.metricsHistory.length;
+    const avgMemoryUsage =
+      this.metricsHistory.reduce((sum, m) => sum + m.memoryUsage, 0) /
+      this.metricsHistory.length;
+    const avgCpuUsage =
+      this.metricsHistory.reduce((sum, m) => sum + m.cpuUsage, 0) /
+      this.metricsHistory.length;
+
     return `
 Performance Report
 ==================
@@ -242,4 +263,8 @@ Averages:
 }
 
 // Export the collector and related interfaces
-export { PerformanceMetricsCollector, type PerformanceMetrics, type PerformanceBenchmark };
+export {
+  PerformanceMetricsCollector,
+  type PerformanceMetrics,
+  type PerformanceBenchmark,
+};

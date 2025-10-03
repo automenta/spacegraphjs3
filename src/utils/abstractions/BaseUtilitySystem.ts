@@ -62,9 +62,16 @@ export abstract class BaseUtilitySystem implements IUtilitySystem {
     try {
       this.onInit();
       this.initialized = true;
-      this.logger.info(this.name, `${this.name} system initialized successfully`);
+      this.logger.info(
+        this.name,
+        `${this.name} system initialized successfully`
+      );
     } catch (error) {
-      this.logger.error(this.name, `Failed to initialize ${this.name} system`, error);
+      this.logger.error(
+        this.name,
+        `Failed to initialize ${this.name} system`,
+        error
+      );
       throw error;
     }
   }
@@ -74,7 +81,7 @@ export abstract class BaseUtilitySystem implements IUtilitySystem {
       this.logger.warn(this.name, `${this.name} system is not initialized`);
       return;
     }
-    
+
     try {
       this.onUpdate(deltaTime);
     } catch (error) {
@@ -88,9 +95,16 @@ export abstract class BaseUtilitySystem implements IUtilitySystem {
     try {
       this.performanceMode = enabled;
       this.onPerformanceModeChanged(enabled);
-      this.logger.info(this.name, `Performance mode ${enabled ? 'enabled' : 'disabled'} for ${this.name} system`);
+      this.logger.info(
+        this.name,
+        `Performance mode ${enabled ? 'enabled' : 'disabled'} for ${this.name} system`
+      );
     } catch (error) {
-      this.logger.error(this.name, `Error setting performance mode for ${this.name} system`, error);
+      this.logger.error(
+        this.name,
+        `Error setting performance mode for ${this.name} system`,
+        error
+      );
       // Re-throw to allow caller to handle if needed
       throw error;
     }
@@ -100,12 +114,16 @@ export abstract class BaseUtilitySystem implements IUtilitySystem {
     if (!this.initialized) {
       return;
     }
-    
+
     try {
       this.onDispose();
       this.logger.info(this.name, `${this.name} system disposed successfully`);
     } catch (error) {
-      this.logger.error(this.name, `Error disposing ${this.name} system`, error);
+      this.logger.error(
+        this.name,
+        `Error disposing ${this.name} system`,
+        error
+      );
       // Continue with cleanup even if onDispose fails
     } finally {
       this.initialized = false;
@@ -164,12 +182,17 @@ export class UtilitySystemManager {
    */
   public registerSystem(system: IUtilitySystem): void {
     if (this.systems.has(system.getName())) {
-      const error = new Error(`Utility system ${system.getName()} is already registered`);
+      const error = new Error(
+        `Utility system ${system.getName()} is already registered`
+      );
       this.logger.error('UtilitySystemManager', 'Registration failed', error);
       throw error;
     }
     this.systems.set(system.getName(), system);
-    this.logger.info('UtilitySystemManager', `Registered system: ${system.getName()}`);
+    this.logger.info(
+      'UtilitySystemManager',
+      `Registered system: ${system.getName()}`
+    );
   }
 
   /**
@@ -185,23 +208,36 @@ export class UtilitySystemManager {
   public initAll(): void {
     this.logger.info('UtilitySystemManager', 'Initializing all systems');
     const errors: Error[] = [];
-    
+
     for (const system of this.systems.values()) {
       try {
         system.init();
       } catch (error) {
-        this.logger.error('UtilitySystemManager', `Failed to initialize system: ${system.getName()}`, error);
+        this.logger.error(
+          'UtilitySystemManager',
+          `Failed to initialize system: ${system.getName()}`,
+          error
+        );
         errors.push(error as Error);
       }
     }
-    
+
     if (errors.length > 0) {
-      const error = new Error(`Failed to initialize ${errors.length} systems. Check logs for details.`);
-      this.logger.error('UtilitySystemManager', 'Initialization completed with errors', error);
+      const error = new Error(
+        `Failed to initialize ${errors.length} systems. Check logs for details.`
+      );
+      this.logger.error(
+        'UtilitySystemManager',
+        'Initialization completed with errors',
+        error
+      );
       throw error;
     }
-    
-    this.logger.info('UtilitySystemManager', 'All systems initialized successfully');
+
+    this.logger.info(
+      'UtilitySystemManager',
+      'All systems initialized successfully'
+    );
   }
 
   /**
@@ -209,19 +245,29 @@ export class UtilitySystemManager {
    */
   public updateAll(deltaTime: number): void {
     const errors: Error[] = [];
-    
+
     for (const system of this.systems.values()) {
       try {
         system.update(deltaTime);
       } catch (error) {
-        this.logger.error('UtilitySystemManager', `Error updating system: ${system.getName()}`, error);
+        this.logger.error(
+          'UtilitySystemManager',
+          `Error updating system: ${system.getName()}`,
+          error
+        );
         errors.push(error as Error);
       }
     }
-    
+
     if (errors.length > 0) {
-      const error = new Error(`Errors occurred while updating ${errors.length} systems. Check logs for details.`);
-      this.logger.error('UtilitySystemManager', 'Update completed with errors', error);
+      const error = new Error(
+        `Errors occurred while updating ${errors.length} systems. Check logs for details.`
+      );
+      this.logger.error(
+        'UtilitySystemManager',
+        'Update completed with errors',
+        error
+      );
       // Don't throw here as we want to continue updating other systems
     }
   }
@@ -230,21 +276,34 @@ export class UtilitySystemManager {
    * Set performance mode for all systems
    */
   public setPerformanceModeAll(enabled: boolean): void {
-    this.logger.info('UtilitySystemManager', `Setting performance mode to ${enabled} for all systems`);
+    this.logger.info(
+      'UtilitySystemManager',
+      `Setting performance mode to ${enabled} for all systems`
+    );
     const errors: Error[] = [];
-    
+
     for (const system of this.systems.values()) {
       try {
         system.setPerformanceMode(enabled);
       } catch (error) {
-        this.logger.error('UtilitySystemManager', `Error setting performance mode for system: ${system.getName()}`, error);
+        this.logger.error(
+          'UtilitySystemManager',
+          `Error setting performance mode for system: ${system.getName()}`,
+          error
+        );
         errors.push(error as Error);
       }
     }
-    
+
     if (errors.length > 0) {
-      const error = new Error(`Errors occurred while setting performance mode for ${errors.length} systems. Check logs for details.`);
-      this.logger.error('UtilitySystemManager', 'Performance mode update completed with errors', error);
+      const error = new Error(
+        `Errors occurred while setting performance mode for ${errors.length} systems. Check logs for details.`
+      );
+      this.logger.error(
+        'UtilitySystemManager',
+        'Performance mode update completed with errors',
+        error
+      );
       // Don't throw here as we want to continue updating other systems
     }
   }
@@ -255,24 +314,34 @@ export class UtilitySystemManager {
   public disposeAll(): void {
     this.logger.info('UtilitySystemManager', 'Disposing all systems');
     const errors: Error[] = [];
-    
+
     for (const system of this.systems.values()) {
       try {
         system.dispose();
       } catch (error) {
-        this.logger.error('UtilitySystemManager', `Error disposing system: ${system.getName()}`, error);
+        this.logger.error(
+          'UtilitySystemManager',
+          `Error disposing system: ${system.getName()}`,
+          error
+        );
         errors.push(error as Error);
       }
     }
-    
+
     this.systems.clear();
-    
+
     if (errors.length > 0) {
-      const error = new Error(`Errors occurred while disposing ${errors.length} systems. Check logs for details.`);
-      this.logger.error('UtilitySystemManager', 'Disposal completed with errors', error);
+      const error = new Error(
+        `Errors occurred while disposing ${errors.length} systems. Check logs for details.`
+      );
+      this.logger.error(
+        'UtilitySystemManager',
+        'Disposal completed with errors',
+        error
+      );
       // Don't throw here as we've already cleared the systems map
     }
-    
+
     this.logger.info('UtilitySystemManager', 'All systems disposed');
   }
 
@@ -281,7 +350,10 @@ export class UtilitySystemManager {
    */
   public start(): void {
     if (this.running) {
-      this.logger.warn('UtilitySystemManager', 'Update loop is already running');
+      this.logger.warn(
+        'UtilitySystemManager',
+        'Update loop is already running'
+      );
       return;
     }
     this.running = true;
@@ -312,7 +384,7 @@ export class UtilitySystemManager {
 
     const currentTime = performance.now();
     const deltaTime = currentTime - this.lastUpdateTime;
-    
+
     if (deltaTime >= this.updateInterval) {
       this.updateAll(deltaTime);
       this.lastUpdateTime = currentTime;

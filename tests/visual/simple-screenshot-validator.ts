@@ -4,7 +4,7 @@ import path from 'path';
 
 /**
  * Simple Screenshot Validator
- * 
+ *
  * A lightweight screenshot validation system that works with Playwright's
  * built-in screenshot comparison capabilities.
  */
@@ -41,7 +41,7 @@ export class SimpleScreenshotValidator {
         threshold: options.threshold || 0.2,
         maxDiffPixels: options.maxDiffPixels || 10000,
       });
-      
+
       return {
         passed: true,
         message: 'Screenshot matches expected',
@@ -50,7 +50,10 @@ export class SimpleScreenshotValidator {
       // First run or mismatch
       return {
         passed: false,
-        message: error instanceof Error ? error.message : 'Screenshot validation failed',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Screenshot validation failed',
       };
     }
   }
@@ -61,11 +64,14 @@ export class SimpleScreenshotValidator {
    * @param name Screenshot name
    */
   async createExpectedScreenshot(page: Page, name: string): Promise<void> {
-    const screenshotsDir = path.join(process.cwd(), 'tests/visual/__snapshots__');
+    const screenshotsDir = path.join(
+      process.cwd(),
+      'tests/visual/__snapshots__'
+    );
     await fs.mkdir(screenshotsDir, { recursive: true });
-    
+
     // Playwright will automatically create expected screenshots in __snapshots__ directory
-    await page.screenshot({ 
+    await page.screenshot({
       path: path.join(screenshotsDir, `${name}-expected.png`),
       fullPage: true,
     });
@@ -81,7 +87,7 @@ export class SimpleScreenshotValidator {
     sequence: InteractionSequence
   ): Promise<SequenceValidationResult> {
     const results: ValidationResult[] = [];
-    
+
     for (const step of sequence.steps) {
       // Execute interaction
       switch (step.type) {
@@ -93,7 +99,11 @@ export class SimpleScreenshotValidator {
           break;
         case 'drag':
           if (step.targetSelector) {
-            await page.dragAndDrop(step.selector, step.targetSelector, step.options);
+            await page.dragAndDrop(
+              step.selector,
+              step.targetSelector,
+              step.options
+            );
           }
           break;
         case 'keyboard':
@@ -102,19 +112,23 @@ export class SimpleScreenshotValidator {
           }
           break;
       }
-      
+
       // Wait for interaction to complete
       await page.waitForTimeout(step.waitTime || 200);
-      
+
       // Validate screenshot if specified
       if (step.screenshotName) {
-        const result = await this.captureAndValidate(page, step.screenshotName, step.validation);
+        const result = await this.captureAndValidate(
+          page,
+          step.screenshotName,
+          step.validation
+        );
         results.push(result);
       }
     }
-    
+
     return {
-      passed: results.every(r => r.passed),
+      passed: results.every((r) => r.passed),
       results,
     };
   }

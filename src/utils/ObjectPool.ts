@@ -55,7 +55,7 @@ export class ObjectPool<T> {
    */
   release(obj: T): void {
     this.releasedCount++;
-    
+
     // Validate input
     if (obj === null || obj === undefined) {
       console.warn('Attempted to release null or undefined object to pool');
@@ -103,8 +103,10 @@ export class ObjectPool<T> {
       size: this.pool.length,
       acquired: this.acquiredCount,
       released: this.releasedCount,
-      utilization: this.acquiredCount > 0 ?
-        Math.min(1, this.releasedCount / this.acquiredCount) : 0
+      utilization:
+        this.acquiredCount > 0
+          ? Math.min(1, this.releasedCount / this.acquiredCount)
+          : 0,
     };
   }
 

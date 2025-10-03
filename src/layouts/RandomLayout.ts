@@ -26,7 +26,6 @@ export class RandomLayout extends BaseLayoutEngine {
     }
   }
 
-
   private setRandomPositions(): void {
     const setState = (fn: (prevState: any) => any) => {
       this.graph.updateStateWithProducer(fn);

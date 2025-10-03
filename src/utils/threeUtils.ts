@@ -50,7 +50,7 @@ export function safeDisposeObject(object: THREE.Object3D): void {
 
   // Dispose children recursively
   try {
-    object.children.forEach(child => {
+    object.children.forEach((child) => {
       safeDisposeObject(child);
     });
   } catch (error) {
@@ -79,10 +79,12 @@ export function safeDisposeGeometry(geometry: THREE.BufferGeometry): void {
  * Safely disposes a Three.js material
  * @param material - The material to dispose
  */
-export function safeDisposeMaterial(material: THREE.Material | THREE.Material[]): void {
+export function safeDisposeMaterial(
+  material: THREE.Material | THREE.Material[]
+): void {
   try {
     if (Array.isArray(material)) {
-      material.forEach(m => {
+      material.forEach((m) => {
         if (m && typeof m.dispose === 'function') {
           m.dispose();
         }

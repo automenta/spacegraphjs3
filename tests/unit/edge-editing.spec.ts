@@ -40,15 +40,15 @@ describe('Edge Editing', () => {
             type: 'sphere',
             position: { x: -5, y: 0, z: 0 },
             color: '#ff0000',
-            label: 'Node 1'
+            label: 'Node 1',
           },
           {
             id: 'node-2',
             type: 'sphere',
             position: { x: 5, y: 0, z: 0 },
             color: '#00ff00',
-            label: 'Node 2'
-          }
+            label: 'Node 2',
+          },
         ],
         edges: [
           {
@@ -58,8 +58,8 @@ describe('Edge Editing', () => {
             type: 'curved',
             color: '#ffffff',
             width: 2,
-            curvature: 0.5
-          }
+            curvature: 0.5,
+          },
         ],
       },
       style: {},
@@ -88,7 +88,7 @@ describe('Edge Editing', () => {
     };
 
     mockUpdateState = vi.fn();
-    
+
     graph = {
       state: initialSpec,
       updateState: mockUpdateState,
@@ -104,12 +104,13 @@ describe('Edge Editing', () => {
       },
       dataManager: {
         getElement: (id: string) =>
-          initialSpec.data.nodes.find(node => node.id === id) ||
-          initialSpec.data.edges.find(edge => edge.id === id) || null,
+          initialSpec.data.nodes.find((node) => node.id === id) ||
+          initialSpec.data.edges.find((edge) => edge.id === id) ||
+          null,
         getNode: (id: string) =>
-          initialSpec.data.nodes.find(node => node.id === id) || null,
+          initialSpec.data.nodes.find((node) => node.id === id) || null,
         getEdge: (id: string) =>
-          initialSpec.data.edges.find(edge => edge.id === id) || null,
+          initialSpec.data.edges.find((edge) => edge.id === id) || null,
       },
       events: {
         on: vi.fn(),
@@ -125,82 +126,94 @@ describe('Edge Editing', () => {
     expect(edge).toBeDefined();
     expect(edge?.type).toBe('curved');
     expect(edge?.curvature).toBe(0.5);
-    
+
     // Update the edge curvature directly
     const newCurvature = 0.8;
-    
+
     graph.update({
       data: {
         edges: {
-          update: [{
-            id: 'edge-1',
-            curvature: newCurvature
-          }]
-        }
-      }
+          update: [
+            {
+              id: 'edge-1',
+              curvature: newCurvature,
+            },
+          ],
+        },
+      },
     });
 
     // Check that the update was called with correct parameters
     expect(mockUpdateState).toHaveBeenCalledWith({
       data: {
         edges: {
-          update: [{
-            id: 'edge-1',
-            curvature: newCurvature
-          }]
-        }
-      }
+          update: [
+            {
+              id: 'edge-1',
+              curvature: newCurvature,
+            },
+          ],
+        },
+      },
     });
   });
 
   it('should prepare curvature values for clamping between 0 and 1', () => {
     // Test that we can set curvature values that would be clamped
     // The actual clamping happens in the InteractionPlugin during drag operations
-    
+
     // Try to set curvature above 1
     graph.update({
       data: {
         edges: {
-          update: [{
-            id: 'edge-1',
-            curvature: 1.5 // Would be clamped to 1 in actual implementation
-          }]
-        }
-      }
+          update: [
+            {
+              id: 'edge-1',
+              curvature: 1.5, // Would be clamped to 1 in actual implementation
+            },
+          ],
+        },
+      },
     });
 
     expect(mockUpdateState).toHaveBeenCalledWith({
       data: {
         edges: {
-          update: [{
-            id: 'edge-1',
-            curvature: 1.5
-          }]
-        }
-      }
+          update: [
+            {
+              id: 'edge-1',
+              curvature: 1.5,
+            },
+          ],
+        },
+      },
     });
 
     // Try to set curvature below 0
     graph.update({
       data: {
         edges: {
-          update: [{
-            id: 'edge-1',
-            curvature: -0.5 // Would be clamped to 0 in actual implementation
-          }]
-        }
-      }
+          update: [
+            {
+              id: 'edge-1',
+              curvature: -0.5, // Would be clamped to 0 in actual implementation
+            },
+          ],
+        },
+      },
     });
 
     expect(mockUpdateState).toHaveBeenCalledWith({
       data: {
         edges: {
-          update: [{
-            id: 'edge-1',
-            curvature: -0.5
-          }]
-        }
-      }
+          update: [
+            {
+              id: 'edge-1',
+              curvature: -0.5,
+            },
+          ],
+        },
+      },
     });
   });
 
@@ -209,39 +222,45 @@ describe('Edge Editing', () => {
     graph.update({
       data: {
         edges: {
-          add: [{
-            id: 'edge-2',
-            source: 'node-1',
-            target: 'node-2',
-            type: 'straight',
-            color: '#ffffff',
-            width: 2
-          }]
-        }
-      }
+          add: [
+            {
+              id: 'edge-2',
+              source: 'node-1',
+              target: 'node-2',
+              type: 'straight',
+              color: '#ffffff',
+              width: 2,
+            },
+          ],
+        },
+      },
     });
 
     // Try to set curvature on straight edge
     graph.update({
       data: {
         edges: {
-          update: [{
-            id: 'edge-2',
-            curvature: 0.5
-          }]
-        }
-      }
+          update: [
+            {
+              id: 'edge-2',
+              curvature: 0.5,
+            },
+          ],
+        },
+      },
     });
 
     expect(mockUpdateState).toHaveBeenCalledWith({
       data: {
         edges: {
-          update: [{
-            id: 'edge-2',
-            curvature: 0.5
-          }]
-        }
-      }
+          update: [
+            {
+              id: 'edge-2',
+              curvature: 0.5,
+            },
+          ],
+        },
+      },
     });
   });
 });

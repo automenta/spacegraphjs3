@@ -5,7 +5,7 @@ import { PerformanceMetrics } from './performance-metrics-collector';
 
 /**
  * Unified Dashboard for Visual Semantics Testing
- * 
+ *
  * This module creates a unified dashboard that displays all test results,
  * including visual regressions, performance metrics, and ergonomic compliance.
  */
@@ -79,8 +79,8 @@ class UnifiedDashboard {
         failedTests: 0,
         warningTests: 0,
         passRate: 0,
-        lastUpdated: new Date().toISOString()
-      }
+        lastUpdated: new Date().toISOString(),
+      },
     };
   }
 
@@ -115,23 +115,29 @@ class UnifiedDashboard {
     const allTests = [
       ...this.data.visualTests,
       ...this.data.performanceTests,
-      ...this.data.ergonomicTests
+      ...this.data.ergonomicTests,
     ];
-    
+
     const totalTests = allTests.length;
-    const passedTests = allTests.filter(test => test.status === 'pass').length;
-    const failedTests = allTests.filter(test => test.status === 'fail').length;
-    const warningTests = allTests.filter(test => test.status === 'warning').length;
-    
+    const passedTests = allTests.filter(
+      (test) => test.status === 'pass'
+    ).length;
+    const failedTests = allTests.filter(
+      (test) => test.status === 'fail'
+    ).length;
+    const warningTests = allTests.filter(
+      (test) => test.status === 'warning'
+    ).length;
+
     this.data.summary = {
       totalTests,
       passedTests,
       failedTests,
       warningTests,
       passRate: totalTests > 0 ? (passedTests / totalTests) * 100 : 0,
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
     };
-    
+
     // Update overall status
     if (failedTests > 0) {
       this.data.overallStatus = 'fail';
@@ -140,7 +146,7 @@ class UnifiedDashboard {
     } else {
       this.data.overallStatus = 'pass';
     }
-    
+
     this.data.timestamp = new Date().toISOString();
   }
 
@@ -149,7 +155,7 @@ class UnifiedDashboard {
    */
   async generateHtmlDashboard(): Promise<string> {
     await this.createDashboardDirectory();
-    
+
     const html = `
 <!DOCTYPE html>
 <html>
@@ -339,7 +345,9 @@ class UnifiedDashboard {
                 </tr>
             </thead>
             <tbody>
-                ${this.data.visualTests.map(test => `
+                ${this.data.visualTests
+                  .map(
+                    (test) => `
                 <tr>
                     <td>${test.componentName}</td>
                     <td>${test.testName}</td>
@@ -352,7 +360,9 @@ class UnifiedDashboard {
                         ${test.diffPath ? ` | <a href="${test.diffPath}" class="screenshot-link">Diff</a>` : ''}
                     </td>
                 </tr>
-                `).join('')}
+                `
+                  )
+                  .join('')}
             </tbody>
         </table>
     </div>
@@ -373,7 +383,9 @@ class UnifiedDashboard {
                 </tr>
             </thead>
             <tbody>
-                ${this.data.performanceTests.map(test => `
+                ${this.data.performanceTests
+                  .map(
+                    (test) => `
                 <tr>
                     <td>${test.componentName}</td>
                     <td>${test.testName}</td>
@@ -385,7 +397,9 @@ class UnifiedDashboard {
                     <td>${test.metrics.memoryUsage.toFixed(2)}MB</td>
                     <td>${test.metrics.cpuUsage.toFixed(2)}%</td>
                 </tr>
-                `).join('')}
+                `
+                  )
+                  .join('')}
             </tbody>
         </table>
     </div>
@@ -404,7 +418,9 @@ class UnifiedDashboard {
                 </tr>
             </thead>
             <tbody>
-                ${this.data.ergonomicTests.map(test => `
+                ${this.data.ergonomicTests
+                  .map(
+                    (test) => `
                 <tr>
                     <td>${test.componentName}</td>
                     <td>${test.testName}</td>
@@ -415,17 +431,19 @@ class UnifiedDashboard {
                         ${test.failures.length > 0 ? `<div class="failures-list">${test.failures.join(', ')}</div>` : 'All requirements met'}
                     </td>
                 </tr>
-                `).join('')}
+                `
+                  )
+                  .join('')}
             </tbody>
         </table>
     </div>
 </body>
 </html>`;
-    
+
     const filepath = path.join(this.dashboardDir, 'index.html');
     await fs.writeFile(filepath, html);
     console.log(`Dashboard generated at: ${filepath}`);
-    
+
     return filepath;
   }
 
@@ -445,15 +463,17 @@ class UnifiedDashboard {
    */
   loadFromRegressionReport(report: RegressionReport): void {
     // Convert regression report to visual test summaries
-    const visualTests: VisualTestSummary[] = report.regressionDetails.map(detail => ({
-      componentName: detail.componentName,
-      testName: detail.testName,
-      status: 'fail',
-      screenshotPath: detail.screenshotPath,
-      diffPath: detail.diffPath,
-      errorMessage: detail.description
-    }));
-    
+    const visualTests: VisualTestSummary[] = report.regressionDetails.map(
+      (detail) => ({
+        componentName: detail.componentName,
+        testName: detail.testName,
+        status: 'fail',
+        screenshotPath: detail.screenshotPath,
+        diffPath: detail.diffPath,
+        errorMessage: detail.description,
+      })
+    );
+
     this.addVisualTestResults(visualTests);
   }
 
@@ -473,4 +493,10 @@ class UnifiedDashboard {
 }
 
 // Export the dashboard class
-export { UnifiedDashboard, type DashboardData, type VisualTestSummary, type PerformanceTestSummary, type ErgonomicTestSummary };
+export {
+  UnifiedDashboard,
+  type DashboardData,
+  type VisualTestSummary,
+  type PerformanceTestSummary,
+  type ErgonomicTestSummary,
+};

@@ -19,7 +19,7 @@ export abstract class BaseLayoutEngine implements ILayoutEngine {
       console.warn('Layout engine is already initialized');
       return;
     }
-    
+
     this.graph = graph;
     this.isInitialized = true;
     this.setupLayout();
@@ -32,7 +32,7 @@ export abstract class BaseLayoutEngine implements ILayoutEngine {
     if (!this.isInitialized) {
       return;
     }
-    
+
     this.cleanupLayout();
     this.isInitialized = false;
   }
@@ -44,7 +44,7 @@ export abstract class BaseLayoutEngine implements ILayoutEngine {
     if (!this.isInitialized) {
       throw new Error('Layout engine must be initialized before resuming');
     }
-    
+
     this.isPaused = false;
     this.onResume();
   }
@@ -56,7 +56,7 @@ export abstract class BaseLayoutEngine implements ILayoutEngine {
     if (!this.isInitialized) {
       throw new Error('Layout engine must be initialized before pausing');
     }
-    
+
     this.isPaused = true;
     this.onPause();
   }
@@ -68,7 +68,7 @@ export abstract class BaseLayoutEngine implements ILayoutEngine {
     if (!this.isInitialized) {
       throw new Error('Layout engine must be initialized before reheating');
     }
-    
+
     this.onReheat();
   }
 

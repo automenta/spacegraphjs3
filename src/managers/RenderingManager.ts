@@ -126,7 +126,7 @@ export class RenderingManager {
     }
     this.edgeRenderer.dispose();
     this.htmlRenderer.dispose();
-    
+
     // Dispose rendering optimizer if it exists
     if (this.renderingOptimizer) {
       this.renderingOptimizer.dispose();
@@ -144,12 +144,12 @@ export class RenderingManager {
   ): THREE.Object3D {
     // Create mesh (in a real implementation, we would use object pooling here)
     const mesh = new THREE.Mesh(geometry, material);
-    
+
     // Apply initial position
     if (position) {
       mesh.position.copy(position);
     }
-    
+
     // Register with LOD system if enabled
     if (this.lodManager) {
       // For LOD, we need to define levels - using a more realistic approach
@@ -164,17 +164,17 @@ export class RenderingManager {
           () => {
             // Low detail - billboard or point sprite (in a real implementation, this would be much simpler)
             return mesh;
-          }
-        ]
+          },
+        ],
       };
       this.lodManager.registerObject(mesh, settings);
     }
-    
+
     // Register with culling system if enabled
     if (this.cullingManager) {
       this.cullingManager.registerObject(mesh);
     }
-    
+
     return mesh;
   }
 
@@ -238,7 +238,11 @@ export class RenderingManager {
 
   private initRenderers() {
     this.edgeRenderer = new EdgeRenderer(this.scene, this.graph.state);
-    this.htmlRenderer = new HTMLRenderer(this.cssScene, this.css3DScene, this.graph.state);
+    this.htmlRenderer = new HTMLRenderer(
+      this.cssScene,
+      this.css3DScene,
+      this.graph.state
+    );
   }
 
   private initDynamicNodeRenderer() {
@@ -254,7 +258,8 @@ export class RenderingManager {
           !(this.nodeRenderer instanceof InstancedRenderer) &&
           !(this.nodeRenderer instanceof BasicRenderer)) ||
         (!shouldUseInstanced &&
-          (this.nodeRenderer instanceof InstancedRenderer || this.nodeRenderer instanceof BasicRenderer));
+          (this.nodeRenderer instanceof InstancedRenderer ||
+            this.nodeRenderer instanceof BasicRenderer));
 
       if (needsUpdate) {
         if (this.nodeRenderer) {
@@ -262,8 +267,9 @@ export class RenderingManager {
         }
 
         // Check if we should use the BasicRenderer for debugging
-        const useBasicRenderer = this.graph.state.performance?.useBasicRenderer ?? false;
-        
+        const useBasicRenderer =
+          this.graph.state.performance?.useBasicRenderer ?? false;
+
         if (shouldUseInstanced && !useBasicRenderer) {
           this.nodeRenderer = new InstancedRenderer(
             this.scene,
@@ -347,7 +353,9 @@ export class RenderingManager {
       }
     } catch (error) {
       this.isLooping = false; // Stop the animation loop
-      this.displayError(new Error(`Rendering failed: ${(error as Error).message}`));
+      this.displayError(
+        new Error(`Rendering failed: ${(error as Error).message}`)
+      );
       return; // Exit the animate loop
     }
 

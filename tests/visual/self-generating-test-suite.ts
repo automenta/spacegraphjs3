@@ -4,7 +4,7 @@ import { ComprehensiveUISemanticsSpecs } from './specs/comprehensive-ui.semantic
 
 /**
  * Self-Generating Test Suite for Visual Semantics
- * 
+ *
  * This module automatically generates test cases based on visual semantics specifications,
  * reducing manual test creation effort and ensuring comprehensive coverage.
  */
@@ -46,11 +46,11 @@ class SelfGeneratingTestSuite {
   private categorizeSpecs(): Record<string, any[]> {
     const categories: Record<string, any[]> = {
       'Element Actors': [],
-      'Renderers': [],
+      Renderers: [],
       'Layout Engines': [],
       'UI Components': [],
       'Interaction Managers': [],
-      'Overlays': []
+      Overlays: [],
     };
 
     for (const [name, spec] of Object.entries(this.specs)) {
@@ -60,7 +60,11 @@ class SelfGeneratingTestSuite {
         categories['Renderers'].push([name, spec]);
       } else if (name.includes('Layout')) {
         categories['Layout Engines'].push([name, spec]);
-      } else if (name.includes('HUD') || name.includes('Overlay') || name.includes('Filter')) {
+      } else if (
+        name.includes('HUD') ||
+        name.includes('Overlay') ||
+        name.includes('Filter')
+      ) {
         categories['Overlays'].push([name, spec]);
       } else if (name.includes('Manager') || name.includes('Menu')) {
         categories['Interaction Managers'].push([name, spec]);
@@ -79,11 +83,14 @@ class SelfGeneratingTestSuite {
     for (const [name, spec] of specs) {
       test(`${this.formatTestName(name)} visual semantics`, async ({}) => {
         let controller: VisualSemanticsController | null = null;
-        
+
         try {
           // Initialize controller
           controller = await VisualSemanticsController.init({
-            viewport: this.config.defaultViewport || { width: 1280, height: 720 },
+            viewport: this.config.defaultViewport || {
+              width: 1280,
+              height: 720,
+            },
             deviceScaleFactor: this.config.deviceScaleFactor || 1,
             isMobile: false,
             hasTouch: false,
@@ -91,13 +98,13 @@ class SelfGeneratingTestSuite {
 
           // Determine appropriate demo page based on component type
           const demoPage = this.getDemoPageForComponent(spec.component);
-          
+
           // Navigate to the appropriate demo page
           await controller.navigateTo(`${this.config.baseUrl}/${demoPage}`);
-          
+
           // Test visual state
           await controller.assertVisualState(spec);
-          
+
           // Test ergonomic compliance
           await controller.assertErgonomicCompliance(spec);
         } finally {
@@ -116,22 +123,22 @@ class SelfGeneratingTestSuite {
   private getDemoPageForComponent(component: string): string {
     // Map components to their appropriate demo pages
     const componentToPageMap: Record<string, string> = {
-      'SphereElementActor': 'element-actors-demo.html',
-      'BoxElementActor': 'element-actors-demo.html',
-      'TextElementActor': 'element-actors-demo.html',
-      'HtmlNodeElementActor': 'element-actors-demo.html',
-      'EdgeRenderer': 'edge-interaction.html',
-      'EdgeLabel': 'edge-interaction.html',
-      'D3ForceLayout': 'layout-engines-demo.html',
-      'CircleLayout': 'layout-engines-demo.html',
-      'GridLayout': 'layout-engines-demo.html',
-      'CameraControls': 'element-actors-demo.html',
-      'HUD': 'element-actors-demo.html',
-      'SelectionManager': 'instanced-interaction.html',
-      'ContextMenu': 'element-actors-demo.html',
-      'SearchFilter': 'element-actors-demo.html',
-      'PerformanceOverlay': 'element-actors-demo.html',
-      'InstancedRenderer': 'instanced-interaction.html'
+      SphereElementActor: 'element-actors-demo.html',
+      BoxElementActor: 'element-actors-demo.html',
+      TextElementActor: 'element-actors-demo.html',
+      HtmlNodeElementActor: 'element-actors-demo.html',
+      EdgeRenderer: 'edge-interaction.html',
+      EdgeLabel: 'edge-interaction.html',
+      D3ForceLayout: 'layout-engines-demo.html',
+      CircleLayout: 'layout-engines-demo.html',
+      GridLayout: 'layout-engines-demo.html',
+      CameraControls: 'element-actors-demo.html',
+      HUD: 'element-actors-demo.html',
+      SelectionManager: 'instanced-interaction.html',
+      ContextMenu: 'element-actors-demo.html',
+      SearchFilter: 'element-actors-demo.html',
+      PerformanceOverlay: 'element-actors-demo.html',
+      InstancedRenderer: 'instanced-interaction.html',
     };
 
     return componentToPageMap[component] || 'element-actors-demo.html';
@@ -143,7 +150,7 @@ class SelfGeneratingTestSuite {
   private formatTestName(name: string): string {
     return name
       .replace(/([A-Z])/g, ' $1')
-      .replace(/^./, str => str.toUpperCase())
+      .replace(/^./, (str) => str.toUpperCase())
       .trim();
   }
 }

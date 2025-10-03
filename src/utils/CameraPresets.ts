@@ -35,13 +35,16 @@ export class CameraPresetsManager {
   /**
    * Create a new camera preset from current camera state
    */
-  public async createPreset(name: string, options: {
-    description?: string;
-    category?: string;
-    tags?: string[];
-    generateThumbnail?: boolean;
-    isBookmark?: boolean;
-  } = {}): Promise<CameraPreset> {
+  public async createPreset(
+    name: string,
+    options: {
+      description?: string;
+      category?: string;
+      tags?: string[];
+      generateThumbnail?: boolean;
+      isBookmark?: boolean;
+    } = {}
+  ): Promise<CameraPreset> {
     const currentState = this.graph.state.camera;
     const thumbnail = options.generateThumbnail
       ? await this.generateThumbnail()
@@ -57,11 +60,11 @@ export class CameraPresetsManager {
       tags: options.tags,
       isBookmark: options.isBookmark || false,
       createdAt: Date.now(),
-      updatedAt: Date.now()
+      updatedAt: Date.now(),
     };
 
     this.presets.set(preset.id, preset);
-    
+
     if (preset.category) {
       this.categories.add(preset.category);
     }
@@ -73,7 +76,10 @@ export class CameraPresetsManager {
   /**
    * Apply a camera preset
    */
-  public async applyPreset(presetId: string, animation: boolean = true): Promise<void> {
+  public async applyPreset(
+    presetId: string,
+    animation: boolean = true
+  ): Promise<void> {
     const preset = this.presets.get(presetId);
     if (!preset) {
       throw new Error(`Camera preset with ID ${presetId} not found`);
@@ -81,7 +87,7 @@ export class CameraPresetsManager {
 
     if (animation) {
       await this.graph.cameraPlugin?.flyTo(preset.cameraState, {
-        duration: 1000
+        duration: 1000,
       });
     } else {
       this.graph.update({ camera: preset.cameraState });
@@ -99,21 +105,26 @@ export class CameraPresetsManager {
    * Get all bookmarks
    */
   public getBookmarks(): CameraPreset[] {
-    return Array.from(this.presets.values()).filter(preset => preset.isBookmark);
+    return Array.from(this.presets.values()).filter(
+      (preset) => preset.isBookmark
+    );
   }
 
   /**
    * Create a bookmark from current camera state
    */
-  public async createBookmark(name: string, options: {
-    description?: string;
-    category?: string;
-    tags?: string[];
-    generateThumbnail?: boolean;
-  } = {}): Promise<CameraPreset> {
+  public async createBookmark(
+    name: string,
+    options: {
+      description?: string;
+      category?: string;
+      tags?: string[];
+      generateThumbnail?: boolean;
+    } = {}
+  ): Promise<CameraPreset> {
     return this.createPreset(name, {
       ...options,
-      isBookmark: true
+      isBookmark: true,
     });
   }
 
@@ -124,17 +135,17 @@ export class CameraPresetsManager {
     // Render current scene to canvas
     const renderer = this.graph.render.getRenderer();
     const canvas = renderer.domElement;
-    
+
     // Create thumbnail at reduced resolution
     const thumbnailCanvas = document.createElement('canvas');
     thumbnailCanvas.width = 200;
     thumbnailCanvas.height = 150;
-    
+
     const ctx = thumbnailCanvas.getContext('2d');
     if (!ctx) throw new Error('Could not get canvas context');
-    
+
     ctx.drawImage(canvas, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
-    
+
     return thumbnailCanvas.toDataURL('image/png');
   }
 
@@ -143,7 +154,7 @@ export class CameraPresetsManager {
    */
   public getPresetsByCategory(category: string): CameraPreset[] {
     return Array.from(this.presets.values())
-      .filter(preset => preset.category === category)
+      .filter((preset) => preset.category === category)
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 
@@ -152,12 +163,13 @@ export class CameraPresetsManager {
    */
   public searchPresets(query: string): CameraPreset[] {
     const lowercaseQuery = query.toLowerCase();
-    
+
     return Array.from(this.presets.values())
-      .filter(preset => 
-        preset.name.toLowerCase().includes(lowercaseQuery) ||
-        preset.description?.toLowerCase().includes(lowercaseQuery) ||
-        preset.tags?.some(tag => tag.toLowerCase().includes(lowercaseQuery))
+      .filter(
+        (preset) =>
+          preset.name.toLowerCase().includes(lowercaseQuery) ||
+          preset.description?.toLowerCase().includes(lowercaseQuery) ||
+          preset.tags?.some((tag) => tag.toLowerCase().includes(lowercaseQuery))
       )
       .sort((a, b) => a.name.localeCompare(b.name));
   }
@@ -169,9 +181,9 @@ export class CameraPresetsManager {
     const collection: CameraPresetsCollection = {
       version: '1.0',
       presets: Array.from(this.presets.values()),
-      categories: Array.from(this.categories)
+      categories: Array.from(this.categories),
     };
-    
+
     return JSON.stringify(collection, null, 2);
   }
 
@@ -181,26 +193,28 @@ export class CameraPresetsManager {
   public importPresets(jsonString: string): void {
     try {
       const collection: CameraPresetsCollection = JSON.parse(jsonString);
-      
+
       if (collection.presets) {
         for (const preset of collection.presets) {
           this.presets.set(preset.id, preset);
-          
+
           if (preset.category) {
             this.categories.add(preset.category);
           }
         }
       }
-      
+
       if (collection.categories) {
         for (const category of collection.categories) {
           this.categories.add(category);
         }
       }
-      
+
       this.savePresets();
     } catch (error) {
-      throw new Error(`Failed to import camera presets: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to import camera presets: ${(error as Error).message}`
+      );
     }
   }
 
@@ -212,9 +226,9 @@ export class CameraPresetsManager {
       const collection: CameraPresetsCollection = {
         version: '1.0',
         presets: Array.from(this.presets.values()),
-        categories: Array.from(this.categories)
+        categories: Array.from(this.categories),
       };
-      
+
       localStorage.setItem(this.storageKey, JSON.stringify(collection));
     } catch (error) {
       console.warn('Failed to save camera presets:', error);
@@ -230,17 +244,17 @@ export class CameraPresetsManager {
       if (!stored) return;
 
       const collection: CameraPresetsCollection = JSON.parse(stored);
-      
+
       if (collection.presets) {
         for (const preset of collection.presets) {
           this.presets.set(preset.id, preset);
-          
+
           if (preset.category) {
             this.categories.add(preset.category);
           }
         }
       }
-      
+
       if (collection.categories) {
         for (const category of collection.categories) {
           this.categories.add(category);

@@ -6,7 +6,7 @@ test('large graph visual test', async ({ page }) => {
 
   // Wait for the graph to be initialized
   await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
-  
+
   // Wait for the large graph to stabilize (longer wait for 1000 nodes)
   await page.waitForTimeout(8000); // Wait for 8 seconds for layout to settle
 

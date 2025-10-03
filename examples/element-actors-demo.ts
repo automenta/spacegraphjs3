@@ -44,7 +44,7 @@ const nodes: NodeSpec[] = [
     color: '#0000ff',
     label: 'Blue Sphere',
   },
-  
+
   // Box nodes
   {
     id: 'box1',
@@ -67,7 +67,7 @@ const nodes: NodeSpec[] = [
     color: '#00ffff',
     label: 'Cyan Box',
   },
-  
+
   // Text nodes
   {
     id: 'text1',
@@ -90,7 +90,7 @@ const nodes: NodeSpec[] = [
     color: '#00ff99',
     label: 'Text!',
   },
-  
+
   // Custom geometry nodes
   {
     id: 'custom1',
@@ -142,7 +142,7 @@ const edges: EdgeSpec[] = [
     curvature: 0.5,
     color: '#00ff00',
   },
-  
+
   // Edges between boxes
   {
     id: 'e3',
@@ -160,7 +160,7 @@ const edges: EdgeSpec[] = [
     type: 'straight',
     color: '#ff00ff',
   },
-  
+
   // Edges between text nodes
   {
     id: 'e5',
@@ -179,7 +179,7 @@ const edges: EdgeSpec[] = [
     gapSize: 0.2,
     color: '#ff9900',
   },
-  
+
   // Edges between custom nodes
   {
     id: 'e7',
@@ -196,7 +196,7 @@ const edges: EdgeSpec[] = [
     curvature: 0.4,
     color: '#6600ff',
   },
-  
+
   // Cross-type edges
   {
     id: 'e9',
@@ -318,7 +318,7 @@ const createElementTypeControls = () => {
     { name: 'Custom Only', filter: 'custom' },
   ];
 
-  types.forEach(type => {
+  types.forEach((type) => {
     const button = document.createElement('button');
     button.textContent = type.name;
     button.style.display = 'block';
@@ -330,16 +330,16 @@ const createElementTypeControls = () => {
     button.style.border = 'none';
     button.style.borderRadius = '3px';
     button.style.cursor = 'pointer';
-    
+
     button.addEventListener('click', () => {
       if (type.filter === null) {
         // Show all nodes
-        const updates = nodes.map(node => ({
+        const updates = nodes.map((node) => ({
           id: node.id,
           type: node.type,
           color: node.color,
         }));
-        
+
         graph.update({
           data: {
             nodes: {
@@ -349,12 +349,12 @@ const createElementTypeControls = () => {
         });
       } else {
         // Show only nodes of specific type
-        const updates = nodes.map(node => ({
+        const updates = nodes.map((node) => ({
           id: node.id,
           type: node.type === type.filter ? node.type : 'sphere',
           color: node.type === type.filter ? node.color : '#888888',
         }));
-        
+
         graph.update({
           data: {
             nodes: {
@@ -364,7 +364,7 @@ const createElementTypeControls = () => {
         });
       }
     });
-    
+
     container.appendChild(button);
   });
 

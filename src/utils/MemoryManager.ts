@@ -12,7 +12,12 @@ interface HasMaterial {
   material: Material | Material[];
 }
 
-type DisposableObject = Object3D | Material | Texture | BufferGeometry | Disposable;
+type DisposableObject =
+  | Object3D
+  | Material
+  | Texture
+  | BufferGeometry
+  | Disposable;
 
 /**
  * MemoryManager handles efficient memory management for Three.js objects.
@@ -73,18 +78,18 @@ export class MemoryManager {
       if ('geometry' in object && (object as unknown as HasGeometry).geometry) {
         this.disposeGeometry((object as unknown as HasGeometry).geometry);
       }
-      
+
       if ('material' in object) {
         const material = (object as unknown as HasMaterial).material;
         if (Array.isArray(material)) {
-          material.forEach(mat => this.disposeMaterial(mat));
+          material.forEach((mat) => this.disposeMaterial(mat));
         } else if (material) {
           this.disposeMaterial(material);
         }
       }
-      
+
       // Recursively dispose of children
-      object.children.forEach(child => this.disposeObject(child));
+      object.children.forEach((child) => this.disposeObject(child));
     } else if (object instanceof Material) {
       this.disposeMaterial(object);
     } else if (object instanceof Texture) {
@@ -98,10 +103,10 @@ export class MemoryManager {
         console.warn('Error disposing object:', error);
       }
     }
-    
+
     // Mark as disposed
     this.markAsDisposed(object);
-    
+
     // Remove from tracked objects
     this.trackedObjects.delete(object);
   }
@@ -118,13 +123,13 @@ export class MemoryManager {
     }
 
     // Dispose of textures used by the material
-    Object.keys(material).forEach(key => {
+    Object.keys(material).forEach((key) => {
       const value = (material as any)[key];
       if (value instanceof Texture) {
         this.disposeTexture(value);
       }
     });
-    
+
     // Dispose of the material itself
     if (typeof material.dispose === 'function') {
       try {
@@ -133,7 +138,7 @@ export class MemoryManager {
         console.warn('Error disposing material:', error);
       }
     }
-    
+
     // Mark as disposed
     this.markAsDisposed(material);
   }
@@ -156,7 +161,7 @@ export class MemoryManager {
         console.warn('Error closing texture image:', error);
       }
     }
-    
+
     if (typeof texture.dispose === 'function') {
       try {
         texture.dispose();
@@ -164,7 +169,7 @@ export class MemoryManager {
         console.warn('Error disposing texture:', error);
       }
     }
-    
+
     // Mark as disposed
     this.markAsDisposed(texture);
   }
@@ -187,7 +192,7 @@ export class MemoryManager {
         console.warn('Error disposing geometry:', error);
       }
     }
-    
+
     // Mark as disposed
     this.markAsDisposed(geometry);
   }
@@ -207,7 +212,7 @@ export class MemoryManager {
   public disposeAllTrackedObjects(): void {
     // Create a copy of the set to avoid modification during iteration
     const objectsToDispose = Array.from(this.trackedObjects);
-    objectsToDispose.forEach(object => {
+    objectsToDispose.forEach((object) => {
       try {
         this.disposeObject(object);
       } catch (error) {

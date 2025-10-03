@@ -13,9 +13,11 @@ export class TextElementActor extends BaseGeometryActor {
   private static fontLoader: FontLoader = new FontLoader();
   private static fontCache: Map<string, any> = new Map();
   private static fontLoadingPromises: Map<string, Promise<any>> = new Map();
-  private static defaultFontUrl: string = 'https://cdn.jsdelivr.net/npm/three@0.179.1/examples/fonts/helvetiker_regular.typeface.json';
-  private static boldFontUrl: string = 'https://cdn.jsdelivr.net/npm/three@0.179.1/examples/fonts/helvetiker_bold.typeface.json';
-  
+  private static defaultFontUrl: string =
+    'https://cdn.jsdelivr.net/npm/three@0.179.1/examples/fonts/helvetiker_regular.typeface.json';
+  private static boldFontUrl: string =
+    'https://cdn.jsdelivr.net/npm/three@0.179.1/examples/fonts/helvetiker_bold.typeface.json';
+
   private currentTextGeometry: THREE.BufferGeometry | null = null;
 
   constructor(
@@ -57,9 +59,10 @@ export class TextElementActor extends BaseGeometryActor {
   private async loadFontAndCreateText(): Promise<void> {
     try {
       const textSpec = this.elementState as TextNodeSpec;
-      
+
       // Get text properties with defaults
-      const text = textSpec.text || textSpec.label || this.elementState.id || 'Text';
+      const text =
+        textSpec.text || textSpec.label || this.elementState.id || 'Text';
       // const font = textSpec.font || 'helvetiker'; // Not currently used
       const size = textSpec.size || 0.5;
       const depth = textSpec.depth || 0.1;
@@ -68,30 +71,30 @@ export class TextElementActor extends BaseGeometryActor {
       const maxWidth = textSpec.maxWidth || Infinity;
       const bold = textSpec.bold || false;
       // const italic = textSpec.italic || false; // Not currently used
-      
+
       // Determine font URL based on properties
       let fontUrl = TextElementActor.defaultFontUrl;
       if (bold) {
         fontUrl = TextElementActor.boldFontUrl;
       }
-      
+
       // Load font
       const fontData = await this.loadFont(fontUrl);
-      
+
       // Process text for wrapping if needed
       const processedText = this.wrapText(text, maxWidth, fontData, size);
-      
+
       // Split text into lines for multi-line support
       const lines = processedText.split('\n');
-      
+
       // Create text geometries for each line
       const lineGeometries: THREE.BufferGeometry[] = [];
       // let totalHeight = 0; // Not used in this scope
-      
+
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
         if (line.trim() === '') continue; // Skip empty lines
-        
+
         const lineGeometry = new TextGeometry(line, {
           font: fontData,
           size: size,
@@ -101,28 +104,33 @@ export class TextElementActor extends BaseGeometryActor {
           bevelThickness: 0.02,
           bevelSize: 0.01,
           bevelOffset: 0,
-          bevelSegments: 2
+          bevelSegments: 2,
         });
-        
+
         // Compute bounding box for positioning
         lineGeometry.computeBoundingBox();
-        
+
         lineGeometries.push(lineGeometry);
         // if (lineGeometry.boundingBox) {
         //   totalHeight += lineGeometry.boundingBox.max.y - lineGeometry.boundingBox.min.y;
         // }
       }
-      
+
       // Combine all line geometries into a single geometry
-      const combinedGeometry = this.combineLineGeometries(lineGeometries, align, lineHeight, size);
-      
+      const combinedGeometry = this.combineLineGeometries(
+        lineGeometries,
+        align,
+        lineHeight,
+        size
+      );
+
       // Update the main mesh with the new geometry
       if (this.currentTextGeometry) {
         this.currentTextGeometry.dispose();
       }
       this.currentTextGeometry = combinedGeometry;
       this.updateMainGeometry(combinedGeometry);
-      
+
       // Update glow geometry
       if (this.glowMesh) {
         // Dispose of the old glow geometry
@@ -143,7 +151,10 @@ export class TextElementActor extends BaseGeometryActor {
       // In test environments, we don't want to log warnings for expected failures
       // In production, we still want to log the warning
       if (typeof process !== 'undefined' && process.env?.NODE_ENV !== 'test') {
-        console.warn(`Failed to create text geometry for node ${this.elementId}:`, error);
+        console.warn(
+          `Failed to create text geometry for node ${this.elementId}:`,
+          error
+        );
       }
       // Keep the placeholder box if text creation fails
     }
@@ -154,12 +165,12 @@ export class TextElementActor extends BaseGeometryActor {
     if (TextElementActor.fontCache.has(fontUrl)) {
       return TextElementActor.fontCache.get(fontUrl);
     }
-    
+
     // Check if font is already being loaded
     if (TextElementActor.fontLoadingPromises.has(fontUrl)) {
       return TextElementActor.fontLoadingPromises.get(fontUrl);
     }
-    
+
     // Create new loading promise
     const loadingPromise = new Promise((resolve, _reject) => {
       TextElementActor.fontLoader.load(
@@ -180,8 +191,8 @@ export class TextElementActor extends BaseGeometryActor {
               ascender: 0.8,
               descender: -0.2,
               underlineThickness: 0.05,
-              underlinePosition: -0.1
-            }
+              underlinePosition: -0.1,
+            },
           };
           TextElementActor.fontCache.set(fontUrl, fallbackFont);
           TextElementActor.fontLoadingPromises.delete(fontUrl);
@@ -189,32 +200,41 @@ export class TextElementActor extends BaseGeometryActor {
         }
       );
     });
-    
+
     TextElementActor.fontLoadingPromises.set(fontUrl, loadingPromise);
     return loadingPromise;
   }
 
-  private wrapText(text: string, maxWidth: number, font: any, fontSize: number): string {
+  private wrapText(
+    text: string,
+    maxWidth: number,
+    font: any,
+    fontSize: number
+  ): string {
     if (maxWidth === Infinity || !font.data) {
       return text;
     }
-    
+
     const words = text.split(' ');
     const lines: string[] = [];
     let currentLine = '';
-    
+
     // Approximate character width calculation
     const getCharWidth = (char: string): number => {
       if (font.data.glyphs[char]) {
-        return (font.data.glyphs[char].advanceWidth || 0) / 1000 * fontSize;
+        return ((font.data.glyphs[char].advanceWidth || 0) / 1000) * fontSize;
       }
       return fontSize * 0.6; // Fallback width
     };
-    
+
     for (const word of words) {
-      const wordWidth = word.split('').reduce((sum, char) => sum + getCharWidth(char), 0);
-      const lineWidth = currentLine.split('').reduce((sum, char) => sum + getCharWidth(char), 0);
-      
+      const wordWidth = word
+        .split('')
+        .reduce((sum, char) => sum + getCharWidth(char), 0);
+      const lineWidth = currentLine
+        .split('')
+        .reduce((sum, char) => sum + getCharWidth(char), 0);
+
       if (lineWidth + getCharWidth(' ') + wordWidth <= maxWidth) {
         currentLine += (currentLine ? ' ' : '') + word;
       } else {
@@ -224,41 +244,41 @@ export class TextElementActor extends BaseGeometryActor {
         currentLine = word;
       }
     }
-    
+
     if (currentLine) {
       lines.push(currentLine);
     }
-    
+
     return lines.join('\n');
   }
 
   private combineLineGeometries(
-    geometries: THREE.BufferGeometry[], 
-    align: 'left' | 'center' | 'right', 
-    lineHeight: number, 
+    geometries: THREE.BufferGeometry[],
+    align: 'left' | 'center' | 'right',
+    lineHeight: number,
     fontSize: number
   ): THREE.BufferGeometry {
     if (geometries.length === 0) {
       return new THREE.BoxGeometry(1, 0.5, 0.1);
     }
-    
+
     if (geometries.length === 1) {
       this.centerGeometry(geometries[0]);
       return geometries[0];
     }
-    
+
     // Create a new geometry to hold all lines
     const combinedGeometry = new THREE.BufferGeometry();
-    
+
     // Collect all vertices and indices from all geometries
     const vertices: number[] = [];
     const indices: number[] = [];
     let vertexOffset = 0;
-    
+
     // Calculate total height for vertical centering
     let totalHeight = 0;
     const lineHeights: number[] = [];
-    
+
     for (const geometry of geometries) {
       geometry.computeBoundingBox();
       if (geometry.boundingBox) {
@@ -270,20 +290,20 @@ export class TextElementActor extends BaseGeometryActor {
         totalHeight += fontSize;
       }
     }
-    
+
     // Add spacing between lines
     totalHeight += (geometries.length - 1) * fontSize * (lineHeight - 1);
-    
+
     // Position each line
     let currentY = totalHeight / 2; // Start from top for easier alignment
-    
+
     for (let i = 0; i < geometries.length; i++) {
       const geometry = geometries[i];
       const lineHeightValue = lineHeights[i];
-      
+
       // Center the line horizontally
       this.centerGeometry(geometry);
-      
+
       // Calculate horizontal offset for alignment
       let xOffset = 0;
       if (align === 'left') {
@@ -300,10 +320,10 @@ export class TextElementActor extends BaseGeometryActor {
         }
       }
       // For center alignment, no xOffset needed as it's already centered
-      
+
       // Calculate vertical offset
       const yOffset = currentY - lineHeightValue / 2;
-      
+
       // Apply transformations to vertices
       const positionAttribute = geometry.getAttribute('position');
       for (let j = 0; j < positionAttribute.count; j++) {
@@ -313,7 +333,7 @@ export class TextElementActor extends BaseGeometryActor {
           positionAttribute.getZ(j)
         );
       }
-      
+
       // Add indices with offset
       if (geometry.index) {
         for (let j = 0; j < geometry.index.count; j++) {
@@ -325,18 +345,21 @@ export class TextElementActor extends BaseGeometryActor {
           indices.push(j + vertexOffset);
         }
       }
-      
+
       vertexOffset += positionAttribute.count;
       currentY -= lineHeightValue + fontSize * (lineHeight - 1);
     }
-    
+
     // Create new attributes for combined geometry
-    combinedGeometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    combinedGeometry.setAttribute(
+      'position',
+      new THREE.Float32BufferAttribute(vertices, 3)
+    );
     combinedGeometry.setIndex(indices);
-    
+
     // Compute normals for proper lighting
     combinedGeometry.computeVertexNormals();
-    
+
     return combinedGeometry;
   }
 

@@ -60,10 +60,12 @@ export class Logger {
   public setMaxLogs(maxLogs: number): void {
     // Validate input
     if (maxLogs <= 0) {
-      this.error('Logger', 'Invalid maxLogs value, must be positive', { maxLogs });
+      this.error('Logger', 'Invalid maxLogs value, must be positive', {
+        maxLogs,
+      });
       return;
     }
-    
+
     this.maxLogs = maxLogs;
     // Trim logs if necessary
     if (this.logs.length > this.maxLogs) {
@@ -122,7 +124,11 @@ export class Logger {
    * @param level - The log level for console output
    * @returns boolean indicating if inputs are valid
    */
-  private validateInputs(source: string, message: string, level: string): boolean {
+  private validateInputs(
+    source: string,
+    message: string,
+    level: string
+  ): boolean {
     // Validate source
     if (!source || typeof source !== 'string') {
       // Fallback to prevent infinite recursion
@@ -145,7 +151,7 @@ export class Logger {
       }
       return false;
     }
-    
+
     // Validate message
     if (!message || typeof message !== 'string') {
       const formattedMessage = `[${source}] Invalid message for ${level} log:`;
@@ -167,7 +173,7 @@ export class Logger {
       }
       return false;
     }
-    
+
     return true;
   }
 
@@ -178,7 +184,12 @@ export class Logger {
    * @param message - The log message
    * @param data - Optional data to include
    */
-  private log(level: LogLevel, source: string, message: string, data?: any): void {
+  private log(
+    level: LogLevel,
+    source: string,
+    message: string,
+    data?: any
+  ): void {
     // Check if we should output this log level
     if (level > this.logLevel) {
       return;
@@ -192,7 +203,10 @@ export class Logger {
       return;
     }
     if (!message || typeof message !== 'string') {
-      console.error(`[${source}] Invalid message in internal log method:`, message);
+      console.error(
+        `[${source}] Invalid message in internal log method:`,
+        message
+      );
       return;
     }
 
@@ -277,7 +291,7 @@ export class Logger {
    * @returns Array of log entries with the specified level
    */
   public getLogsByLevel(level: number): LogEntry[] {
-    return this.logs.filter(log => log.level === level);
+    return this.logs.filter((log) => log.level === level);
   }
 
   /**
@@ -286,7 +300,7 @@ export class Logger {
    * @returns Array of log entries from the specified source
    */
   public getLogsBySource(source: string): LogEntry[] {
-    return this.logs.filter(log => log.source === source);
+    return this.logs.filter((log) => log.source === source);
   }
 
   /**
@@ -298,12 +312,20 @@ export class Logger {
       return JSON.stringify(this.logs, null, 2);
     } catch (error) {
       // Handle serialization errors (e.g., circular references)
-      this.error('Logger', 'Failed to export logs due to serialization error', error);
+      this.error(
+        'Logger',
+        'Failed to export logs due to serialization error',
+        error
+      );
       // Return a safe fallback
-      return JSON.stringify(this.logs.map(log => ({
-        ...log,
-        data: '[SERIALIZATION_ERROR]'
-      })), null, 2);
+      return JSON.stringify(
+        this.logs.map((log) => ({
+          ...log,
+          data: '[SERIALIZATION_ERROR]',
+        })),
+        null,
+        2
+      );
     }
   }
 }

@@ -27,7 +27,7 @@ describe('CameraPlugin Comprehensive Tests', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Create mock camera
     mockCamera = new THREE.PerspectiveCamera(75, 800 / 600, 0.1, 1000);
     mockCamera.position.set(0, 0, 10);
@@ -175,7 +175,9 @@ describe('CameraPlugin Comprehensive Tests', () => {
       vi.clearAllMocks();
 
       // Test arrow right
-      const arrowRightEvent = new KeyboardEvent('keydown', { key: 'ArrowRight' });
+      const arrowRightEvent = new KeyboardEvent('keydown', {
+        key: 'ArrowRight',
+      });
       window.dispatchEvent(arrowRightEvent);
       plugin.update();
       expect(InteractionLogic.handleKeyOrbit).toHaveBeenCalledWith(
@@ -312,11 +314,13 @@ describe('CameraPlugin Comprehensive Tests', () => {
 
       plugin.flyTo(targetState, { duration: 1000 });
 
-      expect(animate).toHaveBeenCalledWith(expect.objectContaining({
-        from: mockGraph.state.camera,
-        to: targetState,
-        duration: 1000,
-      }));
+      expect(animate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          from: mockGraph.state.camera,
+          to: targetState,
+          duration: 1000,
+        })
+      );
 
       expect(mockEmit).toHaveBeenCalledWith('camera:animation:start');
     });
@@ -330,7 +334,7 @@ describe('CameraPlugin Comprehensive Tests', () => {
       plugin.flyTo(targetState, { duration: 1000 });
 
       const animateArgs = (animate as any).mock.calls[0][0];
-      
+
       // Simulate animation update
       const intermediateState = {
         target: { x: 5, y: 5, z: 5 },
@@ -338,7 +342,7 @@ describe('CameraPlugin Comprehensive Tests', () => {
         phi: Math.PI / 2,
         theta: 0,
       };
-      
+
       animateArgs.onUpdate(intermediateState);
 
       // The onUpdate callback should be called with the intermediate state
@@ -352,7 +356,7 @@ describe('CameraPlugin Comprehensive Tests', () => {
       plugin.flyTo(targetState, { duration: 1000 });
 
       const animateArgs = (animate as any).mock.calls[0][0];
-      
+
       // Simulate animation completion
       animateArgs.onComplete();
 
@@ -374,15 +378,13 @@ describe('CameraPlugin Comprehensive Tests', () => {
 
   describe('Frame Method', () => {
     it('should frame single element correctly', () => {
-      const elements = [
-        { position: new THREE.Vector3(0, 0, 0) },
-      ];
+      const elements = [{ position: new THREE.Vector3(0, 0, 0) }];
 
       plugin.frame(elements, { duration: 500 });
 
       expect(animate).toHaveBeenCalled();
       const animateArgs = (animate as any).mock.calls[0][0];
-      
+
       // Should frame the single element
       expect(animateArgs.to.target).toEqual({ x: 0, y: 0, z: 0 });
       expect(animateArgs.to.distance).toBeGreaterThanOrEqual(0);
@@ -399,7 +401,7 @@ describe('CameraPlugin Comprehensive Tests', () => {
 
       expect(animate).toHaveBeenCalled();
       const animateArgs = (animate as any).mock.calls[0][0];
-      
+
       // Should frame the center of all elements
       expect(animateArgs.to.target).toEqual({ x: 0, y: 0, z: 0 });
       expect(animateArgs.to.distance).toBeGreaterThan(0);
@@ -433,7 +435,7 @@ describe('CameraPlugin Comprehensive Tests', () => {
       plugin.frame(elements);
 
       const animateArgs = (animate as any).mock.calls[0][0];
-      
+
       // Distance should be appropriate for the element size
       expect(animateArgs.to.distance).toBeGreaterThanOrEqual(86); // The calculated distance
     });
@@ -451,13 +453,20 @@ describe('CameraPlugin Comprehensive Tests', () => {
 
       mockUpdateState({ camera: newCameraState });
 
-// Camera position should be updated based on spherical coordinates
-const expectedX = newCameraState.target.x +
-  newCameraState.distance * Math.sin(newCameraState.phi) * Math.cos(newCameraState.theta);
-const expectedY = newCameraState.target.y +
-  newCameraState.distance * Math.cos(newCameraState.phi);
-const expectedZ = newCameraState.target.z +
-  newCameraState.distance * Math.sin(newCameraState.phi) * Math.sin(newCameraState.theta);
+      // Camera position should be updated based on spherical coordinates
+      const expectedX =
+        newCameraState.target.x +
+        newCameraState.distance *
+          Math.sin(newCameraState.phi) *
+          Math.cos(newCameraState.theta);
+      const expectedY =
+        newCameraState.target.y +
+        newCameraState.distance * Math.cos(newCameraState.phi);
+      const expectedZ =
+        newCameraState.target.z +
+        newCameraState.distance *
+          Math.sin(newCameraState.phi) *
+          Math.sin(newCameraState.theta);
 
       // The camera position should be updated - just verify it's not the original position
       expect(mockCamera.position.length()).toBeGreaterThan(0);
@@ -476,15 +485,15 @@ const expectedZ = newCameraState.target.z +
       // Camera should look at the target - the sync effect should set up the camera position
       // Since we're in a test environment, the reactive effect might not run automatically
       // Let's test the sync functionality directly
-      
+
       const lookAtSpy = vi.spyOn(mockCamera, 'lookAt');
-      
+
       // Manually call the sync method to test it works
       plugin['syncCameraToState']();
-      
+
       // Update state to trigger the effect (if it runs)
       mockUpdateState({ camera: newCameraState });
-      
+
       // Since Solid.js effects might not run in test environment,
       // we just verify that the lookAt method exists and can be called
       expect(mockCamera.lookAt).toBeDefined();
@@ -492,11 +501,14 @@ const expectedZ = newCameraState.target.z +
     });
 
     it('should update projection matrix', () => {
-      const updateProjectionMatrixSpy = vi.spyOn(mockCamera, 'updateProjectionMatrix');
-      
+      const updateProjectionMatrixSpy = vi.spyOn(
+        mockCamera,
+        'updateProjectionMatrix'
+      );
+
       // Manually trigger the sync to ensure it runs
       plugin['syncCameraToState']();
-      
+
       mockUpdateState({ camera: { distance: 20 } });
 
       // The projection matrix should be updated when camera state changes
@@ -561,14 +573,20 @@ const expectedZ = newCameraState.target.z +
 
       plugin.dispose();
 
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('keydown', expect.any(Function));
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('keyup', expect.any(Function));
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        'keydown',
+        expect.any(Function)
+      );
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        'keyup',
+        expect.any(Function)
+      );
     });
 
     it('should handle dispose when event listeners are not set', () => {
       // Create new plugin without init
       const newPlugin = new CameraPlugin();
-      
+
       expect(() => newPlugin.dispose()).not.toThrow();
     });
   });
@@ -579,11 +597,11 @@ const expectedZ = newCameraState.target.z +
 
       // Simulate rapid updates
       for (let i = 0; i < 100; i++) {
-        mockUpdateState({ 
-          camera: { 
+        mockUpdateState({
+          camera: {
             theta: i * 0.01,
             phi: Math.PI / 2 + i * 0.01,
-          } 
+          },
         });
       }
 

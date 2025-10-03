@@ -29,7 +29,12 @@ export class ErrorHandler {
    * @param error - The error object
    * @param data - Optional additional data
    */
-  public handleError(source: string, message: string, error?: any, data?: any): void {
+  public handleError(
+    source: string,
+    message: string,
+    error?: any,
+    data?: any
+  ): void {
     this.logger.error(source, message, { error, ...data });
   }
 

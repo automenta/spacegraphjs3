@@ -94,19 +94,19 @@ describe('LayoutPlugin', () => {
     d3Layout.tick(10); // Manually tick the simulation for a short time
 
     // Test that manual ticks work when not paused
-    const pos1_before_pause_x = graph.state.data.nodes.find((n) => n.id === 'n1')
-      ?.position?.x;
-
-    d3Layout.tick(10); // Tick again
-    const pos1_after_ticks_x = graph.state.data.nodes.find(
+    const pos1_before_pause_x = graph.state.data.nodes.find(
       (n) => n.id === 'n1'
     )?.position?.x;
-    
+
+    d3Layout.tick(10); // Tick again
+    const pos1_after_ticks_x = graph.state.data.nodes.find((n) => n.id === 'n1')
+      ?.position?.x;
+
     // Positions should change with manual ticks
     expect(pos1_after_ticks_x).not.toBe(pos1_before_pause_x);
 
     d3Layout.pause();
-    
+
     const pos1_paused_x = graph.state.data.nodes.find((n) => n.id === 'n1')
       ?.position?.x;
 
@@ -115,7 +115,7 @@ describe('LayoutPlugin', () => {
     const pos1_after_paused_ticks_x = graph.state.data.nodes.find(
       (n) => n.id === 'n1'
     )?.position?.x;
-    
+
     // Positions should change with manual ticks even when paused
     expect(pos1_after_paused_ticks_x).not.toBe(pos1_paused_x);
 
@@ -124,7 +124,7 @@ describe('LayoutPlugin', () => {
     d3Layout.tick(10); // Tick again after resume
     // After reheat, the simulation should be running
     // We've already tested that reheat calls alpha() with a value and restart()
-    
+
     cleanup();
   });
 });

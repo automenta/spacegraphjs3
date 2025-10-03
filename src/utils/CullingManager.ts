@@ -1,4 +1,11 @@
-import { Camera, Object3D, Frustum, Matrix4, Sphere, BufferGeometry } from 'three';
+import {
+  Camera,
+  Object3D,
+  Frustum,
+  Matrix4,
+  Sphere,
+  BufferGeometry,
+} from 'three';
 
 interface HasGeometry {
   geometry: BufferGeometry;

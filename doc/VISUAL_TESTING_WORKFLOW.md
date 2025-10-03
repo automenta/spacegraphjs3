@@ -2,7 +2,8 @@
 
 ## Overview
 
-This document describes the complete visual testing workflow for SpaceGraphJS, including automated test generation, visual regression detection, performance benchmarking, and unified reporting.
+This document describes the complete visual testing workflow for SpaceGraphJS, including automated test generation,
+visual regression detection, performance benchmarking, and unified reporting.
 
 ## Workflow Components
 
@@ -243,16 +244,16 @@ export default config;
 ### Common Issues
 
 1. **Flaky Visual Tests**
-   - Solution: Increase thresholds for dynamic content
-   - Solution: Wait for animations to complete
+    - Solution: Increase thresholds for dynamic content
+    - Solution: Wait for animations to complete
 
 2. **Environment Differences**
-   - Solution: Use consistent test environments
-   - Solution: Normalize rendering settings
+    - Solution: Use consistent test environments
+    - Solution: Normalize rendering settings
 
 3. **False Positives**
-   - Solution: Fine-tune comparison thresholds
-   - Solution: Exclude non-essential UI elements
+    - Solution: Fine-tune comparison thresholds
+    - Solution: Exclude non-essential UI elements
 
 ### Debugging Tips
 

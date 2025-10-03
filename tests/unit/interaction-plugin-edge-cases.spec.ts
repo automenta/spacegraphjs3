@@ -100,11 +100,11 @@ describe('InteractionPlugin Edge Cases', () => {
     };
 
     mockUpdateState = vi.fn();
-    
+
     // Create mock objects for intersection testing
     const mockNodeObject = new THREE.Object3D();
     mockNodeObject.userData = { elementId: 'n1' };
-    
+
     graph = {
       state: initialSpec,
       updateState: mockUpdateState,
@@ -127,12 +127,13 @@ describe('InteractionPlugin Edge Cases', () => {
       },
       dataManager: {
         getElement: (id: string) =>
-          initialSpec.data.nodes.find(node => node.id === id) ||
-          initialSpec.data.edges.find(edge => edge.id === id) || null,
+          initialSpec.data.nodes.find((node) => node.id === id) ||
+          initialSpec.data.edges.find((edge) => edge.id === id) ||
+          null,
         getNode: (id: string) =>
-          initialSpec.data.nodes.find(node => node.id === id) || null,
+          initialSpec.data.nodes.find((node) => node.id === id) || null,
         getEdge: (id: string) =>
-          initialSpec.data.edges.find(edge => edge.id === id) || null,
+          initialSpec.data.edges.find((edge) => edge.id === id) || null,
       },
       events: {
         on: vi.fn(),
@@ -147,8 +148,12 @@ describe('InteractionPlugin Edge Cases', () => {
 
   describe('Click vs Drag Differentiation', () => {
     it('should handle click events correctly when no drag occurs', () => {
-      const mockElement = { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } };
-      
+      const mockElement = {
+        id: 'n1',
+        type: 'sphere',
+        position: { x: 0, y: 0, z: 0 },
+      };
+
       // Override getIntersectedElement to return a node element
       const originalMethod = (plugin as any).getIntersectedElement;
       (plugin as any).getIntersectedElement = (event: any) => {
@@ -188,8 +193,12 @@ describe('InteractionPlugin Edge Cases', () => {
     });
 
     it('should prevent click events during drag operations', () => {
-      const mockElement = { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } };
-      
+      const mockElement = {
+        id: 'n1',
+        type: 'sphere',
+        position: { x: 0, y: 0, z: 0 },
+      };
+
       // Override getIntersectedElement to return a node element
       const originalMethod = (plugin as any).getIntersectedElement;
       (plugin as any).getIntersectedElement = (event: any) => {
@@ -224,8 +233,12 @@ describe('InteractionPlugin Edge Cases', () => {
 
   describe('Drag State Management', () => {
     it('should properly initialize drag state when element is intersected', () => {
-      const mockElement = { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } };
-      
+      const mockElement = {
+        id: 'n1',
+        type: 'sphere',
+        position: { x: 0, y: 0, z: 0 },
+      };
+
       // Override getIntersectedElement to return a node element
       const originalMethod = (plugin as any).getIntersectedElement;
       (plugin as any).getIntersectedElement = (event: any) => {
@@ -247,8 +260,12 @@ describe('InteractionPlugin Edge Cases', () => {
     });
 
     it('should handle drag when element is removed during drag', () => {
-      const mockElement = { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } };
-      
+      const mockElement = {
+        id: 'n1',
+        type: 'sphere',
+        position: { x: 0, y: 0, z: 0 },
+      };
+
       // Override getIntersectedElement to return a node element
       const originalMethod = (plugin as any).getIntersectedElement;
       (plugin as any).getIntersectedElement = (event: any) => {
@@ -285,8 +302,12 @@ describe('InteractionPlugin Edge Cases', () => {
     });
 
     it('should clear drag state when drag ends', () => {
-      const mockElement = { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } };
-      
+      const mockElement = {
+        id: 'n1',
+        type: 'sphere',
+        position: { x: 0, y: 0, z: 0 },
+      };
+
       // Override getIntersectedElement to return a node element
       const originalMethod = (plugin as any).getIntersectedElement;
       (plugin as any).getIntersectedElement = (event: any) => {
@@ -323,8 +344,12 @@ describe('InteractionPlugin Edge Cases', () => {
 
   describe('Hover State Management', () => {
     it('should not process hover events during drag', () => {
-      const mockElement = { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } };
-      
+      const mockElement = {
+        id: 'n1',
+        type: 'sphere',
+        position: { x: 0, y: 0, z: 0 },
+      };
+
       // Start drag
       (plugin as any).draggedElementId = 'n1';
 
@@ -347,20 +372,26 @@ describe('InteractionPlugin Edge Cases', () => {
     });
 
     it('should handle hover enter and leave events correctly', () => {
-      const mockElement = { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } };
-      
+      const mockElement = {
+        id: 'n1',
+        type: 'sphere',
+        position: { x: 0, y: 0, z: 0 },
+      };
+
       // Override getIntersectedElement to return a node element
       const originalMethod = (plugin as any).getIntersectedElement;
       (plugin as any).getIntersectedElement = (event: any) => {
         // Return element when hovering over it, null when hovering away
-        return event === 'hoverEnter' ? { type: 'node', element: mockElement } : null;
+        return event === 'hoverEnter'
+          ? { type: 'node', element: mockElement }
+          : null;
       };
 
       // Hover over element
       const hoverEnterState = {
         event: new MockPointerEvent('pointermove'),
       };
-      
+
       // Temporarily override for this call
       (plugin as any).getIntersectedElement = (event: any) => {
         return { type: 'node', element: mockElement };
@@ -396,8 +427,12 @@ describe('InteractionPlugin Edge Cases', () => {
 
   describe('Multi-select Functionality', () => {
     it('should handle multi-select with Ctrl key', () => {
-      const mockElement = { id: 'n2', type: 'sphere', position: { x: 10, y: 0, z: 0 } };
-      
+      const mockElement = {
+        id: 'n2',
+        type: 'sphere',
+        position: { x: 10, y: 0, z: 0 },
+      };
+
       graph.state.interaction.selectedElementIds = ['n1'];
 
       // Override getIntersectedElement to return a node element
@@ -426,8 +461,12 @@ describe('InteractionPlugin Edge Cases', () => {
     });
 
     it('should handle multi-select with Meta key', () => {
-      const mockElement = { id: 'n2', type: 'sphere', position: { x: 10, y: 0, z: 0 } };
-      
+      const mockElement = {
+        id: 'n2',
+        type: 'sphere',
+        position: { x: 10, y: 0, z: 0 },
+      };
+
       graph.state.interaction.selectedElementIds = ['n1'];
 
       // Override getIntersectedElement to return a node element
@@ -513,7 +552,7 @@ describe('InteractionPlugin Edge Cases', () => {
       // We can't easily mock the InteractionLogic methods due to import issues,
       // but we can verify that the function doesn't throw and handles the pinch state correctly
       expect(() => (plugin as any).onDrag(pinchState)).not.toThrow();
-      
+
       // If we get here without an error, the early return worked
       expect(true).toBe(true);
     });
@@ -521,11 +560,17 @@ describe('InteractionPlugin Edge Cases', () => {
 
   describe('Event Cleanup', () => {
     it('should properly clean up event listeners on dispose', () => {
-      const removeEventListenerSpy = vi.spyOn(mockRendererEl, 'removeEventListener');
+      const removeEventListenerSpy = vi.spyOn(
+        mockRendererEl,
+        'removeEventListener'
+      );
 
       plugin.dispose();
 
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function));
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        'click',
+        expect.any(Function)
+      );
     });
 
     it('should destroy gesture handler on dispose', () => {
@@ -538,8 +583,12 @@ describe('InteractionPlugin Edge Cases', () => {
 
   describe('Race Conditions', () => {
     it('should handle rapid click events', () => {
-      const mockElement = { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } };
-      
+      const mockElement = {
+        id: 'n1',
+        type: 'sphere',
+        position: { x: 0, y: 0, z: 0 },
+      };
+
       // Override getIntersectedElement to return a node element
       const originalMethod = (plugin as any).getIntersectedElement;
       (plugin as any).getIntersectedElement = (event: any) => {
@@ -564,8 +613,12 @@ describe('InteractionPlugin Edge Cases', () => {
     });
 
     it('should handle drag start during existing drag', () => {
-      const mockElement = { id: 'n1', type: 'sphere', position: { x: 0, y: 0, z: 0 } };
-      
+      const mockElement = {
+        id: 'n1',
+        type: 'sphere',
+        position: { x: 0, y: 0, z: 0 },
+      };
+
       // Override getIntersectedElement to return a node element
       const originalMethod = (plugin as any).getIntersectedElement;
       (plugin as any).getIntersectedElement = (event: any) => {
@@ -596,7 +649,7 @@ describe('InteractionPlugin Edge Cases', () => {
 
       // Start another drag without ending the first
       (plugin as any).onDrag(dragState2);
-      
+
       // Should update to new drag state
       expect((plugin as any).draggedElementId).toBe('n1');
     });

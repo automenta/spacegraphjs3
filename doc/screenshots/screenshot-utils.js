@@ -8,12 +8,14 @@ import path from 'path';
  */
 export async function initBrowser() {
   // Create screenshots directory if it doesn't exist
-  await fs.mkdir(path.join(process.cwd(), 'doc/screenshots'), { recursive: true });
+  await fs.mkdir(path.join(process.cwd(), 'doc/screenshots'), {
+    recursive: true,
+  });
 
   // Launch the browser
   const browser = await chromium.launch();
   const page = await browser.newPage();
-  
+
   return { browser, page };
 }
 
@@ -36,10 +38,10 @@ export async function navigateAndLoad(page, url, timeout = 3000) {
  */
 export async function captureScreenshot(page, filename, options = {}) {
   const fullPath = path.join(process.cwd(), 'doc/screenshots', filename);
-  await page.screenshot({ 
+  await page.screenshot({
     path: fullPath,
     fullPage: true,
-    ...options
+    ...options,
   });
   console.log(`Screenshot saved to ${fullPath}`);
 }
@@ -53,13 +55,13 @@ export async function captureScreenshot(page, filename, options = {}) {
 export async function moveCamera(page, cameraParams, timeout = 2000) {
   await page.evaluate((params) => {
     if (window.graph && window.graph.cameraPlugin) {
-      window.graph.cameraPlugin.flyTo(params.target, { 
+      window.graph.cameraPlugin.flyTo(params.target, {
         duration: params.duration || 1000,
-        ...params.options
+        ...params.options,
       });
     }
   }, cameraParams);
-  
+
   await page.waitForTimeout(timeout);
 }
 
@@ -72,12 +74,12 @@ export async function switchToBasicRenderer(page) {
     if (window.graph) {
       window.graph.update({
         performance: {
-          useBasicRenderer: true
-        }
+          useBasicRenderer: true,
+        },
       });
     }
   });
-  
+
   // Wait for the renderer to switch
   await page.waitForTimeout(2000);
 }

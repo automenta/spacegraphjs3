@@ -6,38 +6,98 @@
 import * as THREE from 'three';
 
 // Animation System
-import AnimationSystem, { AnimationSystem as AnimationSystemClass, AnimationTask, KeyframeAnimation } from './AnimationSystem';
-import type { AnimationConfig, ParallelAnimation, SequenceAnimation } from './UnifiedAnimationSystem';
+import AnimationSystem, {
+  AnimationSystem as AnimationSystemClass,
+  AnimationTask,
+  KeyframeAnimation,
+} from './AnimationSystem';
+import type {
+  AnimationConfig,
+  ParallelAnimation,
+  SequenceAnimation,
+} from './UnifiedAnimationSystem';
 
 // Camera Utils
-import CameraUtils, { CameraUtils as CameraUtilsClass, CameraAnimationConfig } from './CameraUtils';
+import CameraUtils, {
+  CameraUtils as CameraUtilsClass,
+  CameraAnimationConfig,
+} from './CameraUtils';
 
 // HUD Utils
-import HUDUtils, { HUDUtils as HUDUtilsClass, HUDTheme, HUDAnimationConfig } from './HUDUtils';
+import HUDUtils, {
+  HUDUtils as HUDUtilsClass,
+  HUDTheme,
+  HUDAnimationConfig,
+} from './HUDUtils';
 
 // Interaction Utils
-import InteractionUtils, { InteractionUtils as InteractionUtilsClass, InteractionEvent, GestureConfig, InteractionState } from './InteractionUtils';
+import InteractionUtils, {
+  InteractionUtils as InteractionUtilsClass,
+  InteractionEvent,
+  GestureConfig,
+  InteractionState,
+} from './InteractionUtils';
 
 // Performance Utils
-import PerformanceUtils, { PerformanceUtils as PerformanceUtilsClass, PerformanceMetrics, PerformanceConfig } from './PerformanceUtils';
+import PerformanceUtils, {
+  PerformanceUtils as PerformanceUtilsClass,
+  PerformanceMetrics,
+  PerformanceConfig,
+} from './PerformanceUtils';
 
 // Theme System
-import ThemeSystem, { ThemeSystem as ThemeSystemClass, Theme, ThemeConfig } from './ThemeSystem';
+import ThemeSystem, {
+  ThemeSystem as ThemeSystemClass,
+  Theme,
+  ThemeConfig,
+} from './ThemeSystem';
 
 // Visual Effects System
-import VisualEffectsSystem, { VisualEffectsSystem as VisualEffectsSystemClass, EffectConfig, ParticleEffect, GlowEffect, TrailEffect } from './VisualEffectsSystem';
+import VisualEffectsSystem, {
+  VisualEffectsSystem as VisualEffectsSystemClass,
+  EffectConfig,
+  ParticleEffect,
+  GlowEffect,
+  TrailEffect,
+} from './VisualEffectsSystem';
 
 // Error Handler
 import { ErrorHandler } from './ErrorHandler';
 
 // Export types and classes
-export { AnimationSystemClass as AnimationSystem, AnimationConfig, AnimationTask, KeyframeAnimation, ParallelAnimation, SequenceAnimation };
-export { CameraUtils, CameraUtilsClass as CameraUtilsClass, CameraAnimationConfig };
+export {
+  AnimationSystemClass as AnimationSystem,
+  AnimationConfig,
+  AnimationTask,
+  KeyframeAnimation,
+  ParallelAnimation,
+  SequenceAnimation,
+};
+export {
+  CameraUtils,
+  CameraUtilsClass as CameraUtilsClass,
+  CameraAnimationConfig,
+};
 export { HUDUtilsClass as HUDUtils, HUDTheme, HUDAnimationConfig };
-export { InteractionUtilsClass as InteractionUtils, InteractionEvent, GestureConfig, InteractionState };
-export { PerformanceUtilsClass as PerformanceUtils, PerformanceMetrics, PerformanceConfig };
+export {
+  InteractionUtilsClass as InteractionUtils,
+  InteractionEvent,
+  GestureConfig,
+  InteractionState,
+};
+export {
+  PerformanceUtilsClass as PerformanceUtils,
+  PerformanceMetrics,
+  PerformanceConfig,
+};
 export { ThemeSystemClass as ThemeSystem, Theme, ThemeConfig };
-export { VisualEffectsSystemClass as VisualEffectsSystem, EffectConfig, ParticleEffect, GlowEffect, TrailEffect };
+export {
+  VisualEffectsSystemClass as VisualEffectsSystem,
+  EffectConfig,
+  ParticleEffect,
+  GlowEffect,
+  TrailEffect,
+};
 export { ErrorHandler };
 
 // Re-export existing utilities
@@ -80,21 +140,25 @@ export class UtilitySystem {
     this.camera = new CameraUtilsClass();
     this.hud = new HUDUtilsClass();
     this.errorHandler = ErrorHandler.getInstance();
-    
+
     if (config.camera && config.scene) {
-      this.interaction = new InteractionUtilsClass(config.camera, config.scene, config.interactionConfig);
+      this.interaction = new InteractionUtilsClass(
+        config.camera,
+        config.scene,
+        config.interactionConfig
+      );
     } else {
       this.interaction = null as any;
     }
-    
+
     this.performance = new PerformanceUtilsClass({
       enableFPSMonitoring: true,
       enableMemoryTracking: true,
       enableRenderTiming: true,
-      updateInterval: 1000
+      updateInterval: 1000,
     });
     this.theme = new ThemeSystemClass(config.themeConfig);
-    
+
     if (config.scene) {
       this.visualEffects = new VisualEffectsSystemClass(config.scene);
     } else {
@@ -108,10 +172,10 @@ export class UtilitySystem {
   update(deltaTime: number): void {
     // AnimationSystem doesn't have an update method
     // this.animation.update(deltaTime);
-    
+
     // PerformanceUtils doesn't have an update method
     // this.performance.update(deltaTime);
-    
+
     if (this.visualEffects) {
       this.visualEffects.update(deltaTime);
     }
@@ -143,7 +207,9 @@ export class UtilitySystem {
 // Create a singleton instance
 let utilitySystemInstance: UtilitySystem | null = null;
 
-export function createUtilitySystem(config: UtilitySystemConfig = {}): UtilitySystem {
+export function createUtilitySystem(
+  config: UtilitySystemConfig = {}
+): UtilitySystem {
   if (utilitySystemInstance) {
     utilitySystemInstance.dispose();
   }
@@ -173,5 +239,5 @@ export default {
   UtilitySystem,
   createUtilitySystem,
   getUtilitySystem,
-  disposeUtilitySystem
+  disposeUtilitySystem,
 };

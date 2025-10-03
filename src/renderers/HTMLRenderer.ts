@@ -14,7 +14,11 @@ export class HTMLRenderer {
   private htmlObjects: Map<string, THREE.Object3D> = new Map();
   private disposeEffect?: () => void;
 
-  constructor(cssScene: THREE.Scene, css3DScene: THREE.Scene, state: Store<Spec>) {
+  constructor(
+    cssScene: THREE.Scene,
+    css3DScene: THREE.Scene,
+    state: Store<Spec>
+  ) {
     this.cssScene = cssScene;
     this.css3DScene = css3DScene;
     this.state = state;
@@ -23,7 +27,7 @@ export class HTMLRenderer {
     if (state.performance?.enableCulling) {
       this.cullingManager = new CullingManager();
     }
-    
+
     if (state.performance?.enableLOD) {
       this.lodManager = new LODManager();
     }
@@ -49,23 +53,23 @@ export class HTMLRenderer {
     this.cullingManager?.clear();
     this.lodManager?.clear();
   }
-  
+
   public getCssScene(): THREE.Scene {
     return this.cssScene;
   }
-  
+
   public getCss3DScene(): THREE.Scene {
     return this.css3DScene;
   }
-  
+
   public registerHtmlObject(nodeId: string, object: THREE.Object3D): void {
     this.htmlObjects.set(nodeId, object);
-    
+
     // Register with culling system if enabled
     if (this.cullingManager) {
       this.cullingManager.registerObject(object);
     }
-    
+
     // Register with LOD system if enabled
     if (this.lodManager) {
       // Define LOD settings for HTML nodes
@@ -74,13 +78,13 @@ export class HTMLRenderer {
         detailLevels: [
           (obj: THREE.Object3D) => obj, // Full detail
           (obj: THREE.Object3D) => obj, // Medium detail (could reduce complexity)
-          (obj: THREE.Object3D) => obj  // Low detail (could hide or simplify)
-        ]
+          (obj: THREE.Object3D) => obj, // Low detail (could hide or simplify)
+        ],
       };
       this.lodManager.registerObject(object, settings);
     }
   }
-  
+
   public unregisterHtmlObject(nodeId: string): void {
     const object = this.htmlObjects.get(nodeId);
     if (object) {
@@ -89,13 +93,13 @@ export class HTMLRenderer {
       this.htmlObjects.delete(nodeId);
     }
   }
-  
+
   public updatePerformanceSystems(): void {
     // This method is called from the createEffect in the constructor
     // In a more sophisticated implementation, we would update the performance systems
     // with camera information, but for now we'll just ensure they're initialized
   }
-  
+
   public getVisibleHtmlObjects(): THREE.Object3D[] {
     if (this.cullingManager) {
       return this.cullingManager.cullObjects();

@@ -3,7 +3,7 @@ import * as path from 'path';
 
 /**
  * Visual Regression Reporter
- * 
+ *
  * This module detects visual regressions and generates detailed reports
  * to help developers understand and fix visual issues.
  */
@@ -58,15 +58,17 @@ class VisualRegressionReporter {
   async reportRegression(detail: RegressionDetail): Promise<void> {
     // In a real implementation, this would integrate with the testing framework
     // to automatically detect and report regressions
-    
-    console.log(`Visual Regression Detected: ${detail.componentName} - ${detail.testName}`);
+
+    console.log(
+      `Visual Regression Detected: ${detail.componentName} - ${detail.testName}`
+    );
     console.log(`Failure Type: ${detail.failureType}`);
     console.log(`Description: ${detail.description}`);
-    
+
     if (detail.screenshotPath) {
       console.log(`Screenshot: ${detail.screenshotPath}`);
     }
-    
+
     if (detail.diffPath) {
       console.log(`Diff Image: ${detail.diffPath}`);
     }
@@ -78,13 +80,13 @@ class VisualRegressionReporter {
   async generateReport(testResults: TestResult[]): Promise<RegressionReport> {
     const timestamp = new Date().toISOString();
     const totalTests = testResults.length;
-    const failedTests = testResults.filter(result => !result.passed).length;
+    const failedTests = testResults.filter((result) => !result.passed).length;
     const passedTests = totalTests - failedTests;
-    
+
     const regressionDetails: RegressionDetail[] = [];
-    
+
     // Process failed tests to create regression details
-    for (const result of testResults.filter(r => !r.passed)) {
+    for (const result of testResults.filter((r) => !r.passed)) {
       regressionDetails.push({
         componentName: result.componentName,
         testName: result.testName,
@@ -92,31 +94,35 @@ class VisualRegressionReporter {
         description: result.errorMessage || 'Unknown failure',
         screenshotPath: result.screenshotPath,
         diffPath: result.diffPath,
-        metrics: result.metrics
+        metrics: result.metrics,
       });
     }
-    
+
     const summary = this.generateSummary(totalTests, passedTests, failedTests);
-    
+
     const report: RegressionReport = {
       timestamp,
       totalTests,
       passedTests,
       failedTests,
       regressionDetails,
-      summary
+      summary,
     };
-    
+
     this.reports.push(report);
     await this.saveReport(report);
-    
+
     return report;
   }
 
   /**
    * Generate a summary of the test results
    */
-  private generateSummary(total: number, passed: number, failed: number): string {
+  private generateSummary(
+    total: number,
+    passed: number,
+    failed: number
+  ): string {
     const passRate = ((passed / total) * 100).toFixed(2);
     return `Test Results: ${passed}/${total} passed (${passRate}%) - ${failed} regressions detected`;
   }
@@ -128,7 +134,7 @@ class VisualRegressionReporter {
     try {
       const filename = `regression-report-${report.timestamp.replace(/[:.]/g, '-')}.json`;
       const filepath = path.join(this.reportDir, filename);
-      
+
       await fs.writeFile(filepath, JSON.stringify(report, null, 2));
       console.log(`Regression report saved to: ${filepath}`);
     } catch (error) {
@@ -206,7 +212,9 @@ class VisualRegressionReporter {
     
     <div class="regressions">
         <h2>Regressions Detected (${report.regressionDetails.length})</h2>
-        ${report.regressionDetails.map(detail => `
+        ${report.regressionDetails
+          .map(
+            (detail) => `
         <div class="regression">
             <div class="regression-header">
                 <span>${detail.componentName} - ${detail.testName}</span>
@@ -216,17 +224,19 @@ class VisualRegressionReporter {
             ${detail.screenshotPath ? `<img src="${detail.screenshotPath}" alt="Screenshot" class="screenshot">` : ''}
             ${detail.diffPath ? `<img src="${detail.diffPath}" alt="Diff" class="screenshot">` : ''}
         </div>
-        `).join('')}
+        `
+          )
+          .join('')}
     </div>
 </body>
 </html>`;
-    
+
     const filename = `regression-report-${report.timestamp.replace(/[:.]/g, '-')}.html`;
     const filepath = path.join(this.reportDir, filename);
-    
+
     await fs.writeFile(filepath, html);
     console.log(`HTML regression report saved to: ${filepath}`);
-    
+
     return filepath;
   }
 }
@@ -243,4 +253,10 @@ interface TestResult {
 }
 
 // Export the reporter and related interfaces
-export { VisualRegressionReporter, type RegressionReport, type RegressionDetail, type TestResult, type PerformanceMetrics };
+export {
+  VisualRegressionReporter,
+  type RegressionReport,
+  type RegressionDetail,
+  type TestResult,
+  type PerformanceMetrics,
+};

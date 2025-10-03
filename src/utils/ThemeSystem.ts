@@ -64,27 +64,31 @@ export class ThemeSystem {
   private customProperties: Map<string, any> = new Map();
 
   private logger: Logger;
-  
+
   constructor(config: ThemeConfig = {}) {
     this.logger = Logger.getInstance();
-    
+
     this.config = {
       allowCustomThemes: true,
       transitionDuration: 300,
       autoSwitch: false,
       timeBasedSwitching: false,
-      ...config
+      ...config,
     };
 
     try {
       this.initializeDefaultThemes();
       this.currentTheme = this.themes.get('dark')!;
-      
+
       if (this.config.autoSwitch) {
         this.setupAutoSwitching();
       }
     } catch (error) {
-      this.logger.error('ThemeSystem', 'Failed to initialize theme system', error);
+      this.logger.error(
+        'ThemeSystem',
+        'Failed to initialize theme system',
+        error
+      );
       throw error;
     }
   }
@@ -106,35 +110,43 @@ export class ThemeSystem {
         textSecondary: '#94a3b8',
         border: '#334155',
         shadow: '#000000',
-        glow: '#3b82f6'
+        glow: '#3b82f6',
       },
       materials: {
         node: { color: 0x3b82f6, emissive: 0x1e40af, emissiveIntensity: 0.2 },
         edge: { color: 0x64748b, transparent: true, opacity: 0.8 },
         background: { color: 0x0f172a },
-        highlight: { color: 0xf59e0b, emissive: 0xf59e0b, emissiveIntensity: 0.5 },
-        selected: { color: 0x8b5cf6, emissive: 0x8b5cf6, emissiveIntensity: 0.3 }
+        highlight: {
+          color: 0xf59e0b,
+          emissive: 0xf59e0b,
+          emissiveIntensity: 0.5,
+        },
+        selected: {
+          color: 0x8b5cf6,
+          emissive: 0x8b5cf6,
+          emissiveIntensity: 0.3,
+        },
       },
       effects: {
         glowIntensity: 1.0,
         shadowIntensity: 0.8,
         animationSpeed: 1.0,
         particleDensity: 1.0,
-        blurAmount: 0.5
+        blurAmount: 0.5,
       },
       typography: {
         fontFamily: 'Inter, system-ui, sans-serif',
         fontSize: 14,
         fontWeight: 400,
-        lineHeight: 1.5
+        lineHeight: 1.5,
       },
       spacing: {
         unit: 8,
         small: 8,
         medium: 16,
         large: 24,
-        xlarge: 32
-      }
+        xlarge: 32,
+      },
     });
 
     // Light theme
@@ -150,35 +162,43 @@ export class ThemeSystem {
         textSecondary: '#64748b',
         border: '#e2e8f0',
         shadow: '#000000',
-        glow: '#2563eb'
+        glow: '#2563eb',
       },
       materials: {
         node: { color: 0x2563eb, emissive: 0x1d4ed8, emissiveIntensity: 0.1 },
         edge: { color: 0x64748b, transparent: true, opacity: 0.6 },
         background: { color: 0xffffff },
-        highlight: { color: 0xd97706, emissive: 0xd97706, emissiveIntensity: 0.3 },
-        selected: { color: 0x7c3aed, emissive: 0x7c3aed, emissiveIntensity: 0.2 }
+        highlight: {
+          color: 0xd97706,
+          emissive: 0xd97706,
+          emissiveIntensity: 0.3,
+        },
+        selected: {
+          color: 0x7c3aed,
+          emissive: 0x7c3aed,
+          emissiveIntensity: 0.2,
+        },
       },
       effects: {
         glowIntensity: 0.8,
         shadowIntensity: 0.4,
         animationSpeed: 1.0,
         particleDensity: 0.8,
-        blurAmount: 0.3
+        blurAmount: 0.3,
       },
       typography: {
         fontFamily: 'Inter, system-ui, sans-serif',
         fontSize: 14,
         fontWeight: 400,
-        lineHeight: 1.5
+        lineHeight: 1.5,
       },
       spacing: {
         unit: 8,
         small: 8,
         medium: 16,
         large: 24,
-        xlarge: 32
-      }
+        xlarge: 32,
+      },
     });
 
     // Matrix theme
@@ -194,35 +214,43 @@ export class ThemeSystem {
         textSecondary: '#008f11',
         border: '#00ff41',
         shadow: '#000000',
-        glow: '#00ff41'
+        glow: '#00ff41',
       },
       materials: {
         node: { color: 0x00ff41, emissive: 0x00ff41, emissiveIntensity: 0.5 },
         edge: { color: 0x008f11, transparent: true, opacity: 0.9 },
         background: { color: 0x000000 },
-        highlight: { color: 0x39ff14, emissive: 0x39ff14, emissiveIntensity: 0.8 },
-        selected: { color: 0x00ff41, emissive: 0x00ff41, emissiveIntensity: 0.6 }
+        highlight: {
+          color: 0x39ff14,
+          emissive: 0x39ff14,
+          emissiveIntensity: 0.8,
+        },
+        selected: {
+          color: 0x00ff41,
+          emissive: 0x00ff41,
+          emissiveIntensity: 0.6,
+        },
       },
       effects: {
         glowIntensity: 2.0,
         shadowIntensity: 1.0,
         animationSpeed: 1.5,
         particleDensity: 2.0,
-        blurAmount: 0.2
+        blurAmount: 0.2,
       },
       typography: {
         fontFamily: 'Courier New, monospace',
         fontSize: 14,
         fontWeight: 400,
-        lineHeight: 1.4
+        lineHeight: 1.4,
       },
       spacing: {
         unit: 8,
         small: 8,
         medium: 16,
         large: 24,
-        xlarge: 32
-      }
+        xlarge: 32,
+      },
     });
 
     // Neon theme
@@ -238,35 +266,43 @@ export class ThemeSystem {
         textSecondary: '#00ffff',
         border: '#ff00ff',
         shadow: '#000000',
-        glow: '#ff00ff'
+        glow: '#ff00ff',
       },
       materials: {
         node: { color: 0xff00ff, emissive: 0xff00ff, emissiveIntensity: 0.6 },
         edge: { color: 0x00ffff, transparent: true, opacity: 0.8 },
         background: { color: 0x0a0a0a },
-        highlight: { color: 0xffff00, emissive: 0xffff00, emissiveIntensity: 1.0 },
-        selected: { color: 0xff00ff, emissive: 0xff00ff, emissiveIntensity: 0.8 }
+        highlight: {
+          color: 0xffff00,
+          emissive: 0xffff00,
+          emissiveIntensity: 1.0,
+        },
+        selected: {
+          color: 0xff00ff,
+          emissive: 0xff00ff,
+          emissiveIntensity: 0.8,
+        },
       },
       effects: {
         glowIntensity: 2.5,
         shadowIntensity: 0.9,
         animationSpeed: 1.2,
         particleDensity: 1.5,
-        blurAmount: 0.1
+        blurAmount: 0.1,
       },
       typography: {
         fontFamily: 'Orbitron, sans-serif',
         fontSize: 14,
         fontWeight: 500,
-        lineHeight: 1.3
+        lineHeight: 1.3,
       },
       spacing: {
         unit: 8,
         small: 8,
         medium: 16,
         large: 24,
-        xlarge: 32
-      }
+        xlarge: 32,
+      },
     });
   }
 
@@ -323,7 +359,7 @@ export class ThemeSystem {
       this.logger.warn('ThemeSystem', 'Cannot set theme with empty name');
       return false;
     }
-    
+
     const theme = this.themes.get(name);
     if (!theme) {
       this.logger.warn('ThemeSystem', `Theme not found: ${name}`);
@@ -338,11 +374,15 @@ export class ThemeSystem {
       this.applyThemeTransition(previousTheme, theme);
 
       // Notify callbacks
-      this.themeChangeCallbacks.forEach(callback => {
+      this.themeChangeCallbacks.forEach((callback) => {
         try {
           callback(theme);
         } catch (error) {
-          this.logger.error('ThemeSystem', 'Error in theme change callback', error);
+          this.logger.error(
+            'ThemeSystem',
+            'Error in theme change callback',
+            error
+          );
         }
       });
 
@@ -379,10 +419,13 @@ export class ThemeSystem {
   private applyMaterialTransitions(from: any, to: any): void {
     // This would be implemented based on your specific material handling
     // For now, we'll just ensure smooth color transitions
-    Object.keys(to).forEach(materialType => {
+    Object.keys(to).forEach((materialType) => {
       if (from[materialType] && to[materialType]) {
         // Interpolate material properties
-        this.interpolateMaterialProperties(from[materialType], to[materialType]);
+        this.interpolateMaterialProperties(
+          from[materialType],
+          to[materialType]
+        );
       }
     });
   }
@@ -395,7 +438,7 @@ export class ThemeSystem {
     if (from.color !== undefined && to.color !== undefined) {
       const fromColor = new THREE.Color(from.color);
       const toColor = new THREE.Color(to.color);
-      
+
       // This would be expanded based on your material system
       fromColor.lerp(toColor, 1);
     }
@@ -404,18 +447,22 @@ export class ThemeSystem {
   /**
    * Create custom theme
    */
-  createCustomTheme(name: string, baseTheme: string, customizations: Partial<Theme>): Theme | null {
+  createCustomTheme(
+    name: string,
+    baseTheme: string,
+    customizations: Partial<Theme>
+  ): Theme | null {
     // Validate inputs
     if (!name) {
       this.logger.warn('ThemeSystem', 'Cannot create theme with empty name');
       return null;
     }
-    
+
     if (!baseTheme) {
       this.logger.warn('ThemeSystem', 'Cannot create theme without base theme');
       return null;
     }
-    
+
     if (!this.config.allowCustomThemes) {
       this.logger.warn('ThemeSystem', 'Custom themes are not allowed');
       return null;
@@ -435,7 +482,7 @@ export class ThemeSystem {
         materials: { ...base.materials, ...customizations.materials },
         effects: { ...base.effects, ...customizations.effects },
         typography: { ...base.typography, ...customizations.typography },
-        spacing: { ...base.spacing, ...customizations.spacing }
+        spacing: { ...base.spacing, ...customizations.spacing },
       };
 
       this.themes.set(name, customTheme);
@@ -451,7 +498,7 @@ export class ThemeSystem {
    */
   deleteCustomTheme(name: string): boolean {
     if (!this.config.allowCustomThemes) return false;
-    
+
     const theme = this.themes.get(name);
     if (!theme || this.isDefaultTheme(name)) return false;
 
@@ -474,7 +521,7 @@ export class ThemeSystem {
     const r = parseInt(hex.substr(0, 2), 16);
     const g = parseInt(hex.substr(2, 2), 16);
     const b = parseInt(hex.substr(4, 2), 16);
-    
+
     return `rgba(${r}, ${g}, ${b}, ${opacity})`;
   }
 
@@ -486,7 +533,7 @@ export class ThemeSystem {
     const r = parseInt(hex.substr(0, 2), 16);
     const g = parseInt(hex.substr(2, 2), 16);
     const b = parseInt(hex.substr(4, 2), 16);
-    
+
     const brightness = (r * 299 + g * 587 + b * 114) / 1000;
     return brightness > 128 ? '#000000' : '#ffffff';
   }
@@ -494,35 +541,48 @@ export class ThemeSystem {
   /**
    * Generate color palette from base color
    */
-  generateColorPalette(baseColor: string): { primary: string; secondary: string; accent: string } {
+  generateColorPalette(baseColor: string): {
+    primary: string;
+    secondary: string;
+    accent: string;
+  } {
     const base = new THREE.Color(baseColor);
-    
+
     const primary = base.getHexString();
     const secondary = base.clone().offsetHSL(0.33, 0, 0).getHexString();
     const accent = base.clone().offsetHSL(0.66, 0, 0).getHexString();
-    
+
     return {
       primary: `#${primary}`,
       secondary: `#${secondary}`,
-      accent: `#${accent}`
+      accent: `#${accent}`,
     };
   }
 
   /**
    * Apply theme to Three.js material
    */
-  applyThemeToMaterial(material: THREE.Material, materialType: keyof Theme['materials']): void {
+  applyThemeToMaterial(
+    material: THREE.Material,
+    materialType: keyof Theme['materials']
+  ): void {
     const theme = this.currentTheme;
     const materialParams = theme.materials[materialType];
 
     if (material instanceof THREE.MeshBasicMaterial) {
-      if (materialParams.color !== undefined) (material as any).color.setHex(materialParams.color as number);
-      if (materialParams.transparent !== undefined) (material as any).transparent = materialParams.transparent;
-      if (materialParams.opacity !== undefined) (material as any).opacity = materialParams.opacity;
+      if (materialParams.color !== undefined)
+        (material as any).color.setHex(materialParams.color as number);
+      if (materialParams.transparent !== undefined)
+        (material as any).transparent = materialParams.transparent;
+      if (materialParams.opacity !== undefined)
+        (material as any).opacity = materialParams.opacity;
     } else if (material instanceof THREE.MeshStandardMaterial) {
-      if (materialParams.color !== undefined) (material as any).color.setHex(materialParams.color as number);
-      if (materialParams.emissive !== undefined) (material as any).emissive.setHex(materialParams.emissive as number);
-      if (materialParams.emissiveIntensity !== undefined) (material as any).emissiveIntensity = materialParams.emissiveIntensity;
+      if (materialParams.color !== undefined)
+        (material as any).color.setHex(materialParams.color as number);
+      if (materialParams.emissive !== undefined)
+        (material as any).emissive.setHex(materialParams.emissive as number);
+      if (materialParams.emissiveIntensity !== undefined)
+        (material as any).emissiveIntensity = materialParams.emissiveIntensity;
     }
   }
 
@@ -542,8 +602,10 @@ export class ThemeSystem {
     variables['--theme-font-weight'] = theme.typography.fontWeight.toString();
     variables['--theme-line-height'] = theme.typography.lineHeight.toString();
     variables['--theme-spacing-unit'] = `${theme.spacing.unit}px`;
-    variables['--theme-glow-intensity'] = theme.effects.glowIntensity.toString();
-    variables['--theme-animation-speed'] = theme.effects.animationSpeed.toString();
+    variables['--theme-glow-intensity'] =
+      theme.effects.glowIntensity.toString();
+    variables['--theme-animation-speed'] =
+      theme.effects.animationSpeed.toString();
 
     return variables;
   }
@@ -594,12 +656,12 @@ export class ThemeSystem {
       this.logger.warn('ThemeSystem', 'Cannot import empty theme JSON');
       return null;
     }
-    
+
     try {
       const themeData = JSON.parse(json);
       const theme: Theme = {
         ...themeData,
-        materials: this.validateMaterials(themeData.materials)
+        materials: this.validateMaterials(themeData.materials),
       };
 
       if (this.config.allowCustomThemes) {
@@ -619,20 +681,22 @@ export class ThemeSystem {
   private validateMaterials(materials: any): Theme['materials'] {
     // Ensure all required material types are present
     const defaultMaterials = this.themes.get('dark')!.materials;
-    
+
     return {
       node: { ...defaultMaterials.node, ...materials.node },
       edge: { ...defaultMaterials.edge, ...materials.edge },
       background: { ...defaultMaterials.background, ...materials.background },
       highlight: { ...defaultMaterials.highlight, ...materials.highlight },
-      selected: { ...defaultMaterials.selected, ...materials.selected }
+      selected: { ...defaultMaterials.selected, ...materials.selected },
     };
   }
 
   /**
    * Get theme preview
    */
-  getThemePreview(name: string): { colors: string[]; description: string } | null {
+  getThemePreview(
+    name: string
+  ): { colors: string[]; description: string } | null {
     const theme = this.themes.get(name);
     if (!theme) return null;
 
@@ -641,19 +705,19 @@ export class ThemeSystem {
       theme.colors.secondary,
       theme.colors.accent,
       theme.colors.background,
-      theme.colors.surface
+      theme.colors.surface,
     ];
 
     const descriptions: Record<string, string> = {
       dark: 'Professional dark theme with blue accents',
       light: 'Clean light theme with subtle colors',
       matrix: 'Cyberpunk-inspired green matrix theme',
-      neon: 'Vibrant neon theme with purple and cyan'
+      neon: 'Vibrant neon theme with purple and cyan',
     };
 
     return {
       colors,
-      description: descriptions[name] || 'Custom theme'
+      description: descriptions[name] || 'Custom theme',
     };
   }
 

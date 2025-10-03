@@ -92,31 +92,33 @@ export class BoxElementActor extends BaseGeometryActor {
     // to approximate rounded corners
 
     const positionAttribute = geometry.getAttribute('position');
-    
+
     // Get the vertices
     const vertices = [];
     for (let i = 0; i < positionAttribute.count; i++) {
-      vertices.push(new THREE.Vector3(
-        positionAttribute.getX(i),
-        positionAttribute.getY(i),
-        positionAttribute.getZ(i)
-      ));
+      vertices.push(
+        new THREE.Vector3(
+          positionAttribute.getX(i),
+          positionAttribute.getY(i),
+          positionAttribute.getZ(i)
+        )
+      );
     }
 
     // Adjust vertices to create rounded effect
     for (let i = 0; i < vertices.length; i++) {
       const vertex = vertices[i];
-      
+
       // Determine which corner this vertex belongs to
       const cornerX = Math.sign(vertex.x) * width * 0.5;
       const cornerY = Math.sign(vertex.y) * height * 0.5;
       const cornerZ = Math.sign(vertex.z) * depth * 0.5;
-      
+
       // Calculate distance from corner
       const dx = Math.abs(vertex.x - cornerX);
       const dy = Math.abs(vertex.y - cornerY);
       const dz = Math.abs(vertex.z - cornerZ);
-      
+
       // Only adjust vertices near corners
       if (dx < radius && dy < radius && dz < radius) {
         // Move vertex toward corner by radius amount
@@ -125,10 +127,11 @@ export class BoxElementActor extends BaseGeometryActor {
           vertex.y - cornerY,
           vertex.z - cornerZ
         ).normalize();
-        
-        const newPosition = new THREE.Vector3(cornerX, cornerY, cornerZ)
-          .add(direction.multiplyScalar(radius));
-          
+
+        const newPosition = new THREE.Vector3(cornerX, cornerY, cornerZ).add(
+          direction.multiplyScalar(radius)
+        );
+
         vertex.copy(newPosition);
       }
     }
@@ -138,7 +141,7 @@ export class BoxElementActor extends BaseGeometryActor {
       const vertex = vertices[i];
       positionAttribute.setXYZ(i, vertex.x, vertex.y, vertex.z);
     }
-    
+
     positionAttribute.needsUpdate = true;
     geometry.computeVertexNormals();
 

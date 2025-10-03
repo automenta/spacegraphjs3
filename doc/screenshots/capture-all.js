@@ -5,7 +5,7 @@ import path from 'path';
 const scripts = [
   'capture-screenshots.js',
   'capture-basic-renderer-screenshots.js',
-  'capture-visible-rendering-demo.js'
+  'capture-visible-rendering-demo.js',
 ];
 
 /**
@@ -16,13 +16,13 @@ const scripts = [
 function runScript(script) {
   return new Promise((resolve, reject) => {
     console.log(`Running ${script}...`);
-    
+
     const scriptPath = path.join(process.cwd(), 'doc/screenshots', script);
     const child = spawn('node', [scriptPath], {
       stdio: 'inherit',
-      cwd: process.cwd()
+      cwd: process.cwd(),
     });
-    
+
     child.on('close', (code) => {
       if (code === 0) {
         console.log(`${script} completed successfully`);
@@ -32,7 +32,7 @@ function runScript(script) {
         reject(new Error(`${script} failed with exit code ${code}`));
       }
     });
-    
+
     child.on('error', (error) => {
       console.error(`Failed to start ${script}:`, error);
       reject(error);
@@ -45,9 +45,11 @@ function runScript(script) {
  */
 async function runAllScripts() {
   console.log('Starting screenshot capture process...');
-  console.log('Make sure the development server is running on http://localhost:5174');
+  console.log(
+    'Make sure the development server is running on http://localhost:5174'
+  );
   console.log('');
-  
+
   for (const script of scripts) {
     try {
       await runScript(script);
@@ -57,7 +59,7 @@ async function runAllScripts() {
       process.exit(1);
     }
   }
-  
+
   console.log('All screenshot capture scripts completed successfully!');
 }
 

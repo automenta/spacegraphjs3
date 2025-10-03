@@ -2,7 +2,9 @@
 
 ## Overview
 
-The Event Handling system in SpaceGraph provides a robust and type-safe mechanism for managing events throughout the application. It uses the `mitt` library as a foundation but adds important features like disposal safety and improved TypeScript support.
+The Event Handling system in SpaceGraph provides a robust and type-safe mechanism for managing events throughout the
+application. It uses the `mitt` library as a foundation but adds important features like disposal safety and improved
+TypeScript support.
 
 ## Components
 
@@ -52,14 +54,17 @@ eventManager.dispose();
 The system supports a comprehensive set of events:
 
 #### Element Events
+
 - `element:click`: User clicks on a node or edge
 - `element:hover:enter`: Mouse enters a node or edge
 - `element:hover:leave`: Mouse leaves a node or edge
 
 #### Background Events
+
 - `background:click`: User clicks on the background
 
 #### Edge Events
+
 - `edge:click`: User clicks on an edge
 - `edge:hover:enter`: Mouse enters an edge
 - `edge:hover:leave`: Mouse leaves an edge
@@ -67,10 +72,12 @@ The system supports a comprehensive set of events:
 - `edge:multi-select`: Multiple edges are selected
 
 #### Layout Events
+
 - `layout:pin`: Nodes are pinned
 - `layout:unpin`: Nodes are unpinned
 
 #### Camera Events
+
 - `camera:animation:start`: Camera animation begins
 - `camera:animation:end`: Camera animation completes
 

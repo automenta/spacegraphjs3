@@ -2,7 +2,9 @@
 
 ## Overview
 
-This document describes the comprehensive approach to visual/interaction semantics testing in SpaceGraphJS, combining generated-screenshot testing with validation and a control interface to definitively specify UI/UX ergonomics expectations.
+This document describes the comprehensive approach to visual/interaction semantics testing in SpaceGraphJS, combining
+generated-screenshot testing with validation and a control interface to definitively specify UI/UX ergonomics
+expectations.
 
 ## Key Components
 
@@ -188,16 +190,16 @@ Integrated performance metrics help identify interaction bottlenecks.
 ### Common Issues
 
 1. **Flaky Visual Tests**
-   - Solution: Increase thresholds for dynamic content
-   - Solution: Wait for animations to complete
+    - Solution: Increase thresholds for dynamic content
+    - Solution: Wait for animations to complete
 
 2. **Environment Differences**
-   - Solution: Use consistent test environments
-   - Solution: Normalize rendering settings
+    - Solution: Use consistent test environments
+    - Solution: Normalize rendering settings
 
 3. **False Positives**
-   - Solution: Fine-tune comparison thresholds
-   - Solution: Exclude non-essential UI elements
+    - Solution: Fine-tune comparison thresholds
+    - Solution: Exclude non-essential UI elements
 
 ### Debugging Tips
 
@@ -208,4 +210,7 @@ Integrated performance metrics help identify interaction bottlenecks.
 
 ## Conclusion
 
-The visual/interaction semantics testing approach provides a comprehensive solution for ensuring SpaceGraphJS maintains high-quality UI/UX standards. By combining automated screenshot validation with rigorous ergonomics testing, we can definitively specify and verify the visual behavior of our components while maintaining accessibility and usability for all users.
+The visual/interaction semantics testing approach provides a comprehensive solution for ensuring SpaceGraphJS maintains
+high-quality UI/UX standards. By combining automated screenshot validation with rigorous ergonomics testing, we can
+definitively specify and verify the visual behavior of our components while maintaining accessibility and usability for
+all users.

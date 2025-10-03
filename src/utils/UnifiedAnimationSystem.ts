@@ -54,36 +54,53 @@ export type AnimationTask =
   | { type: 'keyframe'; animation: KeyframeAnimation; config: AnimationConfig }
   | { type: 'parallel'; animation: ParallelAnimation; config: AnimationConfig }
   | { type: 'sequence'; animation: SequenceAnimation; config: AnimationConfig }
-  | { type: 'callback'; callback: () => void | Promise<void>; config: AnimationConfig }
-  | { type: 'spring'; target: Record<string, any>; property: string; to: any; config: AnimationConfig }
-  | { type: 'decay'; target: Record<string, any>; property: string; from: any; config: AnimationConfig };
+  | {
+      type: 'callback';
+      callback: () => void | Promise<void>;
+      config: AnimationConfig;
+    }
+  | {
+      type: 'spring';
+      target: Record<string, any>;
+      property: string;
+      to: any;
+      config: AnimationConfig;
+    }
+  | {
+      type: 'decay';
+      target: Record<string, any>;
+      property: string;
+      from: any;
+      config: AnimationConfig;
+    };
 
 // Easing functions
 export const EasingFunctions = {
   linear: (t: number) => t,
   easeIn: (t: number) => t * t,
   easeOut: (t: number) => 1 - Math.pow(1 - t, 2),
-  easeInOut: (t: number) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2,
+  easeInOut: (t: number) =>
+    t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2,
   bounce: (t: number) => {
-    if (t < 1/2.75) return 7.5625 * t * t;
-    if (t < 2/2.75) return 7.5625 * (t -= 1.5/2.75) * t + 0.75;
-    if (t < 2.5/2.75) return 7.5625 * (t -= 2.25/2.75) * t + 0.9375;
-    return 7.5625 * (t -= 2.625/2.75) * t + 0.984375;
+    if (t < 1 / 2.75) return 7.5625 * t * t;
+    if (t < 2 / 2.75) return 7.5625 * (t -= 1.5 / 2.75) * t + 0.75;
+    if (t < 2.5 / 2.75) return 7.5625 * (t -= 2.25 / 2.75) * t + 0.9375;
+    return 7.5625 * (t -= 2.625 / 2.75) * t + 0.984375;
   },
   elastic: (t: number) => {
     if (t === 0) return 0;
     if (t === 1) return 1;
     const p = 0.3;
     const s = p / 4;
-    return Math.pow(2, -10 * t) * Math.sin((t - s) * (2 * Math.PI) / p) + 1;
+    return Math.pow(2, -10 * t) * Math.sin(((t - s) * (2 * Math.PI)) / p) + 1;
   },
   back: (t: number) => {
     const s = 1.70158;
     return t * t * ((s + 1) * t - s);
   },
   circ: (t: number) => 1 - Math.sqrt(1 - t * t),
-  expo: (t: number) => t === 0 ? 0 : Math.pow(2, 10 * (t - 1)),
-  quad: (t: number) => t * t
+  expo: (t: number) => (t === 0 ? 0 : Math.pow(2, 10 * (t - 1))),
+  quad: (t: number) => t * t,
 };
 
 /**
@@ -106,7 +123,7 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
   }
 
   protected onUpdate(deltaTime: number): void {
-     void deltaTime; // Intentionally unused, keeping for potential future use
+    void deltaTime; // Intentionally unused, keeping for potential future use
     // Update active animations
     for (const [id, controller] of this.activeAnimations.entries()) {
       if (!controller.isActive()) {
@@ -140,18 +157,21 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
     return this.addAnimation({
       type: 'tween',
       animation: { target, property, from, to },
-      config
+      config,
     });
   }
 
   /**
    * Create a keyframe animation
    */
-  public keyframe(animation: KeyframeAnimation, config: AnimationConfig = {}): Promise<void> {
+  public keyframe(
+    animation: KeyframeAnimation,
+    config: AnimationConfig = {}
+  ): Promise<void> {
     return this.addAnimation({
       type: 'keyframe',
       animation,
-      config
+      config,
     });
   }
 
@@ -169,7 +189,7 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
       target,
       property,
       to,
-      config
+      config,
     });
   }
 
@@ -187,40 +207,49 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
       target,
       property,
       from,
-      config
+      config,
     });
   }
 
   /**
    * Run animations in parallel
    */
-  public parallel(animations: AnimationTask[], config: AnimationConfig = {}): Promise<void> {
+  public parallel(
+    animations: AnimationTask[],
+    config: AnimationConfig = {}
+  ): Promise<void> {
     return this.addAnimation({
       type: 'parallel',
       animation: { animations, config },
-      config
+      config,
     });
   }
 
   /**
    * Run animations in sequence
    */
-  public sequence(animations: AnimationTask[], config: AnimationConfig = {}): Promise<void> {
+  public sequence(
+    animations: AnimationTask[],
+    config: AnimationConfig = {}
+  ): Promise<void> {
     return this.addAnimation({
       type: 'sequence',
       animation: { animations, config },
-      config
+      config,
     });
   }
 
   /**
    * Add a callback animation
    */
-  public callback(callback: () => void | Promise<void>, config: AnimationConfig = {}): Promise<void> {
+  public callback(
+    callback: () => void | Promise<void>,
+    config: AnimationConfig = {}
+  ): Promise<void> {
     return this.addAnimation({
       type: 'callback',
       callback,
-      config
+      config,
     });
   }
 
@@ -235,14 +264,18 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
   ): Promise<void> {
     void config; // Intentionally unused, keeping for potential future use
     const originalValue = this.cloneValue(target[property]);
-    
+
     const offset1 = this.offsetValue(originalValue, intensity);
-    await this.tween(target, property, originalValue, offset1, { duration: 100 });
-    
+    await this.tween(target, property, originalValue, offset1, {
+      duration: 100,
+    });
+
     const offset2 = this.offsetValue(originalValue, -intensity * 0.5);
     await this.tween(target, property, offset1, offset2, { duration: 100 });
-    
-    await this.tween(target, property, offset2, originalValue, { duration: 100 });
+
+    await this.tween(target, property, offset2, originalValue, {
+      duration: 100,
+    });
   }
 
   /**
@@ -303,8 +336,8 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
           onComplete: () => {
             if (task.config?.onComplete) task.config.onComplete();
             resolve();
-          }
-        }
+          },
+        },
       };
 
       this.animationQueue.push(wrappedTask);
@@ -317,14 +350,14 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
    */
   private async processQueue(): Promise<void> {
     if (this.isProcessing || this.animationQueue.length === 0) return;
-    
+
     this.isProcessing = true;
-    
+
     while (this.animationQueue.length > 0) {
       const task = this.animationQueue.shift()!;
       await this.executeAnimation(task);
     }
-    
+
     this.isProcessing = false;
   }
 
@@ -360,15 +393,17 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
   /**
    * Execute tween animation using popmotion
    */
-  private async executeTween(task: Extract<AnimationTask, { type: 'tween' }>): Promise<void> {
+  private async executeTween(
+    task: Extract<AnimationTask, { type: 'tween' }>
+  ): Promise<void> {
     const { animation, config } = task;
-    
+
     // Add safety check for animation object
     if (!animation) {
       console.warn('Animation object is undefined in executeTween');
       return Promise.resolve();
     }
-    
+
     const { target, property, from, to } = animation;
     const {
       duration = 1000,
@@ -376,16 +411,18 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
       easing = 'easeInOut',
       onStart,
       onUpdate,
-      onComplete
+      onComplete,
     } = config;
 
     return new Promise((resolve) => {
       setTimeout(() => {
         if (onStart) onStart();
 
-        const easingFunction = typeof easing === 'string' 
-          ? EasingFunctions[easing as keyof typeof EasingFunctions] || EasingFunctions.linear
-          : easing;
+        const easingFunction =
+          typeof easing === 'string'
+            ? EasingFunctions[easing as keyof typeof EasingFunctions] ||
+              EasingFunctions.linear
+            : easing;
 
         const animation = animate({
           from: this.extractValue(from),
@@ -393,17 +430,24 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
           duration,
           ease: easingFunction,
           onUpdate: (value) => {
-            this.setTargetValue(target, property, this.interpolateValue(from, to, value));
+            this.setTargetValue(
+              target,
+              property,
+              this.interpolateValue(from, to, value)
+            );
             if (onUpdate) onUpdate(value, value);
           },
           onComplete: () => {
             if (onComplete) onComplete();
             resolve();
-          }
+          },
         });
 
         const controller = new AnimationController(() => animation.stop());
-        this.activeAnimations.set(`tween_${this.animationIdCounter++}`, controller);
+        this.activeAnimations.set(
+          `tween_${this.animationIdCounter++}`,
+          controller
+        );
       }, delay);
     });
   }
@@ -411,7 +455,9 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
   /**
    * Execute keyframe animation
    */
-  private async executeKeyframe(task: Extract<AnimationTask, { type: 'keyframe' }>): Promise<void> {
+  private async executeKeyframe(
+    task: Extract<AnimationTask, { type: 'keyframe' }>
+  ): Promise<void> {
     const { animation, config } = task;
     const { keyframes, target, property } = animation;
     const {
@@ -419,7 +465,7 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
       delay = 0,
       onStart,
       onUpdate,
-      onComplete
+      onComplete,
     } = config;
 
     return new Promise((resolve) => {
@@ -453,26 +499,28 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
   /**
    * Execute spring animation (simplified implementation)
    */
-  private async executeSpring(task: Extract<AnimationTask, { type: 'spring' }>): Promise<void> {
+  private async executeSpring(
+    task: Extract<AnimationTask, { type: 'spring' }>
+  ): Promise<void> {
     // Add safety check for required properties
     if (!task.target || !task.property || task.to === undefined) {
       console.warn('Invalid spring animation task:', task);
       return Promise.resolve();
     }
-    
+
     const { target, property, to, config } = task;
     const { duration = 1000, delay = 0, onComplete } = config;
-     void duration; // Intentionally unused, keeping for potential future use
+    void duration; // Intentionally unused, keeping for potential future use
 
     return new Promise((resolve) => {
       setTimeout(() => {
         // Simplified spring animation using easing
         const from = this.cloneValue(target[property]);
-        
+
         this.executeTween({
           type: 'tween',
           animation: { target, property, from, to },
-          config: { ...config, easing: 'elastic' }
+          config: { ...config, easing: 'elastic' },
         }).then(() => {
           if (onComplete) onComplete();
           resolve();
@@ -484,26 +532,28 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
   /**
    * Execute decay animation (simplified implementation)
    */
-  private async executeDecay(task: Extract<AnimationTask, { type: 'decay' }>): Promise<void> {
+  private async executeDecay(
+    task: Extract<AnimationTask, { type: 'decay' }>
+  ): Promise<void> {
     // Add safety check for required properties
     if (!task.target || !task.property || task.from === undefined) {
       console.warn('Invalid decay animation task:', task);
       return Promise.resolve();
     }
-    
+
     const { target, property, from, config } = task;
     const { duration = 1000, delay = 0, onComplete } = config;
-     void duration; // Intentionally unused, keeping for potential future use
+    void duration; // Intentionally unused, keeping for potential future use
 
     return new Promise((resolve) => {
       setTimeout(() => {
         // Simplified decay animation - gradually reduce to zero
         const to = this.multiplyValue(from, 0.1); // Reduce to 10% of original
-        
+
         this.executeTween({
           type: 'tween',
           animation: { target, property, from, to },
-          config: { ...config, easing: 'easeOut' }
+          config: { ...config, easing: 'easeOut' },
         }).then(() => {
           if (onComplete) onComplete();
           resolve();
@@ -515,19 +565,25 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
   /**
    * Execute parallel animations
    */
-  private async executeParallel(task: Extract<AnimationTask, { type: 'parallel' }>): Promise<void> {
+  private async executeParallel(
+    task: Extract<AnimationTask, { type: 'parallel' }>
+  ): Promise<void> {
     const { animations, config } = task.animation;
-     void config; // Intentionally unused, keeping for potential future use
-    const promises = animations.map(animation => this.executeAnimation(animation));
+    void config; // Intentionally unused, keeping for potential future use
+    const promises = animations.map((animation) =>
+      this.executeAnimation(animation)
+    );
     await Promise.all(promises);
   }
 
   /**
    * Execute sequence animations
    */
-  private async executeSequence(task: Extract<AnimationTask, { type: 'sequence' }>): Promise<void> {
+  private async executeSequence(
+    task: Extract<AnimationTask, { type: 'sequence' }>
+  ): Promise<void> {
     const { animations, config } = task.animation;
-     void config; // Intentionally unused, keeping for potential future use
+    void config; // Intentionally unused, keeping for potential future use
     for (const animation of animations) {
       await this.executeAnimation(animation);
     }
@@ -536,20 +592,22 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
   /**
    * Execute callback animation
    */
-  private async executeCallback(task: Extract<AnimationTask, { type: 'callback' }>): Promise<void> {
+  private async executeCallback(
+    task: Extract<AnimationTask, { type: 'callback' }>
+  ): Promise<void> {
     const { callback, config } = task;
     const { delay = 0, onStart, onComplete } = config;
 
     return new Promise((resolve) => {
       setTimeout(async () => {
         if (onStart) onStart();
-        
+
         try {
           await callback();
         } catch (error) {
           console.error('Animation callback error:', error);
         }
-        
+
         if (onComplete) onComplete();
         resolve();
       }, delay);
@@ -562,11 +620,11 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
   private evaluateKeyframes(keyframes: Keyframe[], progress: number): any {
     if (keyframes.length === 0) return null;
     if (keyframes.length === 1) return keyframes[0].value;
-    
+
     // Find the keyframe pair that surrounds the current progress
     let startKeyframe = keyframes[0];
     let endKeyframe = keyframes[keyframes.length - 1];
-    
+
     for (let i = 0; i < keyframes.length - 1; i++) {
       if (progress >= keyframes[i].time && progress <= keyframes[i + 1].time) {
         startKeyframe = keyframes[i];
@@ -574,19 +632,26 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
         break;
       }
     }
-    
+
     // Calculate local progress between keyframes
     const timeDelta = endKeyframe.time - startKeyframe.time;
-    const localProgress = timeDelta > 0 ? (progress - startKeyframe.time) / timeDelta : 0;
-    
+    const localProgress =
+      timeDelta > 0 ? (progress - startKeyframe.time) / timeDelta : 0;
+
     // Get the easing function for interpolation
-    const easingFunction = typeof endKeyframe.easing === 'string'
-      ? EasingFunctions[endKeyframe.easing as keyof typeof EasingFunctions] || EasingFunctions.linear
-      : endKeyframe.easing || EasingFunctions.linear;
-      
+    const easingFunction =
+      typeof endKeyframe.easing === 'string'
+        ? EasingFunctions[endKeyframe.easing as keyof typeof EasingFunctions] ||
+          EasingFunctions.linear
+        : endKeyframe.easing || EasingFunctions.linear;
+
     const easedProgress = easingFunction(localProgress);
-    
-    return this.interpolateValue(startKeyframe.value, endKeyframe.value, easedProgress);
+
+    return this.interpolateValue(
+      startKeyframe.value,
+      endKeyframe.value,
+      easedProgress
+    );
   }
 
   /**
@@ -609,7 +674,9 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
     if (value && typeof value === 'object' && 'x' in value) {
       if ('z' in value) {
         // 3D vector
-        return Math.sqrt(value.x * value.x + value.y * value.y + value.z * value.z);
+        return Math.sqrt(
+          value.x * value.x + value.y * value.y + value.z * value.z
+        );
       } else {
         // 2D vector
         return Math.sqrt(value.x * value.x + value.y * value.y);
@@ -658,7 +725,14 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
       return from.map((val, index) => val + (to[index] - val) * progress);
     }
     // For objects with x, y, z properties (like Vector3-like objects)
-    if (from && to && typeof from === 'object' && typeof to === 'object' && 'x' in from && 'x' in to) {
+    if (
+      from &&
+      to &&
+      typeof from === 'object' &&
+      typeof to === 'object' &&
+      'x' in from &&
+      'x' in to
+    ) {
       if ('z' in from && 'z' in to) {
         // 3D vector-like objects
         return new THREE.Vector3(
@@ -688,13 +762,17 @@ export class UnifiedAnimationSystem extends BaseUtilitySystem {
       return value * factor;
     }
     if (Array.isArray(value)) {
-      return value.map(val => val * factor);
+      return value.map((val) => val * factor);
     }
     // For objects with x, y, z properties (like Vector3-like objects)
     if (value && typeof value === 'object' && 'x' in value) {
       if ('z' in value) {
         // 3D vector-like object
-        return new THREE.Vector3(value.x * factor, value.y * factor, value.z * factor);
+        return new THREE.Vector3(
+          value.x * factor,
+          value.y * factor,
+          value.z * factor
+        );
       } else {
         // 2D vector-like object
         return new THREE.Vector2(value.x * factor, value.y * factor);
@@ -763,7 +841,7 @@ class AnimationController {
   private isRunning = false;
   private isPaused = false;
   private stopFunction?: () => void;
-  
+
   /**
    * Create an animation controller
    * @param stopFunction Function to call when stopping the animation
@@ -771,7 +849,7 @@ class AnimationController {
   constructor(stopFunction?: () => void) {
     this.stopFunction = stopFunction;
   }
-  
+
   /**
    * Start the animation
    */
@@ -780,7 +858,7 @@ class AnimationController {
     this.isRunning = true;
     this.isPaused = false;
   }
-  
+
   /**
    * Stop the animation and clean up resources
    */
@@ -790,21 +868,21 @@ class AnimationController {
       this.stopFunction();
     }
   }
-  
+
   /**
    * Pause the animation
    */
   pause(): void {
     this.isPaused = true;
   }
-  
+
   /**
    * Resume a paused animation
    */
   resume(): void {
     this.isPaused = false;
   }
-  
+
   /**
    * Check if the animation is currently active (running and not paused)
    */

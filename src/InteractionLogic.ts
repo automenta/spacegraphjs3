@@ -13,16 +13,18 @@ export class InteractionLogic {
   ) {
     if (!state.camera) return;
     const panSpeed = 0.001 * state.camera.distance;
-    
+
     const poolManager = ThreeObjectPoolManager.getInstance();
 
-    const right = poolManager.getVector3().setFromMatrixColumn(
-      threeCamera.matrix,
-      0
-    );
-    const up = poolManager.getVector3().setFromMatrixColumn(threeCamera.matrix, 1);
+    const right = poolManager
+      .getVector3()
+      .setFromMatrixColumn(threeCamera.matrix, 0);
+    const up = poolManager
+      .getVector3()
+      .setFromMatrixColumn(threeCamera.matrix, 1);
 
-    const panOffset = poolManager.getVector3()
+    const panOffset = poolManager
+      .getVector3()
       .copy(right)
       .multiplyScalar(-mx * panSpeed)
       .add(up.clone().multiplyScalar(my * panSpeed));
@@ -116,13 +118,12 @@ export class InteractionLogic {
     threeCamera: THREE.PerspectiveCamera
   ) {
     if (!state.camera) return;
-    
+
     const poolManager = ThreeObjectPoolManager.getInstance();
 
-    const right = poolManager.getVector3().setFromMatrixColumn(
-      threeCamera.matrix,
-      0
-    );
+    const right = poolManager
+      .getVector3()
+      .setFromMatrixColumn(threeCamera.matrix, 0);
     const forward = poolManager.getVector3();
     threeCamera.getWorldDirection(forward);
     const panOffset = poolManager.getVector3();
@@ -168,7 +169,7 @@ export class InteractionLogic {
     updateState: (spec: SpecUpdate) => void
   ) {
     const poolManager = ThreeObjectPoolManager.getInstance();
-    
+
     const pointer = poolManager.getVector3();
     pointer.set(0, 0, 0); // Convert to Vector2 by setting z=0
     const raycaster = new THREE.Raycaster();

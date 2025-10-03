@@ -27,36 +27,36 @@ const nodes: NodeSpec[] = [
     type: 'sphere',
     position: { x: -10, y: 0, z: 0 },
     color: '#ff0000',
-    label: 'Sphere Node'
+    label: 'Sphere Node',
   },
   {
     id: 'node-2',
     type: 'box',
     position: { x: 0, y: 10, z: 0 },
     color: '#00ff00',
-    label: 'Box Node'
+    label: 'Box Node',
   },
   {
     id: 'node-3',
     type: 'sphere',
     position: { x: 10, y: 0, z: 0 },
     color: '#0000ff',
-    label: 'Sphere Node'
+    label: 'Sphere Node',
   },
   {
     id: 'node-4',
     type: 'text',
     position: { x: 0, y: -10, z: 0 },
     color: '#ffff00',
-    label: 'Text Node'
+    label: 'Text Node',
   },
   {
     id: 'node-5',
     type: 'custom',
     position: { x: 0, y: 0, z: 10 },
     color: '#ff00ff',
-    label: 'Custom Node'
-  }
+    label: 'Custom Node',
+  },
 ];
 
 // Create edges with different types and styles
@@ -68,7 +68,7 @@ const edges: EdgeSpec[] = [
     color: '#ff0000',
     width: 3,
     type: 'straight',
-    label: 'Straight Edge'
+    label: 'Straight Edge',
   },
   {
     id: 'edge-2',
@@ -78,7 +78,7 @@ const edges: EdgeSpec[] = [
     width: 2,
     type: 'curved',
     curvature: 0.5,
-    label: 'Curved Edge'
+    label: 'Curved Edge',
   },
   {
     id: 'edge-3',
@@ -89,7 +89,7 @@ const edges: EdgeSpec[] = [
     type: 'dashed',
     dashSize: 0.5,
     gapSize: 0.3,
-    label: 'Dashed Edge'
+    label: 'Dashed Edge',
   },
   {
     id: 'edge-4',
@@ -98,7 +98,7 @@ const edges: EdgeSpec[] = [
     color: '#ffff00',
     width: 1,
     type: 'straight',
-    label: 'Thin Edge'
+    label: 'Thin Edge',
   },
   {
     id: 'edge-5',
@@ -108,7 +108,7 @@ const edges: EdgeSpec[] = [
     width: 5,
     type: 'curved',
     curvature: -0.3,
-    label: 'Reverse Curved'
+    label: 'Reverse Curved',
   },
   {
     id: 'edge-6',
@@ -119,8 +119,8 @@ const edges: EdgeSpec[] = [
     type: 'dashed',
     dashSize: 0.3,
     gapSize: 0.7,
-    label: 'Sparse Dashed'
-  }
+    label: 'Sparse Dashed',
+  },
 ];
 
 const spec: Spec = {
@@ -133,20 +133,20 @@ const spec: Spec = {
       color: '#ffffff',
       glow: {
         color: '#ffffff',
-        strength: 0.8
-      }
+        strength: 0.8,
+      },
     },
     'node:selected': {
       color: '#ffffff',
       glow: {
         color: '#ffffff',
-        strength: 1.0
-      }
+        strength: 1.0,
+      },
     },
     'edge:hover': {
       color: '#ffffff',
       width: 5,
-      opacity: 1.0
+      opacity: 1.0,
     },
     'edge:selected': {
       color: '#ffffff',
@@ -154,24 +154,24 @@ const spec: Spec = {
       opacity: 1.0,
       glow: {
         color: '#ffffff',
-        strength: 0.5
-      }
+        strength: 0.5,
+      },
     },
     'edge:source-selected': {
       color: '#ffaa00',
       width: 4,
-      opacity: 0.9
+      opacity: 0.9,
     },
     'edge:target-selected': {
       color: '#00aaff',
       width: 4,
-      opacity: 0.9
+      opacity: 0.9,
     },
     'edge:both-selected': {
       color: '#ff00ff',
       width: 5,
-      opacity: 1.0
-    }
+      opacity: 1.0,
+    },
   },
   layout: {
     type: 'force-directed',
@@ -211,13 +211,13 @@ const plugins = [
 export default function init() {
   const container = document.getElementById('graph')!;
   const graph = new SpaceGraph('#graph', spec, plugins);
-  
+
   // Use container to avoid linting error
   console.log('Graph initialized in container:', container.id);
 
   // Add UI controls
   const controls = document.getElementById('controls')!;
-  
+
   // Add event listeners to demonstrate edge interaction
   graph.on('edge:click', ({ target, event, sourceNode, targetNode }) => {
     console.log('Edge clicked:', target.id);
@@ -263,16 +263,16 @@ export default function init() {
     { id: 'all', label: 'All Edges', filter: null },
     { id: 'straight', label: 'Straight', filter: 'straight' },
     { id: 'curved', label: 'Curved', filter: 'curved' },
-    { id: 'dashed', label: 'Dashed', filter: 'dashed' }
+    { id: 'dashed', label: 'Dashed', filter: 'dashed' },
   ];
 
-  edgeTypes.forEach(type => {
+  edgeTypes.forEach((type) => {
     const button = document.createElement('button');
     button.id = type.id;
     button.textContent = type.label;
     button.addEventListener('click', () => {
       // Update active button
-      document.querySelectorAll('#controls button').forEach(btn => {
+      document.querySelectorAll('#controls button').forEach((btn) => {
         btn.classList.remove('active');
       });
       button.classList.add('active');
@@ -282,18 +282,18 @@ export default function init() {
         graph.update({
           data: {
             edges: {
-              update: edges.map(edge => ({
+              update: edges.map((edge) => ({
                 id: edge.id,
                 type: edge.type,
                 color: edge.color,
                 width: edge.width,
-              }))
-            }
-          }
+              })),
+            },
+          },
         });
       } else {
         // Show only edges of specific type
-        const updates = edges.map(edge => ({
+        const updates = edges.map((edge) => ({
           id: edge.id,
           type: edge.type === type.filter ? edge.type : 'straight',
           color: edge.type === type.filter ? edge.color : '#888888',
@@ -303,9 +303,9 @@ export default function init() {
         graph.update({
           data: {
             edges: {
-              update: updates
-            }
-          }
+              update: updates,
+            },
+          },
         });
       }
     });
@@ -322,7 +322,7 @@ export default function init() {
         phi: Math.PI / 4,
         theta: Math.PI / 4,
         distance: 50,
-      }
+      },
     });
   });
   controls.appendChild(resetButton);

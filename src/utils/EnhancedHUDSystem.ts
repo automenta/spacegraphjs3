@@ -49,20 +49,20 @@ export class EnhancedHUDSystem {
     drawCalls: 0,
     triangles: 0,
     nodes: 0,
-    edges: 0
+    edges: 0,
   };
-  
+
   private fpsHistory: number[] = [];
   private lastFrameTime = performance.now();
   private frameCount = 0;
-  
+
   constructor(container: HTMLElement) {
     this.container = container;
     this.setupContainer();
     this.createDefaultElements();
     this.startPerformanceMonitoring();
   }
-  
+
   /**
    * Setup HUD container
    */
@@ -75,7 +75,7 @@ export class EnhancedHUDSystem {
     this.container.style.pointerEvents = 'none';
     this.container.style.zIndex = '1000';
   }
-  
+
   /**
    * Create default HUD elements
    */
@@ -90,11 +90,11 @@ export class EnhancedHUDSystem {
         backgroundColor: 'rgba(0, 0, 0, 0.8)',
         borderColor: '#00ff00',
         borderRadius: 5,
-        opacity: 0.9
+        opacity: 0.9,
       },
-      visible: true
+      visible: true,
     });
-    
+
     // FPS counter
     this.createElement({
       id: 'fps-counter',
@@ -104,11 +104,11 @@ export class EnhancedHUDSystem {
       content: 'FPS: 0',
       style: {
         textColor: '#00ff00',
-        fontSize: 14
+        fontSize: 14,
       },
-      visible: true
+      visible: true,
     });
-    
+
     // Memory usage
     this.createElement({
       id: 'memory-usage',
@@ -118,11 +118,11 @@ export class EnhancedHUDSystem {
       content: 'Memory: 0 MB',
       style: {
         textColor: '#00ff00',
-        fontSize: 14
+        fontSize: 14,
       },
-      visible: true
+      visible: true,
     });
-    
+
     // Node count
     this.createElement({
       id: 'node-count',
@@ -132,11 +132,11 @@ export class EnhancedHUDSystem {
       content: 'Nodes: 0',
       style: {
         textColor: '#00ff00',
-        fontSize: 14
+        fontSize: 14,
       },
-      visible: true
+      visible: true,
     });
-    
+
     // Edge count
     this.createElement({
       id: 'edge-count',
@@ -146,11 +146,11 @@ export class EnhancedHUDSystem {
       content: 'Edges: 0',
       style: {
         textColor: '#00ff00',
-        fontSize: 14
+        fontSize: 14,
       },
-      visible: true
+      visible: true,
     });
-    
+
     // Draw calls
     this.createElement({
       id: 'draw-calls',
@@ -160,11 +160,11 @@ export class EnhancedHUDSystem {
       content: 'Draw Calls: 0',
       style: {
         textColor: '#00ff00',
-        fontSize: 14
+        fontSize: 14,
       },
-      visible: true
+      visible: true,
     });
-    
+
     // Control panel
     this.createElement({
       id: 'control-panel',
@@ -175,21 +175,21 @@ export class EnhancedHUDSystem {
         backgroundColor: 'rgba(0, 0, 0, 0.8)',
         borderColor: '#0088ff',
         borderRadius: 5,
-        opacity: 0.9
+        opacity: 0.9,
       },
-      visible: true
+      visible: true,
     });
-    
+
     // Control buttons
     const buttons = [
       { id: 'reset-camera', label: 'Reset Camera', y: 190 },
       { id: 'toggle-physics', label: 'Toggle Physics', y: 220 },
       { id: 'toggle-wireframe', label: 'Wireframe', y: 250 },
       { id: 'toggle-stats', label: 'Toggle Stats', y: 280 },
-      { id: 'export-scene', label: 'Export Scene', y: 310 }
+      { id: 'export-scene', label: 'Export Scene', y: 310 },
     ];
-    
-    buttons.forEach(button => {
+
+    buttons.forEach((button) => {
       this.createElement({
         id: button.id,
         type: 'button',
@@ -201,13 +201,13 @@ export class EnhancedHUDSystem {
           textColor: '#ffffff',
           borderColor: '#0088ff',
           borderRadius: 3,
-          fontSize: 12
+          fontSize: 12,
         },
         visible: true,
-        interactive: true
+        interactive: true,
       });
     });
-    
+
     // Status bar
     this.createElement({
       id: 'status-bar',
@@ -218,11 +218,11 @@ export class EnhancedHUDSystem {
         backgroundColor: 'rgba(0, 0, 0, 0.9)',
         borderColor: '#666666',
         borderRadius: 5,
-        opacity: 0.95
+        opacity: 0.95,
       },
-      visible: true
+      visible: true,
     });
-    
+
     // Status text
     this.createElement({
       id: 'status-text',
@@ -232,11 +232,11 @@ export class EnhancedHUDSystem {
       content: 'Ready',
       style: {
         textColor: '#ffffff',
-        fontSize: 12
+        fontSize: 12,
       },
-      visible: true
+      visible: true,
     });
-    
+
     // FPS chart
     this.createElement({
       id: 'fps-chart',
@@ -247,12 +247,12 @@ export class EnhancedHUDSystem {
         backgroundColor: 'rgba(0, 0, 0, 0.8)',
         borderColor: '#00ff00',
         borderRadius: 5,
-        opacity: 0.9
+        opacity: 0.9,
       },
-      visible: true
+      visible: true,
     });
   }
-  
+
   /**
    * Create HUD element
    */
@@ -266,7 +266,7 @@ export class EnhancedHUDSystem {
     element.style.height = `${config.size.height}px`;
     element.style.pointerEvents = config.interactive ? 'auto' : 'none';
     element.style.display = config.visible !== false ? 'block' : 'none';
-    
+
     // Apply styles
     if (config.style) {
       if (config.style.backgroundColor) {
@@ -288,7 +288,7 @@ export class EnhancedHUDSystem {
         element.style.opacity = config.style.opacity.toString();
       }
     }
-    
+
     // Set content based on type
     switch (config.type) {
       case 'button':
@@ -310,13 +310,13 @@ export class EnhancedHUDSystem {
         element.innerHTML = `<input type="range" style="width: 100%;" value="50">`;
         break;
     }
-    
+
     this.container.appendChild(element);
     this.elements.set(config.id, element);
-    
+
     return element;
   }
-  
+
   /**
    * Update element content
    */
@@ -333,23 +333,27 @@ export class EnhancedHUDSystem {
       }
     }
   }
-  
+
   /**
    * Show/hide element with animation
    */
-  public toggleElement(id: string, show: boolean, duration: number = 300): void {
+  public toggleElement(
+    id: string,
+    show: boolean,
+    duration: number = 300
+  ): void {
     const element = this.elements.get(id);
     if (!element) return;
-    
+
     // Stop existing animation
     const existingAnimation = this.animations.get(id);
     if (existingAnimation) {
       existingAnimation();
     }
-    
+
     if (show) {
       element.style.display = 'block';
-      
+
       const stopAnimation = animate({
         from: { opacity: 0, scale: 0.8 },
         to: { opacity: 1, scale: 1 },
@@ -358,9 +362,9 @@ export class EnhancedHUDSystem {
         onUpdate: ({ opacity, scale }) => {
           element.style.opacity = opacity.toString();
           element.style.transform = `scale(${scale})`;
-        }
+        },
       });
-      
+
       this.animations.set(id, () => stopAnimation.stop());
     } else {
       const stopAnimation = animate({
@@ -374,27 +378,36 @@ export class EnhancedHUDSystem {
         },
         onComplete: () => {
           element.style.display = 'none';
-        }
+        },
       });
-      
+
       this.animations.set(id, () => stopAnimation.stop());
     }
   }
-  
+
   /**
    * Update performance metrics
    */
   public updatePerformanceMetrics(metrics: Partial<PerformanceMetrics>): void {
     Object.assign(this.performanceMetrics, metrics);
-    
+
     // Update display
-    this.updateElement('fps-counter', `FPS: ${Math.round(this.performanceMetrics.fps)}`);
-    this.updateElement('memory-usage', `Memory: ${Math.round(this.performanceMetrics.memoryUsage)} MB`);
+    this.updateElement(
+      'fps-counter',
+      `FPS: ${Math.round(this.performanceMetrics.fps)}`
+    );
+    this.updateElement(
+      'memory-usage',
+      `Memory: ${Math.round(this.performanceMetrics.memoryUsage)} MB`
+    );
     this.updateElement('node-count', `Nodes: ${this.performanceMetrics.nodes}`);
     this.updateElement('edge-count', `Edges: ${this.performanceMetrics.edges}`);
-    this.updateElement('draw-calls', `Draw Calls: ${this.performanceMetrics.drawCalls}`);
+    this.updateElement(
+      'draw-calls',
+      `Draw Calls: ${this.performanceMetrics.drawCalls}`
+    );
   }
-  
+
   /**
    * Start performance monitoring
    */
@@ -402,60 +415,63 @@ export class EnhancedHUDSystem {
     const updateLoop = () => {
       const currentTime = performance.now();
       const deltaTime = currentTime - this.lastFrameTime;
-      
+
       this.frameCount++;
-      
-      if (this.frameCount % 60 === 0) { // Update every 60 frames
+
+      if (this.frameCount % 60 === 0) {
+        // Update every 60 frames
         const fps = 1000 / deltaTime;
         this.fpsHistory.push(fps);
-        
+
         if (this.fpsHistory.length > 100) {
           this.fpsHistory.shift();
         }
-        
+
         // Update FPS chart
         this.updateFPSChart();
-        
+
         // Update memory usage if available
         if ((performance as any).memory) {
-          this.performanceMetrics.memoryUsage = (performance as any).memory.usedJSHeapSize / 1048576;
+          this.performanceMetrics.memoryUsage =
+            (performance as any).memory.usedJSHeapSize / 1048576;
         }
-        
+
         this.updatePerformanceMetrics({
-          fps: this.fpsHistory.reduce((a, b) => a + b, 0) / this.fpsHistory.length
+          fps:
+            this.fpsHistory.reduce((a, b) => a + b, 0) / this.fpsHistory.length,
         });
       }
-      
+
       this.lastFrameTime = currentTime;
       requestAnimationFrame(updateLoop);
     };
-    
+
     updateLoop();
   }
-  
+
   /**
    * Update FPS chart
    */
   private updateFPSChart(): void {
     const element = this.elements.get('fps-chart');
     if (!element) return;
-    
+
     const canvas = element.querySelector('canvas') as HTMLCanvasElement;
     if (!canvas) return;
-    
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    
+
     const width = canvas.width;
     const height = canvas.height;
-    
+
     // Clear canvas
     ctx.clearRect(0, 0, width, height);
-    
+
     // Draw grid
     ctx.strokeStyle = 'rgba(0, 255, 0, 0.2)';
     ctx.lineWidth = 1;
-    
+
     for (let i = 0; i <= 4; i++) {
       const y = (height / 4) * i;
       ctx.beginPath();
@@ -463,36 +479,36 @@ export class EnhancedHUDSystem {
       ctx.lineTo(width, y);
       ctx.stroke();
     }
-    
+
     // Draw FPS line
     if (this.fpsHistory.length > 1) {
       ctx.strokeStyle = '#00ff00';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      
+
       const step = width / (this.fpsHistory.length - 1);
       const maxFPS = Math.max(...this.fpsHistory, 60);
-      
+
       this.fpsHistory.forEach((fps, index) => {
         const x = index * step;
         const y = height - (fps / maxFPS) * height;
-        
+
         if (index === 0) {
           ctx.moveTo(x, y);
         } else {
           ctx.lineTo(x, y);
         }
       });
-      
+
       ctx.stroke();
     }
-    
+
     // Draw current FPS text
     ctx.fillStyle = '#00ff00';
     ctx.font = '12px monospace';
     ctx.fillText(`${Math.round(this.performanceMetrics.fps)} FPS`, 5, 15);
   }
-  
+
   /**
    * Update chart data
    */
@@ -504,33 +520,37 @@ export class EnhancedHUDSystem {
       console.log(`Updating chart ${id} with data: ${data}`);
     }
   }
-  
+
   /**
    * Set status text
    */
   public setStatus(text: string, duration: number = 3000): void {
     this.updateElement('status-text', text);
-    
+
     if (duration > 0) {
       setTimeout(() => {
         this.updateElement('status-text', 'Ready');
       }, duration);
     }
   }
-  
+
   /**
    * Show notification
    */
-  public showNotification(message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info', duration: number = 3000): void {
+  public showNotification(
+    message: string,
+    type: 'info' | 'success' | 'warning' | 'error' = 'info',
+    duration: number = 3000
+  ): void {
     const notificationId = `notification-${Date.now()}`;
-    
+
     const colors = {
       info: '#0088ff',
       success: '#00ff00',
       warning: '#ffaa00',
-      error: '#ff0000'
+      error: '#ff0000',
     };
-    
+
     this.createElement({
       id: notificationId,
       type: 'panel',
@@ -540,11 +560,11 @@ export class EnhancedHUDSystem {
         backgroundColor: 'rgba(0, 0, 0, 0.9)',
         borderColor: colors[type],
         borderRadius: 5,
-        opacity: 0
+        opacity: 0,
       },
-      visible: true
+      visible: true,
     });
-    
+
     this.createElement({
       id: `${notificationId}-text`,
       type: 'text',
@@ -553,29 +573,29 @@ export class EnhancedHUDSystem {
       content: message,
       style: {
         textColor: colors[type],
-        fontSize: 14
+        fontSize: 14,
       },
-      visible: true
+      visible: true,
     });
-    
+
     // Animate in
     this.toggleElement(notificationId, true, 200);
     this.toggleElement(`${notificationId}-text`, true, 200);
-    
+
     // Auto remove
     setTimeout(() => {
       this.toggleElement(notificationId, false, 200);
       this.toggleElement(`${notificationId}-text`, false, 200);
-      
+
       setTimeout(() => {
         const element = this.elements.get(notificationId);
         const textElement = this.elements.get(`${notificationId}-text`);
-        
+
         if (element) {
           element.remove();
           this.elements.delete(notificationId);
         }
-        
+
         if (textElement) {
           textElement.remove();
           this.elements.delete(`${notificationId}-text`);
@@ -583,14 +603,14 @@ export class EnhancedHUDSystem {
       }, 200);
     }, duration);
   }
-  
+
   /**
    * Get element by ID
    */
   public getElement(id: string): HTMLElement | undefined {
     return this.elements.get(id);
   }
-  
+
   /**
    * Remove element
    */
@@ -601,7 +621,7 @@ export class EnhancedHUDSystem {
       this.elements.delete(id);
     }
   }
-  
+
   /**
    * Clear all elements
    */
@@ -612,15 +632,15 @@ export class EnhancedHUDSystem {
     this.elements.clear();
     this.animations.clear();
   }
-  
+
   /**
    * Dispose of HUD system
    */
   public dispose(): void {
     this.clear();
-    
+
     // Stop all animations
-    this.animations.forEach(stopAnimation => stopAnimation());
+    this.animations.forEach((stopAnimation) => stopAnimation());
     this.animations.clear();
   }
 }

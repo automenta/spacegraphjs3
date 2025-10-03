@@ -2,11 +2,13 @@
 
 ## Overview
 
-This specification details the enhancement of the existing HUDPlugin to include an interactive REPL (Read-Eval-Print Loop) console for debugging and runtime manipulation of the SpaceGraph instance.
+This specification details the enhancement of the existing HUDPlugin to include an interactive REPL (Read-Eval-Print
+Loop) console for debugging and runtime manipulation of the SpaceGraph instance.
 
 ## Current State
 
 The existing HUDPlugin (`src/plugins/HUDPlugin.ts`) provides basic functionality:
+
 - Simple HUD container creation
 - Basic content display based on `graph.state.hud.visible` and `graph.state.hud.content`
 - Minimal styling and positioning
@@ -14,6 +16,7 @@ The existing HUDPlugin (`src/plugins/HUDPlugin.ts`) provides basic functionality
 ## Target Enhancement
 
 A fully-featured interactive console that provides:
+
 1. **Command Input**: Text input field for entering commands
 2. **Output Display**: Scrollable output area for command results
 3. **Graph State Inspection**: Ability to examine current graph state

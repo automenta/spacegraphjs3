@@ -2,11 +2,14 @@
 
 ## Overview
 
-This document specifies the implementation of advanced camera features for SpaceGraphJS3, including auto-zoom capabilities, camera presets and bookmarks, smooth rotation controls, and advanced framing options. These enhancements build upon the existing solid camera foundation to provide professional-grade camera control and animation capabilities.
+This document specifies the implementation of advanced camera features for SpaceGraphJS3, including auto-zoom
+capabilities, camera presets and bookmarks, smooth rotation controls, and advanced framing options. These enhancements
+build upon the existing solid camera foundation to provide professional-grade camera control and animation capabilities.
 
 ## Current Camera System Analysis
 
 ### ✅ Existing Camera Features
+
 - **Basic Camera Controls**: Pan, zoom, orbit via mouse/touch/keyboard
 - **flyTo() Animation**: Smooth camera transitions to target states
 - **frame() Method**: Basic framing of elements
@@ -14,6 +17,7 @@ This document specifies the implementation of advanced camera features for Space
 - **Keyboard Controls**: WASD movement, arrow key orbit, +/- zoom
 
 ### 🔧 Missing Advanced Features
+
 - Auto-zoom to selected elements with intelligent framing
 - Camera presets and bookmarks system
 - Advanced rotation controls and constraints
@@ -26,9 +30,11 @@ This document specifies the implementation of advanced camera features for Space
 ### Core Enhancement Areas
 
 #### 1. Auto-Zoom System
+
 **File**: [`src/plugins/CameraPlugin.ts`](src/plugins/CameraPlugin.ts) (enhancement)
 
 **Features**:
+
 - Intelligent framing of selected elements
 - Configurable padding and margins
 - Aspect ratio considerations
@@ -36,9 +42,11 @@ This document specifies the implementation of advanced camera features for Space
 - Smooth animated transitions
 
 #### 2. Camera Presets & Bookmarks
+
 **New File**: `src/utils/CameraPresets.ts`
 
 **Features**:
+
 - Named camera position storage
 - JSON serialization/deserialization
 - Category organization
@@ -46,9 +54,11 @@ This document specifies the implementation of advanced camera features for Space
 - Quick access methods
 
 #### 3. Advanced Rotation Controls
+
 **File**: [`src/plugins/CameraPlugin.ts`](src/plugins/CameraPlugin.ts) (enhancement)
 
 **Features**:
+
 - Rotation constraints and limits
 - Smooth rotation animations
 - Quaternion-based rotations
@@ -56,9 +66,11 @@ This document specifies the implementation of advanced camera features for Space
 - Custom rotation pivots
 
 #### 4. Enhanced Framing Options
+
 **File**: [`src/plugins/CameraPlugin.ts`](src/plugins/CameraPlugin.ts) (enhancement)
 
 **Features**:
+
 - Multiple framing strategies
 - Configurable padding and margins
 - Aspect ratio handling
@@ -70,6 +82,7 @@ This document specifies the implementation of advanced camera features for Space
 ### Phase 1: Enhanced Auto-Zoom System
 
 #### 1.1 Intelligent Element Framing
+
 ```typescript
 export interface FramingOptions {
   padding?: number | { top: number; right: number; bottom: number; left: number }; // Padding in world units
@@ -280,6 +293,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
 ```
 
 #### 1.2 Auto-Zoom to Selected Elements
+
 ```typescript
 export class CameraPlugin implements ISpaceGraphPlugin {
   // ... existing implementation
@@ -348,6 +362,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
 ### Phase 2: Camera Presets and Bookmarks
 
 #### 2.1 Camera Presets Manager
+
 ```typescript
 // src/utils/CameraPresets.ts
 export interface CameraPreset {
@@ -576,6 +591,7 @@ export class CameraPresetsManager {
 ```
 
 #### 2.2 Camera Presets UI Integration
+
 ```typescript
 // Enhanced CameraPlugin with preset management
 export class CameraPlugin implements ISpaceGraphPlugin {
@@ -668,6 +684,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
 ### Phase 3: Advanced Rotation Controls
 
 #### 3.1 Enhanced Rotation System
+
 ```typescript
 export interface RotationConstraints {
   minPhi?: number; // Minimum phi angle in degrees
@@ -869,6 +886,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
 ### Phase 4: Enhanced Animation System
 
 #### 4.1 Advanced Animation Curves
+
 ```typescript
 export interface AnimationCurve {
   name: string;
@@ -985,6 +1003,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
 ## Usage Examples
 
 ### Basic Auto-Zoom
+
 ```typescript
 const graph = new SpaceGraph('#container', {
   data: { /* your data */ },
@@ -1005,6 +1024,7 @@ await graph.camera.frame([
 ```
 
 ### Camera Presets
+
 ```typescript
 // Save current view as preset
 const preset = await graph.camera.presetsManager.createPreset('My View', {
@@ -1023,6 +1043,7 @@ await graph.camera.applyQuickPreset('front');
 ```
 
 ### Advanced Rotation
+
 ```typescript
 // Set rotation constraints
 graph.camera.setRotationConstraints({
@@ -1049,6 +1070,7 @@ await graph.camera.orbitAround('y', 360, {
 ```
 
 ### Custom Animation Curves
+
 ```typescript
 // Use custom animation curves
 await graph.camera.flyTo({
@@ -1068,4 +1090,5 @@ await graph.camera.flyTo({
 });
 ```
 
-This specification provides a comprehensive blueprint for implementing advanced camera features that enhance the user experience while maintaining the performance and architectural standards of SpaceGraphJS3.
+This specification provides a comprehensive blueprint for implementing advanced camera features that enhance the user
+experience while maintaining the performance and architectural standards of SpaceGraphJS3.

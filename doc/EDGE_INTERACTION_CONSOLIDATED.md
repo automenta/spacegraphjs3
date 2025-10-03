@@ -2,7 +2,9 @@
 
 ## Overview
 
-The edge interaction system in SpaceGraphJS enables users to interact with edges in the graph visualization through hover, click, and selection operations. This system provides a comprehensive set of features for creating rich, interactive graph experiences.
+The edge interaction system in SpaceGraphJS enables users to interact with edges in the graph visualization through
+hover, click, and selection operations. This system provides a comprehensive set of features for creating rich,
+interactive graph experiences.
 
 ## Features
 
@@ -11,11 +13,13 @@ The edge interaction system in SpaceGraphJS enables users to interact with edges
 Users can hover over edges to visually highlight them and trigger hover events.
 
 #### Visual Feedback
+
 - Edges change appearance when hovered over
 - Configurable styling through the `edge:hover` style specification
 - Default hover effect increases edge width and opacity
 
 #### Events
+
 - `edge:hover:enter` - Fired when mouse enters an edge
 - `edge:hover:leave` - Fired when mouse leaves an edge
 
@@ -24,16 +28,19 @@ Users can hover over edges to visually highlight them and trigger hover events.
 Users can select edges through clicking, with support for multi-selection using modifier keys.
 
 #### Single Selection
+
 - Clicking an edge selects it exclusively
 - Previously selected edges are deselected
 - Visual feedback through the `edge:selected` style
 
 #### Multi-Selection
+
 - Ctrl+Click (Windows/Linux) or Cmd+Click (Mac) toggles edge selection
 - Allows selecting multiple edges simultaneously
 - Visual feedback for all selected edges
 
 #### Events
+
 - `edge:click` - Fired when an edge is clicked
 - `edge:select` - Fired when an edge is selected
 - `edge:multi-select` - Fired when multiple edges are selected
@@ -43,6 +50,7 @@ Users can select edges through clicking, with support for multi-selection using 
 Edges support customizable styling for different interaction states.
 
 #### Style Properties
+
 ```typescript
 interface EdgeStyle {
   color?: string;           // Edge color
@@ -63,6 +71,7 @@ interface EdgeStyle {
 ```
 
 #### Style States
+
 - `edge:hover` - Applied when edge is hovered
 - `edge:selected` - Applied when edge is selected
 - `edge:source-selected` - Applied when source node is selected
@@ -74,15 +83,18 @@ interface EdgeStyle {
 Support for different edge visualization types with interaction support.
 
 #### Straight Edges
+
 - Direct connection between nodes
 - Basic hover and selection support
 
 #### Curved Edges
+
 - Quadratic bezier curves for visual distinction
 - Configurable curvature parameter
 - Full interaction support
 
 #### Dashed Edges
+
 - Dashed line pattern
 - Configurable dash and gap sizes
 - Full interaction support
@@ -94,12 +106,14 @@ Support for different edge visualization types with interaction support.
 The `EdgeRenderer` class handles the visual representation and interaction state of edges.
 
 #### Key Methods
+
 - `setEdgeHover(edgeId: string, hovered: boolean)` - Sets hover state
 - `setEdgeSelected(edgeId: string, selected: boolean)` - Sets selection state
 - `getRaycastableObjects(): THREE.Object3D[]` - Returns objects for raycasting
 - `updateEdges()` - Updates all edges based on current state
 
 #### Hit Detection
+
 - Each edge has an invisible "hit area" for easier interaction
 - Hit areas are thicker than visual representations
 - Raycasting prioritizes edges over nodes
@@ -109,6 +123,7 @@ The `EdgeRenderer` class handles the visual representation and interaction state
 The `InteractionPlugin` handles user input and translates it to edge interactions.
 
 #### Key Methods
+
 - `getIntersectedElement(event: MouseEvent)` - Determines what was clicked
 - `handleEdgeClick()` - Processes edge click events
 - `onHover()` - Handles hover state changes
@@ -178,11 +193,13 @@ const spec = {
 The system supports interactive editing of curved edges:
 
 ### Curved Edge Editing
+
 - Right-click on a curved edge to enter edit mode
 - Drag the yellow handle to adjust the curve
 - Right-click again to exit edit mode
 
 ### API for Edge Editing
+
 ```javascript
 // Programmatically edit an edge path
 graph.update({
@@ -200,16 +217,19 @@ graph.update({
 ## Performance Considerations
 
 ### Raycasting Optimization
+
 - Edge hit areas are only created when needed
 - Efficient spatial partitioning for large graphs
 - Throttled hover detection to prevent performance issues
 
 ### Memory Management
+
 - Proper disposal of edge geometries and materials
 - Reuse of materials where possible
 - Cleanup of event listeners on destruction
 
 ### Rendering Optimization
+
 - Geometry caching to avoid recreation on every update
 - Efficient hit area handling
 - Batched updates for multiple edge changes
@@ -217,6 +237,7 @@ graph.update({
 ## Testing
 
 ### Unit Tests
+
 - Edge hover state management
 - Edge selection functionality
 - Multi-selection behavior
@@ -224,6 +245,7 @@ graph.update({
 - Style application
 
 ### Integration Tests
+
 - Edge interaction with node interaction
 - Complex graph scenarios
 - Performance with large numbers of edges
@@ -231,16 +253,19 @@ graph.update({
 ## Future Enhancements
 
 ### Edge Context Menu
+
 - Right-click context menu for edges
 - Customizable menu options
 - Plugin support for additional actions
 
 ### Edge Labels
+
 - Interactive edge labels
 - Editable labels
 - Rich text support
 
 ### Edge Annotations
+
 - Custom annotations along edges
 - Tooltips and popups
 - Rich media integration
@@ -248,12 +273,14 @@ graph.update({
 ## Best Practices
 
 ### For Developers
+
 1. **Consistent Event Naming**: Follow the established naming conventions
 2. **Proper Disposal**: Always clean up resources and event listeners
 3. **Performance Monitoring**: Profile edge interaction performance regularly
 4. **Accessibility**: Ensure keyboard navigation and screen reader support
 
 ### For Users
+
 1. **Appropriate Styling**: Use clear visual distinctions for different states
 2. **Responsive Feedback**: Provide immediate feedback for user actions
 3. **Contextual Help**: Offer guidance for complex interactions

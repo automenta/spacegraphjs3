@@ -37,7 +37,13 @@ export class BoxGeometryPool extends ObjectPool<THREE.BoxGeometry> {
   private height: number;
   private depth: number;
 
-  constructor(width = 1, height = 1, depth = 1, initialSize = 20, maxSize = 200) {
+  constructor(
+    width = 1,
+    height = 1,
+    depth = 1,
+    initialSize = 20,
+    maxSize = 200
+  ) {
     super(
       () => new THREE.BoxGeometry(width, height, depth),
       (geom: THREE.BoxGeometry) => {
@@ -63,7 +69,13 @@ export class SphereGeometryPool extends ObjectPool<THREE.SphereGeometry> {
   private widthSegments: number;
   private heightSegments: number;
 
-  constructor(radius = 1, widthSegments = 32, heightSegments = 32, initialSize = 50, maxSize = 500) {
+  constructor(
+    radius = 1,
+    widthSegments = 32,
+    heightSegments = 32,
+    initialSize = 50,
+    maxSize = 500
+  ) {
     super(
       () => new THREE.SphereGeometry(radius, widthSegments, heightSegments),
       (geom: THREE.SphereGeometry) => {
@@ -86,7 +98,11 @@ export class SphereGeometryPool extends ObjectPool<THREE.SphereGeometry> {
 export class MaterialPool extends ObjectPool<THREE.MeshBasicMaterial> {
   private defaultColor: THREE.Color;
 
-  constructor(defaultColor = new THREE.Color(0xffffff), initialSize = 100, maxSize = 1000) {
+  constructor(
+    defaultColor = new THREE.Color(0xffffff),
+    initialSize = 100,
+    maxSize = 1000
+  ) {
     super(
       () => new THREE.MeshBasicMaterial({ color: defaultColor }),
       (mat: THREE.MeshBasicMaterial) => {

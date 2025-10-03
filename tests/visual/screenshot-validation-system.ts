@@ -6,7 +6,7 @@ import { PNG } from 'pngjs';
 
 /**
  * Screenshot Validation System
- * 
+ *
  * Advanced system for generating, comparing, and validating screenshots
  * with detailed reporting and diff visualization.
  */
@@ -46,7 +46,7 @@ export class ScreenshotValidationSystem {
     const timestamp = new Date().toISOString();
     const fileName = `${name}-${timestamp.replace(/[:.]/g, '-')}.png`;
     const filePath = path.join(this.basePath, fileName);
-    
+
     // Capture screenshot
     await page.screenshot({
       path: filePath,
@@ -56,10 +56,10 @@ export class ScreenshotValidationSystem {
       quality: options.quality,
       type: options.type || 'png',
     });
-    
+
     // Get image dimensions
     const dimensions = await this.getImageDimensions(filePath);
-    
+
     const metadata: ScreenshotMetadata = {
       name,
       fileName,
@@ -69,7 +69,7 @@ export class ScreenshotValidationSystem {
       height: dimensions.height,
       viewport: page.viewportSize() || { width: 0, height: 0 },
     };
-    
+
     return metadata;
   }
 
@@ -87,33 +87,40 @@ export class ScreenshotValidationSystem {
   ): Promise<ScreenshotComparisonResult> {
     const expectedPath = path.join(this.expectedPath, `${expectedName}.png`);
     const diffPath = path.join(this.diffPath, `${expectedName}-diff.png`);
-    
+
     try {
       // Check if expected screenshot exists
       await fs.access(expectedPath);
-      
+
       // Load images
       const img1 = PNG.sync.read(await fs.readFile(actualPath));
       const img2 = PNG.sync.read(await fs.readFile(expectedPath));
-      
+
       // Create diff image
       const { width, height } = img1;
       const diff = new PNG({ width, height });
-      
+
       // Compare images
-      const diffPixels = pixelmatch(img1.data, img2.data, diff.data, width, height, {
-        threshold: options.threshold || 0.1,
-        includeAA: options.includeAA || false,
-      });
-      
+      const diffPixels = pixelmatch(
+        img1.data,
+        img2.data,
+        diff.data,
+        width,
+        height,
+        {
+          threshold: options.threshold || 0.1,
+          includeAA: options.includeAA || false,
+        }
+      );
+
       const totalPixels = width * height;
       const diffPercentage = (diffPixels / totalPixels) * 100;
-      
+
       // Save diff image if there are differences
       if (diffPixels > 0) {
         await fs.writeFile(diffPath, PNG.sync.write(diff));
       }
-      
+
       const result: ScreenshotComparisonResult = {
         passed: diffPixels <= (options.maxDiffPixels || 1000),
         diffPixels,
@@ -122,7 +129,7 @@ export class ScreenshotValidationSystem {
         expectedPath,
         diffPath: diffPixels > 0 ? diffPath : undefined,
       };
-      
+
       return result;
     } catch (error) {
       // Expected screenshot doesn't exist - this might be the first run
@@ -134,7 +141,7 @@ export class ScreenshotValidationSystem {
         expectedPath,
         isFirstRun: true,
       };
-      
+
       return result;
     }
   }
@@ -144,7 +151,10 @@ export class ScreenshotValidationSystem {
    * @param actualPath Path to actual screenshot
    * @param expectedName Name for expected screenshot
    */
-  async acceptScreenshot(actualPath: string, expectedName: string): Promise<void> {
+  async acceptScreenshot(
+    actualPath: string,
+    expectedName: string
+  ): Promise<void> {
     const expectedPath = path.join(this.expectedPath, `${expectedName}.png`);
     await fs.copyFile(actualPath, expectedPath);
   }
@@ -154,7 +164,9 @@ export class ScreenshotValidationSystem {
    * @param imagePath Path to image file
    * @returns Image dimensions
    */
-  private async getImageDimensions(imagePath: string): Promise<{ width: number; height: number }> {
+  private async getImageDimensions(
+    imagePath: string
+  ): Promise<{ width: number; height: number }> {
     try {
       const buffer = await fs.readFile(imagePath);
       const png = PNG.sync.read(buffer);
@@ -170,7 +182,10 @@ export class ScreenshotValidationSystem {
    * @param results Comparison results
    * @param outputPath Path to save report
    */
-  async generateReport(results: ScreenshotComparisonResult[], outputPath: string): Promise<void> {
+  async generateReport(
+    results: ScreenshotComparisonResult[],
+    outputPath: string
+  ): Promise<void> {
     const reportContent = `
 <!DOCTYPE html>
 <html>
@@ -190,11 +205,13 @@ export class ScreenshotValidationSystem {
     <h1>Screenshot Validation Report</h1>
     <div class="stats">
         <p>Total Tests: ${results.length}</p>
-        <p>Passed: ${results.filter(r => r.passed).length}</p>
-        <p>Failed: ${results.filter(r => !r.passed).length}</p>
+        <p>Passed: ${results.filter((r) => r.passed).length}</p>
+        <p>Failed: ${results.filter((r) => !r.passed).length}</p>
     </div>
     
-    ${results.map(result => `
+    ${results
+      .map(
+        (result) => `
         <div class="result ${result.passed ? 'passed' : 'failed'}">
             <h2>${result.expectedPath.split('/').pop()}</h2>
             <p>Status: ${result.passed ? 'PASSED' : 'FAILED'}</p>
@@ -212,19 +229,25 @@ export class ScreenshotValidationSystem {
                     <img src="${path.relative(path.dirname(outputPath), result.expectedPath)}" alt="Expected">
                 </div>
                 
-                ${result.diffPath ? `
+                ${
+                  result.diffPath
+                    ? `
                 <div>
                     <h3>Diff</h3>
                     <img src="${path.relative(path.dirname(outputPath), result.diffPath)}" alt="Diff">
                 </div>
-                ` : ''}
+                `
+                    : ''
+                }
             </div>
         </div>
-    `).join('')}
+    `
+      )
+      .join('')}
 </body>
 </html>
     `.trim();
-    
+
     await fs.writeFile(outputPath, reportContent);
   }
 }

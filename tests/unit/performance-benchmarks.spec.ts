@@ -46,7 +46,7 @@ class PerformanceMonitor {
   getStats(name: string) {
     const measurements = this.measurements.get(name);
     if (!measurements || measurements.length === 0) return null;
-    
+
     const sorted = [...measurements].sort((a, b) => a - b);
     const median = sorted[Math.floor(sorted.length / 2)];
     const p95 = sorted[Math.floor(sorted.length * 0.95)];
@@ -127,7 +127,11 @@ describe('Performance Benchmarks', () => {
         const nodes = Array.from({ length: count }, (_, i) => ({
           id: `n${i}`,
           type: 'sphere',
-          position: { x: Math.random() * 100, y: Math.random() * 100, z: Math.random() * 100 },
+          position: {
+            x: Math.random() * 100,
+            y: Math.random() * 100,
+            z: Math.random() * 100,
+          },
         }));
 
         const edges = [];
@@ -140,10 +144,10 @@ describe('Performance Benchmarks', () => {
         }
 
         monitor.startMeasurement(`render_${count}_nodes`);
-        
+
         // Update the graph data
         (graph as any).updateState({
-          data: { nodes, edges }
+          data: { nodes, edges },
         });
 
         // Wait for initial render
@@ -168,7 +172,7 @@ describe('Performance Benchmarks', () => {
           const prevResult = results[index - 1];
           const nodeIncrease = result.nodeCount / prevResult.nodeCount;
           const timeIncrease = result.renderTime / prevResult.renderTime;
-          
+
           // Rendering time should not increase more than linearly with node count
           expect(timeIncrease).toBeLessThan(nodeIncrease * 2);
         }
@@ -183,7 +187,11 @@ describe('Performance Benchmarks', () => {
       const nodes = Array.from({ length: nodeCount }, (_, i) => ({
         id: `n${i}`,
         type: 'sphere',
-        position: { x: Math.random() * 100, y: Math.random() * 100, z: Math.random() * 100 },
+        position: {
+          x: Math.random() * 100,
+          y: Math.random() * 100,
+          z: Math.random() * 100,
+        },
       }));
 
       const spec: Spec = {
@@ -218,7 +226,7 @@ describe('Performance Benchmarks', () => {
 
       // Measure hover performance
       monitor.startMeasurement('hover_performance');
-      
+
       // Simulate hover events
       for (let i = 0; i < 100; i++) {
         (graph as any).updateState({
@@ -230,7 +238,7 @@ describe('Performance Benchmarks', () => {
 
       // Measure selection performance
       monitor.startMeasurement('selection_performance');
-      
+
       // Simulate selection events
       for (let i = 0; i < 100; i++) {
         (graph as any).updateState({
@@ -260,7 +268,11 @@ describe('Performance Benchmarks', () => {
           nodes: Array.from({ length: 100 }, (_, i) => ({
             id: `n${i}`,
             type: 'sphere',
-            position: { x: Math.random() * 100, y: Math.random() * 100, z: Math.random() * 100 },
+            position: {
+              x: Math.random() * 100,
+              y: Math.random() * 100,
+              z: Math.random() * 100,
+            },
           })),
           edges: [],
         },
@@ -294,7 +306,7 @@ describe('Performance Benchmarks', () => {
 
       // Measure camera updates
       monitor.startMeasurement('camera_updates');
-      
+
       for (let i = 0; i < 100; i++) {
         (graph as any).updateState({
           camera: {
@@ -320,7 +332,11 @@ describe('Performance Benchmarks', () => {
           nodes: Array.from({ length: 50 }, (_, i) => ({
             id: `n${i}`,
             type: 'sphere',
-            position: { x: Math.random() * 100, y: Math.random() * 100, z: Math.random() * 100 },
+            position: {
+              x: Math.random() * 100,
+              y: Math.random() * 100,
+              z: Math.random() * 100,
+            },
           })),
           edges: [],
         },
@@ -353,10 +369,12 @@ describe('Performance Benchmarks', () => {
       cleanup = testGraph.cleanup;
 
       // Get camera plugin
-      const cameraPlugin = (graph as any).plugins.find((p: any) => p.constructor.name === 'CameraPlugin');
+      const cameraPlugin = (graph as any).plugins.find(
+        (p: any) => p.constructor.name === 'CameraPlugin'
+      );
 
       monitor.startMeasurement('keyboard_response');
-      
+
       // Simulate rapid keyboard input
       for (let i = 0; i < 50; i++) {
         window.dispatchEvent(new KeyboardEvent('keydown', { key: 'w' }));
@@ -380,7 +398,11 @@ describe('Performance Benchmarks', () => {
           nodes: Array.from({ length: 200 }, (_, i) => ({
             id: `n${i}`,
             type: 'sphere',
-            position: { x: Math.random() * 100, y: Math.random() * 100, z: Math.random() * 100 },
+            position: {
+              x: Math.random() * 100,
+              y: Math.random() * 100,
+              z: Math.random() * 100,
+            },
           })),
           edges: Array.from({ length: 100 }, (_, i) => ({
             id: `e${i}`,
@@ -420,7 +442,7 @@ describe('Performance Benchmarks', () => {
       const initialMemory = (performance as any).memory?.usedJSHeapSize || 0;
 
       monitor.startMeasurement('extended_interaction');
-      
+
       // Simulate extended interaction session
       for (let i = 0; i < 1000; i++) {
         // Random state updates
@@ -450,10 +472,16 @@ describe('Performance Benchmarks', () => {
           (graph as any).updateState({
             data: {
               nodes: {
-                update: [{
-                  id: `n${i % 200}`,
-                  position: { x: Math.random() * 100, y: Math.random() * 100, z: Math.random() * 100 },
-                }],
+                update: [
+                  {
+                    id: `n${i % 200}`,
+                    position: {
+                      x: Math.random() * 100,
+                      y: Math.random() * 100,
+                      z: Math.random() * 100,
+                    },
+                  },
+                ],
               },
             },
           });
@@ -485,7 +513,11 @@ describe('Performance Benchmarks', () => {
           nodes: Array.from({ length: 100 }, (_, i) => ({
             id: `n${i}`,
             type: 'sphere',
-            position: { x: Math.random() * 100, y: Math.random() * 100, z: Math.random() * 100 },
+            position: {
+              x: Math.random() * 100,
+              y: Math.random() * 100,
+              z: Math.random() * 100,
+            },
           })),
           edges: [],
         },
@@ -539,7 +571,8 @@ describe('Performance Benchmarks', () => {
       const lastStats = monitor.getStats('rapid_updates_last_100');
 
       // Performance should not degrade significantly
-      const degradation = (lastStats!.average - firstStats!.average) / firstStats!.average;
+      const degradation =
+        (lastStats!.average - firstStats!.average) / firstStats!.average;
       expect(degradation).toBeLessThan(0.5); // Less than 50% degradation
 
       console.log('Stress Test Results:', {
@@ -605,14 +638,16 @@ describe('Performance Benchmarks', () => {
       // Camera performance
       recommendations.push({
         category: 'Camera Updates',
-        recommendation: 'Consider throttling camera updates for smooth animations',
+        recommendation:
+          'Consider throttling camera updates for smooth animations',
         threshold: 5, // ms
       });
 
       // Memory usage
       recommendations.push({
         category: 'Memory Management',
-        recommendation: 'Implement object pooling for frequently created/destroyed objects',
+        recommendation:
+          'Implement object pooling for frequently created/destroyed objects',
         threshold: 1024 * 1024, // 1MB
       });
 
@@ -623,7 +658,7 @@ describe('Performance Benchmarks', () => {
       expect(recommendations[0]).toHaveProperty('category');
       expect(recommendations[0]).toHaveProperty('recommendation');
       expect(recommendations[0]).toHaveProperty('threshold');
-      
+
       // Test completed successfully - no additional cleanup needed
       // All cleanup is handled by the afterEach hook
     });

@@ -2,7 +2,8 @@
 
 ## Overview
 
-SpaceGraphJS provides six different layout engines for arranging nodes in your graph visualization. Each layout engine serves different purposes and offers unique advantages depending on your data and visualization needs.
+SpaceGraphJS provides six different layout engines for arranging nodes in your graph visualization. Each layout engine
+serves different purposes and offers unique advantages depending on your data and visualization needs.
 
 ## Implemented Layout Engines
 
@@ -11,6 +12,7 @@ SpaceGraphJS provides six different layout engines for arranging nodes in your g
 A physics-based layout that simulates forces between nodes to create organic-looking graphs.
 
 #### Features
+
 - Uses D3's force-directed algorithm with 3D support
 - Configurable charge, link distance, and link strength parameters
 - Continuous simulation that stabilizes over time
@@ -18,6 +20,7 @@ A physics-based layout that simulates forces between nodes to create organic-loo
 - Optimized for performance with incremental updates
 
 #### Configuration
+
 ```typescript
 interface ForceDirectedLayoutSpec {
   type: 'force-directed';
@@ -28,6 +31,7 @@ interface ForceDirectedLayoutSpec {
 ```
 
 #### Performance Optimizations
+
 - Incremental updates that only refresh when significant changes occur
 - Efficient data structures for node/link lookups
 - Batched state updates to reduce re-renders
@@ -35,6 +39,7 @@ interface ForceDirectedLayoutSpec {
 - Change detection with thresholds to avoid unnecessary updates
 
 #### Usage Example
+
 ```javascript
 const spec = {
   layout: {
@@ -51,6 +56,7 @@ const spec = {
 Arranges nodes in a 2D or 3D grid pattern for structured layouts.
 
 #### Features
+
 - Supports both 2D and 3D grid arrangements
 - Configurable spacing between nodes
 - Automatic calculation of rows/columns/depth or manual specification
@@ -58,6 +64,7 @@ Arranges nodes in a 2D or 3D grid pattern for structured layouts.
 - Axis ordering configuration
 
 #### Configuration
+
 ```typescript
 interface GridLayoutSpec {
   type: 'grid';
@@ -72,6 +79,7 @@ interface GridLayoutSpec {
 ```
 
 #### Usage Example
+
 ```javascript
 const spec = {
   layout: {
@@ -89,6 +97,7 @@ const spec = {
 Arranges nodes in a circular or spherical pattern.
 
 #### Features
+
 - Supports both 2D circles and 3D spheres
 - Configurable radius and center position
 - Direction control (clockwise/counterclockwise)
@@ -96,6 +105,7 @@ Arranges nodes in a circular or spherical pattern.
 - Works well for showing hierarchical or cyclic relationships
 
 #### Configuration
+
 ```typescript
 interface CircleLayoutSpec {
   type: 'circle';
@@ -109,6 +119,7 @@ interface CircleLayoutSpec {
 ```
 
 #### Usage Example
+
 ```javascript
 const spec = {
   layout: {
@@ -126,6 +137,7 @@ const spec = {
 Arranges nodes in vertical columns for structured vertical organization.
 
 #### Features
+
 - Vertical arrangement in columns
 - Configurable vertical spacing and column spacing
 - Control over maximum nodes per column
@@ -133,6 +145,7 @@ Arranges nodes in vertical columns for structured vertical organization.
 - Automatically balances columns
 
 #### Configuration
+
 ```typescript
 interface ColumnLayoutSpec {
   type: 'column';
@@ -145,6 +158,7 @@ interface ColumnLayoutSpec {
 ```
 
 #### Usage Example
+
 ```javascript
 const spec = {
   layout: {
@@ -162,6 +176,7 @@ const spec = {
 Arranges nodes in horizontal rows for structured horizontal organization.
 
 #### Features
+
 - Horizontal arrangement in rows
 - Configurable horizontal spacing and row spacing
 - Control over maximum nodes per row
@@ -169,6 +184,7 @@ Arranges nodes in horizontal rows for structured horizontal organization.
 - Automatically balances rows
 
 #### Configuration
+
 ```typescript
 interface RowLayoutSpec {
   type: 'row';
@@ -181,6 +197,7 @@ interface RowLayoutSpec {
 ```
 
 #### Usage Example
+
 ```javascript
 const spec = {
   layout: {
@@ -198,12 +215,14 @@ const spec = {
 Places nodes at random positions for initial layouts or special effects.
 
 #### Features
+
 - Simple random positioning
 - No configuration options needed
 - Good for initial layouts before applying other layouts
 - Fast execution
 
 #### Configuration
+
 ```typescript
 interface RandomLayoutSpec {
   type: 'random';
@@ -212,6 +231,7 @@ interface RandomLayoutSpec {
 ```
 
 #### Usage Example
+
 ```javascript
 const spec = {
   layout: {
@@ -242,12 +262,15 @@ SpaceGraph.registerLayout('custom-layout', CustomLayoutEngine);
 ## Performance Considerations
 
 ### For Large Graphs
-1. **Choose Appropriate Layouts**: Grid, circle, column, and row layouts are generally faster than force-directed layouts
+
+1. **Choose Appropriate Layouts**: Grid, circle, column, and row layouts are generally faster than force-directed
+   layouts
 2. **Use Pinning**: Pin nodes to reduce computation in force-directed layouts
 3. **Pause When Idle**: Pause layouts when not actively needed
 4. **Configure Parameters**: Tune layout parameters for optimal performance
 
 ### Optimization Techniques
+
 1. **Incremental Updates**: Layouts only update when significant changes occur
 2. **Object Reuse**: Existing objects are preserved when possible
 3. **Batched Updates**: Related updates are grouped together
@@ -256,6 +279,7 @@ SpaceGraph.registerLayout('custom-layout', CustomLayoutEngine);
 ## Best Practices
 
 ### For Layout Engine Developers
+
 1. **Implement Change Detection**: Only update when necessary
 2. **Reuse Objects**: Preserve existing objects when possible
 3. **Batch Updates**: Group related updates together
@@ -263,6 +287,7 @@ SpaceGraph.registerLayout('custom-layout', CustomLayoutEngine);
 5. **Consider Memory**: Minimize object creation and retention
 
 ### For Users
+
 1. **Choose Appropriate Layouts**: Select layouts based on data characteristics
 2. **Configure Parameters**: Tune layout parameters for optimal performance
 3. **Monitor Performance**: Watch for performance issues with large datasets
@@ -278,6 +303,7 @@ Creating custom layout engines is straightforward:
 3. Register your layout with `SpaceGraph.registerLayout()`
 
 Example custom layout:
+
 ```typescript
 class CustomLayout extends BaseLayoutEngine {
   protected setupLayout(): void {

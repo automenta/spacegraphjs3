@@ -2,7 +2,8 @@
 
 ## Overview
 
-The Memory Management system in SpaceGraph provides robust resource handling to prevent memory leaks and optimize performance. It includes object pooling, safe disposal mechanisms, and tracking systems for Three.js objects.
+The Memory Management system in SpaceGraph provides robust resource handling to prevent memory leaks and optimize
+performance. It includes object pooling, safe disposal mechanisms, and tracking systems for Three.js objects.
 
 ## Components
 

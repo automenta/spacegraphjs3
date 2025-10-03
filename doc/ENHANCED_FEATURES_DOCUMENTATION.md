@@ -2,7 +2,8 @@
 
 ## Overview
 
-This document provides comprehensive documentation for the enhanced features added to SpaceGraphJS, including advanced camera controls, visual feedback systems, enhanced interactions, performance optimization, and animation systems.
+This document provides comprehensive documentation for the enhanced features added to SpaceGraphJS, including advanced
+camera controls, visual feedback systems, enhanced interactions, performance optimization, and animation systems.
 
 ## Table of Contents
 
@@ -21,7 +22,8 @@ This document provides comprehensive documentation for the enhanced features add
 
 ### Overview
 
-The `AdvancedCameraControls` class provides sophisticated camera control capabilities with smooth animations, constraints, and advanced movement patterns.
+The `AdvancedCameraControls` class provides sophisticated camera control capabilities with smooth animations,
+constraints, and advanced movement patterns.
 
 ### Features
 
@@ -67,19 +69,19 @@ cameraControls.reset();
 
 ### Configuration Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `enableDamping` | boolean | true | Enable smooth damping |
-| `dampingFactor` | number | 0.05 | Damping intensity (0-1) |
-| `enableZoom` | boolean | true | Enable zoom controls |
-| `enableRotate` | boolean | true | Enable rotation controls |
-| `enablePan` | boolean | true | Enable pan controls |
-| `autoRotate` | boolean | false | Enable auto-rotation |
-| `autoRotateSpeed` | number | 0.5 | Auto-rotation speed |
-| `minDistance` | number | 10 | Minimum zoom distance |
-| `maxDistance` | number | 200 | Maximum zoom distance |
-| `minPolarAngle` | number | 0 | Minimum polar angle |
-| `maxPolarAngle` | number | Math.PI | Maximum polar angle |
+| Option            | Type    | Default | Description              |
+|-------------------|---------|---------|--------------------------|
+| `enableDamping`   | boolean | true    | Enable smooth damping    |
+| `dampingFactor`   | number  | 0.05    | Damping intensity (0-1)  |
+| `enableZoom`      | boolean | true    | Enable zoom controls     |
+| `enableRotate`    | boolean | true    | Enable rotation controls |
+| `enablePan`       | boolean | true    | Enable pan controls      |
+| `autoRotate`      | boolean | false   | Enable auto-rotation     |
+| `autoRotateSpeed` | number  | 0.5     | Auto-rotation speed      |
+| `minDistance`     | number  | 10      | Minimum zoom distance    |
+| `maxDistance`     | number  | 200     | Maximum zoom distance    |
+| `minPolarAngle`   | number  | 0       | Minimum polar angle      |
+| `maxPolarAngle`   | number  | Math.PI | Maximum polar angle      |
 
 ---
 
@@ -87,7 +89,8 @@ cameraControls.reset();
 
 ### Overview
 
-The `VisualFeedbackSystem` provides rich visual feedback for user interactions, including glow effects, pulsing, particles, and color changes.
+The `VisualFeedbackSystem` provides rich visual feedback for user interactions, including glow effects, pulsing,
+particles, and color changes.
 
 ### Features
 
@@ -132,17 +135,17 @@ visualFeedback.clearFeedback(object.uuid);
 
 ### Feedback Configuration
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `type` | FeedbackType | required | Type of feedback |
-| `color` | string | auto | Feedback color |
-| `intensity` | number | 1.0 | Feedback intensity (0-1) |
-| `duration` | number | 0 | Duration in ms (0 = infinite) |
-| `scale` | number | 1.0 | Scale multiplier |
-| `pulse` | boolean | false | Enable pulsing |
-| `glow` | boolean | true | Enable glow effect |
-| `particles` | boolean | false | Enable particles |
-| `sound` | boolean | false | Enable sound (future) |
+| Property    | Type         | Default  | Description                   |
+|-------------|--------------|----------|-------------------------------|
+| `type`      | FeedbackType | required | Type of feedback              |
+| `color`     | string       | auto     | Feedback color                |
+| `intensity` | number       | 1.0      | Feedback intensity (0-1)      |
+| `duration`  | number       | 0        | Duration in ms (0 = infinite) |
+| `scale`     | number       | 1.0      | Scale multiplier              |
+| `pulse`     | boolean      | false    | Enable pulsing                |
+| `glow`      | boolean      | true     | Enable glow effect            |
+| `particles` | boolean      | false    | Enable particles              |
+| `sound`     | boolean      | false    | Enable sound (future)         |
 
 ---
 
@@ -150,7 +153,8 @@ visualFeedback.clearFeedback(object.uuid);
 
 ### Overview
 
-The `EnhancedInteractionSystem` provides comprehensive interaction handling with visual feedback, gesture recognition, and advanced event management.
+The `EnhancedInteractionSystem` provides comprehensive interaction handling with visual feedback, gesture recognition,
+and advanced event management.
 
 ### Features
 
@@ -202,20 +206,20 @@ interactionSystem.on('select', (object) => {
 
 ### Event Types
 
-| Event | Parameters | Description |
-|-------|------------|-------------|
-| `hoverstart` | `object: THREE.Object3D` | Object hover started |
-| `hoverend` | `objectId: string` | Object hover ended |
-| `click` | `object: THREE.Object3D` | Object clicked |
-| `doubleclick` | `object: THREE.Object3D` | Object double-clicked |
-| `select` | `object: THREE.Object3D` | Object selected |
-| `deselect` | `object: THREE.Object3D` | Object deselected |
-| `dragstart` | `object: THREE.Object3D` | Drag started |
-| `drag` | `object: THREE.Object3D` | Object being dragged |
-| `dragend` | `objectId: string` | Drag ended |
+| Event         | Parameters                             | Description            |
+|---------------|----------------------------------------|------------------------|
+| `hoverstart`  | `object: THREE.Object3D`               | Object hover started   |
+| `hoverend`    | `objectId: string`                     | Object hover ended     |
+| `click`       | `object: THREE.Object3D`               | Object clicked         |
+| `doubleclick` | `object: THREE.Object3D`               | Object double-clicked  |
+| `select`      | `object: THREE.Object3D`               | Object selected        |
+| `deselect`    | `object: THREE.Object3D`               | Object deselected      |
+| `dragstart`   | `object: THREE.Object3D`               | Drag started           |
+| `drag`        | `object: THREE.Object3D`               | Object being dragged   |
+| `dragend`     | `objectId: string`                     | Drag ended             |
 | `contextmenu` | `object: THREE.Object3D, event: Event` | Context menu requested |
-| `keydown` | `event: KeyboardEvent` | Key pressed |
-| `keyup` | `event: KeyboardEvent` | Key released |
+| `keydown`     | `event: KeyboardEvent`                 | Key pressed            |
+| `keyup`       | `event: KeyboardEvent`                 | Key released           |
 
 ---
 
@@ -223,7 +227,8 @@ interactionSystem.on('select', (object) => {
 
 ### Overview
 
-The `EnhancedHUDSystem` provides a comprehensive heads-up display with interactive elements, performance monitoring, and customizable UI components.
+The `EnhancedHUDSystem` provides a comprehensive heads-up display with interactive elements, performance monitoring, and
+customizable UI components.
 
 ### Features
 
@@ -266,14 +271,14 @@ hudSystem.toggleElement('status-text', true, 500);
 
 ### Element Types
 
-| Type | Description | Properties |
-|------|-------------|------------|
-| `text` | Text display | `content`, `style` |
+| Type     | Description        | Properties               |
+|----------|--------------------|--------------------------|
+| `text`   | Text display       | `content`, `style`       |
 | `button` | Interactive button | `content`, `interactive` |
-| `slider` | Range input | `interactive` |
-| `chart` | Data visualization | `content` (canvas) |
-| `panel` | Container element | `style` |
-| `icon` | Icon display | `content` |
+| `slider` | Range input        | `interactive`            |
+| `chart`  | Data visualization | `content` (canvas)       |
+| `panel`  | Container element  | `style`                  |
+| `icon`   | Icon display       | `content`                |
 
 ---
 
@@ -281,7 +286,8 @@ hudSystem.toggleElement('status-text', true, 500);
 
 ### Overview
 
-The `PerformanceOptimizer` provides comprehensive performance optimization including object pooling, frustum culling, LOD management, and adaptive quality.
+The `PerformanceOptimizer` provides comprehensive performance optimization including object pooling, frustum culling,
+LOD management, and adaptive quality.
 
 ### Features
 
@@ -327,18 +333,18 @@ performanceOptimizer.setOptimizationEnabled(false);
 
 ### Configuration Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `enableObjectPooling` | boolean | true | Enable object pooling |
-| `enableFrustumCulling` | boolean | true | Enable frustum culling |
-| `enableLOD` | boolean | true | Enable level of detail |
-| `enableMemoryManagement` | boolean | true | Enable memory management |
-| `enableBatching` | boolean | true | Enable object batching |
-| `enableInstancing` | boolean | true | Enable instancing |
-| `maxFPS` | number | 60 | Target maximum FPS |
-| `targetFrameTime` | number | 16.67 | Target frame time (ms) |
-| `qualityLevel` | string | 'high' | Initial quality level |
-| `adaptiveQuality` | boolean | true | Enable adaptive quality |
+| Option                   | Type    | Default | Description              |
+|--------------------------|---------|---------|--------------------------|
+| `enableObjectPooling`    | boolean | true    | Enable object pooling    |
+| `enableFrustumCulling`   | boolean | true    | Enable frustum culling   |
+| `enableLOD`              | boolean | true    | Enable level of detail   |
+| `enableMemoryManagement` | boolean | true    | Enable memory management |
+| `enableBatching`         | boolean | true    | Enable object batching   |
+| `enableInstancing`       | boolean | true    | Enable instancing        |
+| `maxFPS`                 | number  | 60      | Target maximum FPS       |
+| `targetFrameTime`        | number  | 16.67   | Target frame time (ms)   |
+| `qualityLevel`           | string  | 'high'  | Initial quality level    |
+| `adaptiveQuality`        | boolean | true    | Enable adaptive quality  |
 
 ---
 
@@ -346,11 +352,13 @@ performanceOptimizer.setOptimizationEnabled(false);
 
 ### Overview
 
-The `EnhancedAnimationSystem` provides advanced animation capabilities with multiple animation types, particle effects, and complex sequences.
+The `EnhancedAnimationSystem` provides advanced animation capabilities with multiple animation types, particle effects,
+and complex sequences.
 
 ### Features
 
-- **Multiple Animation Types**: Fade, scale, rotate, translate, color, glow, pulse, bounce, shake, morph, explode, implode, wave, spiral
+- **Multiple Animation Types**: Fade, scale, rotate, translate, color, glow, pulse, bounce, shake, morph, explode,
+  implode, wave, spiral
 - **Particle Systems**: Dynamic particle effects
 - **Animation Sequences**: Chain multiple animations
 - **Parallel Animations**: Run multiple animations simultaneously
@@ -397,22 +405,22 @@ animationSystem.stopAnimation(animId);
 
 ### Animation Types
 
-| Type | Description | Parameters |
-|------|-------------|------------|
-| `fade` | Opacity animation | `from`, `to` |
-| `scale` | Size animation | `from`, `to` |
-| `rotate` | Rotation animation | `from`, `to` |
-| `translate` | Position animation | `from`, `to` |
-| `color` | Color transition | `from`, `to` |
-| `glow` | Glow effect | `from`, `to` |
-| `pulse` | Pulsing animation | `to`, `intensity` |
-| `bounce` | Bouncing animation | `to`, `spring` |
-| `shake` | Shaking animation | `to` (intensity) |
-| `morph` | Geometry morphing | `to` (factor) |
-| `explode` | Explosion effect | `from`, `to` |
-| `implode` | Implosion effect | `to` (scale) |
-| `wave` | Wave motion | `to` (amplitude) |
-| `spiral` | Spiral motion | `to` (radius) |
+| Type        | Description        | Parameters        |
+|-------------|--------------------|-------------------|
+| `fade`      | Opacity animation  | `from`, `to`      |
+| `scale`     | Size animation     | `from`, `to`      |
+| `rotate`    | Rotation animation | `from`, `to`      |
+| `translate` | Position animation | `from`, `to`      |
+| `color`     | Color transition   | `from`, `to`      |
+| `glow`      | Glow effect        | `from`, `to`      |
+| `pulse`     | Pulsing animation  | `to`, `intensity` |
+| `bounce`    | Bouncing animation | `to`, `spring`    |
+| `shake`     | Shaking animation  | `to` (intensity)  |
+| `morph`     | Geometry morphing  | `to` (factor)     |
+| `explode`   | Explosion effect   | `from`, `to`      |
+| `implode`   | Implosion effect   | `to` (scale)      |
+| `wave`      | Wave motion        | `to` (amplitude)  |
+| `spiral`    | Spiral motion      | `to` (radius)     |
 
 ---
 
@@ -538,6 +546,8 @@ animate();
 
 ## Conclusion
 
-The enhanced SpaceGraphJS features provide a comprehensive set of tools for creating sophisticated, performant, and user-friendly 3D graph visualizations. By following the documentation and best practices outlined here, developers can create engaging and interactive experiences that leverage the full power of modern web technologies.
+The enhanced SpaceGraphJS features provide a comprehensive set of tools for creating sophisticated, performant, and
+user-friendly 3D graph visualizations. By following the documentation and best practices outlined here, developers can
+create engaging and interactive experiences that leverage the full power of modern web technologies.
 
 For additional support and examples, refer to the integration demo and source code comments.

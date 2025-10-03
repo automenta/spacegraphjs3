@@ -8,7 +8,7 @@ const { PNG } = require('pngjs');
 
 /**
  * Enhanced Visual Semantics Controller for comprehensive UI/UX testing
- * 
+ *
  * This enhanced controller extends the basic functionality with:
  * - Full ergonomic compliance checking
  * - Advanced screenshot comparison with diff visualization
@@ -26,7 +26,9 @@ export class EnhancedVisualSemanticsController {
    * @param options Initialization options
    * @returns EnhancedVisualSemanticsController instance
    */
-  static async init(options: InitOptions = {}): Promise<EnhancedVisualSemanticsController> {
+  static async init(
+    options: InitOptions = {}
+  ): Promise<EnhancedVisualSemanticsController> {
     const controller = new EnhancedVisualSemanticsController();
     await controller.initialize(options);
     return controller;
@@ -43,14 +45,25 @@ export class EnhancedVisualSemanticsController {
    */
   private async initialize(options: InitOptions): Promise<void> {
     // Create necessary directories
-    await fs.mkdir(path.join(process.cwd(), 'tests/visual/screenshots'), { recursive: true });
-    await fs.mkdir(path.join(process.cwd(), 'tests/visual/screenshots/expected'), { recursive: true });
-    await fs.mkdir(path.join(process.cwd(), 'tests/visual/screenshots/diffs'), { recursive: true });
-    await fs.mkdir(path.join(process.cwd(), 'tests/visual/reports'), { recursive: true });
+    await fs.mkdir(path.join(process.cwd(), 'tests/visual/screenshots'), {
+      recursive: true,
+    });
+    await fs.mkdir(
+      path.join(process.cwd(), 'tests/visual/screenshots/expected'),
+      { recursive: true }
+    );
+    await fs.mkdir(path.join(process.cwd(), 'tests/visual/screenshots/diffs'), {
+      recursive: true,
+    });
+    await fs.mkdir(path.join(process.cwd(), 'tests/visual/reports'), {
+      recursive: true,
+    });
 
     // Launch browser
-    this.browser = await chromium.launch({ headless: options.headless ?? true });
-    
+    this.browser = await chromium.launch({
+      headless: options.headless ?? true,
+    });
+
     // Create context with specified options
     const context = await this.browser.newContext({
       viewport: options.viewport || { width: 1280, height: 720 },
@@ -73,16 +86,18 @@ export class EnhancedVisualSemanticsController {
     const startTime = Date.now();
     await this.page!.goto(url);
     // Wait for graph to initialize
-    await this.page!.waitForFunction(() => (window as any).graph, { timeout: 10000 });
+    await this.page!.waitForFunction(() => (window as any).graph, {
+      timeout: 10000,
+    });
     // Additional wait for rendering
     await this.page!.waitForTimeout(2000);
-    
+
     // Record performance metric
     this.performanceMetrics.push({
       interaction: 'navigation',
       element: url,
       duration: Date.now() - startTime,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
@@ -95,7 +110,7 @@ export class EnhancedVisualSemanticsController {
     this.ensureInitialized();
     const startTime = Date.now();
     const canvas = this.page!.locator(selector);
-    
+
     if (options.position) {
       await canvas.hover({
         position: options.position,
@@ -114,16 +129,16 @@ export class EnhancedVisualSemanticsController {
         });
       }
     }
-    
+
     // Wait for hover effect
     await this.page!.waitForTimeout(200);
-    
+
     // Record performance metric
     this.performanceMetrics.push({
       interaction: 'hover',
       element: selector,
       duration: Date.now() - startTime,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
@@ -136,7 +151,7 @@ export class EnhancedVisualSemanticsController {
     this.ensureInitialized();
     const startTime = Date.now();
     const canvas = this.page!.locator(selector);
-    
+
     if (options.position) {
       await canvas.click({
         button: options.button || 'left',
@@ -159,16 +174,16 @@ export class EnhancedVisualSemanticsController {
         });
       }
     }
-    
+
     // Wait for click effect
     await this.page!.waitForTimeout(200);
-    
+
     // Record performance metric
     this.performanceMetrics.push({
       interaction: 'click',
       element: selector,
       duration: Date.now() - startTime,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
@@ -178,12 +193,16 @@ export class EnhancedVisualSemanticsController {
    * @param target Target selector
    * @param options Drag options
    */
-  async drag(source: string, target: string, options: DragOptions = {}): Promise<void> {
+  async drag(
+    source: string,
+    target: string,
+    options: DragOptions = {}
+  ): Promise<void> {
     this.ensureInitialized();
     const startTime = Date.now();
     const sourceLocator = this.page!.locator(source);
     const targetLocator = this.page!.locator(target);
-    
+
     if (options.sourcePosition && options.targetPosition) {
       await sourceLocator.dragTo(targetLocator, {
         sourcePosition: options.sourcePosition,
@@ -205,16 +224,16 @@ export class EnhancedVisualSemanticsController {
         });
       }
     }
-    
+
     // Wait for drag effect
     await this.page!.waitForTimeout(500);
-    
+
     // Record performance metric
     this.performanceMetrics.push({
       interaction: 'drag',
       element: `${source} -> ${target}`,
       duration: Date.now() - startTime,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
@@ -227,22 +246,22 @@ export class EnhancedVisualSemanticsController {
     this.ensureInitialized();
     const startTime = Date.now();
     const element = this.page!.locator(selector);
-    
+
     // Default delta values
     const deltaX = options.deltaX || 0;
     const deltaY = options.deltaY || 100;
-    
+
     await element.dispatchEvent('wheel', { deltaX, deltaY });
-    
+
     // Wait for scroll effect
     await this.page!.waitForTimeout(200);
-    
+
     // Record performance metric
     this.performanceMetrics.push({
       interaction: 'scroll',
       element: selector,
       duration: Date.now() - startTime,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
@@ -257,13 +276,13 @@ export class EnhancedVisualSemanticsController {
     await this.page!.keyboard.press(keys, { delay: options.delay || 0 });
     // Wait for keyboard effect
     await this.page!.waitForTimeout(100);
-    
+
     // Record performance metric
     this.performanceMetrics.push({
       interaction: 'keyboard',
       element: keys,
       duration: Date.now() - startTime,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
@@ -273,11 +292,11 @@ export class EnhancedVisualSemanticsController {
    */
   async assertVisualState(spec: VisualSemanticsSpec): Promise<void> {
     this.ensureInitialized();
-    
+
     // Process each interaction sequence
     for (const interaction of spec.interactions) {
       console.log(`Processing interaction sequence: ${interaction.name}`);
-      
+
       // Execute each step in the sequence
       for (const step of interaction.steps) {
         switch (step.type) {
@@ -301,30 +320,30 @@ export class EnhancedVisualSemanticsController {
             break;
         }
       }
-      
+
       // Validate expected outcomes
       for (const outcome of interaction.expectedOutcomes) {
         console.log(`Validating outcome: ${outcome.description}`);
-        
+
         // Capture screenshot
         const screenshotPath = path.join(
-          process.cwd(), 
-          'tests/visual/screenshots', 
+          process.cwd(),
+          'tests/visual/screenshots',
           outcome.screenshot
         );
-        
-        await this.page!.screenshot({ 
+
+        await this.page!.screenshot({
           path: screenshotPath,
           fullPage: true,
         });
-        
+
         // Compare with expected (if exists)
         const expectedPath = path.join(
           process.cwd(),
           'tests/visual/screenshots/expected',
           outcome.screenshot
         );
-        
+
         try {
           await fs.access(expectedPath);
           // If expected exists, compare
@@ -333,9 +352,11 @@ export class EnhancedVisualSemanticsController {
             expectedPath,
             outcome.screenshot.replace('.png', '-diff.png')
           );
-          
+
           if (!comparisonResult.passed) {
-            throw new Error(`Screenshot comparison failed: ${comparisonResult.diffPixels} pixels differ (${comparisonResult.diffPercentage.toFixed(2)}%)`);
+            throw new Error(
+              `Screenshot comparison failed: ${comparisonResult.diffPixels} pixels differ (${comparisonResult.diffPercentage.toFixed(2)}%)`
+            );
           }
         } catch (error) {
           if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
@@ -355,88 +376,103 @@ export class EnhancedVisualSemanticsController {
    * Assert ergonomic compliance with comprehensive checking
    * @param spec Visual semantics specification
    */
-  async assertErgonomicCompliance(spec: VisualSemanticsSpec): Promise<ErgonomicComplianceResult> {
+  async assertErgonomicCompliance(
+    spec: VisualSemanticsSpec
+  ): Promise<ErgonomicComplianceResult> {
     this.ensureInitialized();
-    
+
     const result: ErgonomicComplianceResult = {
       component: spec.component,
       passed: true,
       violations: [],
-      metrics: {}
+      metrics: {},
     };
-    
+
     // Check ergonomic requirements
     const ergonomics = spec.ergonomics;
-    
+
     if (ergonomics.minTouchTargetSize) {
-      const touchCheck = await this.checkTouchTargetSize(spec.elementId || '', ergonomics.minTouchTargetSize);
+      const touchCheck = await this.checkTouchTargetSize(
+        spec.elementId || '',
+        ergonomics.minTouchTargetSize
+      );
       if (!touchCheck.passed) {
         result.passed = false;
         result.violations.push({
           type: 'touchTarget',
           message: `Element ${spec.elementId} has touch target size ${touchCheck.actualSize}px, minimum required is ${ergonomics.minTouchTargetSize}px`,
-          severity: 'error'
+          severity: 'error',
         });
       }
       result.metrics.touchTargetSize = touchCheck.actualSize;
     }
-    
+
     if (ergonomics.minContrastRatio) {
-      const contrastCheck = await this.checkContrastRatio(spec.elementId || '', ergonomics.minContrastRatio);
+      const contrastCheck = await this.checkContrastRatio(
+        spec.elementId || '',
+        ergonomics.minContrastRatio
+      );
       if (!contrastCheck.passed) {
         result.passed = false;
         result.violations.push({
           type: 'contrast',
           message: `Element ${spec.elementId} has contrast ratio ${contrastCheck.actualRatio.toFixed(2)}:1, minimum required is ${ergonomics.minContrastRatio}:1`,
-          severity: 'error'
+          severity: 'error',
         });
       }
       result.metrics.contrastRatio = contrastCheck.actualRatio;
     }
-    
+
     if (ergonomics.keyboardNavigation) {
-      const keyboardCheck = await this.checkKeyboardNavigation(spec.elementId || '');
+      const keyboardCheck = await this.checkKeyboardNavigation(
+        spec.elementId || ''
+      );
       if (!keyboardCheck.passed) {
         result.passed = false;
         result.violations.push({
           type: 'keyboard',
           message: `Element ${spec.elementId} does not support keyboard navigation properly`,
-          severity: 'warning'
+          severity: 'warning',
         });
       }
       result.metrics.keyboardAccessible = keyboardCheck.passed;
     }
-    
+
     if (ergonomics.screenReaderSupport) {
-      const screenReaderCheck = await this.checkScreenReaderSupport(spec.elementId || '');
+      const screenReaderCheck = await this.checkScreenReaderSupport(
+        spec.elementId || ''
+      );
       if (!screenReaderCheck.passed) {
         result.passed = false;
         result.violations.push({
           type: 'screenReader',
           message: `Element ${spec.elementId} lacks proper screen reader support`,
-          severity: 'warning'
+          severity: 'warning',
         });
       }
       result.metrics.screenReaderSupport = screenReaderCheck.passed;
     }
-    
+
     if (ergonomics.maxResponseTime) {
       // Find the latest performance metric for this component
       const latestMetric = this.performanceMetrics
-        .filter(m => m.element === (spec.elementId || ''))
-        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
-      
+        .filter((m) => m.element === (spec.elementId || ''))
+        .sort(
+          (a, b) =>
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        )[0];
+
       if (latestMetric && latestMetric.duration > ergonomics.maxResponseTime) {
         result.passed = false;
         result.violations.push({
           type: 'performance',
           message: `Element ${spec.elementId} response time ${latestMetric.duration}ms exceeds maximum ${ergonomics.maxResponseTime}ms`,
-          severity: 'error'
+          severity: 'error',
         });
       }
       result.metrics.responseTime = latestMetric ? latestMetric.duration : 0;
     }
-    
+
     return result;
   }
 
@@ -445,25 +481,28 @@ export class EnhancedVisualSemanticsController {
    * @param elementId Element ID to check
    * @param minSize Minimum required size
    */
-  private async checkTouchTargetSize(elementId: string, minSize: number): Promise<TouchTargetCheckResult> {
+  private async checkTouchTargetSize(
+    elementId: string,
+    minSize: number
+  ): Promise<TouchTargetCheckResult> {
     try {
       const size = await this.page!.evaluate((id) => {
         const element = document.getElementById(id);
         if (!element) return { width: 0, height: 0 };
-        
+
         const rect = element.getBoundingClientRect();
         return { width: rect.width, height: rect.height };
       }, elementId);
-      
+
       const actualSize = Math.min(size.width, size.height);
       return {
         passed: actualSize >= minSize,
-        actualSize
+        actualSize,
       };
     } catch (error) {
       return {
         passed: false,
-        actualSize: 0
+        actualSize: 0,
       };
     }
   }
@@ -473,30 +512,33 @@ export class EnhancedVisualSemanticsController {
    * @param elementId Element ID to check
    * @param minRatio Minimum required contrast ratio
    */
-  private async checkContrastRatio(elementId: string, minRatio: number): Promise<ContrastCheckResult> {
+  private async checkContrastRatio(
+    elementId: string,
+    minRatio: number
+  ): Promise<ContrastCheckResult> {
     try {
       const colors = await this.page!.evaluate((id) => {
         const element = document.getElementById(id);
         if (!element) return { foreground: '#000000', background: '#ffffff' };
-        
+
         const style = window.getComputedStyle(element);
         return {
           foreground: style.color || '#000000',
-          background: style.backgroundColor || '#ffffff'
+          background: style.backgroundColor || '#ffffff',
         };
       }, elementId);
-      
+
       // Simplified contrast calculation (in a real implementation, this would be more accurate)
       const actualRatio = 4.5; // Placeholder value
-      
+
       return {
         passed: actualRatio >= minRatio,
-        actualRatio
+        actualRatio,
       };
     } catch (error) {
       return {
         passed: false,
-        actualRatio: 0
+        actualRatio: 0,
       };
     }
   }
@@ -505,26 +547,30 @@ export class EnhancedVisualSemanticsController {
    * Check keyboard navigation support
    * @param elementId Element ID to check
    */
-  private async checkKeyboardNavigation(elementId: string): Promise<KeyboardNavCheckResult> {
+  private async checkKeyboardNavigation(
+    elementId: string
+  ): Promise<KeyboardNavCheckResult> {
     try {
       const result = await this.page!.evaluate((id) => {
         const element = document.getElementById(id);
         if (!element) return false;
-        
+
         // Check for tabindex or if it's naturally focusable
-        return element.hasAttribute('tabindex') || 
-               element.tagName === 'BUTTON' || 
-               element.tagName === 'INPUT' || 
-               element.tagName === 'SELECT' || 
-               element.tagName === 'TEXTAREA';
+        return (
+          element.hasAttribute('tabindex') ||
+          element.tagName === 'BUTTON' ||
+          element.tagName === 'INPUT' ||
+          element.tagName === 'SELECT' ||
+          element.tagName === 'TEXTAREA'
+        );
       }, elementId);
-      
+
       return {
-        passed: result
+        passed: result,
       };
     } catch (error) {
       return {
-        passed: false
+        passed: false,
       };
     }
   }
@@ -533,25 +579,29 @@ export class EnhancedVisualSemanticsController {
    * Check screen reader support
    * @param elementId Element ID to check
    */
-  private async checkScreenReaderSupport(elementId: string): Promise<ScreenReaderCheckResult> {
+  private async checkScreenReaderSupport(
+    elementId: string
+  ): Promise<ScreenReaderCheckResult> {
     try {
       const result = await this.page!.evaluate((id) => {
         const element = document.getElementById(id);
         if (!element) return false;
-        
+
         // Check for accessibility attributes
-        return element.hasAttribute('aria-label') || 
-               element.hasAttribute('aria-labelledby') || 
-               element.hasAttribute('title') ||
-               element.hasAttribute('alt');
+        return (
+          element.hasAttribute('aria-label') ||
+          element.hasAttribute('aria-labelledby') ||
+          element.hasAttribute('title') ||
+          element.hasAttribute('alt')
+        );
       }, elementId);
-      
+
       return {
-        passed: result
+        passed: result,
       };
     } catch (error) {
       return {
-        passed: false
+        passed: false,
       };
     }
   }
@@ -562,16 +612,19 @@ export class EnhancedVisualSemanticsController {
    * @param options Screenshot options
    * @returns Path to captured screenshot
    */
-  async captureScreenshot(name: string, options: ScreenshotOptions = {}): Promise<string> {
+  async captureScreenshot(
+    name: string,
+    options: ScreenshotOptions = {}
+  ): Promise<string> {
     this.ensureInitialized();
-    
+
     const screenshotPath = path.join(
-      process.cwd(), 
-      'tests/visual/screenshots', 
+      process.cwd(),
+      'tests/visual/screenshots',
       name
     );
-    
-    await this.page!.screenshot({ 
+
+    await this.page!.screenshot({
       path: screenshotPath,
       fullPage: options.fullPage ?? true,
       clip: options.clip,
@@ -579,7 +632,7 @@ export class EnhancedVisualSemanticsController {
       quality: options.quality,
       type: options.type,
     });
-    
+
     return screenshotPath;
   }
 
@@ -599,24 +652,35 @@ export class EnhancedVisualSemanticsController {
       // Load images
       const img1 = PNG.sync.read(await fs.readFile(actualPath));
       const img2 = PNG.sync.read(await fs.readFile(expectedPath));
-      
+
       // Create diff image
       const { width, height } = img1;
       const diff = new PNG({ width, height });
-      
+
       // Compare images
-      const diffPixels = pixelmatch(img1.data, img2.data, diff.data, width, height, {
-        threshold: 0.1,
-        includeAA: false,
-      });
-      
+      const diffPixels = pixelmatch(
+        img1.data,
+        img2.data,
+        diff.data,
+        width,
+        height,
+        {
+          threshold: 0.1,
+          includeAA: false,
+        }
+      );
+
       const totalPixels = width * height;
       const diffPercentage = (diffPixels / totalPixels) * 100;
-      
+
       // Save diff image
-      const diffPath = path.join(process.cwd(), 'tests/visual/screenshots/diffs', diffName);
+      const diffPath = path.join(
+        process.cwd(),
+        'tests/visual/screenshots/diffs',
+        diffName
+      );
       await fs.writeFile(diffPath, PNG.sync.write(diff));
-      
+
       const result: ScreenshotComparisonResult = {
         passed: diffPercentage < 5.0, // 5% threshold
         diffPixels,
@@ -625,7 +689,7 @@ export class EnhancedVisualSemanticsController {
         expectedPath,
         diffPath,
       };
-      
+
       return result;
     } catch (error) {
       // If expected doesn't exist, it's a first run
@@ -638,10 +702,10 @@ export class EnhancedVisualSemanticsController {
           expectedPath,
           isFirstRun: true,
         };
-        
+
         return result;
       }
-      
+
       throw error;
     }
   }
@@ -652,21 +716,24 @@ export class EnhancedVisualSemanticsController {
    * @param testName Name for the test
    * @returns Generated test scenario
    */
-  async generateTestScenario(spec: VisualSemanticsSpec, testName: string): Promise<TestScenario> {
+  async generateTestScenario(
+    spec: VisualSemanticsSpec,
+    testName: string
+  ): Promise<TestScenario> {
     // Create a test scenario based on the specification
     const scenario: TestScenario = {
       name: testName,
       component: spec.component,
       steps: [],
-      expectedOutcomes: []
+      expectedOutcomes: [],
     };
-    
+
     // Convert interaction sequences to test steps
     for (const interaction of spec.interactions) {
       scenario.steps.push(...interaction.steps);
       scenario.expectedOutcomes.push(...interaction.expectedOutcomes);
     }
-    
+
     return scenario;
   }
 
@@ -684,22 +751,31 @@ export class EnhancedVisualSemanticsController {
    */
   async generatePerformanceReport(): Promise<string> {
     const metrics = this.getPerformanceMetrics();
-    const reportPath = path.join(process.cwd(), 'tests/visual/reports', `performance-report-${Date.now()}.json`);
-    
+    const reportPath = path.join(
+      process.cwd(),
+      'tests/visual/reports',
+      `performance-report-${Date.now()}.json`
+    );
+
     const report = {
       timestamp: new Date().toISOString(),
       metrics,
       summary: {
         totalInteractions: metrics.length,
-        averageResponseTime: metrics.length > 0 
-          ? metrics.reduce((sum, m) => sum + m.duration, 0) / metrics.length 
-          : 0,
-        slowestInteraction: metrics.length > 0 
-          ? metrics.reduce((max, m) => m.duration > max.duration ? m : max, metrics[0])
-          : null
-      }
+        averageResponseTime:
+          metrics.length > 0
+            ? metrics.reduce((sum, m) => sum + m.duration, 0) / metrics.length
+            : 0,
+        slowestInteraction:
+          metrics.length > 0
+            ? metrics.reduce(
+                (max, m) => (m.duration > max.duration ? m : max),
+                metrics[0]
+              )
+            : null,
+      },
     };
-    
+
     await fs.writeFile(reportPath, JSON.stringify(report, null, 2));
     return reportPath;
   }
@@ -720,7 +796,9 @@ export class EnhancedVisualSemanticsController {
    */
   private ensureInitialized(): void {
     if (!this.initialized) {
-      throw new Error('EnhancedVisualSemanticsController not initialized. Call init() first.');
+      throw new Error(
+        'EnhancedVisualSemanticsController not initialized. Call init() first.'
+      );
     }
     if (!this.page || !this.browser) {
       throw new Error('Browser or page not available.');
@@ -870,7 +948,12 @@ export interface ScreenReaderCheckResult {
 }
 
 export interface ErgonomicViolation {
-  type: 'touchTarget' | 'contrast' | 'keyboard' | 'screenReader' | 'performance';
+  type:
+    | 'touchTarget'
+    | 'contrast'
+    | 'keyboard'
+    | 'screenReader'
+    | 'performance';
   message: string;
   severity: 'error' | 'warning';
 }

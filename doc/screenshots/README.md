@@ -26,6 +26,7 @@ To generate screenshots, you need to have the development server running and the
 ## Available Screenshots
 
 ### Main Demo Screenshots
+
 - `comprehensive-demo.png` - Overview of the comprehensive demo
 - `comprehensive-demo-closeup.png` - Close-up view of graph elements
 - `element-actors-demo.png` - Different element actor types
@@ -33,15 +34,18 @@ To generate screenshots, you need to have the development server running and the
 - `layout-engines-demo.png` - Various layout engines
 
 ### Element Type Screenshots
+
 - `sphere-nodes.png` - Sphere nodes close-up
 - `box-nodes.png` - Box nodes close-up
 - `text-nodes.png` - Text nodes close-up
 - `custom-nodes.png` - Custom geometry nodes close-up
 
 ### Edge Type Screenshots
+
 - `edges-curves.png` - Different edge types (straight, curved, dashed)
 
 ### Basic Renderer Screenshots
+
 - `basic-renderer-overview.png` - Overview with BasicRenderer enabled
 - `basic-renderer-sphere-nodes.png` - Sphere nodes with BasicRenderer
 - `basic-renderer-box-nodes.png` - Box nodes with BasicRenderer
@@ -50,6 +54,7 @@ To generate screenshots, you need to have the development server running and the
 - `basic-renderer-edges-curves.png` - Edges with BasicRenderer
 
 ### Visible Rendering Demo Screenshots
+
 - `visible-rendering-demo.png` - Visible rendering demo without labels/menus
 
 ## Viewing Screenshots

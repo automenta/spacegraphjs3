@@ -97,7 +97,7 @@ export class NodeRenderer implements IRenderer {
     const actor = new ActorClass(this.scene, elementStateProxy, this.state);
     actor.init();
     this.elementActors.set(node.id, actor);
-    
+
     // For HTML nodes, we need to add them to the CSS3D scene
     if (node.type === 'html' && actor instanceof HtmlNodeElementActor) {
       const css3DObject = actor.getRaycastableObject() as CSS3DObject;
@@ -118,7 +118,7 @@ export class NodeRenderer implements IRenderer {
           this.css3DScene.remove(css3DObject);
         }
       }
-      
+
       actor.dispose();
       this.elementActors.delete(nodeId);
     }

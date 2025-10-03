@@ -43,11 +43,12 @@ export function createState(initialSpec: Spec) {
         for (const key in specUpdate) {
           if (key !== 'data' && key in s) {
             const updateValue = specUpdate[key as keyof SpecUpdate];
-            if (updateValue !== undefined && updateValue !== null && typeof updateValue === 'object') {
-              deepMerge(
-                s[key as keyof Spec] as any,
-                updateValue as any
-              );
+            if (
+              updateValue !== undefined &&
+              updateValue !== null &&
+              typeof updateValue === 'object'
+            ) {
+              deepMerge(s[key as keyof Spec] as any, updateValue as any);
             }
           }
         }

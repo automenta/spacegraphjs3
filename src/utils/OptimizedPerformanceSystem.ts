@@ -40,7 +40,11 @@ export interface PerformanceMetrics {
 
 // Strategy interfaces for different optimization techniques
 export interface IOptimizationStrategy {
-  init(scene: THREE.Scene, camera: THREE.Camera, renderer: THREE.WebGLRenderer): void;
+  init(
+    scene: THREE.Scene,
+    camera: THREE.Camera,
+    renderer: THREE.WebGLRenderer
+  ): void;
   update(): void;
   dispose(): void;
   getName(): string;
@@ -57,7 +61,11 @@ export class ObjectPoolingStrategy implements IOptimizationStrategy {
 
   constructor(private config: { maxPoolSize?: number } = {}) {}
 
-  init(_scene: THREE.Scene, _camera: THREE.Camera, _renderer: THREE.WebGLRenderer): void {
+  init(
+    _scene: THREE.Scene,
+    _camera: THREE.Camera,
+    _renderer: THREE.WebGLRenderer
+  ): void {
     this.setupDefaultPools();
   }
 
@@ -86,12 +94,27 @@ export class ObjectPoolingStrategy implements IOptimizationStrategy {
 
   private setupDefaultPools(): void {
     const maxSize = this.config.maxPoolSize || 100;
-    
-    this.pools.set('vector3', new ObjectPool(() => new THREE.Vector3(), undefined, maxSize));
-    this.pools.set('matrix4', new ObjectPool(() => new THREE.Matrix4(), undefined, maxSize));
-    this.pools.set('color', new ObjectPool(() => new THREE.Color(), undefined, maxSize));
-    this.pools.set('mesh', new ObjectPool(() => new THREE.Mesh(), undefined, maxSize / 2));
-    this.pools.set('group', new ObjectPool(() => new THREE.Group(), undefined, maxSize / 4));
+
+    this.pools.set(
+      'vector3',
+      new ObjectPool(() => new THREE.Vector3(), undefined, maxSize)
+    );
+    this.pools.set(
+      'matrix4',
+      new ObjectPool(() => new THREE.Matrix4(), undefined, maxSize)
+    );
+    this.pools.set(
+      'color',
+      new ObjectPool(() => new THREE.Color(), undefined, maxSize)
+    );
+    this.pools.set(
+      'mesh',
+      new ObjectPool(() => new THREE.Mesh(), undefined, maxSize / 2)
+    );
+    this.pools.set(
+      'group',
+      new ObjectPool(() => new THREE.Group(), undefined, maxSize / 4)
+    );
   }
 
   public getPool<T>(name: string): ObjectPool<T> | undefined {
@@ -114,7 +137,11 @@ export class FrustumCullingStrategy implements IOptimizationStrategy {
     this.cullingManager = new CullingManager();
   }
 
-  init(_scene: THREE.Scene, camera: THREE.Camera, _renderer: THREE.WebGLRenderer): void {
+  init(
+    _scene: THREE.Scene,
+    camera: THREE.Camera,
+    _renderer: THREE.WebGLRenderer
+  ): void {
     this.cullingManager.setCamera(camera);
   }
 
@@ -162,7 +189,11 @@ export class LODStrategy implements IOptimizationStrategy {
     this.qualityLevel = config.qualityLevel || 2;
   }
 
-  init(_scene: THREE.Scene, camera: THREE.Camera, _renderer: THREE.WebGLRenderer): void {
+  init(
+    _scene: THREE.Scene,
+    camera: THREE.Camera,
+    _renderer: THREE.WebGLRenderer
+  ): void {
     this.lodManager.setCamera(camera);
   }
 
@@ -208,10 +239,18 @@ export class MemoryManagementStrategy implements IOptimizationStrategy {
     this.memoryManager = MemoryManager.getInstance();
   }
 
-  init(scene: THREE.Scene, _camera: THREE.Camera, _renderer: THREE.WebGLRenderer): void {
+  init(
+    scene: THREE.Scene,
+    _camera: THREE.Camera,
+    _renderer: THREE.WebGLRenderer
+  ): void {
     // Track objects for memory management
-    scene.traverse(object => {
-      if (object instanceof THREE.Mesh || object instanceof THREE.Material || object instanceof THREE.Texture) {
+    scene.traverse((object) => {
+      if (
+        object instanceof THREE.Mesh ||
+        object instanceof THREE.Material ||
+        object instanceof THREE.Texture
+      ) {
         this.memoryManager.trackObject(object);
       }
     });
@@ -250,7 +289,11 @@ export class GeometryBatchingStrategy implements IOptimizationStrategy {
   private enabled = true;
   private batchedObjects: Map<string, THREE.Mesh> = new Map();
 
-  init(scene: THREE.Scene, _camera: THREE.Camera, _renderer: THREE.WebGLRenderer): void {
+  init(
+    scene: THREE.Scene,
+    _camera: THREE.Camera,
+    _renderer: THREE.WebGLRenderer
+  ): void {
     this.createBatchedMeshes(scene);
   }
 
@@ -263,7 +306,7 @@ export class GeometryBatchingStrategy implements IOptimizationStrategy {
       if (mesh.geometry) mesh.geometry.dispose();
       if (mesh.material) {
         if (Array.isArray(mesh.material)) {
-          mesh.material.forEach(mat => mat.dispose());
+          mesh.material.forEach((mat) => mat.dispose());
         } else {
           mesh.material.dispose();
         }
@@ -287,11 +330,17 @@ export class GeometryBatchingStrategy implements IOptimizationStrategy {
   private createBatchedMeshes(scene: THREE.Scene): void {
     const batchGroups = new Map<string, THREE.Mesh[]>();
 
-    scene.traverse(object => {
-      if (object instanceof THREE.Mesh && object.material && !object.userData.isBatched) {
-        const material = Array.isArray(object.material) ? object.material[0] : object.material;
+    scene.traverse((object) => {
+      if (
+        object instanceof THREE.Mesh &&
+        object.material &&
+        !object.userData.isBatched
+      ) {
+        const material = Array.isArray(object.material)
+          ? object.material[0]
+          : object.material;
         const key = `${material.type}_${material.uuid}`;
-        
+
         if (!batchGroups.has(key)) {
           batchGroups.set(key, []);
         }
@@ -307,13 +356,17 @@ export class GeometryBatchingStrategy implements IOptimizationStrategy {
     });
   }
 
-  private createBatchedMesh(meshes: THREE.Mesh[], key: string, scene: THREE.Scene): void {
+  private createBatchedMesh(
+    meshes: THREE.Mesh[],
+    key: string,
+    scene: THREE.Scene
+  ): void {
     if (meshes.length === 0) return;
 
     const geometries: THREE.BufferGeometry[] = [];
     const materials: THREE.Material[] = [];
 
-    meshes.forEach(mesh => {
+    meshes.forEach((mesh) => {
       if (mesh.geometry) {
         geometries.push(mesh.geometry);
       }
@@ -335,13 +388,13 @@ export class GeometryBatchingStrategy implements IOptimizationStrategy {
     // Create batched mesh
     const batchedMesh = new THREE.Mesh(mergedGeometry, materials[0]);
     batchedMesh.userData.isBatched = true;
-    batchedMesh.userData.originalMeshes = meshes.map(m => m.uuid);
+    batchedMesh.userData.originalMeshes = meshes.map((m) => m.uuid);
 
     // Replace original meshes
     const parent = meshes[0].parent || scene;
     parent.add(batchedMesh);
 
-    meshes.forEach(mesh => {
+    meshes.forEach((mesh) => {
       mesh.visible = false;
       mesh.userData.batchedBy = batchedMesh.uuid;
     });
@@ -349,7 +402,9 @@ export class GeometryBatchingStrategy implements IOptimizationStrategy {
     this.batchedObjects.set(key, batchedMesh);
   }
 
-  private mergeGeometries(geometries: THREE.BufferGeometry[]): THREE.BufferGeometry | null {
+  private mergeGeometries(
+    geometries: THREE.BufferGeometry[]
+  ): THREE.BufferGeometry | null {
     if (geometries.length === 0) return null;
     if (geometries.length === 1) return geometries[0];
 
@@ -362,7 +417,7 @@ export class GeometryBatchingStrategy implements IOptimizationStrategy {
 
       let vertexOffset = 0;
 
-      geometries.forEach(geometry => {
+      geometries.forEach((geometry) => {
         const pos = geometry.attributes.position?.array;
         const norm = geometry.attributes.normal?.array;
         const uv = geometry.attributes.uv?.array;
@@ -373,7 +428,7 @@ export class GeometryBatchingStrategy implements IOptimizationStrategy {
         if (uv) uvs.push(...Array.from(uv));
 
         if (index) {
-          indices.push(...Array.from(index).map(i => i + vertexOffset));
+          indices.push(...Array.from(index).map((i) => i + vertexOffset));
         } else {
           for (let i = 0; i < pos.length / 3; i++) {
             indices.push(vertexOffset + i);
@@ -384,13 +439,22 @@ export class GeometryBatchingStrategy implements IOptimizationStrategy {
       });
 
       if (positions.length > 0) {
-        mergedGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        mergedGeometry.setAttribute(
+          'position',
+          new THREE.Float32BufferAttribute(positions, 3)
+        );
       }
       if (normals.length > 0) {
-        mergedGeometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+        mergedGeometry.setAttribute(
+          'normal',
+          new THREE.Float32BufferAttribute(normals, 3)
+        );
       }
       if (uvs.length > 0) {
-        mergedGeometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+        mergedGeometry.setAttribute(
+          'uv',
+          new THREE.Float32BufferAttribute(uvs, 2)
+        );
       }
       if (indices.length > 0) {
         mergedGeometry.setIndex(indices);
@@ -411,7 +475,11 @@ export class InstancingStrategy implements IOptimizationStrategy {
   private enabled = true;
   private instancedObjects: Map<string, THREE.InstancedMesh> = new Map();
 
-  init(scene: THREE.Scene, _camera: THREE.Camera, _renderer: THREE.WebGLRenderer): void {
+  init(
+    scene: THREE.Scene,
+    _camera: THREE.Camera,
+    _renderer: THREE.WebGLRenderer
+  ): void {
     this.createInstancedMeshes(scene);
   }
 
@@ -430,7 +498,7 @@ export class InstancingStrategy implements IOptimizationStrategy {
       if (instancedMesh.geometry) instancedMesh.geometry.dispose();
       if (instancedMesh.material) {
         if (Array.isArray(instancedMesh.material)) {
-          instancedMesh.material.forEach(mat => mat.dispose());
+          instancedMesh.material.forEach((mat) => mat.dispose());
         } else {
           instancedMesh.material.dispose();
         }
@@ -455,12 +523,19 @@ export class InstancingStrategy implements IOptimizationStrategy {
     // Find objects suitable for instancing
     const instanceGroups = new Map<string, THREE.Mesh[]>();
 
-    scene.traverse(object => {
-      if (object instanceof THREE.Mesh && object.geometry && object.material && !object.userData.isInstanced) {
+    scene.traverse((object) => {
+      if (
+        object instanceof THREE.Mesh &&
+        object.geometry &&
+        object.material &&
+        !object.userData.isInstanced
+      ) {
         const geometry = object.geometry;
-        const material = Array.isArray(object.material) ? object.material[0] : object.material;
+        const material = Array.isArray(object.material)
+          ? object.material[0]
+          : object.material;
         const key = `${geometry.uuid}_${material.uuid}`;
-        
+
         if (!instanceGroups.has(key)) {
           instanceGroups.set(key, []);
         }
@@ -476,16 +551,26 @@ export class InstancingStrategy implements IOptimizationStrategy {
     });
   }
 
-  private createInstancedMesh(meshes: THREE.Mesh[], key: string, scene: THREE.Scene): void {
+  private createInstancedMesh(
+    meshes: THREE.Mesh[],
+    key: string,
+    scene: THREE.Scene
+  ): void {
     if (meshes.length === 0) return;
 
     const templateMesh = meshes[0];
     const geometry = templateMesh.geometry;
-    const material = Array.isArray(templateMesh.material) ? templateMesh.material[0] : templateMesh.material;
+    const material = Array.isArray(templateMesh.material)
+      ? templateMesh.material[0]
+      : templateMesh.material;
 
-    const instancedMesh = new THREE.InstancedMesh(geometry, material, meshes.length);
+    const instancedMesh = new THREE.InstancedMesh(
+      geometry,
+      material,
+      meshes.length
+    );
     instancedMesh.userData.isInstanced = true;
-    instancedMesh.userData.originalMeshes = meshes.map(m => m.uuid);
+    instancedMesh.userData.originalMeshes = meshes.map((m) => m.uuid);
 
     const matrix = new THREE.Matrix4();
     const color = new THREE.Color();
@@ -496,7 +581,10 @@ export class InstancingStrategy implements IOptimizationStrategy {
       instancedMesh.setMatrixAt(index, matrix);
 
       // Set instance color if material supports it
-      if (material instanceof THREE.MeshBasicMaterial && mesh.material instanceof THREE.MeshBasicMaterial) {
+      if (
+        material instanceof THREE.MeshBasicMaterial &&
+        mesh.material instanceof THREE.MeshBasicMaterial
+      ) {
         color.copy(mesh.material.color);
         instancedMesh.setColorAt(index, color);
       }
@@ -524,7 +612,7 @@ export class OptimizedPerformanceSystem extends BaseUtilitySystem {
   private renderer: THREE.WebGLRenderer;
   private config: Required<PerformanceConfig>;
   private metrics: PerformanceMetrics;
-  
+
   private frameCount = 0;
   private lastFrameTime = performance.now();
   private fpsHistory: number[] = [];
@@ -541,7 +629,7 @@ export class OptimizedPerformanceSystem extends BaseUtilitySystem {
     this.scene = scene;
     this.camera = camera;
     this.renderer = renderer;
-    
+
     this.config = {
       enableObjectPooling: true,
       enableFrustumCulling: true,
@@ -554,9 +642,9 @@ export class OptimizedPerformanceSystem extends BaseUtilitySystem {
       qualityLevel: 'high',
       adaptiveQuality: true,
       updateInterval: 1000,
-      ...config
+      ...config,
     };
-    
+
     this.metrics = {
       fps: 0,
       frameTime: 0,
@@ -567,9 +655,9 @@ export class OptimizedPerformanceSystem extends BaseUtilitySystem {
       textureCount: 0,
       shaderCount: 0,
       qualityLevel: this.getQualityLevelValue(this.config.qualityLevel),
-      isThrottling: false
+      isThrottling: false,
     };
-    
+
     this.initializeStrategies();
   }
 
@@ -581,11 +669,11 @@ export class OptimizedPerformanceSystem extends BaseUtilitySystem {
   protected onUpdate(_deltaTime: number): void {
     this.updateMetrics();
     this.checkPerformanceThresholds();
-    
+
     if (this.config.adaptiveQuality) {
       this.adaptQuality();
     }
-    
+
     // Update all strategies
     for (const strategy of this.strategies.values()) {
       if (strategy.isEnabled()) {
@@ -599,7 +687,7 @@ export class OptimizedPerformanceSystem extends BaseUtilitySystem {
     for (const strategy of this.strategies.values()) {
       strategy.setEnabled(!enabled); // Disable some strategies in performance mode
     }
-    
+
     if (enabled) {
       this.setQualityLevel('low');
     }
@@ -617,23 +705,28 @@ export class OptimizedPerformanceSystem extends BaseUtilitySystem {
     if (this.config.enableObjectPooling) {
       this.strategies.set('objectPooling', new ObjectPoolingStrategy());
     }
-    
+
     if (this.config.enableFrustumCulling) {
       this.strategies.set('frustumCulling', new FrustumCullingStrategy());
     }
-    
+
     if (this.config.enableLOD) {
-      this.strategies.set('lod', new LODStrategy({ qualityLevel: this.getQualityLevelValue(this.config.qualityLevel) }));
+      this.strategies.set(
+        'lod',
+        new LODStrategy({
+          qualityLevel: this.getQualityLevelValue(this.config.qualityLevel),
+        })
+      );
     }
-    
+
     if (this.config.enableMemoryManagement) {
       this.strategies.set('memoryManagement', new MemoryManagementStrategy());
     }
-    
+
     if (this.config.enableBatching) {
       this.strategies.set('geometryBatching', new GeometryBatchingStrategy());
     }
-    
+
     if (this.config.enableInstancing) {
       this.strategies.set('instancing', new InstancingStrategy());
     }
@@ -654,15 +747,15 @@ export class OptimizedPerformanceSystem extends BaseUtilitySystem {
     const currentTime = performance.now();
     const frameTime = currentTime - this.lastFrameTime;
     const fps = 1000 / frameTime;
-    
+
     this.fpsHistory.push(fps);
     this.frameTimeHistory.push(frameTime);
-    
+
     if (this.fpsHistory.length > 60) {
       this.fpsHistory.shift();
       this.frameTimeHistory.shift();
     }
-    
+
     this.metrics.fps = fps;
     this.metrics.frameTime = frameTime;
     this.metrics.drawCalls = this.renderer.info.render.calls;
@@ -670,23 +763,30 @@ export class OptimizedPerformanceSystem extends BaseUtilitySystem {
     this.metrics.objectCount = this.scene.children.length;
     this.metrics.textureCount = this.renderer.info.memory.textures;
     this.metrics.shaderCount = this.renderer.info.programs?.length || 0;
-    
+
     if ((performance as any).memory) {
-      this.metrics.memoryUsage = (performance as any).memory.usedJSHeapSize / 1048576;
+      this.metrics.memoryUsage =
+        (performance as any).memory.usedJSHeapSize / 1048576;
     }
-    
+
     this.lastFrameTime = currentTime;
   }
 
   private checkPerformanceThresholds(): void {
-    const avgFPS = this.fpsHistory.reduce((a, b) => a + b, 0) / this.fpsHistory.length;
-    const avgFrameTime = this.frameTimeHistory.reduce((a, b) => a + b, 0) / this.frameTimeHistory.length;
-    
+    const avgFPS =
+      this.fpsHistory.reduce((a, b) => a + b, 0) / this.fpsHistory.length;
+    const avgFrameTime =
+      this.frameTimeHistory.reduce((a, b) => a + b, 0) /
+      this.frameTimeHistory.length;
+
     // Check if performance is below target
-    if (avgFPS < this.config.maxFPS * 0.8 || avgFrameTime > this.config.targetFrameTime * 1.2) {
+    if (
+      avgFPS < this.config.maxFPS * 0.8 ||
+      avgFrameTime > this.config.targetFrameTime * 1.2
+    ) {
       this.throttling = true;
       this.metrics.isThrottling = true;
-      
+
       if (this.config.adaptiveQuality) {
         this.reduceQuality();
       }
@@ -694,9 +794,10 @@ export class OptimizedPerformanceSystem extends BaseUtilitySystem {
       this.throttling = false;
       this.metrics.isThrottling = false;
     }
-    
+
     // Check memory usage
-    if (this.metrics.memoryUsage > 500) { // 500MB threshold
+    if (this.metrics.memoryUsage > 500) {
+      // 500MB threshold
       const memoryStrategy = this.strategies.get('memoryManagement');
       if (memoryStrategy instanceof MemoryManagementStrategy) {
         // Trigger garbage collection
@@ -705,11 +806,15 @@ export class OptimizedPerformanceSystem extends BaseUtilitySystem {
   }
 
   private adaptQuality(): void {
-    const avgFPS = this.fpsHistory.reduce((a, b) => a + b, 0) / this.fpsHistory.length;
-    
+    const avgFPS =
+      this.fpsHistory.reduce((a, b) => a + b, 0) / this.fpsHistory.length;
+
     if (avgFPS < this.config.maxFPS * 0.7) {
       this.reduceQuality();
-    } else if (avgFPS > this.config.maxFPS * 0.95 && this.metrics.qualityLevel < 3) {
+    } else if (
+      avgFPS > this.config.maxFPS * 0.95 &&
+      this.metrics.qualityLevel < 3
+    ) {
       this.increaseQuality();
     }
   }
@@ -730,19 +835,42 @@ export class OptimizedPerformanceSystem extends BaseUtilitySystem {
 
   private applyQualitySettings(): void {
     const qualitySettings = {
-      0: { shadows: false, lodDistance: 0.5, maxRoughness: 1, maxMetalness: 0.5 },
-      1: { shadows: true, lodDistance: 0.75, maxRoughness: 0.8, maxMetalness: 0.7 },
-      2: { shadows: true, lodDistance: 1, maxRoughness: 0.5, maxMetalness: 0.9 },
-      3: { shadows: true, lodDistance: 1.5, maxRoughness: 0.2, maxMetalness: 1.0 }
+      0: {
+        shadows: false,
+        lodDistance: 0.5,
+        maxRoughness: 1,
+        maxMetalness: 0.5,
+      },
+      1: {
+        shadows: true,
+        lodDistance: 0.75,
+        maxRoughness: 0.8,
+        maxMetalness: 0.7,
+      },
+      2: {
+        shadows: true,
+        lodDistance: 1,
+        maxRoughness: 0.5,
+        maxMetalness: 0.9,
+      },
+      3: {
+        shadows: true,
+        lodDistance: 1.5,
+        maxRoughness: 0.2,
+        maxMetalness: 1.0,
+      },
     };
-    
-    const settings = qualitySettings[this.metrics.qualityLevel as keyof typeof qualitySettings] || qualitySettings[2];
-    
+
+    const settings =
+      qualitySettings[
+        this.metrics.qualityLevel as keyof typeof qualitySettings
+      ] || qualitySettings[2];
+
     // Apply renderer settings
     if (this.renderer.shadowMap) {
       this.renderer.shadowMap.enabled = settings.shadows;
     }
-    
+
     // Update LOD distances
     const lodStrategy = this.strategies.get('lod');
     if (lodStrategy instanceof LODStrategy) {
@@ -753,17 +881,17 @@ export class OptimizedPerformanceSystem extends BaseUtilitySystem {
   private startPerformanceMonitoring(): void {
     const monitorLoop = () => {
       if (!this.isInitialized()) return;
-      
+
       this.updateMetrics();
       this.checkPerformanceThresholds();
-      
+
       if (this.config.adaptiveQuality) {
         this.adaptQuality();
       }
-      
+
       setTimeout(() => monitorLoop(), this.config.updateInterval);
     };
-    
+
     monitorLoop();
   }
 
@@ -787,7 +915,7 @@ export class OptimizedPerformanceSystem extends BaseUtilitySystem {
 
   public updateConfig(newConfig: Partial<PerformanceConfig>): void {
     Object.assign(this.config, newConfig);
-    
+
     if (newConfig.qualityLevel) {
       this.setQualityLevel(newConfig.qualityLevel);
     }

@@ -61,7 +61,7 @@ export class InteractionUtils {
       swipeThreshold: 50,
       pinchThreshold: 5,
       dragThreshold: 5,
-      ...config
+      ...config,
     };
 
     this.initializeGestureRecognizers();
@@ -71,10 +71,22 @@ export class InteractionUtils {
    * Initialize gesture recognizers
    */
   private initializeGestureRecognizers(): void {
-    this.gestureRecognizers.set('tap', new TapGestureRecognizer(this.gestureConfig));
-    this.gestureRecognizers.set('swipe', new SwipeGestureRecognizer(this.gestureConfig));
-    this.gestureRecognizers.set('pinch', new PinchGestureRecognizer(this.gestureConfig));
-    this.gestureRecognizers.set('drag', new DragGestureRecognizer(this.gestureConfig));
+    this.gestureRecognizers.set(
+      'tap',
+      new TapGestureRecognizer(this.gestureConfig)
+    );
+    this.gestureRecognizers.set(
+      'swipe',
+      new SwipeGestureRecognizer(this.gestureConfig)
+    );
+    this.gestureRecognizers.set(
+      'pinch',
+      new PinchGestureRecognizer(this.gestureConfig)
+    );
+    this.gestureRecognizers.set(
+      'drag',
+      new DragGestureRecognizer(this.gestureConfig)
+    );
   }
 
   /**
@@ -98,24 +110,27 @@ export class InteractionUtils {
   worldToScreen(worldPos: THREE.Vector3): THREE.Vector2 {
     const vector = worldPos.clone();
     vector.project(this.camera);
-    
+
     return new THREE.Vector2(
-      (vector.x + 1) / 2 * window.innerWidth,
-      -(vector.y - 1) / 2 * window.innerHeight
+      ((vector.x + 1) / 2) * window.innerWidth,
+      (-(vector.y - 1) / 2) * window.innerHeight
     );
   }
 
   /**
    * Raycast from screen position
    */
-  raycastFromScreen(screenPos: THREE.Vector2, objects: THREE.Object3D[] = []): THREE.Intersection[] {
+  raycastFromScreen(
+    screenPos: THREE.Vector2,
+    objects: THREE.Object3D[] = []
+  ): THREE.Intersection[] {
     const mouse = new THREE.Vector2(
       (screenPos.x / window.innerWidth) * 2 - 1,
       -(screenPos.y / window.innerHeight) * 2 + 1
     );
 
     this.raycaster.setFromCamera(mouse, this.camera);
-    
+
     const targetObjects = objects.length > 0 ? objects : this.scene.children;
     return this.raycaster.intersectObjects(targetObjects, true);
   }
@@ -123,7 +138,10 @@ export class InteractionUtils {
   /**
    * Get object at screen position
    */
-  getObjectAtPosition(screenPos: THREE.Vector2, objects: THREE.Object3D[] = []): THREE.Object3D | null {
+  getObjectAtPosition(
+    screenPos: THREE.Vector2,
+    objects: THREE.Object3D[] = []
+  ): THREE.Object3D | null {
     const intersections = this.raycastFromScreen(screenPos, objects);
     return intersections.length > 0 ? intersections[0].object : null;
   }
@@ -138,7 +156,10 @@ export class InteractionUtils {
   /**
    * Calculate velocity from position history
    */
-  calculateVelocity(positions: THREE.Vector2[], timestamps: number[]): THREE.Vector2 {
+  calculateVelocity(
+    positions: THREE.Vector2[],
+    timestamps: number[]
+  ): THREE.Vector2 {
     if (positions.length < 2) return new THREE.Vector2(0, 0);
 
     const recentPositions = positions.slice(-5);
@@ -150,7 +171,7 @@ export class InteractionUtils {
     for (let i = 1; i < recentPositions.length; i++) {
       const distance = recentPositions[i].distanceTo(recentPositions[i - 1]);
       const time = recentTimestamps[i] - recentTimestamps[i - 1];
-      
+
       totalDistance += distance;
       totalTime += time;
     }
@@ -173,7 +194,7 @@ export class InteractionUtils {
     if (events.length === 0) return null;
 
     const _latestEvent = events[events.length - 1];
-    
+
     for (const [_name, recognizer] of this.gestureRecognizers) {
       const gesture = recognizer.recognize(events);
       if (gesture) {
@@ -188,7 +209,8 @@ export class InteractionUtils {
    * Update interaction state
    */
   updateInteractionState(id: string, event: Partial<InteractionState>): void {
-    const currentState = this.interactionState.get(id) || this.createDefaultState();
+    const currentState =
+      this.interactionState.get(id) || this.createDefaultState();
     const newState = { ...currentState, ...event };
     this.interactionState.set(id, newState);
   }
@@ -221,24 +243,32 @@ export class InteractionUtils {
       dragStartPosition: new THREE.Vector3(),
       dragOffset: new THREE.Vector3(),
       velocity: new THREE.Vector2(),
-      pressure: 0
+      pressure: 0,
     };
   }
 
   /**
    * Check if position is within bounds
    */
-  isWithinBounds(position: THREE.Vector2, bounds: { x: number; y: number; width: number; height: number }): boolean {
-    return position.x >= bounds.x && 
-           position.x <= bounds.x + bounds.width &&
-           position.y >= bounds.y && 
-           position.y <= bounds.y + bounds.height;
+  isWithinBounds(
+    position: THREE.Vector2,
+    bounds: { x: number; y: number; width: number; height: number }
+  ): boolean {
+    return (
+      position.x >= bounds.x &&
+      position.x <= bounds.x + bounds.width &&
+      position.y >= bounds.y &&
+      position.y <= bounds.y + bounds.height
+    );
   }
 
   /**
    * Clamp position to bounds
    */
-  clampToBounds(position: THREE.Vector2, bounds: { x: number; y: number; width: number; height: number }): THREE.Vector2 {
+  clampToBounds(
+    position: THREE.Vector2,
+    bounds: { x: number; y: number; width: number; height: number }
+  ): THREE.Vector2 {
     return new THREE.Vector2(
       Math.max(bounds.x, Math.min(bounds.x + bounds.width, position.x)),
       Math.max(bounds.y, Math.min(bounds.y + bounds.height, position.y))
@@ -253,26 +283,30 @@ export class InteractionUtils {
     constraints: { min?: THREE.Vector3; max?: THREE.Vector3 }
   ): THREE.Vector3 {
     const constrained = currentPosition.clone();
-    
+
     if (constraints.min) {
       constrained.x = Math.max(constraints.min.x, constrained.x);
       constrained.y = Math.max(constraints.min.y, constrained.y);
       constrained.z = Math.max(constraints.min.z, constrained.z);
     }
-    
+
     if (constraints.max) {
       constrained.x = Math.min(constraints.max.x, constrained.x);
       constrained.y = Math.min(constraints.max.y, constrained.y);
       constrained.z = Math.min(constraints.max.z, constrained.z);
     }
-    
+
     return constrained;
   }
 
   /**
    * Smooth position interpolation
    */
-  smoothPosition(current: THREE.Vector2, target: THREE.Vector2, smoothing: number = 0.1): THREE.Vector2 {
+  smoothPosition(
+    current: THREE.Vector2,
+    target: THREE.Vector2,
+    smoothing: number = 0.1
+  ): THREE.Vector2 {
     return current.clone().lerp(target, smoothing);
   }
 
@@ -288,14 +322,17 @@ export class InteractionUtils {
     for (let i = 1; i < events.length; i++) {
       const prev = events[i - 1];
       const curr = events[i];
-      
+
       const timeDiff = curr.timestamp - prev.timestamp;
       const distance = prev.position.distanceTo(curr.position);
-      
+
       // Higher confidence for consistent timing and movement
       const timingConsistency = Math.min(1, 50 / Math.max(timeDiff, 1));
-      const movementConsistency = Math.min(1, 1 / Math.max(distance / timeDiff, 0.01));
-      
+      const movementConsistency = Math.min(
+        1,
+        1 / Math.max(distance / timeDiff, 0.01)
+      );
+
       totalConfidence += (timingConsistency + movementConsistency) / 2;
       count++;
     }
@@ -321,7 +358,7 @@ export class InteractionUtils {
         position: touch1.clone().add(touch2).multiplyScalar(0.5),
         delta: new THREE.Vector2(distance, 0),
         timestamp: now,
-        originalEvent: new Event('pinch')
+        originalEvent: new Event('pinch'),
       });
     }
 
@@ -340,7 +377,7 @@ export class InteractionUtils {
       position,
       worldPosition,
       timestamp: Date.now(),
-      originalEvent: event
+      originalEvent: event,
     };
   }
 
@@ -360,7 +397,7 @@ export class InteractionUtils {
         position,
         worldPosition,
         timestamp: Date.now(),
-        originalEvent: event
+        originalEvent: event,
       });
     }
 
@@ -377,12 +414,18 @@ export class InteractionUtils {
    */
   private getMouseEventType(event: MouseEvent): InteractionEvent['type'] {
     switch (event.type) {
-      case 'click': return 'click';
-      case 'dblclick': return 'dblclick';
-      case 'mousemove': return 'hover';
-      case 'mousedown': return 'drag';
-      case 'mouseup': return 'drag';
-      default: return 'click';
+      case 'click':
+        return 'click';
+      case 'dblclick':
+        return 'dblclick';
+      case 'mousemove':
+        return 'hover';
+      case 'mousedown':
+        return 'drag';
+      case 'mouseup':
+        return 'drag';
+      default:
+        return 'click';
     }
   }
 
@@ -417,10 +460,13 @@ class TapGestureRecognizer extends GestureRecognizer {
     const timeDiff = latest.timestamp - previous.timestamp;
     const distance = previous.position.distanceTo(latest.position);
 
-    if (timeDiff < this.config.doubleTapDelay! && distance < this.config.tapThreshold!) {
+    if (
+      timeDiff < this.config.doubleTapDelay! &&
+      distance < this.config.tapThreshold!
+    ) {
       return {
         ...latest,
-        type: 'tap'
+        type: 'tap',
       };
     }
 
@@ -443,13 +489,16 @@ class SwipeGestureRecognizer extends GestureRecognizer {
     const timeDiff = end.timestamp - start.timestamp;
 
     if (distance > this.config.swipeThreshold! && timeDiff < 500) {
-      const velocity = end.position.clone().sub(start.position).divideScalar(timeDiff);
-      
+      const velocity = end.position
+        .clone()
+        .sub(start.position)
+        .divideScalar(timeDiff);
+
       return {
         ...end,
         type: 'swipe',
         velocity,
-        delta: end.position.clone().sub(start.position)
+        delta: end.position.clone().sub(start.position),
       };
     }
 
@@ -485,7 +534,10 @@ class DragGestureRecognizer extends GestureRecognizer {
         ...latest,
         type: 'drag',
         delta: latest.position.clone().sub(previous.position),
-        velocity: latest.position.clone().sub(previous.position).divideScalar(timeDiff)
+        velocity: latest.position
+          .clone()
+          .sub(previous.position)
+          .divideScalar(timeDiff),
       };
     }
 

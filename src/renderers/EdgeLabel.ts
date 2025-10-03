@@ -11,7 +11,8 @@ export class EdgeLabel {
   private static fontLoader: FontLoader = new FontLoader();
   private static defaultFont: any = null;
   private static fontLoadingPromise: Promise<any> | null = null;
-  private static fontUrl: string = 'https://cdn.jsdelivr.net/npm/three@0.179.1/examples/fonts/helvetiker_regular.typeface.json';
+  private static fontUrl: string =
+    'https://cdn.jsdelivr.net/npm/three@0.179.1/examples/fonts/helvetiker_regular.typeface.json';
 
   private scene: THREE.Scene;
   private edge: EdgeSpec;
@@ -36,12 +37,12 @@ export class EdgeLabel {
     this.group = new THREE.Group();
     this.group.userData.edgeId = edge.id;
     this.group.userData.isLabel = true;
-    
+
     // Load font if not already loaded
     if (!EdgeLabel.defaultFont && !EdgeLabel.fontLoadingPromise) {
       EdgeLabel.fontLoadingPromise = this.loadFont();
     }
-    
+
     this.scene.add(this.group);
   }
 
@@ -62,9 +63,12 @@ export class EdgeLabel {
     const backgroundMaterial = new THREE.MeshBasicMaterial({
       color: 0x000000,
       transparent: true,
-      opacity: 0.7
+      opacity: 0.7,
     });
-    this.backgroundMesh = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
+    this.backgroundMesh = new THREE.Mesh(
+      backgroundGeometry,
+      backgroundMaterial
+    );
     this.backgroundMesh.position.z = -0.05; // Slightly behind the text
     this.group.add(this.backgroundMesh);
 
@@ -85,7 +89,10 @@ export class EdgeLabel {
         },
         undefined,
         (error) => {
-          console.warn('Failed to load font for edge label, using fallback:', error);
+          console.warn(
+            'Failed to load font for edge label, using fallback:',
+            error
+          );
           // Create a minimal font object as fallback
           EdgeLabel.defaultFont = {
             data: {
@@ -94,8 +101,8 @@ export class EdgeLabel {
               ascender: 0.8,
               descender: -0.2,
               underlineThickness: 0.05,
-              underlinePosition: -0.1
-            }
+              underlinePosition: -0.1,
+            },
           };
           resolve(EdgeLabel.defaultFont);
         }
@@ -116,8 +123,8 @@ export class EdgeLabel {
           glyphs: {},
           familyName: 'Fallback',
           ascender: 0.8,
-          descender: -0.2
-        }
+          descender: -0.2,
+        },
       };
 
       // Create text geometry
@@ -130,7 +137,7 @@ export class EdgeLabel {
         bevelThickness: 0.01,
         bevelSize: 0.005,
         bevelOffset: 0,
-        bevelSegments: 2
+        bevelSegments: 2,
       });
 
       // Center the geometry
@@ -162,11 +169,17 @@ export class EdgeLabel {
       if (textGeometry.boundingBox) {
         const size = new THREE.Vector3();
         textGeometry.boundingBox.getSize(size);
-        const backgroundGeometry = new THREE.PlaneGeometry(size.x + 0.2, size.y + 0.2);
+        const backgroundGeometry = new THREE.PlaneGeometry(
+          size.x + 0.2,
+          size.y + 0.2
+        );
         const oldBackgroundGeometry = this.backgroundMesh.geometry;
         this.backgroundMesh.geometry = backgroundGeometry;
-        
-        if (oldBackgroundGeometry && oldBackgroundGeometry !== backgroundGeometry) {
+
+        if (
+          oldBackgroundGeometry &&
+          oldBackgroundGeometry !== backgroundGeometry
+        ) {
           if (oldBackgroundGeometry.disposeBoundsTree) {
             oldBackgroundGeometry.disposeBoundsTree();
           }
@@ -177,7 +190,10 @@ export class EdgeLabel {
       // In test environments, we don't want to log warnings for expected failures
       // In production, we still want to log the warning
       if (process.env.NODE_ENV !== 'test') {
-        console.warn(`Failed to create text geometry for edge label ${this.edge.id}:`, error);
+        console.warn(
+          `Failed to create text geometry for edge label ${this.edge.id}:`,
+          error
+        );
       }
       // Keep the placeholder box if text creation fails
     }
@@ -192,25 +208,29 @@ export class EdgeLabel {
       (sourcePos.y + targetPos.y) / 2,
       (sourcePos.z + targetPos.z) / 2
     );
-    
+
     this.group.position.copy(midpoint);
   }
 
-  public updateStyle(isHovered: boolean = false, isSelected: boolean = false): void {
+  public updateStyle(
+    isHovered: boolean = false,
+    isSelected: boolean = false
+  ): void {
     // Update text color based on state
     let textColor = 0xffffff; // Default white
-    
+
     if (isSelected) {
       textColor = 0xffff00; // Yellow when selected
     } else if (isHovered) {
       textColor = 0x00ffff; // Cyan when hovered
     }
-    
+
     (this.textMesh.material as THREE.MeshBasicMaterial).color.set(textColor);
-    
+
     // Update background opacity based on state
     const backgroundOpacity = isSelected ? 0.9 : isHovered ? 0.8 : 0.7;
-    (this.backgroundMesh.material as THREE.MeshBasicMaterial).opacity = backgroundOpacity;
+    (this.backgroundMesh.material as THREE.MeshBasicMaterial).opacity =
+      backgroundOpacity;
   }
 
   public dispose(): void {
@@ -218,7 +238,7 @@ export class EdgeLabel {
     if (this.group.parent === this.scene) {
       this.scene.remove(this.group);
     }
-    
+
     // Dispose of geometries
     if (this.textMesh.geometry) {
       if (this.textMesh.geometry.disposeBoundsTree) {
@@ -226,19 +246,19 @@ export class EdgeLabel {
       }
       this.textMesh.geometry.dispose();
     }
-    
+
     if (this.backgroundMesh.geometry) {
       if (this.backgroundMesh.geometry.disposeBoundsTree) {
         this.backgroundMesh.geometry.disposeBoundsTree();
       }
       this.backgroundMesh.geometry.dispose();
     }
-    
+
     // Dispose of materials
     if (this.textMesh.material) {
       (this.textMesh.material as THREE.Material).dispose();
     }
-    
+
     if (this.backgroundMesh.material) {
       (this.backgroundMesh.material as THREE.Material).dispose();
     }

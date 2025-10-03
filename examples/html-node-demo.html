@@ -1,200 +1,226 @@
 <![CDATA[<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SpaceGraphJS - HTML Node Demo</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            color: #e6e6e6;
-        }
-        #graph {
-            width: 100vw;
-            height: 100vh;
-        }
-        #controls {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 100;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px;
-            border-radius: 10px;
-            color: white;
-            backdrop-filter: blur(5px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            max-width: 300px;
-        }
-        #controls h3 {
-            margin: 0 0 15px 0;
-            color: #4dccbd;
-            font-size: 1.2em;
-        }
-        #controls p {
-            margin: 8px 0;
-            font-size: 14px;
-            line-height: 1.4;
-        }
-        #controls button {
-            margin: 5px;
-            padding: 8px 15px;
-            border: none;
-            border-radius: 5px;
-            background: #4a4a4a;
-            color: white;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-weight: 500;
-        }
-        #controls button:hover {
-            background: #6a6a6a;
-            transform: translateY(-2px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        }
-        #controls button.active {
-            background: #4dccbd;
-            color: #000;
-        }
-        #instructions {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            z-index: 100;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px;
-            border-radius: 10px;
-            color: white;
-            max-width: 350px;
-            backdrop-filter: blur(5px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        }
-        #instructions h3 {
-            margin: 0 0 10px 0;
-            color: #4dccbd;
-        }
-        #instructions ul {
-            margin: 0;
-            padding-left: 20px;
-        }
-        #instructions li {
-            margin-bottom: 8px;
-            font-size: 14px;
-            line-height: 1.4;
-        }
-        .spacegraph-html-node {
-            background: rgba(30, 30, 46, 0.9);
-            border: 2px solid #4dccbd;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-            min-width: 200px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .spacegraph-html-node:hover {
-            box-shadow: 0 6px 20px rgba(77, 204, 189, 0.4);
-        }
-        .spacegraph-html-node h4 {
-            margin: 0 0 10px 0;
-            color: #4dccbd;
-            font-size: 1.1em;
-        }
-        .spacegraph-html-node p {
-            margin: 5px 0;
-            font-size: 0.9em;
-            color: #ccc;
-        }
-        .spacegraph-html-node input, .spacegraph-html-node select, .spacegraph-html-node button {
-            width: 100%;
-            margin: 5px 0;
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #444;
-            background: #222;
-            color: #eee;
-        }
-        .spacegraph-html-node button {
-            background: #4dccbd;
-            color: #000;
-            font-weight: bold;
-            cursor: pointer;
-            border: none;
-        }
-        .spacegraph-html-node button:hover {
-            background: #3db0a0;
-        }
-        .spacegraph-html-node progress {
-            width: 100%;
-            height: 10px;
-            border-radius: 5px;
-            background: #222;
-        }
-        .spacegraph-html-node progress::-webkit-progress-bar {
-            background: #222;
-            border-radius: 5px;
-        }
-        .spacegraph-html-node progress::-webkit-progress-value {
-            background: #4dccbd;
-            border-radius: 5px;
-        }
-        .spacegraph-html-node .status-indicator {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-        .spacegraph-html-node .status-online {
-            background: #4dccbd;
-            box-shadow: 0 0 8px #4dccbd;
-        }
-        .spacegraph-html-node .status-offline {
-            background: #ff6b6b;
-        }
-        .spacegraph-html-node .metric-value {
-            font-weight: bold;
-            color: #4dccbd;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>SpaceGraphJS - HTML Node Demo</title>
+  <style>
+      body {
+          margin: 0;
+          padding: 0;
+          overflow: hidden;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background: linear-gradient(135deg, #1a1a2e, #16213e);
+          color: #e6e6e6;
+      }
+
+      #graph {
+          width: 100vw;
+          height: 100vh;
+      }
+
+      #controls {
+          position: absolute;
+          top: 10px;
+          left: 10px;
+          z-index: 100;
+          background: rgba(0, 0, 0, 0.7);
+          padding: 15px;
+          border-radius: 10px;
+          color: white;
+          backdrop-filter: blur(5px);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+          max-width: 300px;
+      }
+
+      #controls h3 {
+          margin: 0 0 15px 0;
+          color: #4dccbd;
+          font-size: 1.2em;
+      }
+
+      #controls p {
+          margin: 8px 0;
+          font-size: 14px;
+          line-height: 1.4;
+      }
+
+      #controls button {
+          margin: 5px;
+          padding: 8px 15px;
+          border: none;
+          border-radius: 5px;
+          background: #4a4a4a;
+          color: white;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          font-weight: 500;
+      }
+
+      #controls button:hover {
+          background: #6a6a6a;
+          transform: translateY(-2px);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      #controls button.active {
+          background: #4dccbd;
+          color: #000;
+      }
+
+      #instructions {
+          position: absolute;
+          bottom: 10px;
+          left: 10px;
+          z-index: 100;
+          background: rgba(0, 0, 0, 0.7);
+          padding: 15px;
+          border-radius: 10px;
+          color: white;
+          max-width: 350px;
+          backdrop-filter: blur(5px);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      }
+
+      #instructions h3 {
+          margin: 0 0 10px 0;
+          color: #4dccbd;
+      }
+
+      #instructions ul {
+          margin: 0;
+          padding-left: 20px;
+      }
+
+      #instructions li {
+          margin-bottom: 8px;
+          font-size: 14px;
+          line-height: 1.4;
+      }
+
+      .spacegraph-html-node {
+          background: rgba(30, 30, 46, 0.9);
+          border: 2px solid #4dccbd;
+          border-radius: 8px;
+          padding: 15px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+          transition: all 0.3s ease;
+          min-width: 200px;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      .spacegraph-html-node:hover {
+          box-shadow: 0 6px 20px rgba(77, 204, 189, 0.4);
+      }
+
+      .spacegraph-html-node h4 {
+          margin: 0 0 10px 0;
+          color: #4dccbd;
+          font-size: 1.1em;
+      }
+
+      .spacegraph-html-node p {
+          margin: 5px 0;
+          font-size: 0.9em;
+          color: #ccc;
+      }
+
+      .spacegraph-html-node input, .spacegraph-html-node select, .spacegraph-html-node button {
+          width: 100%;
+          margin: 5px 0;
+          padding: 8px;
+          border-radius: 4px;
+          border: 1px solid #444;
+          background: #222;
+          color: #eee;
+      }
+
+      .spacegraph-html-node button {
+          background: #4dccbd;
+          color: #000;
+          font-weight: bold;
+          cursor: pointer;
+          border: none;
+      }
+
+      .spacegraph-html-node button:hover {
+          background: #3db0a0;
+      }
+
+      .spacegraph-html-node progress {
+          width: 100%;
+          height: 10px;
+          border-radius: 5px;
+          background: #222;
+      }
+
+      .spacegraph-html-node progress::-webkit-progress-bar {
+          background: #222;
+          border-radius: 5px;
+      }
+
+      .spacegraph-html-node progress::-webkit-progress-value {
+          background: #4dccbd;
+          border-radius: 5px;
+      }
+
+      .spacegraph-html-node .status-indicator {
+          display: inline-block;
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          margin-right: 8px;
+      }
+
+      .spacegraph-html-node .status-online {
+          background: #4dccbd;
+          box-shadow: 0 0 8px #4dccbd;
+      }
+
+      .spacegraph-html-node .status-offline {
+          background: #ff6b6b;
+      }
+
+      .spacegraph-html-node .metric-value {
+          font-weight: bold;
+          color: #4dccbd;
+      }
+  </style>
 </head>
 <body>
-    <div id="controls">
-        <h3>HTML Node Demo</h3>
-        <p>This demo showcases rich interactive HTML nodes in 3D space with:</p>
-        <ul>
-            <li>Interactive forms and controls</li>
-            <li>Dynamic styling and animations</li>
-            <li>Real-time data visualization</li>
-            <li>Draggable and resizable nodes</li>
-        </ul>
-        <p>Node interactions:</p>
-        <button id="addNode">Add New Node</button>
-        <button id="resetView">Reset View</button>
-        <p>Click and drag to rotate view<br>
-        Scroll to zoom in/out</p>
-    </div>
-    
-    <div id="instructions">
-        <h3>Interaction Guide</h3>
-        <ul>
-            <li><strong>Click on HTML nodes</strong> to interact with controls</li>
-            <li><strong>Drag nodes</strong> to reposition them in 3D space</li>
-            <li><strong>Hover over nodes</strong> to see visual feedback</li>
-            <li><strong>Use form controls</strong> to update node data</li>
-            <li><strong>Click "Add New Node"</strong> to create more nodes</li>
-        </ul>
-    </div>
-    
-    <div id="graph"></div>
+<div id="controls">
+  <h3>HTML Node Demo</h3>
+  <p>This demo showcases rich interactive HTML nodes in 3D space with:</p>
+  <ul>
+    <li>Interactive forms and controls</li>
+    <li>Dynamic styling and animations</li>
+    <li>Real-time data visualization</li>
+    <li>Draggable and resizable nodes</li>
+  </ul>
+  <p>Node interactions:</p>
+  <button id="addNode">Add New Node</button>
+  <button id="resetView">Reset View</button>
+  <p>Click and drag to rotate view<br>
+    Scroll to zoom in/out</p>
+</div>
 
-    <script type="module">
-        import init from './html-node-demo.js';
-        init();
-    </script>
+<div id="instructions">
+  <h3>Interaction Guide</h3>
+  <ul>
+    <li><strong>Click on HTML nodes</strong> to interact with controls</li>
+    <li><strong>Drag nodes</strong> to reposition them in 3D space</li>
+    <li><strong>Hover over nodes</strong> to see visual feedback</li>
+    <li><strong>Use form controls</strong> to update node data</li>
+    <li><strong>Click "Add New Node"</strong> to create more nodes</li>
+  </ul>
+</div>
+
+<div id="graph"></div>
+
+<script type="module">
+  import init from './html-node-demo.js';
+
+  init();
+</script>
 </body>
 </html>]]>

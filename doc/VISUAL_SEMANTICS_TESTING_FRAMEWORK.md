@@ -2,7 +2,8 @@
 
 ## Overview
 
-This document describes the Visual Semantics Testing Framework for SpaceGraphJS, which combines generated-screenshot testing with validation and a control interface to definitively specify UI/UX ergonomics expectations.
+This document describes the Visual Semantics Testing Framework for SpaceGraphJS, which combines generated-screenshot
+testing with validation and a control interface to definitively specify UI/UX ergonomics expectations.
 
 ## Framework Components
 

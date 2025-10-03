@@ -1,24 +1,25 @@
 # Basic Renderer Testing Guide
 
-This guide explains how to test the BasicRenderer to ensure all node types render correctly and the system functions properly.
+This guide explains how to test the BasicRenderer to ensure all node types render correctly and the system functions
+properly.
 
 ## Manual Testing Procedure
 
 1. Open `comprehensive-basic-renderer-test.html` in your browser
 2. Verify that all node types are visible:
-   - Sphere nodes (red, green)
-   - Box nodes (yellow, magenta)
-   - Text node (cyan)
-   - Custom geometry node (orange)
-   - HTML nodes (gray with white text)
+    - Sphere nodes (red, green)
+    - Box nodes (yellow, magenta)
+    - Text node (cyan)
+    - Custom geometry node (orange)
+    - HTML nodes (gray with white text)
 3. Verify that all edge types are visible:
-   - Straight edges
-   - Curved edges
-   - Dashed edges
+    - Straight edges
+    - Curved edges
+    - Dashed edges
 4. Test interactions:
-   - Hover over nodes and edges to verify highlighting
-   - Click nodes and edges to verify selection
-   - Try dragging nodes (if supported)
+    - Hover over nodes and edges to verify highlighting
+    - Click nodes and edges to verify selection
+    - Try dragging nodes (if supported)
 
 ## Automated Testing
 

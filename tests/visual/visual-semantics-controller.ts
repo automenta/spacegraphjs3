@@ -15,7 +15,9 @@ export class VisualSemanticsController {
    * @param options Initialization options
    * @returns VisualSemanticsController instance
    */
-  static async init(options: InitOptions = {}): Promise<VisualSemanticsController> {
+  static async init(
+    options: InitOptions = {}
+  ): Promise<VisualSemanticsController> {
     const controller = new VisualSemanticsController();
     await controller.initialize(options);
     return controller;
@@ -32,11 +34,13 @@ export class VisualSemanticsController {
    */
   private async initialize(options: InitOptions): Promise<void> {
     // Create screenshots directory if it doesn't exist
-    await fs.mkdir(path.join(process.cwd(), 'tests/visual/screenshots'), { recursive: true });
+    await fs.mkdir(path.join(process.cwd(), 'tests/visual/screenshots'), {
+      recursive: true,
+    });
 
     // Launch browser
     this.browser = await chromium.launch({ headless: true });
-    
+
     // Create context with specified options
     const context = await this.browser.newContext({
       viewport: options.viewport || { width: 1280, height: 720 },
@@ -58,7 +62,9 @@ export class VisualSemanticsController {
     this.ensureInitialized();
     await this.page!.goto(url);
     // Wait for graph to initialize
-    await this.page!.waitForFunction(() => (window as any).graph, { timeout: 10000 });
+    await this.page!.waitForFunction(() => (window as any).graph, {
+      timeout: 10000,
+    });
     // Additional wait for rendering
     await this.page!.waitForTimeout(2000);
   }
@@ -71,7 +77,7 @@ export class VisualSemanticsController {
   async hover(selector: string, options: HoverOptions = {}): Promise<void> {
     this.ensureInitialized();
     const canvas = this.page!.locator(selector);
-    
+
     if (options.position) {
       await canvas.hover({
         position: options.position,
@@ -90,7 +96,7 @@ export class VisualSemanticsController {
         });
       }
     }
-    
+
     // Wait for hover effect
     await this.page!.waitForTimeout(200);
   }
@@ -103,7 +109,7 @@ export class VisualSemanticsController {
   async click(selector: string, options: ClickOptions = {}): Promise<void> {
     this.ensureInitialized();
     const canvas = this.page!.locator(selector);
-    
+
     if (options.position) {
       await canvas.click({
         button: options.button || 'left',
@@ -126,7 +132,7 @@ export class VisualSemanticsController {
         });
       }
     }
-    
+
     // Wait for click effect
     await this.page!.waitForTimeout(200);
   }
@@ -137,11 +143,15 @@ export class VisualSemanticsController {
    * @param target Target selector
    * @param options Drag options
    */
-  async drag(source: string, target: string, options: DragOptions = {}): Promise<void> {
+  async drag(
+    source: string,
+    target: string,
+    options: DragOptions = {}
+  ): Promise<void> {
     this.ensureInitialized();
     const sourceLocator = this.page!.locator(source);
     const targetLocator = this.page!.locator(target);
-    
+
     if (options.sourcePosition && options.targetPosition) {
       await sourceLocator.dragTo(targetLocator, {
         sourcePosition: options.sourcePosition,
@@ -163,7 +173,7 @@ export class VisualSemanticsController {
         });
       }
     }
-    
+
     // Wait for drag effect
     await this.page!.waitForTimeout(500);
   }
@@ -186,11 +196,11 @@ export class VisualSemanticsController {
    */
   async assertVisualState(spec: VisualSemanticsSpec): Promise<void> {
     this.ensureInitialized();
-    
+
     // Process each interaction sequence
     for (const interaction of spec.interactions) {
       console.log(`Processing interaction sequence: ${interaction.name}`);
-      
+
       // Execute each step in the sequence
       for (const step of interaction.steps) {
         switch (step.type) {
@@ -211,23 +221,23 @@ export class VisualSemanticsController {
             break;
         }
       }
-      
+
       // Validate expected outcomes
       for (const outcome of interaction.expectedOutcomes) {
         console.log(`Validating outcome: ${outcome.description}`);
-        
+
         // Capture screenshot
         const screenshotPath = path.join(
-          process.cwd(), 
-          'tests/visual/screenshots', 
+          process.cwd(),
+          'tests/visual/screenshots',
           outcome.screenshot
         );
-        
-        await this.page!.screenshot({ 
+
+        await this.page!.screenshot({
           path: screenshotPath,
           fullPage: true,
         });
-        
+
         // Compare with expected (if exists)
         const expectedPath = screenshotPath.replace('.png', '-expected.png');
         try {
@@ -240,7 +250,10 @@ export class VisualSemanticsController {
         } catch (error) {
           // Expected screenshot doesn't exist, this is likely the first run
           // We'll create the expected screenshot
-          const newExpectedPath = screenshotPath.replace('.png', '-expected.png');
+          const newExpectedPath = screenshotPath.replace(
+            '.png',
+            '-expected.png'
+          );
           await fs.copyFile(screenshotPath, newExpectedPath);
           console.log(`Created expected screenshot: ${newExpectedPath}`);
         }
@@ -254,34 +267,40 @@ export class VisualSemanticsController {
    */
   async assertErgonomicCompliance(spec: VisualSemanticsSpec): Promise<void> {
     this.ensureInitialized();
-    
+
     // Check ergonomic requirements
     const ergonomics = spec.ergonomics;
-    
+
     if (ergonomics.minTouchTargetSize) {
       // This would require actual element size checking
       // For now, we'll just log the requirement
-      console.log(`Checking minimum touch target size: ${ergonomics.minTouchTargetSize}px`);
+      console.log(
+        `Checking minimum touch target size: ${ergonomics.minTouchTargetSize}px`
+      );
     }
-    
+
     if (ergonomics.minContrastRatio) {
       // Contrast checking would require color analysis
-      console.log(`Checking minimum contrast ratio: ${ergonomics.minContrastRatio}:1`);
+      console.log(
+        `Checking minimum contrast ratio: ${ergonomics.minContrastRatio}:1`
+      );
     }
-    
+
     if (ergonomics.keyboardNavigation) {
       // Check if keyboard navigation is supported
       console.log('Checking keyboard navigation support');
     }
-    
+
     if (ergonomics.screenReaderSupport) {
       // Check for accessibility attributes
       console.log('Checking screen reader support');
     }
-    
+
     if (ergonomics.maxResponseTime) {
       // Measure response time for interactions
-      console.log(`Checking maximum response time: ${ergonomics.maxResponseTime}ms`);
+      console.log(
+        `Checking maximum response time: ${ergonomics.maxResponseTime}ms`
+      );
     }
   }
 
@@ -291,16 +310,19 @@ export class VisualSemanticsController {
    * @param options Screenshot options
    * @returns Path to captured screenshot
    */
-  async captureScreenshot(name: string, options: ScreenshotOptions = {}): Promise<string> {
+  async captureScreenshot(
+    name: string,
+    options: ScreenshotOptions = {}
+  ): Promise<string> {
     this.ensureInitialized();
-    
+
     const screenshotPath = path.join(
-      process.cwd(), 
-      'tests/visual/screenshots', 
+      process.cwd(),
+      'tests/visual/screenshots',
       name
     );
-    
-    await this.page!.screenshot({ 
+
+    await this.page!.screenshot({
       path: screenshotPath,
       fullPage: options.fullPage ?? true,
       clip: options.clip,
@@ -308,7 +330,7 @@ export class VisualSemanticsController {
       quality: options.quality,
       type: options.type,
     });
-    
+
     return screenshotPath;
   }
 
@@ -320,16 +342,16 @@ export class VisualSemanticsController {
    * @returns Comparison result
    */
   async compareScreenshots(
-    actualPath: string, 
-    expectedPath: string, 
+    actualPath: string,
+    expectedPath: string,
     options: CompareOptions = {}
   ): Promise<ComparisonResult> {
     // In a real implementation, we would use an image comparison library
     // For now, we'll simulate the result
-    
+
     try {
       await fs.access(expectedPath);
-      
+
       // This is a simplified simulation
       // In practice, you would use a library like pixelmatch or resemble.js
       const result: ComparisonResult = {
@@ -337,7 +359,7 @@ export class VisualSemanticsController {
         diffPixels: Math.floor(Math.random() * 5000),
         diffPercentage: Math.random() * 0.5,
       };
-      
+
       return result;
     } catch (error) {
       // Expected screenshot doesn't exist
@@ -346,10 +368,10 @@ export class VisualSemanticsController {
         diffPixels: 0,
         diffPercentage: 0,
       };
-      
+
       // Copy actual to expected for future comparisons
       await fs.copyFile(actualPath, expectedPath);
-      
+
       return result;
     }
   }
@@ -370,7 +392,9 @@ export class VisualSemanticsController {
    */
   private ensureInitialized(): void {
     if (!this.initialized) {
-      throw new Error('VisualSemanticsController not initialized. Call init() first.');
+      throw new Error(
+        'VisualSemanticsController not initialized. Call init() first.'
+      );
     }
     if (!this.page || !this.browser) {
       throw new Error('Browser or page not available.');

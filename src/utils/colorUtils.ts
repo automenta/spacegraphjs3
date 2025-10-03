@@ -8,17 +8,18 @@ import { expandHex } from './color';
  * @param fallbackColor - The fallback color if parsing fails
  * @returns A THREE.Color object
  */
-export function parseColor(colorValue: string | undefined, elementId: string, fallbackColor: string = '#ff00ff'): THREE.Color {
+export function parseColor(
+  colorValue: string | undefined,
+  elementId: string,
+  fallbackColor: string = '#ff00ff'
+): THREE.Color {
   const color = new THREE.Color();
   try {
     const value = colorValue || '#ffffff';
     color.set(expandHex(value));
   } catch (error) {
     void error; // Intentionally unused, keeping for potential future use
-    console.warn(
-      `Invalid color specified for node ${elementId}:`,
-      colorValue
-    );
+    console.warn(`Invalid color specified for node ${elementId}:`, colorValue);
     color.set(fallbackColor); // Fallback to magenta for visibility.
   }
   return color;
@@ -39,12 +40,22 @@ export function applyElementStyling(
   isHovered: boolean,
   selectedStyle: any,
   hoverStyle: any
-): { color: THREE.Color; glowVisible: boolean; glowColor?: string; glowStrength?: number } {
-  const result: { color: THREE.Color; glowVisible: boolean; glowColor?: string; glowStrength?: number } = {
+): {
+  color: THREE.Color;
+  glowVisible: boolean;
+  glowColor?: string;
+  glowStrength?: number;
+} {
+  const result: {
+    color: THREE.Color;
+    glowVisible: boolean;
+    glowColor?: string;
+    glowStrength?: number;
+  } = {
     color: baseColor,
     glowVisible: false,
     glowColor: undefined,
-    glowStrength: undefined
+    glowStrength: undefined,
   };
 
   if (isSelected && selectedStyle) {

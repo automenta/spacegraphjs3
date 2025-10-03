@@ -19,7 +19,8 @@ export class CameraPlugin implements ISpaceGraphPlugin {
   readonly id = 'camera-plugin';
   readonly name = 'Camera Control Plugin';
   readonly version = '1.0.0';
-  readonly description = 'Provides advanced camera controls and management for SpaceGraph';
+  readonly description =
+    'Provides advanced camera controls and management for SpaceGraph';
 
   private graph!: SpaceGraph;
   private threeCamera!: THREE.PerspectiveCamera;
@@ -29,7 +30,8 @@ export class CameraPlugin implements ISpaceGraphPlugin {
   private presetsManager!: CameraPresetsManager;
   private rotationConstraints: RotationConstraints = {};
   private rotationPivot: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
-  private poolManager: ThreeObjectPoolManager = ThreeObjectPoolManager.getInstance();
+  private poolManager: ThreeObjectPoolManager =
+    ThreeObjectPoolManager.getInstance();
   private isAnimating: boolean = false;
   private animationCallbacks: Array<() => void> = [];
   private zoomConstraints: { minDistance?: number; maxDistance?: number } = {};
@@ -40,14 +42,26 @@ export class CameraPlugin implements ISpaceGraphPlugin {
   private cameraShakeIntensity: number = 0;
   private cameraShakeDuration: number = 0;
   private cameraShakeStartTime: number = 0;
-  private cameraConstraints: { minX?: number; maxX?: number; minY?: number; maxY?: number; minZ?: number; maxZ?: number } = {};
+  private cameraConstraints: {
+    minX?: number;
+    maxX?: number;
+    minY?: number;
+    maxY?: number;
+    minZ?: number;
+    maxZ?: number;
+  } = {};
   private isInertiaEnabled: boolean = true;
   private inertiaFactor: number = 0.9;
   private cameraVelocity: THREE.Vector3 = new THREE.Vector3();
   private targetVelocity: THREE.Vector3 = new THREE.Vector3();
-  private gestureState: { lastDistance: number; lastAngle: number; isGesturing: boolean } = { lastDistance: 0, lastAngle: 0, isGesturing: false };
+  private gestureState: {
+    lastDistance: number;
+    lastAngle: number;
+    isGesturing: boolean;
+  } = { lastDistance: 0, lastAngle: 0, isGesturing: false };
   private touchStartTime: number = 0;
-  private touchStartPositions: Map<number, { x: number; y: number }> = new Map();
+  private touchStartPositions: Map<number, { x: number; y: number }> =
+    new Map();
   private cameraUtils!: CameraUtils;
   private logger: Logger = Logger.getInstance();
 
@@ -60,22 +74,22 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     if (obj === null || obj === undefined) {
       return obj;
     }
-    
+
     // Handle primitive types
     if (typeof obj !== 'object') {
       return obj;
     }
-    
+
     // Handle arrays
     if (Array.isArray(obj)) {
-      return obj.map(item => this.sanitizeObject(item));
+      return obj.map((item) => this.sanitizeObject(item));
     }
-    
+
     // Handle THREE.Vector3 instances
     if (obj instanceof THREE.Vector3) {
       return { x: obj.x, y: obj.y, z: obj.z };
     }
-    
+
     // Handle plain objects
     if (obj.constructor === Object) {
       const sanitized: any = {};
@@ -86,7 +100,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
       }
       return sanitized;
     }
-    
+
     // For any other object type, try to convert to string or return null
     try {
       // If it's a plain object-like structure, convert it
@@ -109,7 +123,10 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     this.graph = graph;
     this.threeCamera = graph.render.getCamera();
     this.presetsManager = new CameraPresetsManager(graph);
-    this.cameraUtils = new CameraUtils(this.threeCamera, graph.render.getScene());
+    this.cameraUtils = new CameraUtils(
+      this.threeCamera,
+      graph.render.getScene()
+    );
     this.logger.setGraph(graph);
     this.syncCameraToState();
     this.initKeyboardControls();
@@ -171,33 +188,35 @@ export class CameraPlugin implements ISpaceGraphPlugin {
 
     createEffect(() => {
       const selectedIds = this.graph.state.interaction.selectedElementIds;
-      
+
       // Check if selection has changed
       const selectionChanged =
         selectedIds.length !== previousSelection.length ||
         selectedIds.some((id, index) => id !== previousSelection[index]);
-      
+
       if (selectionChanged && selectedIds.length > 0) {
         // Clear previous timer
         if (debounceTimer) {
           clearTimeout(debounceTimer);
         }
-        
+
         // Set new timer with debounce
         debounceTimer = setTimeout(() => {
           // Check if cameraPlugin is available before calling frameSelected
           if (this.graph.cameraPlugin) {
-            this.graph.cameraPlugin.frameSelected({
-              duration: 500,
-              strategy: 'optimal',
-              distributionAware: true
-            }).catch(error => {
-              this.logger.warn('CameraPlugin', 'Auto-frame failed:', error);
-            });
+            this.graph.cameraPlugin
+              .frameSelected({
+                duration: 500,
+                strategy: 'optimal',
+                distributionAware: true,
+              })
+              .catch((error) => {
+                this.logger.warn('CameraPlugin', 'Auto-frame failed:', error);
+              });
           }
         }, 300);
       }
-      
+
       // Update previous selection
       previousSelection = [...selectedIds];
     });
@@ -295,22 +314,25 @@ export class CameraPlugin implements ISpaceGraphPlugin {
    */
   private applyInertia(): void {
     if (!this.isInertiaEnabled) return;
-    
+
     // Apply inertia to camera position
     this.cameraVelocity.multiplyScalar(this.inertiaFactor);
-    
+
     // Apply inertia to target position
     this.targetVelocity.multiplyScalar(this.inertiaFactor);
-    
+
     // Update camera if there's significant movement
-    if (this.cameraVelocity.length() > 0.001 || this.targetVelocity.length() > 0.001) {
+    if (
+      this.cameraVelocity.length() > 0.001 ||
+      this.targetVelocity.length() > 0.001
+    ) {
       const currentState = this.graph.state.camera;
       const newTarget = {
         x: currentState.target.x + this.targetVelocity.x,
         y: currentState.target.y + this.targetVelocity.y,
-        z: currentState.target.z + this.targetVelocity.z
+        z: currentState.target.z + this.targetVelocity.z,
       };
-      
+
       this.graph.update({ camera: { target: newTarget } });
     }
   }
@@ -330,12 +352,12 @@ export class CameraPlugin implements ISpaceGraphPlugin {
         // Pinch gesture start
         const touch1 = event.touches[0];
         const touch2 = event.touches[1];
-        
+
         initialDistance = Math.sqrt(
           Math.pow(touch2.clientX - touch1.clientX, 2) +
-          Math.pow(touch2.clientY - touch1.clientY, 2)
+            Math.pow(touch2.clientY - touch1.clientY, 2)
         );
-        
+
         initialAngle = Math.atan2(
           touch2.clientY - touch1.clientY,
           touch2.clientX - touch1.clientX
@@ -350,15 +372,15 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     const handleTouchMove = (event: TouchEvent) => {
       if (event.touches.length === 2 && this.gestureState.isGesturing) {
         event.preventDefault();
-        
+
         const touch1 = event.touches[0];
         const touch2 = event.touches[1];
-        
+
         const currentDistance = Math.sqrt(
           Math.pow(touch2.clientX - touch1.clientX, 2) +
-          Math.pow(touch2.clientY - touch1.clientY, 2)
+            Math.pow(touch2.clientY - touch1.clientY, 2)
         );
-        
+
         const currentAngle = Math.atan2(
           touch2.clientY - touch1.clientY,
           touch2.clientX - touch1.clientX
@@ -367,9 +389,12 @@ export class CameraPlugin implements ISpaceGraphPlugin {
         // Handle pinch zoom
         const distanceDelta = currentDistance - initialDistance;
         const zoomFactor = distanceDelta * 0.01;
-        
+
         if (Math.abs(zoomFactor) > 0.001) {
-          this.handleSmoothZoom(zoomFactor > 0 ? 'out' : 'in', Math.abs(zoomFactor));
+          this.handleSmoothZoom(
+            zoomFactor > 0 ? 'out' : 'in',
+            Math.abs(zoomFactor)
+          );
         }
 
         // Handle rotation (optional, can be disabled for better UX)
@@ -378,8 +403,8 @@ export class CameraPlugin implements ISpaceGraphPlugin {
           const currentState = this.graph.state.camera;
           this.graph.update({
             camera: {
-              theta: currentState.theta + angleDelta * 0.5
-            }
+              theta: currentState.theta + angleDelta * 0.5,
+            },
           });
         }
 
@@ -390,9 +415,13 @@ export class CameraPlugin implements ISpaceGraphPlugin {
 
     const handleTouchEnd = (event: TouchEvent) => {
       const touchDuration = Date.now() - touchStartTime;
-      
+
       // Handle tap-to-focus gesture
-      if (event.changedTouches.length === 1 && touchDuration < 300 && !this.gestureState.isGesturing) {
+      if (
+        event.changedTouches.length === 1 &&
+        touchDuration < 300 &&
+        !this.gestureState.isGesturing
+      ) {
         const touch = event.changedTouches[0];
         this.handleTapToFocus(touch.clientX, touch.clientY);
       }
@@ -413,33 +442,36 @@ export class CameraPlugin implements ISpaceGraphPlugin {
    */
   private handleTapToFocus(clientX: number, clientY: number): void {
     // Use CameraUtils for coordinate conversion and raycasting
-    
+
     const screenPos = new THREE.Vector2(clientX, clientY);
     // worldPos is calculated but not used in this context
     // const worldPos = this.cameraUtils.screenToWorld(screenPos, 1);
-    
+
     // Use CameraUtils for raycasting
     const nodeRenderer = this.graph.render.getNodeRenderer();
     const objects = nodeRenderer ? nodeRenderer.getRaycastableObjects() : [];
     const intersects = this.cameraUtils.raycastFromScreen(screenPos, objects);
-    
+
     if (intersects.length > 0) {
       // Frame the clicked object
       const intersection = intersects[0];
       const nodeId = nodeRenderer.getNodeIdFromIntersection(intersection);
-      
+
       if (nodeId) {
         const node = this.graph.dataManager.getNode(nodeId);
         if (node && node.position) {
-          this.flyTo({
-            target: node.position,
-            distance: 20,
-            phi: this.graph.state.camera.phi,
-            theta: this.graph.state.camera.theta
-          }, {
-            duration: 800,
-            easing: AnimationCurves.easeOut.easing
-          });
+          this.flyTo(
+            {
+              target: node.position,
+              distance: 20,
+              phi: this.graph.state.camera.phi,
+              theta: this.graph.state.camera.theta,
+            },
+            {
+              duration: 800,
+              easing: AnimationCurves.easeOut.easing,
+            }
+          );
         }
       }
     } else {
@@ -447,7 +479,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
       this.autoZoom({
         duration: 800,
         strategy: 'optimal',
-        focusMode: 'all'
+        focusMode: 'all',
       });
     }
   }
@@ -459,10 +491,13 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     if (!this.isSmoothZoomEnabled) return;
 
     const currentState = this.graph.state.camera;
-    const zoomFactor = direction === 'in' ? 1 - (speed * this.smoothZoomFactor) : 1 + (speed * this.smoothZoomFactor);
-    
+    const zoomFactor =
+      direction === 'in'
+        ? 1 - speed * this.smoothZoomFactor
+        : 1 + speed * this.smoothZoomFactor;
+
     const newDistance = currentState.distance * zoomFactor;
-    
+
     // Apply zoom constraints
     const constrainedDistance = Math.max(
       this.zoomConstraints.minDistance || 1,
@@ -470,7 +505,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     );
 
     this.graph.update({
-      camera: { distance: constrainedDistance }
+      camera: { distance: constrainedDistance },
     });
   }
 
@@ -487,9 +522,6 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     };
     inertiaLoop();
   }
-
-
-
 
   /**
    * Animates the camera state to a new target.
@@ -524,7 +556,12 @@ export class CameraPlugin implements ISpaceGraphPlugin {
       if (Object.prototype.hasOwnProperty.call(targetState, key)) {
         const value = (targetState as any)[key];
         // Skip non-serializable values
-        if (value !== null && value !== undefined && typeof value !== 'function' && typeof value !== 'object') {
+        if (
+          value !== null &&
+          value !== undefined &&
+          typeof value !== 'function' &&
+          typeof value !== 'object'
+        ) {
           sanitizedTargetState[key] = value;
         } else if (typeof value === 'object' && value !== null) {
           // For objects, we need to make sure they're plain objects or Vector3 instances
@@ -562,11 +599,11 @@ export class CameraPlugin implements ISpaceGraphPlugin {
         // Animation end event
         this.graph.events.emit('camera:animation:end');
         this.isAnimating = false;
-        
+
         if (options.onComplete) {
           options.onComplete();
         }
-        
+
         // Process queued animations
         if (this.animationCallbacks.length > 0) {
           const nextCallback = this.animationCallbacks.shift();
@@ -574,7 +611,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
             nextCallback();
           }
         }
-      }
+      },
     });
   }
 
@@ -582,14 +619,21 @@ export class CameraPlugin implements ISpaceGraphPlugin {
    * Sets camera constraints to limit movement within bounds
    * @param constraints - The constraints to apply
    */
-  public setCameraConstraints(constraints: { minX?: number; maxX?: number; minY?: number; maxY?: number; minZ?: number; maxZ?: number }): void {
+  public setCameraConstraints(constraints: {
+    minX?: number;
+    maxX?: number;
+    minY?: number;
+    maxY?: number;
+    minZ?: number;
+    maxZ?: number;
+  }): void {
     this.cameraConstraints = { ...constraints };
   }
 
   /**
    * Enables or disables camera inertia for smooth movements
    * @param enabled - Whether inertia is enabled
-    * @param factor - The inertia factor (0-1, higher is more inertia)
+   * @param factor - The inertia factor (0-1, higher is more inertia)
    */
   public setInertia(enabled: boolean, factor: number = 0.9): void {
     this.isInertiaEnabled = enabled;
@@ -624,10 +668,10 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     box.getSize(size);
     const maxDim = Math.max(size.x, size.y, size.z);
     const fov = this.threeCamera.fov * (Math.PI / 180);
-    
+
     // Calculate base camera distance
     let cameraZ = Math.abs((maxDim / 2) * Math.tan(fov * 2));
-    
+
     // Apply strategy multiplier
     switch (options.strategy) {
       case 'tight':
@@ -643,7 +687,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
         cameraZ *= 1.5;
         break;
     }
-    
+
     // Apply custom padding if provided
     if (options.padding !== undefined) {
       cameraZ *= options.padding;
@@ -654,9 +698,10 @@ export class CameraPlugin implements ISpaceGraphPlugin {
       target: {
         x: typeof center.x === 'number' ? center.x : parseFloat(center.x) || 0,
         y: typeof center.y === 'number' ? center.y : parseFloat(center.y) || 0,
-        z: typeof center.z === 'number' ? center.z : parseFloat(center.z) || 0
+        z: typeof center.z === 'number' ? center.z : parseFloat(center.z) || 0,
       },
-      distance: typeof cameraZ === 'number' ? cameraZ : parseFloat(cameraZ) || 50,
+      distance:
+        typeof cameraZ === 'number' ? cameraZ : parseFloat(cameraZ) || 50,
     };
 
     // Release pooled objects
@@ -672,32 +717,44 @@ export class CameraPlugin implements ISpaceGraphPlugin {
    */
   public setRotationConstraints(constraints: RotationConstraints): void {
     this.rotationConstraints = { ...constraints };
-    
+
     // Apply constraints to current state if needed
     const currentState = this.graph.state.camera;
     let updated = false;
     const newState: Partial<CameraSpec> = {};
-    
-    if (this.rotationConstraints.minPhi !== undefined && currentState.phi < this.rotationConstraints.minPhi) {
+
+    if (
+      this.rotationConstraints.minPhi !== undefined &&
+      currentState.phi < this.rotationConstraints.minPhi
+    ) {
       newState.phi = this.rotationConstraints.minPhi;
       updated = true;
     }
-    
-    if (this.rotationConstraints.maxPhi !== undefined && currentState.phi > this.rotationConstraints.maxPhi) {
+
+    if (
+      this.rotationConstraints.maxPhi !== undefined &&
+      currentState.phi > this.rotationConstraints.maxPhi
+    ) {
       newState.phi = this.rotationConstraints.maxPhi;
       updated = true;
     }
-    
-    if (this.rotationConstraints.minTheta !== undefined && currentState.theta < this.rotationConstraints.minTheta) {
+
+    if (
+      this.rotationConstraints.minTheta !== undefined &&
+      currentState.theta < this.rotationConstraints.minTheta
+    ) {
       newState.theta = this.rotationConstraints.minTheta;
       updated = true;
     }
-    
-    if (this.rotationConstraints.maxTheta !== undefined && currentState.theta > this.rotationConstraints.maxTheta) {
+
+    if (
+      this.rotationConstraints.maxTheta !== undefined &&
+      currentState.theta > this.rotationConstraints.maxTheta
+    ) {
       newState.theta = this.rotationConstraints.maxTheta;
       updated = true;
     }
-    
+
     if (updated) {
       this.graph.update({ camera: newState });
     }
@@ -715,24 +772,33 @@ export class CameraPlugin implements ISpaceGraphPlugin {
    * Sets zoom constraints for the camera
    * @param constraints - The zoom constraints to apply
    */
-  public setZoomConstraints(constraints: { minDistance?: number; maxDistance?: number }): void {
+  public setZoomConstraints(constraints: {
+    minDistance?: number;
+    maxDistance?: number;
+  }): void {
     this.zoomConstraints = { ...constraints };
-    
+
     // Apply constraints to current state if needed
     const currentState = this.graph.state.camera;
     let updated = false;
     const newState: Partial<CameraSpec> = {};
-    
-    if (this.zoomConstraints.minDistance !== undefined && currentState.distance < this.zoomConstraints.minDistance) {
+
+    if (
+      this.zoomConstraints.minDistance !== undefined &&
+      currentState.distance < this.zoomConstraints.minDistance
+    ) {
       newState.distance = this.zoomConstraints.minDistance;
       updated = true;
     }
-    
-    if (this.zoomConstraints.maxDistance !== undefined && currentState.distance > this.zoomConstraints.maxDistance) {
+
+    if (
+      this.zoomConstraints.maxDistance !== undefined &&
+      currentState.distance > this.zoomConstraints.maxDistance
+    ) {
       newState.distance = this.zoomConstraints.maxDistance;
       updated = true;
     }
-    
+
     if (updated) {
       this.graph.update({ camera: newState });
     }
@@ -752,62 +818,70 @@ export class CameraPlugin implements ISpaceGraphPlugin {
    * Enhanced autozoom with intelligent framing and smooth transitions
    * @param options - Animation options
    */
-  public autoZoom(options: {
-    duration?: number;
-    padding?: number;
-    easing?: (t: number) => number | string;
-    includeEdges?: boolean;
-    strategy?: 'tight' | 'loose' | 'optimal' | 'smart';
-    focusMode?: 'all' | 'center' | 'weighted' | 'selection';
-    aspectRatio?: number;
-    perspectiveCorrection?: boolean;
-    distributionAware?: boolean;
-    animate?: boolean;
-    onComplete?: () => void;
-  } = {
-    duration: 1000,
-    padding: 1.5,
-    includeEdges: true,
-    strategy: 'smart',
-    focusMode: 'all',
-    perspectiveCorrection: true,
-    distributionAware: true,
-    animate: true
-  }): void {
+  public autoZoom(
+    options: {
+      duration?: number;
+      padding?: number;
+      easing?: (t: number) => number | string;
+      includeEdges?: boolean;
+      strategy?: 'tight' | 'loose' | 'optimal' | 'smart';
+      focusMode?: 'all' | 'center' | 'weighted' | 'selection';
+      aspectRatio?: number;
+      perspectiveCorrection?: boolean;
+      distributionAware?: boolean;
+      animate?: boolean;
+      onComplete?: () => void;
+    } = {
+      duration: 1000,
+      padding: 1.5,
+      includeEdges: true,
+      strategy: 'smart',
+      focusMode: 'all',
+      perspectiveCorrection: true,
+      distributionAware: true,
+      animate: true,
+    }
+  ): void {
     const nodes = this.graph.state.data.nodes;
     if (nodes.length === 0) return;
 
     // Create elements array with positions
-    const elements = nodes.map(node => ({
-      position: this.poolManager.getVector3().set(
-        node.position?.x || 0,
-        node.position?.y || 0,
-        node.position?.z || 0
-      )
+    const elements = nodes.map((node) => ({
+      position: this.poolManager
+        .getVector3()
+        .set(
+          node.position?.x || 0,
+          node.position?.y || 0,
+          node.position?.z || 0
+        ),
     }));
 
     // Optionally include edges in the framing
     if (options.includeEdges) {
       const edges = this.graph.state.data.edges;
       for (const edge of edges) {
-        const sourceNode = nodes.find(n => n.id === edge.source);
-        const targetNode = nodes.find(n => n.id === edge.target);
-        
+        const sourceNode = nodes.find((n) => n.id === edge.source);
+        const targetNode = nodes.find((n) => n.id === edge.target);
+
         if (sourceNode?.position && targetNode?.position) {
           // Add both source and target positions to ensure edges are framed
           elements.push({
-            position: this.poolManager.getVector3().set(
-              sourceNode.position.x,
-              sourceNode.position.y,
-              sourceNode.position.z
-            )
+            position: this.poolManager
+              .getVector3()
+              .set(
+                sourceNode.position.x,
+                sourceNode.position.y,
+                sourceNode.position.z
+              ),
           });
           elements.push({
-            position: this.poolManager.getVector3().set(
-              targetNode.position.x,
-              targetNode.position.y,
-              targetNode.position.z
-            )
+            position: this.poolManager
+              .getVector3()
+              .set(
+                targetNode.position.x,
+                targetNode.position.y,
+                targetNode.position.z
+              ),
           });
         }
       }
@@ -828,14 +902,14 @@ export class CameraPlugin implements ISpaceGraphPlugin {
               strategy: options.strategy as any,
               perspectiveCorrection: options.perspectiveCorrection,
               distributionAware: options.distributionAware,
-              onComplete: options.onComplete
+              onComplete: options.onComplete,
             });
           } else {
             this.frame(selectedElements, {
               duration: options.duration || 1000,
               padding: options.padding,
               easing: options.easing as any,
-              strategy: options.strategy as any
+              strategy: options.strategy as any,
             });
           }
           return;
@@ -843,83 +917,111 @@ export class CameraPlugin implements ISpaceGraphPlugin {
         // Fall back to all elements if no selection
         break;
       }
-        
+
       case 'center': {
         // Focus on the center of all elements with optimal distance
-        const center = CameraUtils.calculateWeightedCenter(elements.map(el => el.position));
+        const center = CameraUtils.calculateWeightedCenter(
+          elements.map((el) => el.position)
+        );
         // Use CameraUtils for distance calculation
         const dummyCamera = new THREE.PerspectiveCamera();
         dummyCamera.fov = this.threeCamera.fov;
         dummyCamera.aspect = this.threeCamera.aspect;
-        const target = CameraUtils.calculateOptimalPosition(elements, dummyCamera, {
-          focusMode: 'center',
-          padding: 1.5
-        });
+        const target = CameraUtils.calculateOptimalPosition(
+          elements,
+          dummyCamera,
+          {
+            focusMode: 'center',
+            padding: 1.5,
+          }
+        );
         const optimalDistance = target.distance || 50;
-        
+
         if (options.animate) {
-          this.flyTo({
-            target: center,
-            distance: optimalDistance,
-            phi: this.graph.state.camera.phi,
-            theta: this.graph.state.camera.theta
-          }, {
-            duration: options.duration || 1000,
-            easing: typeof options.easing === 'string' ?
-              (AnimationCurves[options.easing as keyof typeof AnimationCurves]?.easing || AnimationCurves.easeInOut.easing) :
-              (options.easing || AnimationCurves.easeInOut.easing),
-            onComplete: options.onComplete
-          });
+          this.flyTo(
+            {
+              target: center,
+              distance: optimalDistance,
+              phi: this.graph.state.camera.phi,
+              theta: this.graph.state.camera.theta,
+            },
+            {
+              duration: options.duration || 1000,
+              easing:
+                typeof options.easing === 'string'
+                  ? AnimationCurves[
+                      options.easing as keyof typeof AnimationCurves
+                    ]?.easing || AnimationCurves.easeInOut.easing
+                  : options.easing || AnimationCurves.easeInOut.easing,
+              onComplete: options.onComplete,
+            }
+          );
         } else {
           this.graph.update({
             camera: {
               target: { x: center.x, y: center.y, z: center.z },
-              distance: optimalDistance
-            }
+              distance: optimalDistance,
+            },
           });
           if (options.onComplete) options.onComplete();
         }
         return;
       }
-        
+
       case 'weighted': {
         // Focus based on element importance/weight
-        const weightedCenter = CameraUtils.calculateWeightedCenter(elements.map(el => el.position));
+        const weightedCenter = CameraUtils.calculateWeightedCenter(
+          elements.map((el) => el.position)
+        );
         // Use CameraUtils for distance calculation
         const dummyCamera = new THREE.PerspectiveCamera();
         dummyCamera.fov = this.threeCamera.fov;
         dummyCamera.aspect = this.threeCamera.aspect;
-        const target = CameraUtils.calculateOptimalPosition(elements, dummyCamera, {
-          focusMode: 'weighted',
-          padding: 1.5
-        });
+        const target = CameraUtils.calculateOptimalPosition(
+          elements,
+          dummyCamera,
+          {
+            focusMode: 'weighted',
+            padding: 1.5,
+          }
+        );
         const weightedDistance = target.distance || 50;
-        
+
         if (options.animate) {
-          this.flyTo({
-            target: weightedCenter,
-            distance: weightedDistance,
-            phi: this.graph.state.camera.phi,
-            theta: this.graph.state.camera.theta
-          }, {
-            duration: options.duration || 1000,
-            easing: typeof options.easing === 'string' ?
-              (AnimationCurves[options.easing as keyof typeof AnimationCurves]?.easing || AnimationCurves.easeInOut.easing) :
-              (options.easing || AnimationCurves.easeInOut.easing),
-            onComplete: options.onComplete
-          });
+          this.flyTo(
+            {
+              target: weightedCenter,
+              distance: weightedDistance,
+              phi: this.graph.state.camera.phi,
+              theta: this.graph.state.camera.theta,
+            },
+            {
+              duration: options.duration || 1000,
+              easing:
+                typeof options.easing === 'string'
+                  ? AnimationCurves[
+                      options.easing as keyof typeof AnimationCurves
+                    ]?.easing || AnimationCurves.easeInOut.easing
+                  : options.easing || AnimationCurves.easeInOut.easing,
+              onComplete: options.onComplete,
+            }
+          );
         } else {
           this.graph.update({
             camera: {
-              target: { x: weightedCenter.x, y: weightedCenter.y, z: weightedCenter.z },
-              distance: weightedDistance
-            }
+              target: {
+                x: weightedCenter.x,
+                y: weightedCenter.y,
+                z: weightedCenter.z,
+              },
+              distance: weightedDistance,
+            },
           });
           if (options.onComplete) options.onComplete();
         }
         return;
       }
-        
+
       case 'all':
       default: {
         // Default: frame all elements
@@ -931,20 +1033,20 @@ export class CameraPlugin implements ISpaceGraphPlugin {
             strategy: options.strategy as any,
             perspectiveCorrection: options.perspectiveCorrection,
             distributionAware: options.distributionAware,
-            onComplete: options.onComplete
+            onComplete: options.onComplete,
           });
         } else {
           this.frame(elements, {
             duration: options.duration || 1000,
             padding: options.padding,
             easing: options.easing as any,
-            strategy: options.strategy as any
+            strategy: options.strategy as any,
           });
         }
         return;
       }
     }
-    
+
     // Fallback to framing all elements
     if (options.animate) {
       this.enhancedFrame(elements, {
@@ -954,14 +1056,14 @@ export class CameraPlugin implements ISpaceGraphPlugin {
         strategy: options.strategy as any,
         perspectiveCorrection: options.perspectiveCorrection,
         distributionAware: options.distributionAware,
-        onComplete: options.onComplete
+        onComplete: options.onComplete,
       });
     } else {
       this.frame(elements, {
         duration: options.duration || 1000,
         padding: options.padding,
         easing: options.easing as any,
-        strategy: options.strategy as any
+        strategy: options.strategy as any,
       });
     }
   }
@@ -970,13 +1072,20 @@ export class CameraPlugin implements ISpaceGraphPlugin {
    * Automatically frame all selected elements
    * @param options - Framing options
    */
-  public async frameSelected(options: {
-    duration: number;
-    padding?: number;
-    easing?: (t: number) => number | string;
-    strategy?: 'tight' | 'loose' | 'optimal';
-    distributionAware?: boolean;
-  } = { duration: 1000, padding: 1.5, strategy: 'optimal', distributionAware: false }): Promise<void> {
+  public async frameSelected(
+    options: {
+      duration: number;
+      padding?: number;
+      easing?: (t: number) => number | string;
+      strategy?: 'tight' | 'loose' | 'optimal';
+      distributionAware?: boolean;
+    } = {
+      duration: 1000,
+      padding: 1.5,
+      strategy: 'optimal',
+      distributionAware: false,
+    }
+  ): Promise<void> {
     const selectedIds = this.graph.state.interaction.selectedElementIds;
     if (selectedIds.length === 0) return;
 
@@ -990,49 +1099,60 @@ export class CameraPlugin implements ISpaceGraphPlugin {
    * @returns Array of elements with position vectors
    */
   private getElementsByIds(ids: string[]): { position: THREE.Vector3 }[] {
-    return ids.map(id => {
-      // Try to find as node first
-      const node = this.graph.state.data.nodes.find(n => n.id === id);
-      if (node && node.position) {
-        return {
-          position: this.poolManager.getVector3().set(
-            node.position.x,
-            node.position.y,
-            node.position.z
-          )
-        };
-      }
-      
-      // Try to find as edge
-      const edge = this.graph.state.data.edges.find(e => e.id === id);
-      if (edge) {
-        // For edges, we'll use the midpoint between source and target
-        const sourceNode = this.graph.state.data.nodes.find(n => n.id === edge.source);
-        const targetNode = this.graph.state.data.nodes.find(n => n.id === edge.target);
-        
-        if (sourceNode?.position && targetNode?.position) {
-          const sourcePos = this.poolManager.getVector3().set(
-            sourceNode.position.x,
-            sourceNode.position.y,
-            sourceNode.position.z
-          );
-          const targetPos = this.poolManager.getVector3().set(
-            targetNode.position.x,
-            targetNode.position.y,
-            targetNode.position.z
-          );
-          const midpoint = this.poolManager.getVector3().addVectors(sourcePos, targetPos).multiplyScalar(0.5);
-          
-          // Release temporary vectors
-          this.poolManager.releaseVector3(sourcePos);
-          this.poolManager.releaseVector3(targetPos);
-          
-          return { position: midpoint };
+    return ids
+      .map((id) => {
+        // Try to find as node first
+        const node = this.graph.state.data.nodes.find((n) => n.id === id);
+        if (node && node.position) {
+          return {
+            position: this.poolManager
+              .getVector3()
+              .set(node.position.x, node.position.y, node.position.z),
+          };
         }
-      }
-      
-      return null;
-    }).filter(Boolean) as { position: THREE.Vector3 }[];
+
+        // Try to find as edge
+        const edge = this.graph.state.data.edges.find((e) => e.id === id);
+        if (edge) {
+          // For edges, we'll use the midpoint between source and target
+          const sourceNode = this.graph.state.data.nodes.find(
+            (n) => n.id === edge.source
+          );
+          const targetNode = this.graph.state.data.nodes.find(
+            (n) => n.id === edge.target
+          );
+
+          if (sourceNode?.position && targetNode?.position) {
+            const sourcePos = this.poolManager
+              .getVector3()
+              .set(
+                sourceNode.position.x,
+                sourceNode.position.y,
+                sourceNode.position.z
+              );
+            const targetPos = this.poolManager
+              .getVector3()
+              .set(
+                targetNode.position.x,
+                targetNode.position.y,
+                targetNode.position.z
+              );
+            const midpoint = this.poolManager
+              .getVector3()
+              .addVectors(sourcePos, targetPos)
+              .multiplyScalar(0.5);
+
+            // Release temporary vectors
+            this.poolManager.releaseVector3(sourcePos);
+            this.poolManager.releaseVector3(targetPos);
+
+            return { position: midpoint };
+          }
+        }
+
+        return null;
+      })
+      .filter(Boolean) as { position: THREE.Vector3 }[];
   }
 
   /**
@@ -1051,7 +1171,13 @@ export class CameraPlugin implements ISpaceGraphPlugin {
       perspectiveCorrection?: boolean;
       distributionAware?: boolean;
       onComplete?: () => void;
-    } = { duration: 1000, padding: 1.5, strategy: 'optimal', perspectiveCorrection: true, distributionAware: false }
+    } = {
+      duration: 1000,
+      padding: 1.5,
+      strategy: 'optimal',
+      perspectiveCorrection: true,
+      distributionAware: false,
+    }
   ) {
     if (elements.length === 0) return;
 
@@ -1067,10 +1193,10 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     box.getSize(size);
     const maxDim = Math.max(size.x, size.y, size.z);
     const fov = this.threeCamera.fov * (Math.PI / 180);
-    
+
     // Calculate base camera distance
     let cameraZ = Math.abs((maxDim / 2) * Math.tan(fov * 2));
-    
+
     // Apply strategy multiplier
     switch (options.strategy) {
       case 'tight':
@@ -1086,18 +1212,18 @@ export class CameraPlugin implements ISpaceGraphPlugin {
         cameraZ *= 1.5;
         break;
     }
-    
+
     // Apply custom padding if provided
     if (options.padding !== undefined) {
       cameraZ *= options.padding;
     }
-    
+
     // Adjust for aspect ratio if provided
     if (options.aspectRatio) {
       const currentAspect = this.threeCamera.aspect;
       cameraZ *= Math.max(options.aspectRatio / currentAspect, 1);
     }
-    
+
     // Apply perspective correction if enabled
     if (options.perspectiveCorrection) {
       // Adjust distance based on current camera angle to maintain consistent framing
@@ -1105,7 +1231,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
       const angleFactor = Math.abs(Math.sin(currentCamera.phi));
       cameraZ *= Math.max(0.5, angleFactor);
     }
-    
+
     // Distribution-aware framing for non-uniform element distributions
     if (options.distributionAware && elements.length > 1) {
       // Calculate variance of elements from center
@@ -1116,11 +1242,11 @@ export class CameraPlugin implements ISpaceGraphPlugin {
       }
       const variance = sumSquaredDistances / elements.length;
       const stdDev = Math.sqrt(variance);
-      
+
       // Adjust distance based on distribution spread
       // More spread out elements need more distance to fit in view
-      const spreadFactor = 1 + (stdDev / (center.length() || 1));
-      
+      const spreadFactor = 1 + stdDev / (center.length() || 1);
+
       cameraZ = cameraZ * Math.min(spreadFactor, 3.0); // Cap at 3x
     }
 
@@ -1135,13 +1261,17 @@ export class CameraPlugin implements ISpaceGraphPlugin {
 
     // Preserve onComplete callback
     const originalOnComplete = options.onComplete;
-    
+
     // Emit framing start event
     this.graph.events.emit('camera:framing:start');
-    
+
     // Debug log to see what values are being passed
-    this.logger.debug('CameraPlugin', 'enhancedFrame calling flyTo with target:', target);
-    
+    this.logger.debug(
+      'CameraPlugin',
+      'enhancedFrame calling flyTo with target:',
+      target
+    );
+
     this.flyTo(target, {
       ...options,
       onComplete: () => {
@@ -1150,7 +1280,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
         }
         // Emit framing complete event
         this.graph.events.emit('camera:framing:end');
-      }
+      },
     });
   }
 
@@ -1176,12 +1306,15 @@ export class CameraPlugin implements ISpaceGraphPlugin {
    * @param options - Bookmark options
    * @returns The created bookmark
    */
-  public async createBookmark(name: string, options: {
-    description?: string;
-    category?: string;
-    tags?: string[];
-    generateThumbnail?: boolean;
-  } = {}): Promise<CameraPreset> {
+  public async createBookmark(
+    name: string,
+    options: {
+      description?: string;
+      category?: string;
+      tags?: string[];
+      generateThumbnail?: boolean;
+    } = {}
+  ): Promise<CameraPreset> {
     return this.presetsManager.createBookmark(name, options);
   }
 
@@ -1190,12 +1323,25 @@ export class CameraPlugin implements ISpaceGraphPlugin {
    * @param view - The view to switch to
    * @param options - Animation options
    */
-  public setView(view: 'top' | 'bottom' | 'front' | 'back' | 'left' | 'right' | 'isometric' | 'auto' | 'diagonal' | 'perspective', options: {
-    duration: number;
-    easing?: (t: number) => number;
-  } = { duration: 1000 }): void {
+  public setView(
+    view:
+      | 'top'
+      | 'bottom'
+      | 'front'
+      | 'back'
+      | 'left'
+      | 'right'
+      | 'isometric'
+      | 'auto'
+      | 'diagonal'
+      | 'perspective',
+    options: {
+      duration: number;
+      easing?: (t: number) => number;
+    } = { duration: 1000 }
+  ): void {
     let targetState: Partial<CameraSpec> = {};
-    
+
     switch (view) {
       case 'top':
         targetState = { phi: 0, theta: 0 };
@@ -1231,7 +1377,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
         this.autoZoom(options);
         return;
     }
-    
+
     this.flyTo(targetState, options);
   }
 
@@ -1259,16 +1405,16 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     } = {}
   ): void {
     if (waypoints.length === 0) return;
-    
+
     const {
       durationPerWaypoint = 2000,
       easing = AnimationCurves.easeInOut.easing,
       loop = false,
-      onComplete
+      onComplete,
     } = options;
-    
+
     this.isPathFollowing = true;
-    
+
     const followWaypoint = (index: number) => {
       if (index >= waypoints.length) {
         this.isPathFollowing = false;
@@ -1279,16 +1425,16 @@ export class CameraPlugin implements ISpaceGraphPlugin {
         }
         return;
       }
-      
+
       this.flyTo(waypoints[index], {
         duration: durationPerWaypoint,
         easing,
         onComplete: () => {
           setTimeout(() => followWaypoint(index + 1), 100);
-        }
+        },
       });
     };
-    
+
     followWaypoint(0);
   }
 
@@ -1301,7 +1447,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     this.cameraShakeIntensity = intensity;
     this.cameraShakeDuration = duration;
     this.cameraShakeStartTime = Date.now();
-    
+
     // Reset shake after duration
     setTimeout(() => {
       this.cameraShakeIntensity = 0;
@@ -1368,11 +1514,11 @@ export class CameraPlugin implements ISpaceGraphPlugin {
       let finalX = target.x + x;
       let finalY = target.y + y;
       let finalZ = target.z + z;
-      
+
       if (this.cameraShakeIntensity > 0 && this.cameraShakeDuration > 0) {
         const elapsed = Date.now() - this.cameraShakeStartTime;
         const progress = Math.min(1, elapsed / this.cameraShakeDuration);
-        
+
         if (progress < 1) {
           // Apply diminishing shake effect
           const shakeAmount = this.cameraShakeIntensity * (1 - progress) * 0.5;
@@ -1386,10 +1532,12 @@ export class CameraPlugin implements ISpaceGraphPlugin {
       }
 
       this.threeCamera.position.set(finalX, finalY, finalZ);
-      const lookAtTarget = this.poolManager.getVector3().set(target.x, target.y, target.z);
+      const lookAtTarget = this.poolManager
+        .getVector3()
+        .set(target.x, target.y, target.z);
       this.threeCamera.lookAt(lookAtTarget);
       this.threeCamera.updateProjectionMatrix();
-      
+
       // Release pooled vector
       this.poolManager.releaseVector3(lookAtTarget);
     });

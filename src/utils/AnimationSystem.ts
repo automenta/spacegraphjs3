@@ -11,7 +11,7 @@ import UnifiedAnimationSystemDefault, {
   AnimationTask,
   TweenAnimation,
   ParallelAnimation,
-  SequenceAnimation
+  SequenceAnimation,
 } from './UnifiedAnimationSystem';
 
 export type {
@@ -20,7 +20,7 @@ export type {
   KeyframeAnimation,
   TweenAnimation,
   ParallelAnimation,
-  SequenceAnimation
+  SequenceAnimation,
 };
 
 export class AnimationSystem {
@@ -47,28 +47,40 @@ export class AnimationSystem {
   /**
    * Create a keyframe animation
    */
-  keyframe(animation: KeyframeAnimation, config: AnimationConfig = {}): Promise<void> {
+  keyframe(
+    animation: KeyframeAnimation,
+    config: AnimationConfig = {}
+  ): Promise<void> {
     return this.unifiedSystem.keyframe(animation, config);
   }
 
   /**
    * Run animations in parallel
    */
-  parallel(animations: AnimationTask[], config: AnimationConfig = {}): Promise<void> {
+  parallel(
+    animations: AnimationTask[],
+    config: AnimationConfig = {}
+  ): Promise<void> {
     return this.unifiedSystem.parallel(animations, config);
   }
 
   /**
    * Run animations in sequence
    */
-  sequence(animations: AnimationTask[], config: AnimationConfig = {}): Promise<void> {
+  sequence(
+    animations: AnimationTask[],
+    config: AnimationConfig = {}
+  ): Promise<void> {
     return this.unifiedSystem.sequence(animations, config);
   }
 
   /**
    * Add a callback animation
    */
-  callback(callback: () => void | Promise<void>, config: AnimationConfig = {}): Promise<void> {
+  callback(
+    callback: () => void | Promise<void>,
+    config: AnimationConfig = {}
+  ): Promise<void> {
     return this.unifiedSystem.callback(callback, config);
   }
 

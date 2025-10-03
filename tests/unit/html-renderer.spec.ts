@@ -44,7 +44,7 @@ describe('HTMLRenderer', () => {
 
       const css3DScene = new THREE.Scene();
       const htmlRenderer = new HTMLRenderer(cssScene, css3DScene, state);
-      
+
       // Create a mock NodeRenderer to handle HTML node creation
       // In a real scenario, this would be handled by the actual NodeRenderer
       const css3DObject = new CSS3DObject(document.createElement('div'));
@@ -52,7 +52,7 @@ describe('HTMLRenderer', () => {
       css3DObject.element.innerHTML = '<h1>Test</h1>';
       css3DObject.userData.nodeId = 'html1';
       css3DScene.add(css3DObject);
-      
+
       await nextTick();
 
       expect(css3DScene.children.length).toBe(1);

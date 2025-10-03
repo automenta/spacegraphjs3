@@ -65,19 +65,23 @@ class REPLCommands {
     return this.graph.state;
   }
 
-  nodes(): Array<{id: string, type: string, position?: {x: number, y: number, z: number}}> {
-    return this.graph.state.data.nodes.map(node => ({
+  nodes(): Array<{
+    id: string;
+    type: string;
+    position?: { x: number; y: number; z: number };
+  }> {
+    return this.graph.state.data.nodes.map((node) => ({
       id: node.id,
       type: node.type,
-      position: node.position
+      position: node.position,
     }));
   }
 
-  edges(): Array<{id: string, source: string, target: string}> {
-    return this.graph.state.data.edges.map(edge => ({
+  edges(): Array<{ id: string; source: string; target: string }> {
+    return this.graph.state.data.edges.map((edge) => ({
       id: edge.id,
       source: edge.source,
-      target: edge.target
+      target: edge.target,
     }));
   }
 
@@ -91,14 +95,14 @@ class REPLCommands {
 
   select(id: string): string {
     this.graph.update({
-      interaction: { selectedElementIds: [id] }
+      interaction: { selectedElementIds: [id] },
     });
     return `Selected node: ${id}`;
   }
 
   hover(id: string): string {
     this.graph.update({
-      interaction: { hoveredElementId: id }
+      interaction: { hoveredElementId: id },
     });
     return `Hovering over node: ${id}`;
   }
@@ -109,20 +113,32 @@ class REPLCommands {
       this.graph.cameraPlugin?.flyTo(parsedTarget);
       return `Flying camera to: ${target}`;
     } catch (error) {
-      throw new Error(`Fly to failed: Invalid target format - ${(error as Error).message}`);
+      throw new Error(
+        `Fly to failed: Invalid target format - ${(error as Error).message}`
+      );
     }
   }
 
   frame(ids: string): string {
     try {
       const nodeIds = JSON.parse(ids);
-      const nodes = this.graph.state.data.nodes.filter(n => nodeIds.includes(n.id));
-      this.graph.cameraPlugin?.frame(nodes.map(n => ({
-        position: new THREE.Vector3(n.position?.x || 0, n.position?.y || 0, n.position?.z || 0)
-      })));
+      const nodes = this.graph.state.data.nodes.filter((n) =>
+        nodeIds.includes(n.id)
+      );
+      this.graph.cameraPlugin?.frame(
+        nodes.map((n) => ({
+          position: new THREE.Vector3(
+            n.position?.x || 0,
+            n.position?.y || 0,
+            n.position?.z || 0
+          ),
+        }))
+      );
       return `Framing nodes: ${ids}`;
     } catch (error) {
-      throw new Error(`Frame failed: Invalid node IDs format - ${(error as Error).message}`);
+      throw new Error(
+        `Frame failed: Invalid node IDs format - ${(error as Error).message}`
+      );
     }
   }
 
@@ -132,7 +148,9 @@ class REPLCommands {
       this.graph.update(parsedSpec);
       return `Graph updated with new specification`;
     } catch (error) {
-      throw new Error(`Update failed: Invalid spec format - ${(error as Error).message}`);
+      throw new Error(
+        `Update failed: Invalid spec format - ${(error as Error).message}`
+      );
     }
   }
 
@@ -141,51 +159,68 @@ class REPLCommands {
   }
 
   theme(name: string): string {
-    const themes: Record<string, { bg: string; text: string; accent: string }> = {
-      dark: { bg: '#1a1a1a', text: '#ffffff', accent: '#00ff00' },
-      light: { bg: '#ffffff', text: '#000000', accent: '#0066cc' },
-      matrix: { bg: '#000000', text: '#00ff00', accent: '#00ff00' }
-    };
-    
+    const themes: Record<string, { bg: string; text: string; accent: string }> =
+      {
+        dark: { bg: '#1a1a1a', text: '#ffffff', accent: '#00ff00' },
+        light: { bg: '#ffffff', text: '#000000', accent: '#0066cc' },
+        matrix: { bg: '#000000', text: '#00ff00', accent: '#00ff00' },
+      };
+
     if (name in themes) {
       return `THEME:${name}`;
     }
-    throw new Error(`Theme failed: Unknown theme "${name}". Available themes: ${Object.keys(themes).join(', ')}`);
+    throw new Error(
+      `Theme failed: Unknown theme "${name}". Available themes: ${Object.keys(themes).join(', ')}`
+    );
   }
-  
+
   deselect(): string {
     this.graph.update({
-      interaction: { selectedElementIds: [] }
+      interaction: { selectedElementIds: [] },
     });
     return `Cleared all selections`;
   }
-  
+
   focus(id: string): string {
-    const node = this.graph.state.data.nodes.find(n => n.id === id);
+    const node = this.graph.state.data.nodes.find((n) => n.id === id);
     if (!node) {
       throw new Error(`Focus failed: Node with ID "${id}" not found`);
     }
-    
+
     if (this.graph.cameraPlugin) {
-      this.graph.cameraPlugin.frame([{
-        position: new THREE.Vector3(
-          node.position?.x || 0,
-          node.position?.y || 0,
-          node.position?.z || 0
-        )
-      }]);
+      this.graph.cameraPlugin.frame([
+        {
+          position: new THREE.Vector3(
+            node.position?.x || 0,
+            node.position?.y || 0,
+            node.position?.z || 0
+          ),
+        },
+      ]);
     }
     return `Focusing on node: ${id}`;
   }
-  
-  setView(view: 'top' | 'bottom' | 'front' | 'back' | 'left' | 'right' | 'isometric' | 'auto' | 'diagonal' | 'perspective'): string {
+
+  setView(
+    view:
+      | 'top'
+      | 'bottom'
+      | 'front'
+      | 'back'
+      | 'left'
+      | 'right'
+      | 'isometric'
+      | 'auto'
+      | 'diagonal'
+      | 'perspective'
+  ): string {
     if (this.graph.cameraPlugin) {
       this.graph.cameraPlugin.setView(view);
       return `Set camera view to: ${view}`;
     }
     throw new Error('Set view failed: Camera plugin not available');
   }
-  
+
   autoZoom(): string {
     if (this.graph.cameraPlugin) {
       this.graph.cameraPlugin.autoZoom();
@@ -193,75 +228,81 @@ class REPLCommands {
     }
     throw new Error('Auto zoom failed: Camera plugin not available');
   }
-  
+
   addNode(spec: string): string {
     try {
       const nodeSpec = JSON.parse(spec);
       if (!nodeSpec.id) {
         throw new Error('Add node failed: Node spec must include an ID');
       }
-      
+
       this.graph.update({
         data: {
           nodes: {
-            add: [nodeSpec]
-          }
-        }
+            add: [nodeSpec],
+          },
+        },
       });
       return `Added node: ${nodeSpec.id}`;
     } catch (error) {
-      throw new Error(`Add node failed: Invalid node spec - ${(error as Error).message}`);
+      throw new Error(
+        `Add node failed: Invalid node spec - ${(error as Error).message}`
+      );
     }
   }
-  
+
   removeNode(id: string): string {
     this.graph.update({
       data: {
         nodes: {
-          remove: [id]
-        }
-      }
+          remove: [id],
+        },
+      },
     });
     return `Removed node: ${id}`;
   }
-  
+
   addEdge(spec: string): string {
     try {
       const edgeSpec = JSON.parse(spec);
       if (!edgeSpec.id || !edgeSpec.source || !edgeSpec.target) {
-        throw new Error('Add edge failed: Edge spec must include id, source, and target');
+        throw new Error(
+          'Add edge failed: Edge spec must include id, source, and target'
+        );
       }
-      
+
       this.graph.update({
         data: {
           edges: {
-            add: [edgeSpec]
-          }
-        }
+            add: [edgeSpec],
+          },
+        },
       });
       return `Added edge: ${edgeSpec.id}`;
     } catch (error) {
-      throw new Error(`Add edge failed: Invalid edge spec - ${(error as Error).message}`);
+      throw new Error(
+        `Add edge failed: Invalid edge spec - ${(error as Error).message}`
+      );
     }
   }
-  
+
   removeEdge(id: string): string {
     this.graph.update({
       data: {
         edges: {
-          remove: [id]
-        }
-      }
+          remove: [id],
+        },
+      },
     });
     return `Removed edge: ${id}`;
   }
-  
+
   toggleMetrics(): string {
     // This would need access to the HUDPlugin instance to toggle metrics
     // For now, we'll just return a message
     return `Use the "Toggle Metrics" button in the HUD to show/hide performance metrics`;
   }
-  
+
   /**
    * Save current camera state as a preset
    */
@@ -269,16 +310,16 @@ class REPLCommands {
     if (!this.graph.cameraPlugin) {
       throw new Error('Preset save failed: Camera plugin not available');
     }
-    
+
     // Parse arguments
     const parts = args.match(/(".*?"|[^"\s]+)(?=\s*|\s*$)/g) || [];
     if (parts.length === 0) {
       throw new Error('Preset save failed: Preset name is required');
     }
-    
+
     const name = parts[0]?.replace(/^"(.*)"$/, '$1') || 'Untitled Preset'; // Remove quotes if present
-    const options: {[key: string]: any} = {};
-    
+    const options: { [key: string]: any } = {};
+
     // Parse optional arguments
     for (let i = 1; i < parts.length; i++) {
       const part = parts[i];
@@ -287,20 +328,22 @@ class REPLCommands {
       } else if (part === '--category' && i + 1 < parts.length) {
         options.category = parts[++i]?.replace(/^"(.*)"$/, '$1');
       } else if (part === '--tags' && i + 1 < parts.length) {
-        options.tags = parts[++i]?.split(',').map(tag => tag.trim());
+        options.tags = parts[++i]?.split(',').map((tag) => tag.trim());
       } else if (part === '--thumbnail') {
         options.generateThumbnail = true;
       }
     }
-    
+
     try {
-      const preset = await this.graph.cameraPlugin.getPresetsManager().createPreset(name, options);
+      const preset = await this.graph.cameraPlugin
+        .getPresetsManager()
+        .createPreset(name, options);
       return `Saved camera preset: ${preset.name} (ID: ${preset.id})`;
     } catch (error) {
       throw new Error(`Preset save failed: ${(error as Error).message}`);
     }
   }
-  
+
   /**
    * Load a camera preset by ID
    */
@@ -308,7 +351,7 @@ class REPLCommands {
     if (!this.graph.cameraPlugin) {
       throw new Error('Preset load failed: Camera plugin not available');
     }
-    
+
     try {
       await this.graph.cameraPlugin.getPresetsManager().applyPreset(id);
       return `Loaded camera preset: ${id}`;
@@ -316,7 +359,7 @@ class REPLCommands {
       throw new Error(`Preset load failed: ${(error as Error).message}`);
     }
   }
-  
+
   /**
    * List all camera presets
    */
@@ -324,17 +367,20 @@ class REPLCommands {
     if (!this.graph.cameraPlugin) {
       throw new Error('Preset list failed: Camera plugin not available');
     }
-    
+
     const presets = this.graph.cameraPlugin.getPresetsManager().getAllPresets();
     if (presets.length === 0) {
       return 'No camera presets found';
     }
-    
-    return presets.map(preset =>
-      `${preset.name} (${preset.id})${preset.description ? ` - ${preset.description}` : ''}`
-    ).join('\n');
+
+    return presets
+      .map(
+        (preset) =>
+          `${preset.name} (${preset.id})${preset.description ? ` - ${preset.description}` : ''}`
+      )
+      .join('\n');
   }
-  
+
   /**
    * Search camera presets
    */
@@ -342,17 +388,22 @@ class REPLCommands {
     if (!this.graph.cameraPlugin) {
       throw new Error('Preset search failed: Camera plugin not available');
     }
-    
-    const results = this.graph.cameraPlugin.getPresetsManager().searchPresets(query);
+
+    const results = this.graph.cameraPlugin
+      .getPresetsManager()
+      .searchPresets(query);
     if (results.length === 0) {
       return `No presets found matching: ${query}`;
     }
-    
-    return results.map(preset =>
-      `${preset.name} (${preset.id})${preset.description ? ` - ${preset.description}` : ''}`
-    ).join('\n');
+
+    return results
+      .map(
+        (preset) =>
+          `${preset.name} (${preset.id})${preset.description ? ` - ${preset.description}` : ''}`
+      )
+      .join('\n');
   }
-  
+
   /**
    * Create a bookmark from current camera state
    */
@@ -360,16 +411,16 @@ class REPLCommands {
     if (!this.graph.cameraPlugin) {
       throw new Error('Preset bookmark failed: Camera plugin not available');
     }
-    
+
     // Parse arguments
     const parts = args.match(/(".*?"|[^"\s]+)(?=\s*|\s*$)/g) || [];
     if (parts.length === 0) {
       throw new Error('Preset bookmark failed: Bookmark name is required');
     }
-    
+
     const name = parts[0]?.replace(/^"(.*)"$/, '$1') || 'Untitled Bookmark'; // Remove quotes if present
-    const options: {[key: string]: any} = {};
-    
+    const options: { [key: string]: any } = {};
+
     // Parse optional arguments
     for (let i = 1; i < parts.length; i++) {
       const part = parts[i];
@@ -378,12 +429,14 @@ class REPLCommands {
       } else if (part === '--category' && i + 1 < parts.length) {
         options.category = parts[++i]?.replace(/^"(.*)"$/, '$1');
       } else if (part === '--tags' && i + 1 < parts.length) {
-        options.tags = parts[++i]?.split(',').map(tag => tag.trim());
+        options.tags = parts[++i]?.split(',').map((tag) => tag.trim());
       }
     }
-    
+
     try {
-      const bookmark = await this.graph.cameraPlugin.getPresetsManager().createBookmark(name, options);
+      const bookmark = await this.graph.cameraPlugin
+        .getPresetsManager()
+        .createBookmark(name, options);
       return `Created bookmark: ${bookmark.name} (ID: ${bookmark.id})`;
     } catch (error) {
       throw new Error(`Preset bookmark failed: ${(error as Error).message}`);
@@ -398,8 +451,9 @@ export class HUDPlugin implements ISpaceGraphPlugin {
   readonly id = 'hud-plugin';
   readonly name = 'HUD Plugin';
   readonly version = '1.0.0';
-  readonly description = 'Head-up display with REPL console and performance metrics';
-  
+  readonly description =
+    'Head-up display with REPL console and performance metrics';
+
   private graph!: SpaceGraph;
   private hudContainer!: HTMLElement;
   private consoleContainer!: HTMLElement;
@@ -409,11 +463,23 @@ export class HUDPlugin implements ISpaceGraphPlugin {
   private commandHistory: string[] = [];
   private historyIndex: number = -1;
   private notificationsContainer!: HTMLElement;
-  private notificationQueue: Array<{message: string, type: string, duration: number}> = [];
+  private notificationQueue: Array<{
+    message: string;
+    type: string;
+    duration: number;
+  }> = [];
   private activeNotifications: Map<string, HTMLElement> = new Map();
   private performanceMetrics: HTMLElement | null = null;
   private isPerformanceVisible: boolean = false;
-  private draggablePanels: Map<string, {element: HTMLElement, isDragging: boolean, offsetX: number, offsetY: number}> = new Map();
+  private draggablePanels: Map<
+    string,
+    {
+      element: HTMLElement;
+      isDragging: boolean;
+      offsetX: number;
+      offsetY: number;
+    }
+  > = new Map();
   private animationSystem: AnimationSystem | null = null;
   private themeManager: ThemeSystem | null = null;
   private notificationSystem: HUDUtils | null = null;
@@ -421,14 +487,14 @@ export class HUDPlugin implements ISpaceGraphPlugin {
   public init(graph: SpaceGraph): void {
     this.graph = graph;
     this.replCommands = new REPLCommands(graph);
-    
+
     const container = this.graph.render.getContainer();
     this.createHUDElements(container);
     this.setupEventListeners();
     this.setupAnimationSystem();
     this.setupThemeManager();
     this.setupNotificationSystem();
-    
+
     createEffect(() => this.updateHUD());
   }
 
@@ -438,14 +504,14 @@ export class HUDPlugin implements ISpaceGraphPlugin {
       // Animate out
       this.hudContainer.style.transform = 'translateY(-20px)';
       this.hudContainer.style.opacity = '0';
-      
+
       // Actually hide after animation
       setTimeout(() => {
         this.hudContainer.style.display = 'none';
       }, 300);
       return;
     }
-    
+
     if (hudState.visible) {
       // Show with animation
       this.hudContainer.style.display = 'block';
@@ -453,14 +519,14 @@ export class HUDPlugin implements ISpaceGraphPlugin {
         this.hudContainer.style.transform = 'translateY(0)';
         this.hudContainer.style.opacity = '1';
       }, 10);
-      
+
       // Handle console visibility with fade animation
       if (hudState.console?.enabled) {
         this.consoleContainer.style.display = 'block';
         this.consoleContainer.style.opacity = '0';
         this.consoleContainer.style.transform = 'translateY(10px)';
         this.consoleContainer.style.transition = 'all 0.3s ease';
-        
+
         setTimeout(() => {
           this.consoleContainer.style.opacity = '1';
           this.consoleContainer.style.transform = 'translateY(0)';
@@ -468,13 +534,13 @@ export class HUDPlugin implements ISpaceGraphPlugin {
       } else {
         this.consoleContainer.style.opacity = '0';
         this.consoleContainer.style.transform = 'translateY(10px)';
-        
+
         // Actually hide after animation
         setTimeout(() => {
           this.consoleContainer.style.display = 'none';
         }, 300);
       }
-      
+
       // Handle legacy content
       if (hudState.content && !hudState.console?.enabled) {
         this.hudContainer.innerHTML = `<div>${hudState.content}</div>`;
@@ -503,14 +569,15 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     this.hudContainer.style.maxWidth = '500px';
     this.hudContainer.style.zIndex = '1000';
     this.hudContainer.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.5)';
-    this.hudContainer.style.transition = 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
+    this.hudContainer.style.transition =
+      'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
     this.hudContainer.style.transform = 'translateY(-20px)';
     this.hudContainer.style.opacity = '0';
     this.hudContainer.style.backdropFilter = 'blur(10px)';
     this.hudContainer.style.border = '1px solid rgba(255, 255, 255, 0.1)';
     this.hudContainer.style.overflow = 'hidden';
     this.hudContainer.style.pointerEvents = 'none'; // Allow pointer events to pass through when not interacting with controls
-    
+
     // Add gradient overlay for enhanced visual appeal
     const gradientOverlay = document.createElement('div');
     gradientOverlay.style.position = 'absolute';
@@ -518,30 +585,33 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     gradientOverlay.style.left = '0';
     gradientOverlay.style.right = '0';
     gradientOverlay.style.height = '2px';
-    gradientOverlay.style.background = 'linear-gradient(90deg, #00ff00, #0088ff, #ff00ff)';
+    gradientOverlay.style.background =
+      'linear-gradient(90deg, #00ff00, #0088ff, #ff00ff)';
     gradientOverlay.style.opacity = '0.7';
     gradientOverlay.style.transition = 'opacity 0.3s ease';
     this.hudContainer.appendChild(gradientOverlay);
-    
+
     // Animate in with enhanced effects
     setTimeout(() => {
       this.hudContainer.style.transform = 'translateY(0)';
       this.hudContainer.style.opacity = '1';
-      
+
       // Add subtle glow effect
       setTimeout(() => {
-        this.hudContainer.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 255, 0, 0.3)';
+        this.hudContainer.style.boxShadow =
+          '0 4px 20px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 255, 0, 0.3)';
       }, 400);
     }, 100);
-    
+
     // Console container
     this.consoleContainer = document.createElement('div');
     this.consoleContainer.style.display = 'none';
     this.consoleContainer.style.marginTop = '10px';
     this.consoleContainer.style.paddingTop = '10px';
-    this.consoleContainer.style.borderTop = '1px solid rgba(255, 255, 255, 0.1)';
+    this.consoleContainer.style.borderTop =
+      '1px solid rgba(255, 255, 255, 0.1)';
     this.consoleContainer.style.pointerEvents = 'auto'; // Enable pointer events for console controls
-    
+
     // Output area with enhanced styling
     this.outputElement = document.createElement('div');
     this.outputElement.style.height = '200px';
@@ -555,15 +625,19 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     this.outputElement.style.borderRadius = '4px';
     this.outputElement.style.boxShadow = 'inset 0 2px 4px rgba(0, 0, 0, 0.3)';
     this.outputElement.style.pointerEvents = 'auto'; // Enable pointer events for output area
-    
+
     // Add syntax highlighting for JSON output
     this.outputElement.addEventListener('DOMNodeInserted', (event) => {
       const target = event.target;
-      if (target instanceof HTMLElement && target.textContent && target.textContent.includes('{')) {
+      if (
+        target instanceof HTMLElement &&
+        target.textContent &&
+        target.textContent.includes('{')
+      ) {
         this.highlightSyntax(target);
       }
     });
-    
+
     // Input area with enhanced styling
     const inputContainer = document.createElement('div');
     inputContainer.style.display = 'flex';
@@ -572,26 +646,27 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     inputContainer.style.backgroundColor = 'rgba(30, 30, 30, 0.8)';
     inputContainer.style.borderRadius = '4px';
     inputContainer.style.border = '1px solid rgba(255, 255, 255, 0.2)';
-    inputContainer.style.transition = 'border-color 0.3s ease, box-shadow 0.3s ease';
+    inputContainer.style.transition =
+      'border-color 0.3s ease, box-shadow 0.3s ease';
     inputContainer.style.pointerEvents = 'auto'; // Enable pointer events for input container
-    
+
     // Add focus effects
     inputContainer.addEventListener('focusin', () => {
       inputContainer.style.borderColor = '#00ff00';
       inputContainer.style.boxShadow = '0 0 10px rgba(0, 255, 0, 0.3)';
     });
-    
+
     inputContainer.addEventListener('focusout', () => {
       inputContainer.style.borderColor = 'rgba(255, 255, 255, 0.2)';
       inputContainer.style.boxShadow = 'none';
     });
-    
+
     const prompt = document.createElement('span');
     prompt.textContent = '>>> ';
     prompt.style.color = '#00ff00';
     prompt.style.fontWeight = 'bold';
     prompt.style.marginRight = '6px';
-    
+
     this.inputElement = document.createElement('input');
     this.inputElement.type = 'text';
     this.inputElement.style.flex = '1';
@@ -604,30 +679,30 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     this.inputElement.style.padding = '2px';
     this.inputElement.style.caretColor = '#00ff00';
     this.inputElement.style.pointerEvents = 'auto'; // Enable pointer events for input element
-    
+
     // Add placeholder with animation
     this.inputElement.placeholder = 'Type command here...';
     this.inputElement.style.transition = 'color 0.3s ease';
-    
+
     // Add input history navigation hint
     this.inputElement.addEventListener('focus', () => {
       if (this.inputElement.value === '') {
         this.inputElement.placeholder = '↑↓ for history, Tab for autocomplete';
       }
     });
-    
+
     this.inputElement.addEventListener('blur', () => {
       this.inputElement.placeholder = 'Type command here...';
     });
-    
+
     inputContainer.appendChild(prompt);
     inputContainer.appendChild(this.inputElement);
-    
+
     this.consoleContainer.appendChild(this.outputElement);
     this.consoleContainer.appendChild(inputContainer);
-    
+
     this.hudContainer.appendChild(this.consoleContainer);
-    
+
     // Notifications container
     this.notificationsContainer = document.createElement('div');
     this.notificationsContainer.style.position = 'absolute';
@@ -640,7 +715,7 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     this.notificationsContainer.style.gap = '12px';
     this.notificationsContainer.style.pointerEvents = 'none'; // Allow pointer events to pass through notifications container
     container.appendChild(this.notificationsContainer);
-    
+
     container.appendChild(this.hudContainer);
 
     // Add welcome message with enhanced animation
@@ -650,13 +725,13 @@ export class HUDPlugin implements ISpaceGraphPlugin {
       this.addOutput('info', '🎯 Try "preset-save" to save camera views');
       this.addOutput('info', '🎨 Use "theme <name>" to change appearance');
     }, 500);
-    
+
     // Add interactive background effects
     this.addBackgroundEffects();
-    
+
     // Setup event listeners for notifications
     this.setupNotificationSystem();
-    
+
     // Create performance metrics panel
     this.createPerformancePanel();
   }
@@ -673,7 +748,7 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     particles.style.zIndex = '-1';
     particles.style.opacity = '0.1';
     particles.style.overflow = 'hidden';
-    
+
     // Create floating particles
     for (let i = 0; i < 20; i++) {
       const particle = document.createElement('div');
@@ -687,10 +762,10 @@ export class HUDPlugin implements ISpaceGraphPlugin {
       particle.style.animation = `float ${3 + Math.random() * 4}s ease-in-out infinite`;
       particle.style.animationDelay = `${Math.random() * 2}s`;
       particle.style.opacity = `${0.3 + Math.random() * 0.7}`;
-      
+
       particles.appendChild(particle);
     }
-    
+
     this.hudContainer.appendChild(particles);
   }
 
@@ -722,11 +797,11 @@ export class HUDPlugin implements ISpaceGraphPlugin {
   private executeCommand(): void {
     const command = this.inputElement.value.trim();
     if (!command) return;
-    
+
     this.addOutput('command', `>>> ${command}`);
     this.commandHistory.push(command);
     this.historyIndex = this.commandHistory.length;
-    
+
     try {
       const result = this.evaluateCommand(command);
       if (result === 'CLEAR_CONSOLE') {
@@ -734,12 +809,17 @@ export class HUDPlugin implements ISpaceGraphPlugin {
       } else if (result.startsWith('THEME:')) {
         this.applyTheme(result.split(':')[1]);
       } else {
-        this.addOutput('result', typeof result === 'object' ? JSON.stringify(result, null, 2) : String(result));
+        this.addOutput(
+          'result',
+          typeof result === 'object'
+            ? JSON.stringify(result, null, 2)
+            : String(result)
+        );
       }
     } catch (error) {
       this.addOutput('error', `Error: ${(error as Error).message}`);
     }
-    
+
     this.inputElement.value = '';
     this.scrollToBottom();
   }
@@ -759,13 +839,36 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     // Basic auto-complete implementation
     const input = this.inputElement.value;
     const commandMethods = [
-      'help', 'state', 'nodes', 'edges', 'camera', 'layout', 'select', 'hover',
-      'deselect', 'focus', 'flyTo', 'frame', 'update', 'clear', 'theme', 'setView',
-      'autoZoom', 'addNode', 'removeNode', 'addEdge', 'removeEdge', 'toggleMetrics',
-      'presetSave', 'presetLoad', 'presetList', 'presetSearch', 'presetBookmark'
+      'help',
+      'state',
+      'nodes',
+      'edges',
+      'camera',
+      'layout',
+      'select',
+      'hover',
+      'deselect',
+      'focus',
+      'flyTo',
+      'frame',
+      'update',
+      'clear',
+      'theme',
+      'setView',
+      'autoZoom',
+      'addNode',
+      'removeNode',
+      'addEdge',
+      'removeEdge',
+      'toggleMetrics',
+      'presetSave',
+      'presetLoad',
+      'presetList',
+      'presetSearch',
+      'presetBookmark',
     ];
-    const matches = commandMethods.filter(cmd => cmd.startsWith(input));
-    
+    const matches = commandMethods.filter((cmd) => cmd.startsWith(input));
+
     if (matches.length === 1) {
       this.inputElement.value = matches[0];
     } else if (matches.length > 1) {
@@ -788,14 +891,14 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     if (parts.length === 0) {
       throw new Error(`Unknown command. Type 'help' for available commands.`);
     }
-    
+
     const cmd = parts[0];
     if (!cmd) {
       throw new Error(`Unknown command. Type 'help' for available commands.`);
     }
-    
+
     const args = parts.slice(1).join(' ');
-    
+
     // Special handling for commands that need to preserve quoted arguments
     if (cmd === 'preset-save' || cmd === 'preset-bookmark') {
       const argsWithQuotes = command.substring(cmd.length).trim();
@@ -806,7 +909,9 @@ export class HUDPlugin implements ISpaceGraphPlugin {
         case 'preset-bookmark':
           return this.replCommands.presetBookmark(argsWithQuotes);
         default:
-          throw new Error(`Unknown command: ${cmd}. Type 'help' for available commands.`);
+          throw new Error(
+            `Unknown command: ${cmd}. Type 'help' for available commands.`
+          );
       }
     } else {
       // Directly call the method on replCommands instance
@@ -841,19 +946,33 @@ export class HUDPlugin implements ISpaceGraphPlugin {
           return this.replCommands.clear();
         case 'theme':
           return this.replCommands.theme(args);
-        case 'setView':
-          {
-            // Validate that args is one of the accepted view types
-            const validViews = ['top', 'bottom', 'front', 'back', 'left', 'right', 'isometric', 'auto', 'diagonal', 'perspective'] as const;
-            const isValidView = (view: string): view is typeof validViews[number] => {
-              return validViews.includes(view as typeof validViews[number]);
-            };
-            if (isValidView(args)) {
-              return this.replCommands.setView(args);
-            } else {
-              throw new Error(`Invalid view: ${args}. Valid views are: ${validViews.join(', ')}`);
-            }
+        case 'setView': {
+          // Validate that args is one of the accepted view types
+          const validViews = [
+            'top',
+            'bottom',
+            'front',
+            'back',
+            'left',
+            'right',
+            'isometric',
+            'auto',
+            'diagonal',
+            'perspective',
+          ] as const;
+          const isValidView = (
+            view: string
+          ): view is (typeof validViews)[number] => {
+            return validViews.includes(view as (typeof validViews)[number]);
+          };
+          if (isValidView(args)) {
+            return this.replCommands.setView(args);
+          } else {
+            throw new Error(
+              `Invalid view: ${args}. Valid views are: ${validViews.join(', ')}`
+            );
           }
+        }
         case 'autoZoom':
           return this.replCommands.autoZoom();
         case 'addNode':
@@ -873,7 +992,9 @@ export class HUDPlugin implements ISpaceGraphPlugin {
         case 'presetSearch':
           return this.replCommands.presetSearch(args);
         default:
-          throw new Error(`Unknown command: ${cmd}. Type 'help' for available commands.`);
+          throw new Error(
+            `Unknown command: ${cmd}. Type 'help' for available commands.`
+          );
       }
     }
   }
@@ -882,9 +1003,9 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     const themes: Record<string, any> = {
       dark: { bg: '#1a1a1a', text: '#ffffff', accent: '#00ff00' },
       light: { bg: '#ffffff', text: '#000000', accent: '#0066cc' },
-      matrix: { bg: '#000000', text: '#00ff00', accent: '#00ff00' }
+      matrix: { bg: '#000000', text: '#00ff00', accent: '#00ff00' },
     };
-    
+
     const theme = themes[themeName];
     if (theme) {
       this.hudContainer.style.backgroundColor = theme.bg;
@@ -908,7 +1029,10 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     // Set up theme change listener
     try {
       this.themeManager = new ThemeSystem();
-      if (this.themeManager && typeof this.themeManager.onThemeChange === 'function') {
+      if (
+        this.themeManager &&
+        typeof this.themeManager.onThemeChange === 'function'
+      ) {
         this.themeManager.onThemeChange(() => {
           this.applyThemeToHUD();
         });
@@ -920,25 +1044,25 @@ export class HUDPlugin implements ISpaceGraphPlugin {
 
   private applyThemeToHUD(): void {
     if (!this.themeManager) return;
-    
+
     try {
       const theme = this.themeManager.getCurrentTheme();
       if (!theme) return;
-      
+
       // Apply to main HUD container
       if (this.hudContainer) {
         this.hudContainer.style.backgroundColor = theme.colors.surface;
         this.hudContainer.style.borderColor = theme.colors.border;
         this.hudContainer.style.color = theme.colors.text;
       }
-      
+
       // Apply to input container
       const inputContainer = this.inputElement?.parentElement;
       if (inputContainer) {
         inputContainer.style.backgroundColor = 'rgba(30, 30, 30, 0.8)';
         inputContainer.style.borderColor = theme.colors.border;
       }
-      
+
       // Apply to output element
       if (this.outputElement) {
         this.outputElement.style.borderColor = theme.colors.border;
@@ -951,24 +1075,39 @@ export class HUDPlugin implements ISpaceGraphPlugin {
 
   private highlightSyntax(element: HTMLElement): void {
     if (!element.textContent) return;
-    
+
     try {
       // Simple JSON syntax highlighting
-      if (element.textContent.includes('{') && element.textContent.includes('}')) {
+      if (
+        element.textContent.includes('{') &&
+        element.textContent.includes('}')
+      ) {
         let content = element.textContent;
-        
+
         // Highlight strings
-        content = content.replace(/"([^"]*)"/g, '<span style="color: #ce9178;">"$1"</span>');
-        
+        content = content.replace(
+          /"([^"]*)"/g,
+          '<span style="color: #ce9178;">"$1"</span>'
+        );
+
         // Highlight numbers
-        content = content.replace(/\b(\d+)\b/g, '<span style="color: #b5cea8;">$1</span>');
-        
+        content = content.replace(
+          /\b(\d+)\b/g,
+          '<span style="color: #b5cea8;">$1</span>'
+        );
+
         // Highlight booleans and null
-        content = content.replace(/\b(true|false|null)\b/g, '<span style="color: #569cd6;">$1</span>');
-        
+        content = content.replace(
+          /\b(true|false|null)\b/g,
+          '<span style="color: #569cd6;">$1</span>'
+        );
+
         // Highlight keys
-        content = content.replace(/"([^"]*)":/g, '<span style="color: #9cdcfe;">"$1"</span>:');
-        
+        content = content.replace(
+          /"([^"]*)":/g,
+          '<span style="color: #9cdcfe;">"$1"</span>:'
+        );
+
         element.innerHTML = content;
       }
     } catch (error) {
@@ -984,37 +1123,41 @@ export class HUDPlugin implements ISpaceGraphPlugin {
         this.graph.events.on('element:click', ({ target }) => {
           this.showNotification(`Clicked: ${target.id}`, 'info', 2000);
         });
-        
+
         this.graph.events.on('element:hover:enter', ({ target }) => {
           this.showNotification(`Hovering: ${target.id}`, 'info', 1500);
         });
-        
+
         this.graph.events.on('element:drag:start', ({ target }) => {
           this.showNotification(`Dragging: ${target.id}`, 'info', 1500);
         });
-        
+
         this.graph.events.on('element:drag:end', ({ target }) => {
           this.showNotification(`Dropped: ${target.id}`, 'success', 2000);
         });
-        
+
         this.graph.events.on('edge:click', ({ target }) => {
           this.showNotification(`Edge clicked: ${target.id}`, 'info', 2000);
         });
-        
+
         this.graph.events.on('edge:hover:enter', ({ target }) => {
           this.showNotification(`Edge hovering: ${target.id}`, 'info', 1500);
         });
-        
+
         this.graph.events.on('edge:select', ({ target }) => {
           this.showNotification(`Edge selected: ${target.id}`, 'success', 2000);
         });
-        
+
         this.graph.events.on('camera:animation:start', () => {
           this.showNotification('Camera animation started', 'info', 1500);
         });
-        
+
         this.graph.events.on('camera:animation:end', () => {
-          this.showNotification('✨ Camera animation completed', 'success', 2000);
+          this.showNotification(
+            '✨ Camera animation completed',
+            'success',
+            2000
+          );
         });
       }
     } catch (error) {
@@ -1022,7 +1165,11 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     }
   }
 
-  public showNotification(message: string, type: string = 'info', duration: number = 3000): void {
+  public showNotification(
+    message: string,
+    type: string = 'info',
+    duration: number = 3000
+  ): void {
     // Create notification element
     const notification = document.createElement('div');
     notification.style.padding = '12px 16px';
@@ -1040,10 +1187,11 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     notification.style.position = 'relative';
     notification.style.overflow = 'hidden';
     notification.style.pointerEvents = 'auto'; // Enable pointer events for notification (needed for close button)
-    
+
     // Add subtle glow effect
-    notification.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.25), 0 0 8px rgba(255, 255, 255, 0.1)';
-    
+    notification.style.boxShadow =
+      '0 4px 12px rgba(0, 0, 0, 0.25), 0 0 8px rgba(255, 255, 255, 0.1)';
+
     // Set styles based on type with enhanced colors
     switch (type) {
       case 'success':
@@ -1068,7 +1216,7 @@ export class HUDPlugin implements ISpaceGraphPlugin {
         notification.style.borderLeft = '4px solid #17a2b8';
         break;
     }
-    
+
     // Add enhanced visual effects based on type
     if (type === 'error' || type === 'warning') {
       notification.style.animation = 'pulse 2s infinite';
@@ -1076,14 +1224,14 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     } else if (type === 'success') {
       notification.classList.add('hud-float-effect');
     }
-    
+
     // Add special effects for certain messages
     if (message.includes('🚀') || message.includes('✨')) {
       notification.classList.add('hud-neon-glow');
     }
-    
+
     notification.textContent = message;
-    
+
     // Add close button with hover effect
     const closeBtn = document.createElement('span');
     closeBtn.textContent = '×';
@@ -1096,24 +1244,24 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     closeBtn.style.lineHeight = '1';
     closeBtn.style.transition = 'transform 0.2s, color 0.2s';
     closeBtn.style.color = 'rgba(255, 255, 255, 0.7)';
-    
+
     closeBtn.onmouseenter = () => {
       closeBtn.style.color = 'white';
       closeBtn.style.transform = 'scale(1.2)';
     };
-    
+
     closeBtn.onmouseleave = () => {
       closeBtn.style.color = 'rgba(255, 255, 255, 0.7)';
       closeBtn.style.transform = 'scale(1)';
     };
-    
+
     closeBtn.onclick = (e) => {
       e.stopPropagation();
       this.hideNotification(notification);
     };
-    
+
     notification.appendChild(closeBtn);
-    
+
     // Add progress bar for auto-hide duration
     if (duration > 0) {
       const progressBar = document.createElement('div');
@@ -1124,41 +1272,42 @@ export class HUDPlugin implements ISpaceGraphPlugin {
       progressBar.style.width = '100%';
       progressBar.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
       progressBar.style.overflow = 'hidden';
-      
+
       const progressFill = document.createElement('div');
       progressFill.style.height = '100%';
       progressFill.style.width = '100%';
       progressFill.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
       progressFill.style.transition = `width ${duration}ms linear`;
       progressFill.style.width = '100%';
-      
+
       // Start progress animation
       setTimeout(() => {
         progressFill.style.width = '0%';
       }, 10);
-      
+
       progressBar.appendChild(progressFill);
       notification.appendChild(progressBar);
     }
-    
+
     // Add to container
     this.notificationsContainer.appendChild(notification);
-    
+
     // Generate unique ID for this notification
     const id = `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     this.activeNotifications.set(id, notification);
-    
+
     // Animate in with bounce effect
     setTimeout(() => {
       notification.style.transform = 'translateX(0) scale(1)';
       notification.style.opacity = '1';
     }, 10);
-    
+
     // Add slight delay before full appearance for smoother effect
     setTimeout(() => {
-      notification.style.transition = 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
+      notification.style.transition =
+        'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
     }, 400);
-    
+
     // Auto-hide after duration
     if (duration > 0) {
       setTimeout(() => {
@@ -1175,12 +1324,12 @@ export class HUDPlugin implements ISpaceGraphPlugin {
         break;
       }
     }
-    
+
     // Animate out with scaling effect
     notification.style.transition = 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
     notification.style.transform = 'translateX(100%) scale(0.8)';
     notification.style.opacity = '0';
-    
+
     // Remove after animation completes
     setTimeout(() => {
       if (notification.parentNode) {
@@ -1189,7 +1338,10 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     }, 300);
   }
 
-  private addOutput(type: 'command' | 'result' | 'error' | 'info', content: string): void {
+  private addOutput(
+    type: 'command' | 'result' | 'error' | 'info',
+    content: string
+  ): void {
     const line = document.createElement('div');
     line.style.marginBottom = '3px';
     line.style.whiteSpace = 'pre-wrap';
@@ -1197,7 +1349,7 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     line.style.opacity = '0';
     line.style.transform = 'translateY(10px)';
     line.style.transition = 'all 0.3s ease-out';
-    
+
     switch (type) {
       case 'command':
         line.style.color = '#00ff00';
@@ -1215,20 +1367,24 @@ export class HUDPlugin implements ISpaceGraphPlugin {
         line.style.fontStyle = 'italic';
         break;
     }
-    
+
     line.textContent = content;
     this.outputElement.appendChild(line);
-    
+
     // Add special effects for certain content
-    if (content.includes('🚀') || content.includes('✨') || content.includes('🎯')) {
+    if (
+      content.includes('🚀') ||
+      content.includes('✨') ||
+      content.includes('🎯')
+    ) {
       line.classList.add('hud-neon-glow');
     }
-    
+
     // Animate in with enhanced effects
     setTimeout(() => {
       line.style.opacity = '1';
       line.style.transform = 'translateY(0)';
-      
+
       // Add subtle glow for results
       if (type === 'result') {
         line.style.textShadow = '0 0 5px rgba(255, 255, 255, 0.3)';
@@ -1256,9 +1412,10 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     this.performanceMetrics.style.backdropFilter = 'blur(5px)';
     this.performanceMetrics.style.transform = 'translateY(20px)';
     this.performanceMetrics.style.opacity = '0';
-    this.performanceMetrics.style.transition = 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
+    this.performanceMetrics.style.transition =
+      'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)';
     this.performanceMetrics.style.pointerEvents = 'auto'; // Enable pointer events for performance metrics
-    
+
     // Title
     const title = document.createElement('div');
     title.textContent = 'Performance Metrics';
@@ -1269,7 +1426,7 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     title.style.display = 'flex';
     title.style.justifyContent = 'space-between';
     title.style.alignItems = 'center';
-    
+
     // Close button for metrics panel
     const closeBtn = document.createElement('span');
     closeBtn.textContent = '×';
@@ -1282,9 +1439,9 @@ export class HUDPlugin implements ISpaceGraphPlugin {
       this.togglePerformanceMetrics();
     };
     title.appendChild(closeBtn);
-    
+
     this.performanceMetrics.appendChild(title);
-    
+
     // Metrics content
     const content = document.createElement('div');
     content.id = 'performance-content';
@@ -1298,24 +1455,24 @@ export class HUDPlugin implements ISpaceGraphPlugin {
       <div>Memory:</div><div id="memory-usage">0 KB</div>
     `;
     this.performanceMetrics.appendChild(content);
-    
+
     // Style the metrics labels
     const labels = content.querySelectorAll('div:nth-child(odd)');
-    labels.forEach(label => {
+    labels.forEach((label) => {
       if (label instanceof HTMLElement) {
         label.style.fontWeight = 'bold';
         label.style.color = '#aaa';
       }
     });
-    
+
     // Style the metrics values
     const values = content.querySelectorAll('div:nth-child(even)');
-    values.forEach(value => {
+    values.forEach((value) => {
       if (value instanceof HTMLElement) {
         value.style.textAlign = 'right';
       }
     });
-    
+
     // Toggle button
     const toggleBtn = document.createElement('div');
     toggleBtn.textContent = 'Toggle Metrics';
@@ -1328,23 +1485,23 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     toggleBtn.style.border = '1px solid #444';
     toggleBtn.style.transition = 'all 0.2s ease';
     toggleBtn.style.fontSize = '11px';
-    
+
     toggleBtn.onmouseenter = () => {
       toggleBtn.style.backgroundColor = 'rgba(70, 70, 70, 0.9)';
     };
-    
+
     toggleBtn.onmouseleave = () => {
       toggleBtn.style.backgroundColor = 'rgba(50, 50, 50, 0.8)';
     };
-    
+
     toggleBtn.onclick = () => {
       this.togglePerformanceMetrics();
     };
     this.performanceMetrics.appendChild(toggleBtn);
-    
+
     // Add to container
     this.hudContainer.appendChild(this.performanceMetrics);
-    
+
     // Start FPS monitoring
     this.startFPSMonitoring();
   }
@@ -1352,7 +1509,7 @@ export class HUDPlugin implements ISpaceGraphPlugin {
   private togglePerformanceMetrics(): void {
     if (this.performanceMetrics) {
       this.isPerformanceVisible = !this.isPerformanceVisible;
-      
+
       if (this.isPerformanceVisible) {
         // Show with animation
         this.performanceMetrics.style.display = 'block';
@@ -1364,7 +1521,7 @@ export class HUDPlugin implements ISpaceGraphPlugin {
         // Hide with animation
         this.performanceMetrics.style.transform = 'translateY(20px)';
         this.performanceMetrics.style.opacity = '0';
-        
+
         // Actually hide after animation completes
         setTimeout(() => {
           if (this.performanceMetrics) {
@@ -1378,36 +1535,39 @@ export class HUDPlugin implements ISpaceGraphPlugin {
   private startFPSMonitoring(): void {
     let lastTime = performance.now();
     let frameCount = 0;
-    
+
     const updateMetrics = () => {
       if (!this.isPerformanceVisible) {
         requestAnimationFrame(updateMetrics);
         return;
       }
-      
+
       const currentTime = performance.now();
       frameCount++;
-      
+
       if (currentTime - lastTime >= 1000) {
         const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
         frameCount = 0;
         lastTime = currentTime;
-        
+
         // Update FPS display
         const fpsElement = document.getElementById('fps-value');
         if (fpsElement) {
           fpsElement.textContent = fps.toString();
-          fpsElement.style.color = fps > 30 ? '#00ff00' : fps > 15 ? '#ffff00' : '#ff0000';
+          fpsElement.style.color =
+            fps > 30 ? '#00ff00' : fps > 15 ? '#ffff00' : '#ff0000';
         }
-        
+
         // Update node/edge counts
         const nodeCountElement = document.getElementById('node-count');
         const edgeCountElement = document.getElementById('edge-count');
         if (nodeCountElement && edgeCountElement && this.graph) {
-          nodeCountElement.textContent = this.graph.state.data.nodes.length.toString();
-          edgeCountElement.textContent = this.graph.state.data.edges.length.toString();
+          nodeCountElement.textContent =
+            this.graph.state.data.nodes.length.toString();
+          edgeCountElement.textContent =
+            this.graph.state.data.edges.length.toString();
         }
-        
+
         // Update memory usage (approximation)
         const memoryElement = document.getElementById('memory-usage');
         if (memoryElement) {
@@ -1418,10 +1578,10 @@ export class HUDPlugin implements ISpaceGraphPlugin {
           memoryElement.textContent = `${totalMemory} KB`;
         }
       }
-      
+
       requestAnimationFrame(updateMetrics);
     };
-    
+
     requestAnimationFrame(updateMetrics);
   }
 

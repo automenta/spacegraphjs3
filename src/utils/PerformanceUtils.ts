@@ -27,7 +27,7 @@ export class PerformanceUtils {
     memoryUsage: 0,
     nodeCount: 0,
     edgeCount: 0,
-    renderTime: 0
+    renderTime: 0,
   };
 
   private config: PerformanceConfig;
@@ -44,7 +44,7 @@ export class PerformanceUtils {
       enableMemoryTracking: true,
       enableRenderTiming: true,
       updateInterval: 1000,
-      ...config
+      ...config,
     };
   }
 
@@ -53,36 +53,36 @@ export class PerformanceUtils {
    */
   startMonitoring(): void {
     if (this.isMonitoring) return;
-    
+
     this.isMonitoring = true;
     this.lastFrameTime = performance.now();
     this.frameCount = 0;
     this.frameTimes = [];
-    
+
     const monitor = () => {
       if (!this.isMonitoring) return;
-      
+
       const currentTime = performance.now();
       this.frameCount++;
-      
+
       // Calculate frame time
       const frameTime = currentTime - this.lastFrameTime;
       this.frameTimes.push(frameTime);
-      
+
       // Keep only recent samples
       if (this.frameTimes.length > this.maxFrameSamples) {
         this.frameTimes.shift();
       }
-      
+
       // Update FPS every second
       if (currentTime - this.lastFrameTime >= this.config.updateInterval!) {
         this.updateMetrics(currentTime);
       }
-      
+
       this.lastFrameTime = currentTime;
       this.monitoringId = requestAnimationFrame(monitor);
     };
-    
+
     this.monitoringId = requestAnimationFrame(monitor);
   }
 
@@ -102,12 +102,17 @@ export class PerformanceUtils {
    */
   private updateMetrics(currentTime: number): void {
     if (this.config.enableFPSMonitoring) {
-      this.metrics.fps = Math.round((this.frameCount * 1000) / (currentTime - this.lastFrameTime + this.config.updateInterval!));
-      this.metrics.frameTime = this.frameTimes.reduce((a, b) => a + b, 0) / this.frameTimes.length;
+      this.metrics.fps = Math.round(
+        (this.frameCount * 1000) /
+          (currentTime - this.lastFrameTime + this.config.updateInterval!)
+      );
+      this.metrics.frameTime =
+        this.frameTimes.reduce((a, b) => a + b, 0) / this.frameTimes.length;
     }
 
     if (this.config.enableMemoryTracking && (performance as any).memory) {
-      this.metrics.memoryUsage = (performance as any).memory.usedJSHeapSize / 1024 / 1024; // MB
+      this.metrics.memoryUsage =
+        (performance as any).memory.usedJSHeapSize / 1024 / 1024; // MB
     }
 
     if (this.config.onMetricsUpdate) {
@@ -129,7 +134,9 @@ export class PerformanceUtils {
   /**
    * Measure render time for a specific operation
    */
-  async measureRenderTime<T>(operation: () => T | Promise<T>): Promise<{ result: T; renderTime: number }> {
+  async measureRenderTime<T>(
+    operation: () => T | Promise<T>
+  ): Promise<{ result: T; renderTime: number }> {
     if (!this.config.enableRenderTiming) {
       const result = await operation();
       return { result, renderTime: 0 };
@@ -138,10 +145,10 @@ export class PerformanceUtils {
     const startTime = performance.now();
     const result = await operation();
     const endTime = performance.now();
-    
+
     const renderTime = endTime - startTime;
     this.metrics.renderTime = renderTime;
-    
+
     return { result, renderTime };
   }
 
@@ -155,20 +162,24 @@ export class PerformanceUtils {
   /**
    * Check if performance is acceptable
    */
-  isPerformanceAcceptable(thresholds: Partial<PerformanceMetrics> = {}): boolean {
+  isPerformanceAcceptable(
+    thresholds: Partial<PerformanceMetrics> = {}
+  ): boolean {
     const defaultThresholds = {
       fps: 30,
       frameTime: 33.33, // ~30 FPS
       memoryUsage: 100, // MB
-      renderTime: 16.67 // ~60 FPS
+      renderTime: 16.67, // ~60 FPS
     };
 
     const actualThresholds = { ...defaultThresholds, ...thresholds };
 
-    return this.metrics.fps >= actualThresholds.fps! &&
-           this.metrics.frameTime <= actualThresholds.frameTime! &&
-           this.metrics.memoryUsage <= actualThresholds.memoryUsage! &&
-           this.metrics.renderTime <= actualThresholds.renderTime!;
+    return (
+      this.metrics.fps >= actualThresholds.fps! &&
+      this.metrics.frameTime <= actualThresholds.frameTime! &&
+      this.metrics.memoryUsage <= actualThresholds.memoryUsage! &&
+      this.metrics.renderTime <= actualThresholds.renderTime!
+    );
   }
 
   /**
@@ -248,21 +259,24 @@ export class PerformanceUtils {
   /**
    * Batch operations for better performance
    */
-  static batchOperations<T>(operations: (() => T)[], batchSize: number = 10): T[] {
+  static batchOperations<T>(
+    operations: (() => T)[],
+    batchSize: number = 10
+  ): T[] {
     const results: T[] = [];
-    
+
     for (let i = 0; i < operations.length; i += batchSize) {
       const batch = operations.slice(i, i + batchSize);
-      const batchResults = batch.map(op => op());
+      const batchResults = batch.map((op) => op());
       results.push(...batchResults);
-      
+
       // Yield to browser between batches
       if (i + batchSize < operations.length) {
         // Use setTimeout to yield control
         setTimeout(() => {}, 0);
       }
     }
-    
+
     return results;
   }
 
@@ -274,7 +288,7 @@ export class PerformanceUtils {
     wait: number
   ): (...args: Parameters<T>) => void {
     let timeout: NodeJS.Timeout;
-    
+
     return (...args: Parameters<T>) => {
       clearTimeout(timeout);
       timeout = setTimeout(() => func.apply(this, args), wait);
@@ -289,12 +303,12 @@ export class PerformanceUtils {
     limit: number
   ): (...args: Parameters<T>) => void {
     let inThrottle: boolean;
-    
+
     return (...args: Parameters<T>) => {
       if (!inThrottle) {
         func.apply(this, args);
         inThrottle = true;
-        setTimeout(() => inThrottle = false, limit);
+        setTimeout(() => (inThrottle = false), limit);
       }
     };
   }
@@ -302,30 +316,33 @@ export class PerformanceUtils {
   /**
    * Optimize array operations
    */
-  static optimizeArrayOperations<T>(array: T[], operation: (item: T) => void): void {
+  static optimizeArrayOperations<T>(
+    array: T[],
+    operation: (item: T) => void
+  ): void {
     // Use chunked processing for large arrays
     const chunkSize = 1000;
-    
+
     if (array.length <= chunkSize) {
       array.forEach(operation);
       return;
     }
-    
+
     let index = 0;
     const processChunk = () => {
       const endIndex = Math.min(index + chunkSize, array.length);
-      
+
       for (let i = index; i < endIndex; i++) {
         operation(array[i]);
       }
-      
+
       index = endIndex;
-      
+
       if (index < array.length) {
         setTimeout(processChunk, 0);
       }
     };
-    
+
     processChunk();
   }
 
@@ -362,16 +379,16 @@ export class PerformanceProfiler {
   measure(startLabel: string, endLabel: string, measureName?: string): number {
     const startTime = this.marks.get(startLabel);
     const endTime = this.marks.get(endLabel);
-    
+
     if (startTime === undefined || endTime === undefined) {
       console.warn(`PerformanceProfiler: Missing marks for measurement`);
       return 0;
     }
-    
+
     const duration = endTime - startTime;
     const name = measureName || `${startLabel}-${endLabel}`;
     this.measures.set(name, duration);
-    
+
     return duration;
   }
 
@@ -387,11 +404,11 @@ export class PerformanceProfiler {
    */
   logSummary(): void {
     console.group(`Performance Profile: ${this.name}`);
-    
+
     this.measures.forEach((duration, name) => {
       console.log(`${name}: ${duration.toFixed(2)}ms`);
     });
-    
+
     console.groupEnd();
   }
 

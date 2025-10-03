@@ -4,13 +4,48 @@ import { SpaceGraph } from '../src';
 const graph = new SpaceGraph('#container', {
   data: {
     nodes: [
-      { id: 'center', type: 'sphere', position: { x: 0, y: 0, z: 0 }, color: '#ff0000' },
-      { id: 'top', type: 'box', position: { x: 0, y: 5, z: 0 }, color: '#00ff00' },
-      { id: 'bottom', type: 'sphere', position: { x: 0, y: -5, z: 0 }, color: '#0000ff' },
-      { id: 'left', type: 'box', position: { x: -5, y: 0, z: 0 }, color: '#ffff00' },
-      { id: 'right', type: 'sphere', position: { x: 5, y: 0, z: 0 }, color: '#ff00ff' },
-      { id: 'front', type: 'box', position: { x: 0, y: 0, z: 5 }, color: '#00ffff' },
-      { id: 'back', type: 'sphere', position: { x: 0, y: 0, z: -5 }, color: '#ffffff' }
+      {
+        id: 'center',
+        type: 'sphere',
+        position: { x: 0, y: 0, z: 0 },
+        color: '#ff0000',
+      },
+      {
+        id: 'top',
+        type: 'box',
+        position: { x: 0, y: 5, z: 0 },
+        color: '#00ff00',
+      },
+      {
+        id: 'bottom',
+        type: 'sphere',
+        position: { x: 0, y: -5, z: 0 },
+        color: '#0000ff',
+      },
+      {
+        id: 'left',
+        type: 'box',
+        position: { x: -5, y: 0, z: 0 },
+        color: '#ffff00',
+      },
+      {
+        id: 'right',
+        type: 'sphere',
+        position: { x: 5, y: 0, z: 0 },
+        color: '#ff00ff',
+      },
+      {
+        id: 'front',
+        type: 'box',
+        position: { x: 0, y: 0, z: 5 },
+        color: '#00ffff',
+      },
+      {
+        id: 'back',
+        type: 'sphere',
+        position: { x: 0, y: 0, z: -5 },
+        color: '#ffffff',
+      },
     ],
     edges: [
       { id: 'e1', source: 'center', target: 'top' },
@@ -18,34 +53,34 @@ const graph = new SpaceGraph('#container', {
       { id: 'e3', source: 'center', target: 'left' },
       { id: 'e4', source: 'center', target: 'right' },
       { id: 'e5', source: 'center', target: 'front' },
-      { id: 'e6', source: 'center', target: 'back' }
-    ]
+      { id: 'e6', source: 'center', target: 'back' },
+    ],
   },
   layout: {
-    type: 'force-directed'
+    type: 'force-directed',
   },
   style: {},
   camera: {
     target: { x: 0, y: 0, z: 0 },
     phi: Math.PI / 3,
     theta: Math.PI / 4,
-    distance: 10
+    distance: 10,
   },
   controls: {
     keyboard: {
       enabled: true,
       panSpeed: 1,
       zoomSpeed: 1,
-      orbitSpeed: 1
-    }
+      orbitSpeed: 1,
+    },
   },
   performance: {
-    instancingThreshold: 1000
+    instancingThreshold: 1000,
   },
   interaction: {
     hoveredElementId: null,
-    selectedElementIds: []
-  }
+    selectedElementIds: [],
+  },
 });
 
 // Add buttons for different camera views
@@ -162,7 +197,7 @@ listBookmarksButton.onclick = () => {
   if (graph.cameraPlugin) {
     const bookmarks = graph.cameraPlugin.getBookmarks();
     if (bookmarks.length > 0) {
-      const bookmarkNames = bookmarks.map(b => b.name).join(', ');
+      const bookmarkNames = bookmarks.map((b) => b.name).join(', ');
       alert(`Bookmarks: ${bookmarkNames}`);
     } else {
       alert('No bookmarks found.');
@@ -177,33 +212,33 @@ addNodesButton.textContent = 'Add Random Nodes';
 addNodesButton.onclick = () => {
   const newNodes = [];
   const newEdges = [];
-  
+
   for (let i = 0; i < 5; i++) {
     const nodeId = `node${Date.now()}_${i}`;
     newNodes.push({
       id: nodeId,
       type: 'sphere',
-      position: { 
+      position: {
         x: Math.random() * 20 - 10,
         y: Math.random() * 20 - 10,
-        z: Math.random() * 20 - 10
+        z: Math.random() * 20 - 10,
       },
-      color: `#${Math.floor(Math.random()*16777215).toString(16)}`
+      color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
     });
-    
+
     // Connect to center node
     newEdges.push({
       id: `edge${Date.now()}_${i}`,
       source: 'center',
-      target: nodeId
+      target: nodeId,
     });
   }
-  
+
   graph.update({
     data: {
       nodes: { add: newNodes },
-      edges: { add: newEdges }
-    }
+      edges: { add: newEdges },
+    },
   });
 };
 document.body.appendChild(addNodesButton);

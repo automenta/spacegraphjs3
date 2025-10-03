@@ -30,9 +30,9 @@ vi.mock('three/examples/jsm/loaders/FontLoader.js', () => {
               onError(new Error('Network request disabled in tests'));
             }
           }, 0);
-        })
+        }),
       };
-    })
+    }),
   };
 });
 
@@ -48,9 +48,9 @@ vi.mock('three/examples/jsm/loaders/GLTFLoader.js', () => {
               onError(new Error('Network request disabled in tests'));
             }
           }, 0);
-        })
+        }),
       };
-    })
+    }),
   };
 });
 
@@ -65,9 +65,9 @@ vi.mock('three/examples/jsm/loaders/OBJLoader.js', () => {
               onError(new Error('Network request disabled in tests'));
             }
           }, 0);
-        })
+        }),
       };
-    })
+    }),
   };
 });
 
@@ -82,9 +82,9 @@ vi.mock('three/examples/jsm/loaders/FBXLoader.js', () => {
               onError(new Error('Network request disabled in tests'));
             }
           }, 0);
-        })
+        }),
       };
-    })
+    }),
   };
 });
 
@@ -99,9 +99,9 @@ vi.mock('three/examples/jsm/loaders/PLYLoader.js', () => {
               onError(new Error('Network request disabled in tests'));
             }
           }, 0);
-        })
+        }),
       };
-    })
+    }),
   };
 });
 
@@ -116,9 +116,9 @@ vi.mock('three/examples/jsm/loaders/STLLoader.js', () => {
               onError(new Error('Network request disabled in tests'));
             }
           }, 0);
-        })
+        }),
       };
-    })
+    }),
   };
 });
 
@@ -135,13 +135,14 @@ afterEach(() => {
   expect(consoleErrorSpy).not.toHaveBeenCalled();
   // Allow warnings only for TextElementActor, ThemeSystem, and InteractionPlugin in test environment
   const warnings = consoleWarnSpy.mock.calls;
-  const nonAllowedWarnings = warnings.filter((call: any[]) =>
-    !call[0]?.includes('Failed to create text geometry for node') &&
-    !call[0]?.includes('Theme not found:') &&
-    !call[0]?.includes('Scene not available for drag indicator')
+  const nonAllowedWarnings = warnings.filter(
+    (call: any[]) =>
+      !call[0]?.includes('Failed to create text geometry for node') &&
+      !call[0]?.includes('Theme not found:') &&
+      !call[0]?.includes('Scene not available for drag indicator')
   );
   expect(nonAllowedWarnings).toHaveLength(0);
-  
+
   consoleErrorSpy.mockRestore();
   consoleWarnSpy.mockRestore();
 });

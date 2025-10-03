@@ -20,7 +20,7 @@ export class CustomGeometryActor extends BaseGeometryActor {
   private static fbxLoader: FBXLoader = new FBXLoader();
   private static plyLoader: PLYLoader = new PLYLoader();
   private static stlLoader: STLLoader = new STLLoader();
-  
+
   private loadedGeometry: THREE.BufferGeometry | null = null;
   private loadingPromise: Promise<THREE.BufferGeometry> | null = null;
 
@@ -64,7 +64,7 @@ export class CustomGeometryActor extends BaseGeometryActor {
    */
   private async loadGeometry(): Promise<THREE.BufferGeometry> {
     const customSpec = this.elementState as CustomGeometryNodeSpec;
-    
+
     // Validate required properties
     if (!customSpec.url) {
       console.error('CustomGeometryActor: Missing URL for geometry loading');
@@ -77,8 +77,11 @@ export class CustomGeometryActor extends BaseGeometryActor {
     }
 
     // Create new loading promise
-    this.loadingPromise = this.loadGeometryFromFile(customSpec.url, customSpec.format || 'gltf')
-      .then(geometry => {
+    this.loadingPromise = this.loadGeometryFromFile(
+      customSpec.url,
+      customSpec.format || 'gltf'
+    )
+      .then((geometry) => {
         this.loadedGeometry = geometry;
         // Update the mesh with the loaded geometry
         if (this.mainMesh) {
@@ -103,7 +106,7 @@ export class CustomGeometryActor extends BaseGeometryActor {
         }
         return geometry;
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('CustomGeometryActor: Failed to load geometry:', error);
         // Fallback to default geometry
         const fallbackGeometry = new THREE.IcosahedronGeometry(0.5, 0);
@@ -129,7 +132,7 @@ export class CustomGeometryActor extends BaseGeometryActor {
     const oldMaterial = this.mainMesh.material;
     if (oldMaterial && oldMaterial !== newMaterial) {
       if (Array.isArray(oldMaterial)) {
-        oldMaterial.forEach(mat => mat.dispose());
+        oldMaterial.forEach((mat) => mat.dispose());
       } else {
         oldMaterial.dispose();
       }
@@ -145,7 +148,10 @@ export class CustomGeometryActor extends BaseGeometryActor {
    * @param format - Format of the geometry file
    * @returns Promise resolving to loaded geometry
    */
-  private loadGeometryFromFile(url: string, format: string): Promise<THREE.BufferGeometry> {
+  private loadGeometryFromFile(
+    url: string,
+    format: string
+  ): Promise<THREE.BufferGeometry> {
     return new Promise((resolve, reject) => {
       try {
         switch (format.toLowerCase()) {
@@ -237,9 +243,11 @@ export class CustomGeometryActor extends BaseGeometryActor {
    * @param object - Three.js object to extract geometry from
    * @returns BufferGeometry or null if none found
    */
-  private extractGeometryFromObject(object: THREE.Object3D): THREE.BufferGeometry | null {
+  private extractGeometryFromObject(
+    object: THREE.Object3D
+  ): THREE.BufferGeometry | null {
     let geometry: THREE.BufferGeometry | null = null;
-    
+
     object.traverse((child) => {
       if (child instanceof THREE.Mesh && child.geometry) {
         // Clone the geometry to avoid sharing between objects
@@ -252,7 +260,7 @@ export class CustomGeometryActor extends BaseGeometryActor {
         return;
       }
     });
-    
+
     return geometry;
   }
 
@@ -264,10 +272,10 @@ export class CustomGeometryActor extends BaseGeometryActor {
       this.loadedGeometry.dispose();
       this.loadedGeometry = null;
     }
-    
+
     // Clear loading promise
     this.loadingPromise = null;
-    
+
     super.dispose();
   }
 }

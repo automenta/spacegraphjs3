@@ -4,10 +4,30 @@ import { SpaceGraph } from '../src';
 const graph = new SpaceGraph('#container', {
   data: {
     nodes: [
-      { id: 'node1', type: 'sphere', position: { x: -2, y: 0, z: 0 }, color: '#ff0000' },
-      { id: 'node2', type: 'box', position: { x: 0, y: 2, z: 0 }, color: '#00ff00' },
-      { id: 'node3', type: 'sphere', position: { x: 2, y: 0, z: 0 }, color: '#0000ff' },
-      { id: 'node4', type: 'box', position: { x: 0, y: -2, z: 0 }, color: '#ffff00' }
+      {
+        id: 'node1',
+        type: 'sphere',
+        position: { x: -2, y: 0, z: 0 },
+        color: '#ff0000',
+      },
+      {
+        id: 'node2',
+        type: 'box',
+        position: { x: 0, y: 2, z: 0 },
+        color: '#00ff00',
+      },
+      {
+        id: 'node3',
+        type: 'sphere',
+        position: { x: 2, y: 0, z: 0 },
+        color: '#0000ff',
+      },
+      {
+        id: 'node4',
+        type: 'box',
+        position: { x: 0, y: -2, z: 0 },
+        color: '#ffff00',
+      },
     ],
     edges: [
       {
@@ -18,7 +38,7 @@ const graph = new SpaceGraph('#container', {
         color: '#ff0000',
         width: 3,
         type: 'curved',
-        curvature: 0.3
+        curvature: 0.3,
       },
       {
         id: 'edge2',
@@ -27,7 +47,7 @@ const graph = new SpaceGraph('#container', {
         label: 'Right Connection',
         color: '#00ff00',
         width: 2,
-        type: 'straight'
+        type: 'straight',
       },
       {
         id: 'edge3',
@@ -37,7 +57,7 @@ const graph = new SpaceGraph('#container', {
         color: '#0000ff',
         width: 4,
         type: 'curved',
-        curvature: -0.3
+        curvature: -0.3,
       },
       {
         id: 'edge4',
@@ -48,12 +68,12 @@ const graph = new SpaceGraph('#container', {
         width: 1,
         type: 'dashed',
         dashSize: 0.2,
-        gapSize: 0.1
-      }
-    ]
+        gapSize: 0.1,
+      },
+    ],
   },
   layout: {
-    type: 'force-directed'
+    type: 'force-directed',
   },
   style: {
     'edge:hover': {
@@ -63,8 +83,8 @@ const graph = new SpaceGraph('#container', {
         color: '#ffffff',
         fontSize: 16,
         fontFamily: 'Arial, sans-serif',
-        backgroundColor: 'rgba(0, 0, 0, 0.8)'
-      }
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      },
     },
     'edge:selected': {
       width: 6,
@@ -73,50 +93,57 @@ const graph = new SpaceGraph('#container', {
         color: '#ff00ff',
         fontSize: 18,
         fontFamily: 'Arial, sans-serif',
-        backgroundColor: 'rgba(255, 0, 255, 0.3)'
-      }
-    }
+        backgroundColor: 'rgba(255, 0, 255, 0.3)',
+      },
+    },
   },
   camera: {
     target: { x: 0, y: 0, z: 0 },
     phi: Math.PI / 2,
     theta: 0,
-    distance: 5
+    distance: 5,
   },
   controls: {
     keyboard: {
       enabled: true,
       panSpeed: 1,
       zoomSpeed: 1,
-      orbitSpeed: 1
-    }
+      orbitSpeed: 1,
+    },
   },
   performance: {
-    instancingThreshold: 1000
+    instancingThreshold: 1000,
   },
   interaction: {
     hoveredElementId: null,
-    selectedElementIds: []
-  }
+    selectedElementIds: [],
+  },
 });
 
 // Add interactivity for edges
 graph.on('edge:click', ({ target }) => {
   console.log('Clicked edge:', target);
-  
+
   // Toggle selection
-  const isSelected = graph.state.interaction.selectedElementIds.includes(target.id);
+  const isSelected = graph.state.interaction.selectedElementIds.includes(
+    target.id
+  );
   if (isSelected) {
     graph.update({
       interaction: {
-        selectedElementIds: graph.state.interaction.selectedElementIds.filter(id => id !== target.id)
-      }
+        selectedElementIds: graph.state.interaction.selectedElementIds.filter(
+          (id) => id !== target.id
+        ),
+      },
     });
   } else {
     graph.update({
       interaction: {
-        selectedElementIds: [...graph.state.interaction.selectedElementIds, target.id]
-      }
+        selectedElementIds: [
+          ...graph.state.interaction.selectedElementIds,
+          target.id,
+        ],
+      },
     });
   }
 });
@@ -129,18 +156,20 @@ addButton.onclick = () => {
   graph.update({
     data: {
       edges: {
-        add: [{
-          id: edgeId,
-          source: 'node1',
-          target: 'node3',
-          label: `New Edge ${edgeId}`,
-          color: '#ff00ff',
-          width: 2,
-          type: 'curved',
-          curvature: Math.random() * 0.5
-        }]
-      }
-    }
+        add: [
+          {
+            id: edgeId,
+            source: 'node1',
+            target: 'node3',
+            label: `New Edge ${edgeId}`,
+            color: '#ff00ff',
+            width: 2,
+            type: 'curved',
+            curvature: Math.random() * 0.5,
+          },
+        ],
+      },
+    },
   });
 };
 document.body.appendChild(addButton);
@@ -155,11 +184,11 @@ updateButton.onclick = () => {
         update: [
           {
             id: 'edge1',
-            label: `Updated: ${new Date().toLocaleTimeString()}`
-          }
-        ]
-      }
-    }
+            label: `Updated: ${new Date().toLocaleTimeString()}`,
+          },
+        ],
+      },
+    },
   });
 };
 document.body.appendChild(updateButton);

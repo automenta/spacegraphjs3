@@ -140,7 +140,7 @@ const createLayoutControls = () => {
     { name: 'Random', value: 'random' as const },
   ];
 
-  layouts.forEach(layout => {
+  layouts.forEach((layout) => {
     const button = document.createElement('button');
     button.textContent = layout.name;
     button.style.display = 'block';
@@ -152,7 +152,7 @@ const createLayoutControls = () => {
     button.style.border = 'none';
     button.style.borderRadius = '3px';
     button.style.cursor = 'pointer';
-    
+
     button.addEventListener('click', () => {
       graph.update({
         layout: {
@@ -162,16 +162,18 @@ const createLayoutControls = () => {
           ...(layout.value === 'circle' && { radius: 15 }),
           ...(layout.value === 'column' && { axis: 'y' }),
           ...(layout.value === 'row' && { axis: 'x' }),
-        } as any
+        } as any,
       });
-      
+
       // Resume layout if it's a force-directed layout
       if (layout.value === 'force-directed') {
-        const layoutPlugin = plugins.find(p => p instanceof LayoutPlugin) as LayoutPlugin;
+        const layoutPlugin = plugins.find(
+          (p) => p instanceof LayoutPlugin
+        ) as LayoutPlugin;
         layoutPlugin?.resume();
       }
     });
-    
+
     container.appendChild(button);
   });
 

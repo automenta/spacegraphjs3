@@ -5,7 +5,7 @@ import { ComprehensiveUISemanticsSpecs } from './specs/comprehensive-ui.semantic
 
 /**
  * Performance Metrics Demo
- * 
+ *
  * This file demonstrates how to use the performance metrics collector
  * to measure and track performance of visual interactions.
  */
@@ -19,7 +19,7 @@ test.describe('Performance Metrics Collection', () => {
       viewport: { width: 1280, height: 720 },
       deviceScaleFactor: 1,
     });
-    
+
     collector = new PerformanceMetricsCollector();
   });
 
@@ -31,8 +31,10 @@ test.describe('Performance Metrics Collection', () => {
 
   test('Measure Sphere Element Actor hover performance', async () => {
     // Navigate to the element actors demo
-    await controller.navigateTo('http://localhost:5175/element-actors-demo.html');
-    
+    await controller.navigateTo(
+      'http://localhost:5175/element-actors-demo.html'
+    );
+
     // Collect performance metrics for hover interaction
     const metrics = await collector.collectMetrics(
       'SphereElementActor',
@@ -41,9 +43,9 @@ test.describe('Performance Metrics Collection', () => {
         await controller.hover('canvas');
       }
     );
-    
+
     console.log(collector.generateReport());
-    
+
     // Compare with baseline (in a real scenario, this would be set from previous runs)
     collector.setBaseline('SphereElementActor-Hover', {
       componentName: 'SphereElementActor',
@@ -54,20 +56,27 @@ test.describe('Performance Metrics Collection', () => {
       frameRate: 60, // Baseline frame rate
       interactionLatency: 10, // Baseline latency in ms
       renderTime: 30, // Baseline render time in ms
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-    
+
     // Check for regressions
-    const benchmark = collector.compareWithBaseline('SphereElementActor-Hover', metrics);
+    const benchmark = collector.compareWithBaseline(
+      'SphereElementActor-Hover',
+      metrics
+    );
     if (benchmark && benchmark.regression) {
-      console.warn(`Performance regression detected: ${benchmark.regressionPercentage.toFixed(2)}% worse than baseline`);
+      console.warn(
+        `Performance regression detected: ${benchmark.regressionPercentage.toFixed(2)}% worse than baseline`
+      );
     }
   });
 
   test('Measure Box Element Actor drag performance', async () => {
     // Navigate to the instanced interaction demo
-    await controller.navigateTo('http://localhost:5175/instanced-interaction.html');
-    
+    await controller.navigateTo(
+      'http://localhost:5175/instanced-interaction.html'
+    );
+
     // Collect performance metrics for drag interaction
     const metrics = await collector.collectMetrics(
       'BoxElementActor',
@@ -79,14 +88,16 @@ test.describe('Performance Metrics Collection', () => {
         });
       }
     );
-    
+
     console.log(collector.generateReport());
   });
 
   test('Measure Layout Engine performance', async () => {
     // Navigate to the layout engines demo
-    await controller.navigateTo('http://localhost:5175/layout-engines-demo.html');
-    
+    await controller.navigateTo(
+      'http://localhost:5175/layout-engines-demo.html'
+    );
+
     // Collect performance metrics for layout execution
     const metrics = await collector.collectMetrics(
       'D3ForceLayout',
@@ -98,7 +109,7 @@ test.describe('Performance Metrics Collection', () => {
         await controller.waitForTimeout(2000);
       }
     );
-    
+
     console.log(collector.generateReport());
   });
 });

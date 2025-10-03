@@ -5,7 +5,7 @@ test('basic visual test', async ({ page }) => {
 
   // Wait for the graph to be initialized
   await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
-  
+
   // Simple wait for rendering to complete
   await page.waitForTimeout(3000);
 

@@ -26,7 +26,7 @@ export class EventManager {
       console.warn('EventManager is disposed, cannot register listener');
       return () => {};
     }
-    
+
     this.emitter.on(eventName, listener);
     return () => this.off(eventName, listener);
   }
@@ -51,13 +51,15 @@ export class EventManager {
    */
   public emit<Key extends keyof GraphEventMap>(
     eventName: Key,
-    ...args: GraphEventMap[Key] extends void ? [] : [payload: GraphEventMap[Key]]
+    ...args: GraphEventMap[Key] extends void
+      ? []
+      : [payload: GraphEventMap[Key]]
   ): void {
     if (this.disposed) {
       console.warn('EventManager is disposed, cannot emit event');
       return;
     }
-    
+
     // Emit the event with proper typing
     // @ts-expect-error - mitt types are tricky with conditional payloads
     this.emitter.emit(eventName, ...args);

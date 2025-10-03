@@ -155,14 +155,14 @@ export class InstancedRenderer implements IRenderer {
       for (let i = 0; i < searchLimit; i++) {
         mesh.getMatrixAt(i, tempMatrix);
         tempPosition.setFromMatrixPosition(tempMatrix);
-        
+
         const distance = tempPosition.distanceTo(intersectionPoint);
         if (distance < closestDistance) {
           closestDistance = distance;
           closestInstanceId = i;
         }
       }
-      
+
       if (closestInstanceId !== null) {
         const nodeId = idMaps.indexToId.get(closestInstanceId) ?? null;
         return nodeId;
@@ -267,7 +267,7 @@ export class InstancedRenderer implements IRenderer {
     if (mesh.instanceColor) {
       mesh.instanceColor.needsUpdate = true;
     }
-    
+
     // Debug logging for center node
     if (node.id === 'n-7-7') {
       console.log('Updating center node n-7-7 at position:', node.position);

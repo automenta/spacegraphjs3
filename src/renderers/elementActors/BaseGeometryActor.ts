@@ -54,9 +54,12 @@ export abstract class BaseGeometryActor extends BaseElementActor {
     }
 
     // Safely set the initial color
-    const initialColor = parseColor(this.elementState.color, this.elementState.id);
+    const initialColor = parseColor(
+      this.elementState.color,
+      this.elementState.id
+    );
     const material = new THREE.MeshBasicMaterial({ color: initialColor });
-    
+
     this.mainMesh = new THREE.Mesh(geometry, material);
     this.mainMesh.userData.nodeId = this.elementId; // For raycasting
     group.add(this.mainMesh);
@@ -113,7 +116,8 @@ export abstract class BaseGeometryActor extends BaseElementActor {
     to: number,
     duration: number,
     onUpdate: (value: number) => void,
-    easing: (t: number) => number = t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
+    easing: (t: number) => number = (t) =>
+      t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
   ): void {
     animateProperty(from, to, duration, onUpdate, easing);
   }
@@ -136,7 +140,7 @@ export abstract class BaseGeometryActor extends BaseElementActor {
     // Only animate if there's a significant position change
     const currentPosition = group.position;
     const positionDelta = currentPosition.distanceTo(targetPosition);
-    
+
     if (this.useAnimations && positionDelta > 0.01) {
       // Animate position with easing
       this.animateProperty(0, 1, 300, (progress) => {
@@ -163,35 +167,50 @@ export abstract class BaseGeometryActor extends BaseElementActor {
     const mainMaterial = this.mainMesh.material as THREE.MeshBasicMaterial;
     const currentMainColor = mainMaterial.color.clone();
     const targetMainColor = stylingResult.color.clone();
-    
+
     if (this.useAnimations && !currentMainColor.equals(targetMainColor)) {
       this.animateProperty(0, 1, 200, (progress) => {
-        mainMaterial.color.lerpColors(currentMainColor, targetMainColor, progress);
+        mainMaterial.color.lerpColors(
+          currentMainColor,
+          targetMainColor,
+          progress
+        );
       });
     } else {
       mainMaterial.color.copy(targetMainColor);
     }
-    
+
     // Animate glow effects
-    if (stylingResult.glowVisible && stylingResult.glowColor !== undefined && stylingResult.glowStrength !== undefined) {
+    if (
+      stylingResult.glowVisible &&
+      stylingResult.glowColor !== undefined &&
+      stylingResult.glowStrength !== undefined
+    ) {
       this.glowMesh.visible = true;
       const glowMaterial = this.glowMesh.material as THREE.MeshBasicMaterial;
       const targetGlowColor = new THREE.Color(stylingResult.glowColor);
       const currentGlowColor = glowMaterial.color.clone();
-      
+
       if (this.useAnimations && !currentGlowColor.equals(targetGlowColor)) {
         this.animateProperty(0, 1, 200, (progress) => {
-          glowMaterial.color.lerpColors(currentGlowColor, targetGlowColor, progress);
+          glowMaterial.color.lerpColors(
+            currentGlowColor,
+            targetGlowColor,
+            progress
+          );
         });
       } else {
         glowMaterial.color.copy(targetGlowColor);
       }
-      
+
       // Animate glow opacity
       const currentOpacity = glowMaterial.opacity;
       const targetOpacity = stylingResult.glowStrength;
-      
-      if (this.useAnimations && Math.abs(currentOpacity - targetOpacity!) > 0.01) {
+
+      if (
+        this.useAnimations &&
+        Math.abs(currentOpacity - targetOpacity!) > 0.01
+      ) {
         this.animateProperty(currentOpacity, targetOpacity!, 200, (value) => {
           glowMaterial.opacity = value;
         });

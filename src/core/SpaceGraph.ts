@@ -32,8 +32,9 @@ import { registerLayouts } from '../layouts/registerLayouts';
  * It orchestrates the renderer, interaction, layout, and other controllers.
  */
 export class SpaceGraph {
-  private static elementActorRegistry: Map<string, ElementActorClass> = new Map();
-  
+  private static elementActorRegistry: Map<string, ElementActorClass> =
+    new Map();
+
   // Initialize the registry with default element actors
   static {
     SpaceGraph.elementActorRegistry.set('sphere', SphereElementActor);
@@ -42,8 +43,9 @@ export class SpaceGraph {
     SpaceGraph.elementActorRegistry.set('text', TextElementActor);
     SpaceGraph.elementActorRegistry.set('html', HtmlNodeElementActor);
   }
-  private static layoutEngineRegistry: Map<string, LayoutEngineClass> = new Map();
-  
+  private static layoutEngineRegistry: Map<string, LayoutEngineClass> =
+    new Map();
+
   // Initialize the registry with default layout engines
   static {
     // Delay layout registration until after class is fully defined to avoid circular dependency
@@ -106,7 +108,9 @@ export class SpaceGraph {
     } catch (error) {
       console.error('Failed to initialize SpaceGraph:', error);
       // If we have a container reference, display the error in it
-      const container = document.querySelector(containerSelector) as HTMLElement;
+      const container = document.querySelector(
+        containerSelector
+      ) as HTMLElement;
       if (container) {
         container.innerHTML = `<div style="color: red; padding: 20px; font-family: monospace;">
           <h2>Failed to initialize</h2>
@@ -179,7 +183,7 @@ export class SpaceGraph {
    */
   public update(spec: SpecUpdate) {
     this.updateState(spec);
-    
+
     // Notify plugins of state update
     for (const plugin of this.plugins) {
       if (plugin.onStateUpdate) {
@@ -241,7 +245,7 @@ export class SpaceGraph {
     this.render = new RenderingManager(this, this.container);
     this.events = new EventManager();
     this.dataManager = new DataManager(this);
-    
+
     // Initialize rendering optimizer after event manager is available
     this.render.initRenderingOptimizer();
   }
@@ -258,7 +262,9 @@ export class SpaceGraph {
           this.cameraPlugin = plugin;
         }
       } catch (error) {
-        throw new Error(`Error initializing plugin: ${(error as Error).message}`);
+        throw new Error(
+          `Error initializing plugin: ${(error as Error).message}`
+        );
       }
     }
   }

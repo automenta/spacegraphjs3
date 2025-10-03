@@ -7,7 +7,7 @@ const { PNG } = require('pngjs');
 
 /**
  * Automated Screenshot Generation and Validation System
- * 
+ *
  * This system provides comprehensive automated screenshot capture, comparison,
  * and validation for all key UI interactions in SpaceGraphJS.
  */
@@ -48,51 +48,53 @@ export class AutomatedScreenshotSystem {
     baseUrl: string
   ): Promise<ScreenshotGenerationResult[]> {
     const results: ScreenshotGenerationResult[] = [];
-    
+
     // Import Playwright dynamically to avoid issues
     const { chromium } = await import('@playwright/test');
-    
+
     // Launch browser
     const browser = await chromium.launch({ headless: true });
     const context = await browser.newContext({
-      viewport: { width: 1280, height: 720 }
+      viewport: { width: 1280, height: 720 },
     });
     const page = await context.newPage();
-    
+
     try {
       // Navigate to base URL
       await page.goto(baseUrl);
-      await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
+      await page.waitForFunction(() => (window as any).graph, {
+        timeout: 10000,
+      });
       await page.waitForTimeout(2000);
-      
+
       // Generate screenshot for each interaction
       for (const interaction of interactions) {
         console.log(`Generating screenshot for: ${interaction.name}`);
-        
+
         // Perform interaction
         await this.performInteraction(page, interaction);
-        
+
         // Wait for interaction to complete
         await page.waitForTimeout(interaction.waitTime || 300);
-        
+
         // Capture screenshot
         const screenshotName = `${interaction.id}-${Date.now()}.png`;
         const screenshotPath = path.join(this.actualPath, screenshotName);
-        
+
         await page.screenshot({ path: screenshotPath, fullPage: true });
-        
+
         results.push({
           interactionId: interaction.id,
           interactionName: interaction.name,
           screenshotPath,
           timestamp: new Date().toISOString(),
-          status: 'generated'
+          status: 'generated',
         });
       }
     } finally {
       await browser.close();
     }
-    
+
     return results;
   }
 
@@ -101,52 +103,59 @@ export class AutomatedScreenshotSystem {
    * @param page Playwright page
    * @param interaction Interaction to perform
    */
-  private async performInteraction(page: any, interaction: ScreenshotInteraction): Promise<void> {
+  private async performInteraction(
+    page: any,
+    interaction: ScreenshotInteraction
+  ): Promise<void> {
     const viewport = page.viewportSize();
-    
+
     switch (interaction.type) {
       case 'hover':
         if (viewport) {
           await page.hover(interaction.selector, {
             position: interaction.position || {
               x: viewport.width / 2,
-              y: viewport.height / 2
-            }
+              y: viewport.height / 2,
+            },
           });
         }
         break;
-        
+
       case 'click':
         if (viewport) {
           await page.click(interaction.selector, {
             position: interaction.position || {
               x: viewport.width / 2,
-              y: viewport.height / 2
+              y: viewport.height / 2,
             },
-            button: interaction.button || 'left'
+            button: interaction.button || 'left',
           });
         }
         break;
-        
+
       case 'drag':
         if (viewport && interaction.targetSelector) {
-          await page.dragAndDrop(interaction.selector, interaction.targetSelector, {
-            sourcePosition: interaction.sourcePosition,
-            targetPosition: interaction.targetPosition
-          });
+          await page.dragAndDrop(
+            interaction.selector,
+            interaction.targetSelector,
+            {
+              sourcePosition: interaction.sourcePosition,
+              targetPosition: interaction.targetPosition,
+            }
+          );
         }
         break;
-        
+
       case 'keyboard':
         if (interaction.keys) {
           await page.keyboard.press(interaction.keys);
         }
         break;
-        
+
       case 'scroll':
         await page.dispatchEvent(interaction.selector, 'wheel', {
           deltaX: interaction.deltaX || 0,
-          deltaY: interaction.deltaY || 100
+          deltaY: interaction.deltaY || 100,
         });
         break;
     }
@@ -162,24 +171,24 @@ export class AutomatedScreenshotSystem {
     threshold: number = 0.1
   ): Promise<ScreenshotValidationResult[]> {
     const results: ScreenshotValidationResult[] = [];
-    
+
     for (const screenshot of generatedScreenshots) {
       const expectedPath = path.join(
-        this.expectedPath, 
+        this.expectedPath,
         path.basename(screenshot.screenshotPath)
       );
-      
+
       try {
         // Check if expected screenshot exists
         await fs.access(expectedPath);
-        
+
         // Compare screenshots
         const comparisonResult = await this.compareScreenshots(
           screenshot.screenshotPath,
           expectedPath,
           threshold
         );
-        
+
         results.push({
           interactionId: screenshot.interactionId,
           interactionName: screenshot.interactionName,
@@ -189,7 +198,7 @@ export class AutomatedScreenshotSystem {
           actualPath: screenshot.screenshotPath,
           expectedPath,
           diffPath: comparisonResult.diffPath,
-          timestamp: screenshot.timestamp
+          timestamp: screenshot.timestamp,
         });
       } catch (error) {
         // Expected screenshot doesn't exist - this might be first run
@@ -202,11 +211,11 @@ export class AutomatedScreenshotSystem {
           actualPath: screenshot.screenshotPath,
           expectedPath,
           isFirstRun: true,
-          timestamp: screenshot.timestamp
+          timestamp: screenshot.timestamp,
         });
       }
     }
-    
+
     return results;
   }
 
@@ -225,30 +234,37 @@ export class AutomatedScreenshotSystem {
       // Load images
       const img1 = PNG.sync.read(await fs.readFile(actualPath));
       const img2 = PNG.sync.read(await fs.readFile(expectedPath));
-      
+
       // Create diff image
       const { width, height } = img1;
       const diff = new PNG({ width, height });
-      
+
       // Compare images
-      const diffPixels = pixelmatch(img1.data, img2.data, diff.data, width, height, {
-        threshold,
-        includeAA: false,
-      });
-      
+      const diffPixels = pixelmatch(
+        img1.data,
+        img2.data,
+        diff.data,
+        width,
+        height,
+        {
+          threshold,
+          includeAA: false,
+        }
+      );
+
       const totalPixels = width * height;
       const diffPercentage = (diffPixels / totalPixels) * 100;
-      
+
       // Save diff image
       const diffFileName = path.basename(actualPath, '.png') + '-diff.png';
       const diffPath = path.join(this.diffPath, diffFileName);
       await fs.writeFile(diffPath, PNG.sync.write(diff));
-      
+
       return {
         passed: diffPercentage < 5.0, // 5% threshold for passing
         diffPixels,
         diffPercentage,
-        diffPath
+        diffPath,
       };
     } catch (error) {
       throw error;
@@ -259,7 +275,9 @@ export class AutomatedScreenshotSystem {
    * Accept current screenshots as new expected versions
    * @param validationResults Results from validation
    */
-  async acceptScreenshots(validationResults: ScreenshotValidationResult[]): Promise<void> {
+  async acceptScreenshots(
+    validationResults: ScreenshotValidationResult[]
+  ): Promise<void> {
     for (const result of validationResults) {
       if (result.isFirstRun || !result.passed) {
         // Copy actual to expected
@@ -282,15 +300,16 @@ export class AutomatedScreenshotSystem {
     validationResults: ScreenshotValidationResult[],
     outputPath?: string
   ): Promise<string> {
-    const reportPath = outputPath || path.join(
-      this.reportPath, 
-      `screenshot-report-${Date.now()}.html`
-    );
-    
-    const passedCount = validationResults.filter(r => r.passed).length;
-    const failedCount = validationResults.filter(r => !r.passed && !r.isFirstRun).length;
-    const firstRunCount = validationResults.filter(r => r.isFirstRun).length;
-    
+    const reportPath =
+      outputPath ||
+      path.join(this.reportPath, `screenshot-report-${Date.now()}.html`);
+
+    const passedCount = validationResults.filter((r) => r.passed).length;
+    const failedCount = validationResults.filter(
+      (r) => !r.passed && !r.isFirstRun
+    ).length;
+    const firstRunCount = validationResults.filter((r) => r.isFirstRun).length;
+
     const reportContent = `
 <!DOCTYPE html>
 <html>
@@ -372,7 +391,9 @@ export class AutomatedScreenshotSystem {
         </div>
     </div>
     
-    ${validationResults.map(result => `
+    ${validationResults
+      .map(
+        (result) => `
         <div class="result ${result.passed ? 'passed' : result.isFirstRun ? 'first-run' : 'failed'}">
             <h2>${result.interactionName}</h2>
             <p><strong>ID:</strong> ${result.interactionId}</p>
@@ -381,10 +402,14 @@ export class AutomatedScreenshotSystem {
                     ${result.passed ? 'PASSED' : result.isFirstRun ? 'FIRST RUN' : 'FAILED'}
                 </span>
             </p>
-            ${!result.isFirstRun ? `
+            ${
+              !result.isFirstRun
+                ? `
                 <p><strong>Diff Pixels:</strong> ${result.diffPixels}</p>
                 <p><strong>Diff Percentage:</strong> ${result.diffPercentage.toFixed(2)}%</p>
-            ` : ''}
+            `
+                : ''
+            }
             
             <div class="image-container">
                 <div>
@@ -392,26 +417,36 @@ export class AutomatedScreenshotSystem {
                     <img src="file://${result.actualPath}" alt="Actual">
                 </div>
                 
-                ${!result.isFirstRun ? `
+                ${
+                  !result.isFirstRun
+                    ? `
                 <div>
                     <h3>Expected</h3>
                     <img src="file://${result.expectedPath}" alt="Expected">
                 </div>
                 
-                ${result.diffPath ? `
+                ${
+                  result.diffPath
+                    ? `
                 <div>
                     <h3>Diff</h3>
                     <img src="file://${result.diffPath}" alt="Diff">
                 </div>
-                ` : ''}
-                ` : ''}
+                `
+                    : ''
+                }
+                `
+                    : ''
+                }
             </div>
         </div>
-    `).join('')}
+    `
+      )
+      .join('')}
 </body>
 </html>
     `.trim();
-    
+
     await fs.writeFile(reportPath, reportContent);
     return reportPath;
   }
@@ -427,14 +462,14 @@ export class AutomatedScreenshotSystem {
         name: 'Node Hover State',
         type: 'hover',
         selector: 'canvas',
-        waitTime: 300
+        waitTime: 300,
       },
       {
         id: 'node-click',
         name: 'Node Click Selection',
         type: 'click',
         selector: 'canvas',
-        waitTime: 300
+        waitTime: 300,
       },
       {
         id: 'node-drag',
@@ -444,9 +479,9 @@ export class AutomatedScreenshotSystem {
         targetSelector: 'canvas',
         sourcePosition: { x: 600, y: 300 },
         targetPosition: { x: 700, y: 400 },
-        waitTime: 500
+        waitTime: 500,
       },
-      
+
       // Edge interactions
       {
         id: 'edge-hover',
@@ -454,9 +489,9 @@ export class AutomatedScreenshotSystem {
         type: 'hover',
         selector: 'canvas',
         position: { x: 640, y: 360 },
-        waitTime: 300
+        waitTime: 300,
       },
-      
+
       // Camera controls
       {
         id: 'camera-pan',
@@ -466,7 +501,7 @@ export class AutomatedScreenshotSystem {
         targetSelector: 'canvas',
         sourcePosition: { x: 400, y: 300 },
         targetPosition: { x: 800, y: 500 },
-        waitTime: 500
+        waitTime: 500,
       },
       {
         id: 'camera-zoom-in',
@@ -474,7 +509,7 @@ export class AutomatedScreenshotSystem {
         type: 'scroll',
         selector: 'canvas',
         deltaY: -100,
-        waitTime: 300
+        waitTime: 300,
       },
       {
         id: 'camera-zoom-out',
@@ -482,9 +517,9 @@ export class AutomatedScreenshotSystem {
         type: 'scroll',
         selector: 'canvas',
         deltaY: 100,
-        waitTime: 300
+        waitTime: 300,
       },
-      
+
       // UI overlays
       {
         id: 'hud-toggle',
@@ -492,7 +527,7 @@ export class AutomatedScreenshotSystem {
         type: 'keyboard',
         selector: 'document',
         keys: 'h',
-        waitTime: 200
+        waitTime: 200,
       },
       {
         id: 'performance-toggle',
@@ -500,8 +535,8 @@ export class AutomatedScreenshotSystem {
         type: 'keyboard',
         selector: 'document',
         keys: 'p',
-        waitTime: 200
-      }
+        waitTime: 200,
+      },
     ];
   }
 }

@@ -20,12 +20,12 @@ export class ColumnLayout extends BaseLayoutEngine {
         columns: layoutConfig.columns,
         columnSpacing: layoutConfig.columnSpacing ?? 8,
         origin: layoutConfig.origin ?? { x: 0, y: 0, z: 0 },
-        maxNodesPerColumn: layoutConfig.maxNodesPerColumn
+        maxNodesPerColumn: layoutConfig.maxNodesPerColumn,
       };
 
       // Run arrangement immediately when initialized
       this.arrangeNodes();
-      
+
       // Also set up effect for reactive updates
       createEffect(() => {
         this.arrangeNodes();
@@ -38,7 +38,7 @@ export class ColumnLayout extends BaseLayoutEngine {
     if (nodes.length === 0) return;
 
     const positions = this.calculateColumnPositions(nodes.length);
-    
+
     // Update node positions using the reactive state update mechanism
     this.graph.updateStateWithProducer(
       produce((s) => {
@@ -53,14 +53,14 @@ export class ColumnLayout extends BaseLayoutEngine {
               if (node.pinning && typeof node.pinning === 'object') {
                 updatedNodes[nodeIndex] = {
                   ...updatedNodes[nodeIndex],
-                  position: { ...node.pinning }
+                  position: { ...node.pinning },
                 };
               }
             } else {
               // For non-pinned nodes, use calculated positions
               updatedNodes[nodeIndex] = {
                 ...updatedNodes[nodeIndex],
-                position: positions[positionIndex]
+                position: positions[positionIndex],
               };
               positionIndex++; // Only increment for non-pinned nodes
             }
@@ -71,39 +71,40 @@ export class ColumnLayout extends BaseLayoutEngine {
     );
   }
 
-  private calculateColumnPositions(count: number): Array<{x: number, y: number, z: number}> {
-    const positions: Array<{x: number, y: number, z: number}> = [];
+  private calculateColumnPositions(
+    count: number
+  ): Array<{ x: number; y: number; z: number }> {
+    const positions: Array<{ x: number; y: number; z: number }> = [];
     const config = this.config;
-    
+
     // Use non-null assertion since we know these have defaults from init()
     const spacing = config.spacing!;
     const columnSpacing = config.columnSpacing!;
     const origin = config.origin!;
-    
+
     // Calculate number of columns and nodes per column
     const maxPerColumn = config.maxNodesPerColumn ?? count;
     const columns = config.columns ?? Math.ceil(count / maxPerColumn);
     const nodesPerColumn = Math.ceil(count / columns);
-    
+
     // Calculate dimensions for centering (values are used in positioning calculations)
     const _totalHeight = (nodesPerColumn - 1) * spacing;
     const _totalWidth = (columns - 1) * columnSpacing;
-    
+
     for (let i = 0; i < count; i++) {
       const columnIndex = i % columns;
       const rowIndex = Math.floor(i / columns);
-      
+
       // Calculate position with centering
       const x = origin.x + (columnIndex - (columns - 1) / 2) * columnSpacing;
       const y = origin.y + (rowIndex - (nodesPerColumn - 1) / 2) * spacing;
       const z = origin.z;
-      
+
       positions.push({ x, y, z });
     }
-    
+
     return positions;
   }
-
 
   public onTick(): void {
     // Column layout doesn't need continuous updates
@@ -116,5 +117,4 @@ export class ColumnLayout extends BaseLayoutEngine {
       // No operation needed for column layout
     }
   }
-
 }

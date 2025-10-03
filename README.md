@@ -4,7 +4,8 @@
 
 Declarative, high-performance library for creating interactive 2D/3D visualizations.
 
-SpaceGraphJS functions as an intelligent orchestrator, translating a declarative `Spec` into a live scene by managing a suite of best-in-class tools for rendering, interaction, and physics.
+SpaceGraphJS functions as an intelligent orchestrator, translating a declarative `Spec` into a live scene by managing a
+suite of best-in-class tools for rendering, interaction, and physics.
 
 ## Recent Improvements
 
@@ -65,7 +66,8 @@ SpaceGraphJS is built around a **Reactive Data Plane** powered by SolidJS. The c
 
 ### HTML Nodes
 
-HTML nodes allow you to embed rich interactive HTML content directly in 3D space. They support all standard HTML elements, CSS styling, and user interactions.
+HTML nodes allow you to embed rich interactive HTML content directly in 3D space. They support all standard HTML
+elements, CSS styling, and user interactions.
 
 #### Creating HTML Nodes
 
@@ -87,6 +89,7 @@ const htmlNode = {
 #### Interacting with HTML Nodes
 
 HTML nodes support all standard interactions:
+
 - Click events
 - Hover effects
 - Dragging to reposition
@@ -111,26 +114,32 @@ SpaceGraphJS is designed to be extensible:
 ## Performance
 
 The library automatically scales performance based on graph size:
+
 - Small graphs: Individual object rendering for maximum flexibility
 - Large graphs: Automatic instancing for high-performance rendering
 
 ### BasicRenderer for Debugging
 
-The BasicRenderer is an alternative rendering backend that can be used for debugging instancing issues. To use it, set `performance.useBasicRenderer: true` in your spec.
+The BasicRenderer is an alternative rendering backend that can be used for debugging instancing issues. To use it, set
+`performance.useBasicRenderer: true` in your spec.
 
 ## Documentation
 
 We've consolidated our documentation into comprehensive guides that accurately reflect the current implementation:
 
-- [Layout Engines - Consolidated Guide](doc/LAYOUT_ENGINES_CONSOLIDATED.md): Complete documentation for all layout engines with implementation details
-- [Element Actors - Consolidated Guide](doc/ELEMENT_ACTORS_CONSOLIDATED.md): Comprehensive guide to all element actors with implementation details
-- [Edge Interaction - Consolidated Guide](doc/EDGE_INTERACTION_CONSOLIDATED.md): Complete documentation for edge interaction system with implementation details
+- [Layout Engines - Consolidated Guide](doc/LAYOUT_ENGINES_CONSOLIDATED.md): Complete documentation for all layout
+  engines with implementation details
+- [Element Actors - Consolidated Guide](doc/ELEMENT_ACTORS_CONSOLIDATED.md): Comprehensive guide to all element actors
+  with implementation details
+- [Edge Interaction - Consolidated Guide](doc/EDGE_INTERACTION_CONSOLIDATED.md): Complete documentation for edge
+  interaction system with implementation details
 
 ## Examples
 
 We've consolidated our examples into fewer, more comprehensive demos that showcase all major features:
 
-- `examples/comprehensive-demo.ts`: A single comprehensive demo showcasing all element types, edge types, and interactions
+- `examples/comprehensive-demo.ts`: A single comprehensive demo showcasing all element types, edge types, and
+  interactions
 - `examples/basic.ts`: A minimal example for getting started
 - `examples/large-graph.ts`: Performance demonstration with large graphs
 - `examples/layout-engines-demo.ts`: Interactive demo for switching between layout engines

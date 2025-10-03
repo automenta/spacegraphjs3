@@ -22,7 +22,7 @@ export class LODManager {
 
   /**
    * Sets the camera to use for distance calculations
-   * 
+   *
    * @param camera - The camera to use
    */
   public setCamera(camera: Camera): void {
@@ -31,7 +31,7 @@ export class LODManager {
 
   /**
    * Registers an object with its LOD settings
-   * 
+   *
    * @param object - The object to register
    * @param settings - The LOD settings for the object
    */
@@ -42,7 +42,7 @@ export class LODManager {
 
   /**
    * Unregisters an object
-   * 
+   *
    * @param object - The object to unregister
    */
   public unregisterObject(object: Object3D): void {
@@ -71,7 +71,7 @@ export class LODManager {
 
   /**
    * Calculates the appropriate LOD level based on distance
-   * 
+   *
    * @param distance - Distance from camera
    * @param distances - Distance thresholds
    * @returns The appropriate LOD level
@@ -87,12 +87,16 @@ export class LODManager {
 
   /**
    * Switches an object to a different LOD level
-   * 
+   *
    * @param object - The object to switch
    * @param level - The new LOD level
    * @param settings - The LOD settings
    */
-  private switchLODLevel(object: Object3D, level: number, settings: LODSettings): void {
+  private switchLODLevel(
+    object: Object3D,
+    level: number,
+    settings: LODSettings
+  ): void {
     // Remove current representation
     if (object.parent) {
       object.parent.remove(object);
@@ -110,7 +114,7 @@ export class LODManager {
 
   /**
    * Gets the current LOD level for an object
-   * 
+   *
    * @param object - The object to check
    * @returns The current LOD level
    */

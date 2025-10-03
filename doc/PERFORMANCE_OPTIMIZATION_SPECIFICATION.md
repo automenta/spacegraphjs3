@@ -2,11 +2,15 @@
 
 ## Overview
 
-This document specifies the implementation of advanced performance optimizations for SpaceGraphJS3, including object pooling systems, level-of-detail (LOD) management, advanced culling mechanisms, and memory optimization strategies. These enhancements will enable the library to handle significantly larger graphs while maintaining smooth 60fps performance.
+This document specifies the implementation of advanced performance optimizations for SpaceGraphJS3, including object
+pooling systems, level-of-detail (LOD) management, advanced culling mechanisms, and memory optimization strategies.
+These enhancements will enable the library to handle significantly larger graphs while maintaining smooth 60fps
+performance.
 
 ## Current Performance Analysis
 
 ### ✅ Existing Performance Features
+
 - **Automatic Instancing**: Switches to InstancedRenderer when node count exceeds threshold
 - **BVH Acceleration**: Uses three-mesh-bvh for GPU-accelerated raycasting
 - **Reactive Data Plane**: Efficient SolidJS-based state management
@@ -14,6 +18,7 @@ This document specifies the implementation of advanced performance optimizations
 - **Comprehensive Benchmarking**: Built-in performance measurement tools
 
 ### 🔧 Performance Bottlenecks Identified
+
 - Object creation/destruction causing garbage collection pressure
 - No level-of-detail system for distant objects
 - Limited culling beyond basic frustum culling
@@ -26,44 +31,52 @@ This document specifies the implementation of advanced performance optimizations
 ### Core Optimization Strategies
 
 #### 1. Object Pooling System
+
 **New File**: `src/utils/ObjectPool.ts`
 
 **Purpose**: Reduce garbage collection pressure by reusing objects instead of creating/destroying them.
 
 **Key Components**:
+
 - Generic object pool for Three.js objects
 - Specialized pools for common object types
 - Automatic pool management and cleanup
 - Configurable pool sizes and growth strategies
 
 #### 2. Level-of-Detail (LOD) System
+
 **New File**: `src/utils/LODManager.ts`
 
 **Purpose**: Automatically reduce geometric complexity of distant objects while maintaining visual quality.
 
 **Key Components**:
+
 - Distance-based LOD switching
 - Multiple LOD levels per object type
 - Smooth transitions between LOD levels
 - Configurable distance thresholds
 
 #### 3. Advanced Culling System
+
 **New File**: `src/utils/CullingManager.ts`
 
 **Purpose**: Eliminate rendering of objects that are not visible to the camera.
 
 **Key Components**:
+
 - Frustum culling for off-screen objects
 - Occlusion culling for hidden objects
 - Distance-based culling for far objects
 - Hierarchical culling for large scenes
 
 #### 4. Memory Management System
+
 **New File**: `src/utils/MemoryManager.ts`
 
 **Purpose**: Monitor and optimize memory usage across the application lifecycle.
 
 **Key Components**:
+
 - Memory usage tracking and reporting
 - Automatic cleanup of unused resources
 - Memory leak detection and prevention
@@ -74,6 +87,7 @@ This document specifies the implementation of advanced performance optimizations
 ### Phase 1: Object Pooling System
 
 #### 1.1 Generic Object Pool
+
 ```typescript
 // src/utils/ObjectPool.ts
 export interface PoolConfig {
@@ -333,6 +347,7 @@ export class ObjectPool<T> {
 ```
 
 #### 1.2 Specialized Object Pools
+
 ```typescript
 // src/utils/ThreeObjectPools.ts
 import * as THREE from 'three';
@@ -581,6 +596,7 @@ export class ThreeObjectPoolManager {
 ### Phase 2: Level-of-Detail (LOD) System
 
 #### 2.1 LOD Manager
+
 ```typescript
 // src/utils/LODManager.ts
 import * as THREE from 'three';
@@ -901,6 +917,7 @@ export class LODManager {
 ```
 
 #### 2.2 LOD Integration with Element Actors
+
 ```typescript
 // Enhanced BaseElementActor with LOD support
 export abstract class BaseElementActor {
@@ -966,6 +983,7 @@ export class SphereElementActor extends BaseElementActor {
 ### Phase 3: Advanced Culling System
 
 #### 3.1 Culling Manager
+
 ```typescript
 // src/utils/CullingManager.ts
 import * as THREE from 'three';
@@ -1200,6 +1218,7 @@ export class CullingManager {
 ```
 
 #### 3.2 Hierarchical Culling for Large Scenes
+
 ```typescript
 // src/utils/HierarchicalCulling.ts
 import * as THREE from 'three';
@@ -1505,6 +1524,7 @@ export class HierarchicalCulling extends CullingManager {
 ### Phase 4: Memory Management System
 
 #### 4.1 Memory Manager
+
 ```typescript
 // src/utils/MemoryManager.ts
 export interface MemoryConfig {
@@ -1819,6 +1839,7 @@ export class MemoryManager {
 ## Integration with Existing Systems
 
 ### Performance-Aware Rendering Manager
+
 ```typescript
 // Enhanced RenderingManager with performance optimizations
 export class RenderingManager {
@@ -1905,6 +1926,7 @@ export class RenderingManager {
 ## Performance Monitoring and Metrics
 
 ### Performance Metrics Collection
+
 ```typescript
 // src/utils/PerformanceMonitor.ts
 export class PerformanceMonitor {
@@ -1974,6 +1996,7 @@ export class PerformanceMonitor {
 ## Usage Examples
 
 ### Basic Performance Setup
+
 ```typescript
 const graph = new SpaceGraph('#container', {
   data: { /* your data */ },
@@ -1987,6 +2010,7 @@ const graph = new SpaceGraph('#container', {
 ```
 
 ### Custom LOD Configuration
+
 ```typescript
 // Create custom LOD levels
 const customLODs: LODLevel[] = [
@@ -2015,6 +2039,7 @@ lodManager.registerObject('node1', mesh, customLODs);
 ```
 
 ### Performance Monitoring
+
 ```typescript
 // Monitor performance metrics
 const monitor = new PerformanceMonitor();
@@ -2031,6 +2056,7 @@ console.log('Performance Report:', report);
 ```
 
 ### Memory Management
+
 ```typescript
 // Check memory usage
 const memoryStats = memoryManager.getMemoryStats();
@@ -2042,4 +2068,6 @@ if (memoryManager.isMemoryCritical()) {
 }
 ```
 
-This comprehensive performance optimization specification provides a complete blueprint for implementing advanced performance features that will enable SpaceGraphJS3 to handle large-scale visualizations while maintaining excellent performance and user experience.
+This comprehensive performance optimization specification provides a complete blueprint for implementing advanced
+performance features that will enable SpaceGraphJS3 to handle large-scale visualizations while maintaining excellent
+performance and user experience.

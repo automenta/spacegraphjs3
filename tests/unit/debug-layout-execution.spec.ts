@@ -10,21 +10,23 @@ describe('Layout Execution Debug', () => {
         nodes: [
           { id: 'n1', type: 'sphere' },
           { id: 'n2', type: 'sphere' },
-          { id: 'n3', type: 'sphere' }
+          { id: 'n3', type: 'sphere' },
         ],
-        edges: []
+        edges: [],
       },
       layout: {
         type: 'circle',
         radius: 10,
         dimensions: 2,
-        center: { x: 0, y: 0, z: 0 }
+        center: { x: 0, y: 0, z: 0 },
       },
       style: {},
       camera: { target: { x: 0, y: 0, z: 0 }, phi: 0, theta: 0, distance: 10 },
-      controls: { keyboard: { enabled: true, panSpeed: 1, zoomSpeed: 1, orbitSpeed: 1 } },
+      controls: {
+        keyboard: { enabled: true, panSpeed: 1, zoomSpeed: 1, orbitSpeed: 1 },
+      },
       performance: { instancingThreshold: 200 },
-      interaction: { hoveredElementId: null, selectedElementIds: [] }
+      interaction: { hoveredElementId: null, selectedElementIds: [] },
     } as any);
 
     // Initialize layout plugin
@@ -33,7 +35,10 @@ describe('Layout Execution Debug', () => {
     layoutPlugin.updateLayoutEngine();
 
     console.log('=== LAYOUT DEBUG INFO ===');
-    console.log('Layout engine type:', layoutPlugin.currentLayoutEngine?.constructor.name);
+    console.log(
+      'Layout engine type:',
+      layoutPlugin.currentLayoutEngine?.constructor.name
+    );
     console.log('Graph layout type:', graph.state.layout.type);
     console.log('Layout engine instance:', layoutPlugin.currentLayoutEngine);
 
@@ -41,11 +46,14 @@ describe('Layout Execution Debug', () => {
 
     // Check if nodes have positions
     const nodes = graph.state.data.nodes;
-    console.log('Nodes after layout:', nodes.map(n => ({
-      id: n.id,
-      hasPosition: !!n.position,
-      position: n.position
-    })));
+    console.log(
+      'Nodes after layout:',
+      nodes.map((n) => ({
+        id: n.id,
+        hasPosition: !!n.position,
+        position: n.position,
+      }))
+    );
 
     console.log('=== END DEBUG INFO ===');
 

@@ -15,8 +15,9 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
   readonly id = 'interaction-plugin';
   readonly name = 'Interaction Plugin';
   readonly version = '1.0.0';
-  readonly description = 'Handles user interactions with the graph, such as clicking, dragging, and hovering.';
-  
+  readonly description =
+    'Handles user interactions with the graph, such as clicking, dragging, and hovering.';
+
   private graph!: SpaceGraph;
   private gesture: Gesture | null = null;
   private dragPlane!: THREE.Plane;
@@ -54,14 +55,14 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
           filterTaps: true,
           preventDefault: true,
           pointer: { capture: true },
-          eventOptions: { passive: false }
+          eventOptions: { passive: false },
         },
         hover: {
           enabled: true,
         },
         wheel: {
           preventDefault: true,
-          eventOptions: { passive: false }
+          eventOptions: { passive: false },
         },
       }
     );
@@ -72,13 +73,21 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     this.boundOnContextMenu = this.onContextMenu.bind(this) as unknown as (
       event: PointerEvent
     ) => void;
-    this.rendererEl.addEventListener('click', this.boundOnClick as EventListener, { passive: false });
-    this.rendererEl.addEventListener('contextmenu', this.boundOnContextMenu as EventListener, { passive: false });
+    this.rendererEl.addEventListener(
+      'click',
+      this.boundOnClick as EventListener,
+      { passive: false }
+    );
+    this.rendererEl.addEventListener(
+      'contextmenu',
+      this.boundOnContextMenu as EventListener,
+      { passive: false }
+    );
 
     this.graph.events.on('element:click', ({ target, event }) => {
       // Only handle node and edge clicks, not groups
       if (!('position' in target) && !('source' in target)) return;
-      
+
       const isMultiSelect = event.metaKey || event.ctrlKey;
       const currentSelection =
         this.graph.state.interaction?.selectedElementIds ?? [];
@@ -105,29 +114,37 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
         this.graph.render.getScene()?.remove(this.dragIndicator);
       } catch (e) {
         // Ignore errors in case scene is not available
-        this.errorHandler.handleWarning('InteractionPlugin', 'Scene not available for drag indicator removal', e);
+        this.errorHandler.handleWarning(
+          'InteractionPlugin',
+          'Scene not available for drag indicator removal',
+          e
+        );
       }
     }
-    
+
     // Create a ring geometry to indicate dragging
     const geometry = new THREE.RingGeometry(0.5, 0.7, 32);
     const material = new THREE.MeshBasicMaterial({
       color: 0x00ffff,
       transparent: true,
       opacity: 0.8,
-      side: THREE.DoubleSide
+      side: THREE.DoubleSide,
     });
-    
+
     this.dragIndicator = new THREE.Mesh(geometry, material);
     this.dragIndicator.position.copy(position);
     this.dragIndicator.rotation.x = Math.PI / 2; // Orient to face camera
-    
+
     // Add to scene if available
     try {
       this.graph.render.getScene()?.add(this.dragIndicator);
     } catch (e) {
       // Ignore errors in case scene is not available (e.g., in tests)
-      this.errorHandler.handleWarning('InteractionPlugin', 'Scene not available for drag indicator addition', e);
+      this.errorHandler.handleWarning(
+        'InteractionPlugin',
+        'Scene not available for drag indicator addition',
+        e
+      );
     }
   }
 
@@ -150,7 +167,11 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
         this.graph.render.getScene()?.remove(this.dragIndicator);
       } catch (e) {
         // Ignore errors in case scene is not available
-        this.errorHandler.handleWarning('InteractionPlugin', 'Scene not available for drag indicator removal', e);
+        this.errorHandler.handleWarning(
+          'InteractionPlugin',
+          'Scene not available for drag indicator removal',
+          e
+        );
       }
       this.dragIndicator = null;
     }
@@ -163,27 +184,30 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
    * @param vy - The y coordinate of the drag
    * @param camera - The camera object
    */
-  private moveGroup(groupId: string, vx: number, vy: number, camera: THREE.PerspectiveCamera): void {
+  private moveGroup(
+    groupId: string,
+    vx: number,
+    vy: number,
+    camera: THREE.PerspectiveCamera
+  ): void {
     // Get the group
     const group = this.graph.dataManager.getGroup(groupId);
     if (!group) return;
 
     // Get all nodes in the group
-    const nodesInGroup = group.nodes.map(nodeId =>
-      this.graph.dataManager.getNode(nodeId)
-    ).filter(node => node !== undefined) as NodeSpec[];
+    const nodesInGroup = group.nodes
+      .map((nodeId) => this.graph.dataManager.getNode(nodeId))
+      .filter((node) => node !== undefined) as NodeSpec[];
 
     if (nodesInGroup.length === 0) return;
 
     // Calculate the center of the group
     const center = new THREE.Vector3();
-    nodesInGroup.forEach(node => {
+    nodesInGroup.forEach((node) => {
       if (node.position) {
-        center.add(new THREE.Vector3(
-          node.position.x,
-          node.position.y,
-          node.position.z
-        ));
+        center.add(
+          new THREE.Vector3(node.position.x, node.position.y, node.position.z)
+        );
       }
     });
     center.divideScalar(nodesInGroup.length);
@@ -203,28 +227,34 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
       (spec) => {
         // Apply the same movement to all nodes in the group
         if (spec.data?.nodes?.update) {
-          const updates = spec.data.nodes.update.flatMap(update => {
+          const updates = spec.data.nodes.update.flatMap((update) => {
             // For each updated node, create updates for all nodes in the group
-            return nodesInGroup.map(node => {
+            return nodesInGroup.map((node) => {
               // Calculate the offset from the reference node
               const referenceNode = nodesInGroup[0];
               if (referenceNode.position && node.position) {
-                const offsetX = (update.position?.x || referenceNode.position.x) - referenceNode.position.x;
-                const offsetY = (update.position?.y || referenceNode.position.y) - referenceNode.position.y;
-                const offsetZ = (update.position?.z || referenceNode.position.z) - referenceNode.position.z;
-                
+                const offsetX =
+                  (update.position?.x || referenceNode.position.x) -
+                  referenceNode.position.x;
+                const offsetY =
+                  (update.position?.y || referenceNode.position.y) -
+                  referenceNode.position.y;
+                const offsetZ =
+                  (update.position?.z || referenceNode.position.z) -
+                  referenceNode.position.z;
+
                 return {
                   id: node.id,
                   position: {
                     x: node.position.x + offsetX,
                     y: node.position.y + offsetY,
-                    z: node.position.z + offsetZ
-                  }
+                    z: node.position.z + offsetZ,
+                  },
                 };
               }
               return {
                 id: node.id,
-                position: node.position
+                position: node.position,
               };
             });
           });
@@ -232,9 +262,9 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
           this.graph.update({
             data: {
               nodes: {
-                update: updates
-              }
-            }
+                update: updates,
+              },
+            },
           });
         }
       }
@@ -257,15 +287,15 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     if (!group) return;
 
     // Get all nodes in the group
-    const nodesInGroup = group.nodes.map(nodeId =>
-      this.graph.dataManager.getNode(nodeId)
-    ).filter(node => node !== undefined) as NodeSpec[];
+    const nodesInGroup = group.nodes
+      .map((nodeId) => this.graph.dataManager.getNode(nodeId))
+      .filter((node) => node !== undefined) as NodeSpec[];
 
     if (nodesInGroup.length === 0) return;
 
     // Calculate bounding box of the group
     const bbox = new THREE.Box3();
-    nodesInGroup.forEach(node => {
+    nodesInGroup.forEach((node) => {
       if (node.position) {
         const pos = new THREE.Vector3(
           node.position.x,
@@ -279,28 +309,32 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     // Create a wireframe box to represent the group
     const size = bbox.getSize(new THREE.Vector3());
     const center = bbox.getCenter(new THREE.Vector3());
-    
+
     const geometry = new THREE.BoxGeometry(size.x + 2, size.y + 2, size.z + 2);
     const material = new THREE.MeshBasicMaterial({
       color: 0x00ffff,
       wireframe: true,
       transparent: true,
-      opacity: 0.5
+      opacity: 0.5,
     });
-    
+
     const groupVisualization = new THREE.Group();
     const box = new THREE.Mesh(geometry, material);
     groupVisualization.add(box);
     groupVisualization.position.copy(center);
     groupVisualization.userData = { groupId, isGroupVisualization: true };
-    
+
     // Add to scene
     try {
       this.graph.render.getScene()?.add(groupVisualization);
       this.groupVisualizations.set(groupId, groupVisualization);
     } catch (e) {
       // Ignore errors in case scene is not available
-      this.errorHandler.handleWarning('InteractionPlugin', 'Scene not available for group visualization addition', e);
+      this.errorHandler.handleWarning(
+        'InteractionPlugin',
+        'Scene not available for group visualization addition',
+        e
+      );
     }
   }
 
@@ -311,7 +345,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
   private updateGroupVisualization(groupId: string): void {
     // Remove existing visualization
     this.removeGroupVisualization(groupId);
-    
+
     // Create new visualization
     this.createGroupVisualization(groupId);
   }
@@ -327,7 +361,11 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
         this.graph.render.getScene()?.remove(visualization);
       } catch (e) {
         // Ignore errors in case scene is not available
-        this.errorHandler.handleWarning('InteractionPlugin', 'Scene not available for group visualization removal', e);
+        this.errorHandler.handleWarning(
+          'InteractionPlugin',
+          'Scene not available for group visualization removal',
+          e
+        );
       }
       this.groupVisualizations.delete(groupId);
     }
@@ -347,11 +385,12 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
    * @param name - The name of the group
    */
   public createGroup(name?: string): void {
-    const selectedNodeIds = this.graph.state.interaction?.selectedElementIds ?? [];
+    const selectedNodeIds =
+      this.graph.state.interaction?.selectedElementIds ?? [];
     if (selectedNodeIds.length === 0) return;
 
     // Filter to only include node IDs (not edge IDs)
-    const nodeIds = selectedNodeIds.filter(id => {
+    const nodeIds = selectedNodeIds.filter((id) => {
       const element = this.graph.dataManager.getElement(id);
       return element && 'position' in element;
     });
@@ -363,22 +402,22 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     const group: GroupSpec = {
       id: groupId,
       name: name || `Group ${groupId}`,
-      nodes: nodeIds
+      nodes: nodeIds,
     };
 
     // Update the graph state
     this.graph.update({
       data: {
         groups: {
-          add: [group]
+          add: [group],
         },
         nodes: {
-          update: nodeIds.map(id => ({
+          update: nodeIds.map((id) => ({
             id,
-            groupId
-          }))
-        }
-      }
+            groupId,
+          })),
+        },
+      },
     });
 
     // Create visualization for the group
@@ -390,11 +429,12 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
    * @param groupId - The ID of the group to add nodes to
    */
   public addNodesToGroup(groupId: string): void {
-    const selectedNodeIds = this.graph.state.interaction?.selectedElementIds ?? [];
+    const selectedNodeIds =
+      this.graph.state.interaction?.selectedElementIds ?? [];
     if (selectedNodeIds.length === 0) return;
 
     // Filter to only include node IDs (not edge IDs)
-    const nodeIds = selectedNodeIds.filter(id => {
+    const nodeIds = selectedNodeIds.filter((id) => {
       const element = this.graph.dataManager.getElement(id);
       return element && 'position' in element;
     });
@@ -405,18 +445,24 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     this.graph.update({
       data: {
         groups: {
-          update: [{
-            id: groupId,
-            nodes: [...(this.graph.state.data.groups?.find(g => g.id === groupId)?.nodes || []), ...nodeIds]
-          }]
+          update: [
+            {
+              id: groupId,
+              nodes: [
+                ...(this.graph.state.data.groups?.find((g) => g.id === groupId)
+                  ?.nodes || []),
+                ...nodeIds,
+              ],
+            },
+          ],
         },
         nodes: {
-          update: nodeIds.map(id => ({
+          update: nodeIds.map((id) => ({
             id,
-            groupId
-          }))
-        }
-      }
+            groupId,
+          })),
+        },
+      },
     });
 
     // Update visualization for the group
@@ -430,26 +476,32 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
    */
   public removeNodesFromGroup(groupId: string, nodeIds: string[]): void {
     // Update the graph state
-    const currentGroup = this.graph.state.data.groups?.find(g => g.id === groupId);
+    const currentGroup = this.graph.state.data.groups?.find(
+      (g) => g.id === groupId
+    );
     if (!currentGroup) return;
 
-    const updatedNodes = currentGroup.nodes.filter(id => !nodeIds.includes(id));
+    const updatedNodes = currentGroup.nodes.filter(
+      (id) => !nodeIds.includes(id)
+    );
 
     this.graph.update({
       data: {
         groups: {
-          update: [{
-            id: groupId,
-            nodes: updatedNodes
-          }]
+          update: [
+            {
+              id: groupId,
+              nodes: updatedNodes,
+            },
+          ],
         },
         nodes: {
-          update: nodeIds.map(id => ({
+          update: nodeIds.map((id) => ({
             id,
-            groupId: undefined
-          }))
-        }
-      }
+            groupId: undefined,
+          })),
+        },
+      },
     });
 
     // Update visualization for the group
@@ -461,22 +513,22 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
    * @param groupId - The ID of the group to dissolve
    */
   public dissolveGroup(groupId: string): void {
-    const group = this.graph.state.data.groups?.find(g => g.id === groupId);
+    const group = this.graph.state.data.groups?.find((g) => g.id === groupId);
     if (!group) return;
 
     // Remove the group and clear groupId from all nodes
     this.graph.update({
       data: {
         groups: {
-          remove: [groupId]
+          remove: [groupId],
         },
         nodes: {
-          update: group.nodes.map(id => ({
+          update: group.nodes.map((id) => ({
             id,
-            groupId: undefined
-          }))
-        }
-      }
+            groupId: undefined,
+          })),
+        },
+      },
     });
 
     // Remove visualization for the group
@@ -500,7 +552,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
    */
   private snapPosition(position: THREE.Vector3): THREE.Vector3 {
     if (!this.snapToGrid) return position;
-    
+
     return new THREE.Vector3(
       Math.round(position.x / this.gridSize) * this.gridSize,
       Math.round(position.y / this.gridSize) * this.gridSize,
@@ -512,8 +564,14 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     if (this.gesture) {
       this.gesture.destroy();
     }
-    this.rendererEl.removeEventListener('click', this.boundOnClick as EventListener);
-    this.rendererEl.removeEventListener('contextmenu', this.boundOnContextMenu as EventListener);
+    this.rendererEl.removeEventListener(
+      'click',
+      this.boundOnClick as EventListener
+    );
+    this.rendererEl.removeEventListener(
+      'contextmenu',
+      this.boundOnContextMenu as EventListener
+    );
     this.contextMenuManager.hideContextMenu();
     this.clearAllEdgeEditHandles();
     this.clearAllGroupVisualizations();
@@ -535,7 +593,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
 
     const raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(pointer, camera);
-    
+
     // Increase raycaster precision for better intersection detection
     raycaster.params.Line!.threshold = 0.1;
     raycaster.params.Points!.threshold = 0.1;
@@ -546,7 +604,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
         edgeRenderer.getEdgeEditHandles(),
         true // Changed to true for recursive intersection
       );
-      
+
       if (handleIntersects.length > 0) {
         const handle = handleIntersects[0].object;
         const edgeId = handle.userData.edgeId;
@@ -554,30 +612,36 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
         if (edge) {
           const sourceNode = this.graph.dataManager.getNode(edge.source);
           const targetNode = this.graph.dataManager.getNode(edge.target);
-          
+
           if (sourceNode && targetNode) {
-            return { type: 'edge-handle', edge, sourceNode, targetNode, handle };
+            return {
+              type: 'edge-handle',
+              edge,
+              sourceNode,
+              targetNode,
+              handle,
+            };
           }
         }
       }
-      
+
       // Then check for edge intersections
       const edgeIntersects = raycaster.intersectObjects(
         edgeRenderer.getRaycastableObjects(),
         true // Changed to true for recursive intersection
       );
-      
-      const topEdgeHit = edgeIntersects.find(hit =>
-        hit.object.userData.edgeId && hit.object.userData.isHitArea
+
+      const topEdgeHit = edgeIntersects.find(
+        (hit) => hit.object.userData.edgeId && hit.object.userData.isHitArea
       );
-      
+
       if (topEdgeHit) {
         const edgeId = topEdgeHit.object.userData.edgeId;
         const edge = this.graph.dataManager.getEdge(edgeId);
         if (edge) {
           const sourceNode = this.graph.dataManager.getNode(edge.source);
           const targetNode = this.graph.dataManager.getNode(edge.target);
-          
+
           if (sourceNode && targetNode) {
             return { type: 'edge', edge, sourceNode, targetNode };
           }
@@ -628,11 +692,15 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
 
     if (first) {
       // console.log('Starting drag operation');
-      const intersected = this.getIntersectedElement(
-        event as PointerEvent
-      );
-      
-      if (intersected && intersected.type === 'node' && intersected.element && 'position' in intersected.element && intersected.element.position) {
+      const intersected = this.getIntersectedElement(event as PointerEvent);
+
+      if (
+        intersected &&
+        intersected.type === 'node' &&
+        intersected.element &&
+        'position' in intersected.element &&
+        intersected.element.position
+      ) {
         // console.log('Starting drag on node:', intersected.element.id);
         this.draggedElementId = intersected.element.id;
         this.isDragging = true;
@@ -648,13 +716,17 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
           normal,
           this.dragStartPosition
         );
-        
+
         // Emit drag start event for visual feedback
         // Only emit event for nodes and edges, not groups
-        if (('position' in intersected.element && 'type' in intersected.element) || ('source' in intersected.element && 'target' in intersected.element)) {
+        if (
+          ('position' in intersected.element &&
+            'type' in intersected.element) ||
+          ('source' in intersected.element && 'target' in intersected.element)
+        ) {
           this.graph.events.emit('element:drag:start', {
             target: intersected.element as NodeSpec,
-            startPosition: this.dragStartPosition.clone()
+            startPosition: this.dragStartPosition.clone(),
           });
         }
       } else if (intersected && intersected.type === 'edge-handle') {
@@ -690,13 +762,15 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
           // Move individual node
           // Create/update drag indicator
           if (!this.dragIndicator) {
-            this.createDragIndicator(new THREE.Vector3(
-              element.position?.x || 0,
-              element.position?.y || 0,
-              element.position?.z || 0
-            ));
+            this.createDragIndicator(
+              new THREE.Vector3(
+                element.position?.x || 0,
+                element.position?.y || 0,
+                element.position?.z || 0
+              )
+            );
           }
-          
+
           // Handle the drag
           // console.log('Calling InteractionLogic.handleNodeDrag');
           InteractionLogic.handleNodeDrag(
@@ -710,41 +784,45 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
               // console.log('Updating node position with spec:', spec);
               // If snap-to-grid is enabled, modify the position
               if (this.snapToGrid && spec.data?.nodes?.update) {
-                const updates = spec.data.nodes.update.map(update => {
+                const updates = spec.data.nodes.update.map((update) => {
                   if (update.id === this.draggedElementId && update.position) {
-                    const snappedPosition = this.snapPosition(new THREE.Vector3(
-                      update.position.x,
-                      update.position.y,
-                      update.position.z
-                    ));
+                    const snappedPosition = this.snapPosition(
+                      new THREE.Vector3(
+                        update.position.x,
+                        update.position.y,
+                        update.position.z
+                      )
+                    );
                     return {
                       ...update,
                       position: {
                         x: snappedPosition.x,
                         y: snappedPosition.y,
-                        z: snappedPosition.z
-                      }
+                        z: snappedPosition.z,
+                      },
                     };
                   }
                   return update;
                 });
-                
+
                 this.graph.update({
                   data: {
                     nodes: {
-                      update: updates
-                    }
-                  }
+                      update: updates,
+                    },
+                  },
                 });
               } else {
                 this.graph.update(spec);
               }
             }
           );
-          
+
           // Update drag indicator position
           if (this.dragIndicator) {
-            const updatedElement = this.graph.dataManager.getElement(this.draggedElementId);
+            const updatedElement = this.graph.dataManager.getElement(
+              this.draggedElementId
+            );
             if (updatedElement && 'position' in updatedElement) {
               const newPosition = new THREE.Vector3(
                 updatedElement.position?.x || 0,
@@ -763,51 +841,68 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
           // Calculate new position based on drag
           const worldPosition = new THREE.Vector3();
           const mouse = new THREE.Vector2(
-            (vx / this.graph.render.getRendererDomElement().clientWidth) * 2 - 1,
-            -(vy / this.graph.render.getRendererDomElement().clientHeight) * 2 + 1
+            (vx / this.graph.render.getRendererDomElement().clientWidth) * 2 -
+              1,
+            -(vy / this.graph.render.getRendererDomElement().clientHeight) * 2 +
+              1
           );
-          
+
           const raycaster = new THREE.Raycaster();
           raycaster.setFromCamera(mouse, camera);
-          
+
           // Find intersection with drag plane
           raycaster.ray.intersectPlane(this.dragPlane, worldPosition);
-          
+
           // Update edge curvature based on handle position
           const sourceNode = this.graph.dataManager.getNode(edge.source);
           const targetNode = this.graph.dataManager.getNode(edge.target);
-          
+
           if (sourceNode && targetNode) {
             const sourcePos = new THREE.Vector3(
               sourceNode.position?.x || 0,
               sourceNode.position?.y || 0,
               sourceNode.position?.z || 0
             );
-            
+
             const targetPos = new THREE.Vector3(
               targetNode.position?.x || 0,
               targetNode.position?.y || 0,
               targetNode.position?.z || 0
             );
-            
+
             // Calculate new curvature based on handle position
-            const midPoint = new THREE.Vector3().lerpVectors(sourcePos, targetPos, 0.5);
-            const direction = new THREE.Vector3().subVectors(targetPos, sourcePos).normalize();
-            const perpendicular = new THREE.Vector3(-direction.z, 0, direction.x).normalize();
+            const midPoint = new THREE.Vector3().lerpVectors(
+              sourcePos,
+              targetPos,
+              0.5
+            );
+            const direction = new THREE.Vector3()
+              .subVectors(targetPos, sourcePos)
+              .normalize();
+            const perpendicular = new THREE.Vector3(
+              -direction.z,
+              0,
+              direction.x
+            ).normalize();
             const distance = sourcePos.distanceTo(targetPos);
-            const offset = new THREE.Vector3().subVectors(worldPosition, midPoint);
+            const offset = new THREE.Vector3().subVectors(
+              worldPosition,
+              midPoint
+            );
             const curvature = offset.dot(perpendicular) / (distance * 0.5);
-            
+
             // Update edge with new curvature
             this.graph.update({
               data: {
                 edges: {
-                  update: [{
-                    id: edge.id,
-                    curvature: Math.max(0, Math.min(1, curvature)) // Clamp between 0 and 1
-                  }]
-                }
-              }
+                  update: [
+                    {
+                      id: edge.id,
+                      curvature: Math.max(0, Math.min(1, curvature)), // Clamp between 0 and 1
+                    },
+                  ],
+                },
+              },
             });
           }
         }
@@ -827,7 +922,9 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     if (last) {
       // console.log('Ending drag operation');
       if (this.draggedElementId && this.dragStartPosition) {
-        const element = this.graph.dataManager.getElement(this.draggedElementId);
+        const element = this.graph.dataManager.getElement(
+          this.draggedElementId
+        );
         if (element && 'position' in element) {
           // Emit drag end event for visual feedback
           this.graph.events.emit('element:drag:end', {
@@ -837,7 +934,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
               (element as NodeSpec).position?.x || 0,
               (element as NodeSpec).position?.y || 0,
               (element as NodeSpec).position?.z || 0
-            )
+            ),
           });
         }
       }
@@ -867,42 +964,52 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
 
   private onHover(state: HoverState) {
     if (this.draggedElementId) return; // Don't hover while dragging
-    
+
     const intersected = this.getIntersectedElement(state.event as MouseEvent);
     const currentHoveredId =
       this.graph.state.interaction?.hoveredElementId ?? null;
 
     // Handle edge hover
-    if (intersected && (intersected.type === 'edge' || intersected.type === 'edge-handle')) {
+    if (
+      intersected &&
+      (intersected.type === 'edge' || intersected.type === 'edge-handle')
+    ) {
       const edgeId = intersected.edge!.id;
-      
+
       // Handle edge hover enter
-      if (this.hoveredEdgeId !== edgeId && intersected.edge && intersected.sourceNode && intersected.targetNode) {
+      if (
+        this.hoveredEdgeId !== edgeId &&
+        intersected.edge &&
+        intersected.sourceNode &&
+        intersected.targetNode
+      ) {
         // Handle edge hover leave for previous edge
         if (this.hoveredEdgeId) {
           const prevEdge = this.graph.dataManager.getEdge(this.hoveredEdgeId);
           if (prevEdge) {
             const sourceNode = this.graph.dataManager.getNode(prevEdge.source);
             const targetNode = this.graph.dataManager.getNode(prevEdge.target);
-            
+
             if (sourceNode && targetNode) {
-              this.graph.render.getEdgeRenderer()?.setEdgeHover(this.hoveredEdgeId, false);
+              this.graph.render
+                .getEdgeRenderer()
+                ?.setEdgeHover(this.hoveredEdgeId, false);
               this.graph.events.emit('edge:hover:leave', {
                 target: prevEdge,
                 sourceNode,
-                targetNode
+                targetNode,
               });
             }
           }
         }
-        
+
         // Handle edge hover enter for new edge
         this.hoveredEdgeId = edgeId;
         this.graph.render.getEdgeRenderer()?.setEdgeHover(edgeId, true);
         this.graph.events.emit('edge:hover:enter', {
           target: intersected.edge,
           sourceNode: intersected.sourceNode,
-          targetNode: intersected.targetNode
+          targetNode: intersected.targetNode,
         });
       }
     } else {
@@ -912,22 +1019,25 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
         if (prevEdge) {
           const sourceNode = this.graph.dataManager.getNode(prevEdge.source);
           const targetNode = this.graph.dataManager.getNode(prevEdge.target);
-          
+
           if (sourceNode && targetNode) {
-            this.graph.render.getEdgeRenderer()?.setEdgeHover(this.hoveredEdgeId, false);
+            this.graph.render
+              .getEdgeRenderer()
+              ?.setEdgeHover(this.hoveredEdgeId, false);
             this.graph.events.emit('edge:hover:leave', {
               target: prevEdge,
               sourceNode,
-              targetNode
+              targetNode,
             });
           }
         }
         this.hoveredEdgeId = null;
       }
-      
+
       // Handle node hover
-      const element = intersected && intersected.type === 'node' ? intersected.element : null;
-      
+      const element =
+        intersected && intersected.type === 'node' ? intersected.element : null;
+
       if (element) {
         if (currentHoveredId !== element.id) {
           this.graph.update({
@@ -950,11 +1060,21 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
 
   private onClick(event: PointerEvent) {
     const intersected = this.getIntersectedElement(event);
-    
+
     if (intersected) {
-      if ((intersected.type === 'edge' || intersected.type === 'edge-handle') && intersected.edge && intersected.sourceNode && intersected.targetNode) {
+      if (
+        (intersected.type === 'edge' || intersected.type === 'edge-handle') &&
+        intersected.edge &&
+        intersected.sourceNode &&
+        intersected.targetNode
+      ) {
         // Handle edge click
-        this.handleEdgeClick(intersected.edge, intersected.sourceNode, intersected.targetNode, event);
+        this.handleEdgeClick(
+          intersected.edge,
+          intersected.sourceNode,
+          intersected.targetNode,
+          event
+        );
       } else if (intersected.type === 'node' && intersected.element) {
         // Handle node click
         this.graph.events.emit('element:click', {
@@ -968,32 +1088,65 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
       this.graph.events.emit('background:click', { event });
     }
   }
-  
+
   private onContextMenu(event: PointerEvent) {
     event.preventDefault();
     const intersected = this.getIntersectedElement(event);
-    
-    if (intersected && (intersected.type === 'edge' || intersected.type === 'edge-handle') && intersected.edge && intersected.sourceNode && intersected.targetNode) {
+
+    if (
+      intersected &&
+      (intersected.type === 'edge' || intersected.type === 'edge-handle') &&
+      intersected.edge &&
+      intersected.sourceNode &&
+      intersected.targetNode
+    ) {
       // Handle edge context menu
-      this.showEdgeContextMenu(event.clientX, event.clientY, intersected.edge, intersected.sourceNode, intersected.targetNode);
-    } else if (intersected && intersected.type === 'node' && intersected.element) {
+      this.showEdgeContextMenu(
+        event.clientX,
+        event.clientY,
+        intersected.edge,
+        intersected.sourceNode,
+        intersected.targetNode
+      );
+    } else if (
+      intersected &&
+      intersected.type === 'node' &&
+      intersected.element
+    ) {
       // Handle node context menu
-      this.showNodeContextMenu(event.clientX, event.clientY, intersected.element as NodeSpec);
+      this.showNodeContextMenu(
+        event.clientX,
+        event.clientY,
+        intersected.element as NodeSpec
+      );
     } else {
       // Handle background context menu
       this.showBackgroundContextMenu(event.clientX, event.clientY);
     }
   }
 
-  private showEdgeContextMenu(x: number, y: number, edge: EdgeSpec, sourceNode: NodeSpec, targetNode: NodeSpec) {
-    this.contextMenuManager.showEdgeContextMenu(x, y, edge, sourceNode, targetNode, {
-      selectEdge: (edgeId) => this.selectEdge(edgeId),
-      deleteEdge: (edgeId) => this.deleteEdge(edgeId),
-      editEdgeLabel: (edgeId) => this.editEdgeLabel(edgeId),
-      reverseEdgeDirection: (edgeId) => this.reverseEdgeDirection(edgeId),
-      highlightPath: (edgeId) => this.highlightPath(edgeId),
-      editEdgePath: (edgeId) => this.editEdgePath(edgeId)
-    });
+  private showEdgeContextMenu(
+    x: number,
+    y: number,
+    edge: EdgeSpec,
+    sourceNode: NodeSpec,
+    targetNode: NodeSpec
+  ) {
+    this.contextMenuManager.showEdgeContextMenu(
+      x,
+      y,
+      edge,
+      sourceNode,
+      targetNode,
+      {
+        selectEdge: (edgeId) => this.selectEdge(edgeId),
+        deleteEdge: (edgeId) => this.deleteEdge(edgeId),
+        editEdgeLabel: (edgeId) => this.editEdgeLabel(edgeId),
+        reverseEdgeDirection: (edgeId) => this.reverseEdgeDirection(edgeId),
+        highlightPath: (edgeId) => this.highlightPath(edgeId),
+        editEdgePath: (edgeId) => this.editEdgePath(edgeId),
+      }
+    );
   }
 
   private showNodeContextMenu(x: number, y: number, node: NodeSpec) {
@@ -1003,7 +1156,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
       editNodeLabel: (nodeId) => this.editNodeLabel(nodeId),
       addNodeConnection: (nodeId) => this.addNodeConnection(nodeId),
       createGroup: () => this.createGroup(),
-      addToGroup: (nodeId) => this.addToGroup(nodeId)
+      addToGroup: (nodeId) => this.addToGroup(nodeId),
     });
   }
 
@@ -1012,7 +1165,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
       addNodeAtPosition: (x, y) => this.addNodeAtPosition(x, y),
       selectAll: () => this.selectAll(),
       clearAllSelections: () => this.clearAllSelections(),
-      resetView: () => this.resetView()
+      resetView: () => this.resetView(),
     });
   }
 
@@ -1021,10 +1174,11 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
   }
 
   private selectNode(nodeId: string) {
-    const currentSelection = this.graph.state.interaction?.selectedElementIds ?? [];
+    const currentSelection =
+      this.graph.state.interaction?.selectedElementIds ?? [];
     if (!currentSelection.includes(nodeId)) {
       this.graph.update({
-        interaction: { selectedElementIds: [...currentSelection, nodeId] }
+        interaction: { selectedElementIds: [...currentSelection, nodeId] },
       });
     }
   }
@@ -1034,9 +1188,9 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     this.graph.update({
       data: {
         nodes: {
-          remove: [nodeId]
-        }
-      }
+          remove: [nodeId],
+        },
+      },
     });
   }
 
@@ -1070,13 +1224,13 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
   private addToGroup(nodeId: string) {
     // Get all available groups
     const groups = this.graph.state.data.groups || [];
-    
+
     if (groups.length === 0) {
       // No groups exist, create a new one
       this.createGroup(`Group ${groups.length + 1}`);
       return;
     }
-    
+
     // For now, we'll just add to the first group as an example
     // In a real implementation, this would show a dialog to select a group
     const firstGroupId = groups[0].id;
@@ -1090,9 +1244,9 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     this.graph.update({
       data: {
         edges: {
-          remove: [edgeId]
-        }
-      }
+          remove: [edgeId],
+        },
+      },
     });
   }
 
@@ -1112,13 +1266,15 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
       this.graph.update({
         data: {
           edges: {
-            update: [{
-              id: edgeId,
-              source: edge.target,
-              target: edge.source
-            }]
-          }
-        }
+            update: [
+              {
+                id: edgeId,
+                source: edge.target,
+                target: edge.source,
+              },
+            ],
+          },
+        },
       });
     }
   }
@@ -1137,19 +1293,19 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     const camera = this.graph.render.getCamera();
     const renderer = this.graph.render.getRenderer();
     const rect = renderer.domElement.getBoundingClientRect();
-    
+
     const mouse = new THREE.Vector2();
     mouse.x = ((x - rect.left) / rect.width) * 2 - 1;
     mouse.y = -((y - rect.top) / rect.height) * 2 + 1;
-    
+
     const raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(mouse, camera);
-    
+
     // Create a plane at y=0 to intersect with
     const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
     const intersection = new THREE.Vector3();
     raycaster.ray.intersectPlane(plane, intersection);
-    
+
     // Emit event for adding node at position
     // Emit a standard event that's supported
     // For now, we'll just log to console as there's no specific event for this
@@ -1158,16 +1314,16 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
 
   private selectAll() {
     // Get all node IDs from the current state
-    const allNodeIds = this.graph.state.data.nodes.map(node => node.id);
+    const allNodeIds = this.graph.state.data.nodes.map((node) => node.id);
     this.graph.update({
-      interaction: { selectedElementIds: allNodeIds }
+      interaction: { selectedElementIds: allNodeIds },
     });
   }
 
   private clearAllSelections() {
     this.clearAllEdgeSelections();
     this.graph.update({
-      interaction: { selectedElementIds: [] }
+      interaction: { selectedElementIds: [] },
     });
   }
 
@@ -1178,11 +1334,16 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
         phi: Math.PI / 4,
         theta: Math.PI / 4,
         distance: 50,
-      }
+      },
     });
   }
-  
-  private handleEdgeClick(edge: EdgeSpec, sourceNode: NodeSpec, targetNode: NodeSpec, event: PointerEvent): void {
+
+  private handleEdgeClick(
+    edge: EdgeSpec,
+    sourceNode: NodeSpec,
+    targetNode: NodeSpec,
+    event: PointerEvent
+  ): void {
     // Handle selection
     if (event.ctrlKey || event.metaKey) {
       // Multi-select
@@ -1198,31 +1359,31 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
       target: edge,
       event,
       sourceNode,
-      targetNode
+      targetNode,
     });
   }
-  
+
   private selectEdge(edgeId: string): void {
     if (!this.selectedEdgeIds.includes(edgeId)) {
       this.selectedEdgeIds.push(edgeId);
       this.graph.render.getEdgeRenderer()?.setEdgeSelected(edgeId, true);
-      
+
       const edge = this.graph.dataManager.getEdge(edgeId);
       if (edge) {
         const sourceNode = this.graph.dataManager.getNode(edge.source);
         const targetNode = this.graph.dataManager.getNode(edge.target);
-        
+
         if (sourceNode && targetNode) {
           this.graph.events.emit('edge:select', {
             target: edge,
             sourceNode,
-            targetNode
+            targetNode,
           });
         }
       }
     }
   }
-  
+
   private toggleEdgeSelection(edgeId: string): void {
     if (this.selectedEdgeIds.includes(edgeId)) {
       this.deselectEdge(edgeId);
@@ -1230,7 +1391,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
       this.selectEdge(edgeId);
     }
   }
-  
+
   private deselectEdge(edgeId: string): void {
     const index = this.selectedEdgeIds.indexOf(edgeId);
     if (index > -1) {
@@ -1238,14 +1399,14 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
       this.graph.render.getEdgeRenderer()?.setEdgeSelected(edgeId, false);
     }
   }
-  
+
   private clearAllEdgeSelections(): void {
     for (const edgeId of this.selectedEdgeIds) {
       this.graph.render.getEdgeRenderer()?.setEdgeSelected(edgeId, false);
     }
     this.selectedEdgeIds = [];
   }
-  
+
   private editEdgePath(edgeId: string) {
     // Toggle edge editing mode
     const edge = this.graph.dataManager.getEdge(edgeId);
@@ -1254,7 +1415,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
       if (edgeRenderer) {
         // Check if edge is already in editing mode
         const isEditing = this.selectedEdgeIds.includes(edgeId);
-        
+
         if (isEditing) {
           // Exit editing mode
           edgeRenderer.setEdgeEditing(edgeId, false);
@@ -1265,78 +1426,88 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
       }
     }
   }
-  
+
   private showEdgeEditHandles(edgeId: string) {
     const edge = this.graph.dataManager.getEdge(edgeId);
     if (!edge || edge.type !== 'curved') return;
-    
+
     // Clear any existing handles
     this.clearEdgeEditHandles(edgeId);
-    
+
     const sourceNode = this.graph.dataManager.getNode(edge.source);
     const targetNode = this.graph.dataManager.getNode(edge.target);
-    
+
     if (!sourceNode || !targetNode) return;
-    
+
     const scene = this.graph.render.getScene();
     if (!scene) return;
-    
+
     const handles: THREE.Object3D[] = [];
-    
+
     // Create control points for editing the curve
     const sourcePos = new THREE.Vector3(
       sourceNode.position?.x || 0,
       sourceNode.position?.y || 0,
       sourceNode.position?.z || 0
     );
-    
+
     const targetPos = new THREE.Vector3(
       targetNode.position?.x || 0,
       targetNode.position?.y || 0,
       targetNode.position?.z || 0
     );
-    
+
     // Create a handle at the midpoint of the curve
     const midPoint = new THREE.Vector3().lerpVectors(sourcePos, targetPos, 0.5);
-    
+
     // Adjust position based on current curvature
     if (edge.curvature) {
-      const direction = new THREE.Vector3().subVectors(targetPos, sourcePos).normalize();
-      const perpendicular = new THREE.Vector3(-direction.z, 0, direction.x).normalize();
-      midPoint.add(perpendicular.multiplyScalar(edge.curvature * sourcePos.distanceTo(targetPos) * 0.5));
+      const direction = new THREE.Vector3()
+        .subVectors(targetPos, sourcePos)
+        .normalize();
+      const perpendicular = new THREE.Vector3(
+        -direction.z,
+        0,
+        direction.x
+      ).normalize();
+      midPoint.add(
+        perpendicular.multiplyScalar(
+          edge.curvature * sourcePos.distanceTo(targetPos) * 0.5
+        )
+      );
     }
-    
+
     const handleGeometry = new THREE.SphereGeometry(0.3, 16, 16);
     const handleMaterial = new THREE.MeshBasicMaterial({
       color: 0xffff00,
       transparent: true,
-      opacity: 0.8
+      opacity: 0.8,
     });
-    
+
     const handle = new THREE.Mesh(handleGeometry, handleMaterial);
     handle.position.copy(midPoint);
     handle.userData = { edgeId, type: 'curveHandle' };
-    
+
     scene.add(handle);
     handles.push(handle);
-    
+
     // Store handles for this edge
     this.edgeEditHandles.set(edgeId, handles);
   }
-  
+
   private clearEdgeEditHandles(edgeId: string) {
     const handles = this.edgeEditHandles.get(edgeId);
     if (handles) {
       const scene = this.graph.render.getScene();
       if (scene) {
-        handles.forEach(handle => {
+        handles.forEach((handle) => {
           scene.remove(handle);
         });
       }
       this.edgeEditHandles.delete(edgeId);
     }
   }
-  
+
   private clearAllEdgeEditHandles() {
     for (const edgeId of this.edgeEditHandles.keys()) {
       this.clearEdgeEditHandles(edgeId);

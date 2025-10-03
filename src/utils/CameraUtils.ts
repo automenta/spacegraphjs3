@@ -53,27 +53,24 @@ export class CameraUtils {
     camera: THREE.Camera,
     options: FramingOptions = {}
   ): CameraTarget {
-    const {
-      padding = 1.2,
-      focusMode = 'all'
-    } = options;
+    const { padding = 1.2, focusMode = 'all' } = options;
 
     if (targets.length === 0) {
       return {
         position: new THREE.Vector3(0, 0, 30),
         target: new THREE.Vector3(0, 0, 0),
-        distance: 30
+        distance: 30,
       };
     }
 
     // Calculate bounding sphere
-    const positions = targets.map(t => t.position);
+    const positions = targets.map((t) => t.position);
     const center = new THREE.Vector3();
-    positions.forEach(pos => center.add(pos));
+    positions.forEach((pos) => center.add(pos));
     center.divideScalar(positions.length);
 
     let maxDistance = 0;
-    positions.forEach(pos => {
+    positions.forEach((pos) => {
       const distance = pos.distanceTo(center);
       maxDistance = Math.max(maxDistance, distance);
     });
@@ -87,35 +84,44 @@ export class CameraUtils {
 
     switch (focusMode) {
       case 'center': {
-        cameraPosition = center.clone().add(new THREE.Vector3(0, 0, maxDistance * 2));
+        cameraPosition = center
+          .clone()
+          .add(new THREE.Vector3(0, 0, maxDistance * 2));
         distance = maxDistance * 2;
         break;
       }
-      
+
       case 'weighted': {
         // Weighted center considering node importance/distance
         const weightedCenter = CameraUtils.calculateWeightedCenter(positions);
-        cameraPosition = weightedCenter.clone().add(new THREE.Vector3(0, maxDistance * 0.5, maxDistance * 1.5));
+        cameraPosition = weightedCenter
+          .clone()
+          .add(new THREE.Vector3(0, maxDistance * 0.5, maxDistance * 1.5));
         distance = maxDistance * 1.8;
         break;
       }
-      
+
       case 'selection': {
         // Focus on selected elements with closer view
-        cameraPosition = center.clone().add(new THREE.Vector3(maxDistance * 0.3, maxDistance * 0.2, maxDistance));
+        cameraPosition = center
+          .clone()
+          .add(
+            new THREE.Vector3(maxDistance * 0.3, maxDistance * 0.2, maxDistance)
+          );
         distance = maxDistance * 1.2;
         break;
       }
-      
+
       case 'all':
       default: {
         // Traditional bounding sphere approach
-        const fov = (camera as THREE.PerspectiveCamera).fov * Math.PI / 180;
+        const fov = ((camera as THREE.PerspectiveCamera).fov * Math.PI) / 180;
         const aspect = (camera as THREE.PerspectiveCamera).aspect;
         const verticalFov = fov;
         const horizontalFov = 2 * Math.atan(Math.tan(fov / 2) * aspect);
-        
-        distance = maxDistance / Math.sin(Math.min(verticalFov, horizontalFov) / 2);
+
+        distance =
+          maxDistance / Math.sin(Math.min(verticalFov, horizontalFov) / 2);
         cameraPosition = center.clone().add(new THREE.Vector3(0, 0, distance));
         break;
       }
@@ -124,7 +130,7 @@ export class CameraUtils {
     return {
       position: cameraPosition,
       target: center.clone(),
-      distance: distance
+      distance: distance,
     };
   }
 
@@ -138,7 +144,7 @@ export class CameraUtils {
     const center = new THREE.Vector3();
     let totalWeight = 0;
 
-    positions.forEach(pos => {
+    positions.forEach((pos) => {
       // Weight based on distance from origin (nodes further away get more weight)
       const weight = 1 + pos.length() * 0.1;
       center.add(pos.clone().multiplyScalar(weight));
@@ -160,13 +166,13 @@ export class CameraUtils {
       duration = 1000,
       easing = 'ease-out',
       onComplete,
-      onUpdate
+      onUpdate,
     } = config;
 
     return new Promise((resolve) => {
       const startPosition = camera.position.clone();
       const startTarget = CameraUtils.getCameraTarget(camera);
-      
+
       const endPosition = target.position || startPosition;
       const endTarget = target.target || startTarget;
 
@@ -185,7 +191,11 @@ export class CameraUtils {
 
         // Update camera look-at if target is provided
         if (target.target && camera instanceof THREE.PerspectiveCamera) {
-          const currentTarget = new THREE.Vector3().lerpVectors(startTarget, endTarget, easedProgress);
+          const currentTarget = new THREE.Vector3().lerpVectors(
+            startTarget,
+            endTarget,
+            easedProgress
+          );
           camera.lookAt(currentTarget);
         }
 
@@ -215,8 +225,8 @@ export class CameraUtils {
       case 'ease-out':
         return 1 - Math.pow(1 - progress, 2);
       case 'ease-in-out':
-        return progress < 0.5 
-          ? 2 * progress * progress 
+        return progress < 0.5
+          ? 2 * progress * progress
           : 1 - Math.pow(-2 * progress + 2, 2) / 2;
       case 'linear':
       default:
@@ -232,11 +242,11 @@ export class CameraUtils {
       // Extract look-at direction from camera matrix
       const direction = new THREE.Vector3(0, 0, -1);
       direction.applyQuaternion(camera.quaternion);
-      
+
       // Assume target is 100 units in front of camera (common convention)
       return camera.position.clone().add(direction.multiplyScalar(100));
     }
-    
+
     // Fallback for other camera types
     return new THREE.Vector3(0, 0, 0);
   }
@@ -282,9 +292,14 @@ export class CameraUtils {
     minBounds: THREE.Vector3,
     maxBounds: THREE.Vector3
   ): boolean {
-    return position.x >= minBounds.x && position.x <= maxBounds.x &&
-           position.y >= minBounds.y && position.y <= maxBounds.y &&
-           position.z >= minBounds.z && position.z <= maxBounds.z;
+    return (
+      position.x >= minBounds.x &&
+      position.x <= maxBounds.x &&
+      position.y >= minBounds.y &&
+      position.y <= maxBounds.y &&
+      position.z >= minBounds.z &&
+      position.z <= maxBounds.z
+    );
   }
 
   /**
@@ -297,7 +312,7 @@ export class CameraUtils {
   ): THREE.Vector3[] {
     const path: THREE.Vector3[] = [];
     const segments = 20; // Number of path segments
-    
+
     // Simple linear interpolation if no control points
     if (controlPoints.length === 0) {
       for (let i = 0; i <= segments; i++) {
@@ -307,16 +322,16 @@ export class CameraUtils {
       }
       return path;
     }
-    
+
     // Bezier curve with control points
     const allPoints = [start, ...controlPoints, end];
-    
+
     for (let i = 0; i <= segments; i++) {
       const t = i / segments;
       const point = CameraUtils.evaluateBezier(allPoints, t);
       path.push(point);
     }
-    
+
     return path;
   }
 
@@ -326,16 +341,19 @@ export class CameraUtils {
    * @param camera - The camera to calculate for
    * @returns The optimal distance
    */
-  static calculateOptimalDistance(boundingRadius: number, camera: THREE.Camera): number {
+  static calculateOptimalDistance(
+    boundingRadius: number,
+    camera: THREE.Camera
+  ): number {
     if (!(camera instanceof THREE.PerspectiveCamera)) {
       // For orthographic or other camera types, return a reasonable default
       return boundingRadius * 2;
     }
-    
+
     // Calculate distance based on field of view
-    const fov = camera.fov * Math.PI / 180; // Convert to radians
+    const fov = (camera.fov * Math.PI) / 180; // Convert to radians
     const distance = boundingRadius / Math.tan(fov / 2);
-    
+
     // Add some padding to ensure the object fits comfortably
     return distance * 1.2;
   }
@@ -343,15 +361,22 @@ export class CameraUtils {
   /**
    * Evaluate Bezier curve at given parameter
    */
-  private static evaluateBezier(points: THREE.Vector3[], t: number): THREE.Vector3 {
+  private static evaluateBezier(
+    points: THREE.Vector3[],
+    t: number
+  ): THREE.Vector3 {
     if (points.length === 1) return points[0].clone();
-    
+
     const newPoints: THREE.Vector3[] = [];
     for (let i = 0; i < points.length - 1; i++) {
-      const point = new THREE.Vector3().lerpVectors(points[i], points[i + 1], t);
+      const point = new THREE.Vector3().lerpVectors(
+        points[i],
+        points[i + 1],
+        t
+      );
       newPoints.push(point);
     }
-    
+
     return CameraUtils.evaluateBezier(newPoints, t);
   }
 
@@ -364,13 +389,13 @@ export class CameraUtils {
     description?: string
   ): CameraTarget & { name: string; description?: string } {
     const target = CameraUtils.getCameraTarget(camera);
-    
+
     return {
       name,
       description,
       position: camera.position.clone(),
       target: target,
-      distance: camera.position.distanceTo(target)
+      distance: camera.position.distanceTo(target),
     };
   }
 
@@ -417,7 +442,11 @@ export class CameraUtils {
 
     if (fromSystem === 'spherical' && toSystem === 'cartesian') {
       const spherical = position as unknown as THREE.Spherical;
-      return CameraUtils.sphericalToCartesian(spherical.radius, spherical.phi, spherical.theta);
+      return CameraUtils.sphericalToCartesian(
+        spherical.radius,
+        spherical.phi,
+        spherical.theta
+      );
     }
 
     return position.clone();
@@ -444,24 +473,27 @@ export class CameraUtils {
   worldToScreen(worldPos: THREE.Vector3): THREE.Vector2 {
     const vector = worldPos.clone();
     vector.project(this.camera);
-    
+
     return new THREE.Vector2(
-      (vector.x + 1) / 2 * window.innerWidth,
-      -(vector.y - 1) / 2 * window.innerHeight
+      ((vector.x + 1) / 2) * window.innerWidth,
+      (-(vector.y - 1) / 2) * window.innerHeight
     );
   }
 
   /**
    * Raycast from screen position
    */
-  raycastFromScreen(screenPos: THREE.Vector2, objects: THREE.Object3D[] = []): THREE.Intersection[] {
+  raycastFromScreen(
+    screenPos: THREE.Vector2,
+    objects: THREE.Object3D[] = []
+  ): THREE.Intersection[] {
     const mouse = new THREE.Vector2(
       (screenPos.x / window.innerWidth) * 2 - 1,
       -(screenPos.y / window.innerHeight) * 2 + 1
     );
 
     this.raycaster.setFromCamera(mouse, this.camera);
-    
+
     const targetObjects = objects.length > 0 ? objects : this.scene.children;
     return this.raycaster.intersectObjects(targetObjects, true);
   }
@@ -469,7 +501,10 @@ export class CameraUtils {
   /**
    * Get object at screen position
    */
-  getObjectAtPosition(screenPos: THREE.Vector2, objects: THREE.Object3D[] = []): THREE.Object3D | null {
+  getObjectAtPosition(
+    screenPos: THREE.Vector2,
+    objects: THREE.Object3D[] = []
+  ): THREE.Object3D | null {
     const intersections = this.raycastFromScreen(screenPos, objects);
     return intersections.length > 0 ? intersections[0].object : null;
   }
@@ -486,13 +521,13 @@ export class CameraUtils {
    */
   applyCameraShake(intensity: number, duration: number = 500): void {
     const startTime = Date.now();
-    
+
     const shake = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(1, elapsed / duration);
-      
+
       if (progress >= 1) return;
-      
+
       // Apply diminishing shake effect
       const shakeAmount = intensity * (1 - progress) * 0.5;
       const offset = new THREE.Vector3(
@@ -500,15 +535,15 @@ export class CameraUtils {
         (Math.random() - 0.5) * shakeAmount,
         (Math.random() - 0.5) * shakeAmount
       );
-      
+
       this.camera.position.add(offset);
-      
+
       setTimeout(() => {
         this.camera.position.sub(offset);
         if (progress < 1) shake();
       }, 16); // ~60fps
     };
-    
+
     shake();
   }
 
@@ -526,12 +561,12 @@ export class CameraUtils {
 
     // Calculate center
     const center = new THREE.Vector3();
-    elements.forEach(el => center.add(el.position));
+    elements.forEach((el) => center.add(el.position));
     center.divideScalar(elements.length);
 
     // Calculate maximum distance from center
     let maxDistance = 0;
-    elements.forEach(el => {
+    elements.forEach((el) => {
       const distance = el.position.distanceTo(center);
       maxDistance = Math.max(maxDistance, distance);
     });
@@ -547,7 +582,10 @@ export class CameraUtils {
         break;
       case 'smart': {
         // Calculate distribution factor
-        const distributionFactor = this.calculateDistributionFactor(elements, center);
+        const distributionFactor = this.calculateDistributionFactor(
+          elements,
+          center
+        );
         distanceMultiplier = 1 + distributionFactor * 0.5;
         break;
       }
@@ -560,7 +598,7 @@ export class CameraUtils {
     // Calculate final distance based on camera FOV
     let finalDistance = maxDistance * distanceMultiplier;
     if (this.camera instanceof THREE.PerspectiveCamera) {
-      const fov = this.camera.fov * Math.PI / 180;
+      const fov = (this.camera.fov * Math.PI) / 180;
       finalDistance = (maxDistance * distanceMultiplier) / Math.sin(fov / 2);
     }
 
@@ -577,10 +615,13 @@ export class CameraUtils {
     if (elements.length <= 1) return 0;
 
     // Calculate standard deviation of distances from center
-    const distances = elements.map(el => el.position.distanceTo(center));
-    const avgDistance = distances.reduce((sum, d) => sum + d, 0) / distances.length;
-    
-    const variance = distances.reduce((sum, d) => sum + Math.pow(d - avgDistance, 2), 0) / distances.length;
+    const distances = elements.map((el) => el.position.distanceTo(center));
+    const avgDistance =
+      distances.reduce((sum, d) => sum + d, 0) / distances.length;
+
+    const variance =
+      distances.reduce((sum, d) => sum + Math.pow(d - avgDistance, 2), 0) /
+      distances.length;
     const stdDev = Math.sqrt(variance);
 
     // Normalize by average distance
@@ -590,7 +631,11 @@ export class CameraUtils {
   /**
    * Smooth zoom with constraints
    */
-  smoothZoom(zoomDirection: 'in' | 'out', speed: number = 0.1, constraints?: { minDistance?: number; maxDistance?: number }): void {
+  smoothZoom(
+    zoomDirection: 'in' | 'out',
+    speed: number = 0.1,
+    constraints?: { minDistance?: number; maxDistance?: number }
+  ): void {
     if (!(this.camera instanceof THREE.PerspectiveCamera)) return;
 
     const currentDistance = this.camera.position.length();
@@ -617,7 +662,12 @@ export class CameraUtils {
    */
   handleTouchGesture(
     gesture: 'pinch' | 'tap' | 'swipe',
-    data: { startPos?: THREE.Vector2; endPos?: THREE.Vector2; distance?: number; scale?: number }
+    data: {
+      startPos?: THREE.Vector2;
+      endPos?: THREE.Vector2;
+      distance?: number;
+      scale?: number;
+    }
   ): void {
     switch (gesture) {
       case 'pinch':
@@ -627,7 +677,7 @@ export class CameraUtils {
           this.smoothZoom(zoomDirection, speed);
         }
         break;
-        
+
       case 'tap':
         if (data.startPos) {
           // Convert to world coordinates and potentially focus on object
@@ -635,7 +685,7 @@ export class CameraUtils {
           // This could trigger focus logic
         }
         break;
-        
+
       case 'swipe':
         if (data.startPos && data.endPos) {
           const delta = data.endPos.clone().sub(data.startPos);

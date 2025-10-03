@@ -7,7 +7,7 @@ import { ComprehensiveUISemanticsSpecs } from './specs/comprehensive-ui.semantic
 
 /**
  * Unified Dashboard Demo
- * 
+ *
  * This file demonstrates how to use the unified dashboard to display
  * all visual semantics testing results in a single interface.
  */
@@ -22,7 +22,7 @@ test.describe('Unified Dashboard Demo', () => {
     reporter = new VisualRegressionReporter();
     collector = new PerformanceMetricsCollector();
     dashboard = new UnifiedDashboard();
-    
+
     await reporter.initialize();
   });
 
@@ -47,48 +47,67 @@ test.describe('Unified Dashboard Demo', () => {
 
   test('Sphere Element Actor comprehensive test', async () => {
     // Navigate to the element actors demo
-    await controller.navigateTo('http://localhost:5175/element-actors-demo.html');
-    
+    await controller.navigateTo(
+      'http://localhost:5175/element-actors-demo.html'
+    );
+
     try {
       // Test visual state
-      await controller.assertVisualState(ComprehensiveUISemanticsSpecs.SphereElementActorSpec);
-      
+      await controller.assertVisualState(
+        ComprehensiveUISemanticsSpecs.SphereElementActorSpec
+      );
+
       // Test ergonomic compliance
-      await controller.assertErgonomicCompliance(ComprehensiveUISemanticsSpecs.SphereElementActorSpec);
-      
+      await controller.assertErgonomicCompliance(
+        ComprehensiveUISemanticsSpecs.SphereElementActorSpec
+      );
+
       // Add visual test result to dashboard
-      dashboard.addVisualTestResults([{
-        componentName: 'SphereElementActor',
-        testName: 'Visual Semantics',
-        status: 'pass'
-      }]);
-      
+      dashboard.addVisualTestResults([
+        {
+          componentName: 'SphereElementActor',
+          testName: 'Visual Semantics',
+          status: 'pass',
+        },
+      ]);
+
       // Add ergonomic test result to dashboard
-      dashboard.addErgonomicTestResults([{
-        componentName: 'SphereElementActor',
-        testName: 'Ergonomic Compliance',
-        status: 'pass',
-        requirements: ['minTouchTargetSize', 'minContrastRatio', 'keyboardNavigation', 'screenReaderSupport', 'maxResponseTime'],
-        failures: []
-      }]);
+      dashboard.addErgonomicTestResults([
+        {
+          componentName: 'SphereElementActor',
+          testName: 'Ergonomic Compliance',
+          status: 'pass',
+          requirements: [
+            'minTouchTargetSize',
+            'minContrastRatio',
+            'keyboardNavigation',
+            'screenReaderSupport',
+            'maxResponseTime',
+          ],
+          failures: [],
+        },
+      ]);
     } catch (error) {
       // Report visual regression
       await reporter.reportRegression({
         componentName: 'SphereElementActor',
         testName: 'Visual Semantics',
         failureType: 'visual',
-        description: error instanceof Error ? error.message : 'Unknown error'
+        description: error instanceof Error ? error.message : 'Unknown error',
       });
-      
+
       // Add failed test result to dashboard
-      dashboard.addVisualTestResults([{
-        componentName: 'SphereElementActor',
-        testName: 'Visual Semantics',
-        status: 'fail',
-        errorMessage: error instanceof Error ? error.message : 'Unknown error'
-      }]);
+      dashboard.addVisualTestResults([
+        {
+          componentName: 'SphereElementActor',
+          testName: 'Visual Semantics',
+          status: 'fail',
+          errorMessage:
+            error instanceof Error ? error.message : 'Unknown error',
+        },
+      ]);
     }
-    
+
     // Collect performance metrics
     try {
       const metrics = await collector.collectMetrics(
@@ -98,14 +117,16 @@ test.describe('Unified Dashboard Demo', () => {
           await controller.hover('canvas');
         }
       );
-      
+
       // Add performance test result to dashboard
-      dashboard.addPerformanceTestResults([{
-        componentName: 'SphereElementActor',
-        testName: 'Hover Interaction',
-        status: 'pass',
-        metrics
-      }]);
+      dashboard.addPerformanceTestResults([
+        {
+          componentName: 'SphereElementActor',
+          testName: 'Hover Interaction',
+          status: 'pass',
+          metrics,
+        },
+      ]);
     } catch (error) {
       console.error('Performance test failed:', error);
     }
@@ -113,48 +134,67 @@ test.describe('Unified Dashboard Demo', () => {
 
   test('Box Element Actor comprehensive test', async () => {
     // Navigate to the element actors demo
-    await controller.navigateTo('http://localhost:5175/element-actors-demo.html');
-    
+    await controller.navigateTo(
+      'http://localhost:5175/element-actors-demo.html'
+    );
+
     try {
       // Test visual state
-      await controller.assertVisualState(ComprehensiveUISemanticsSpecs.BoxElementActorSpec);
-      
+      await controller.assertVisualState(
+        ComprehensiveUISemanticsSpecs.BoxElementActorSpec
+      );
+
       // Test ergonomic compliance
-      await controller.assertErgonomicCompliance(ComprehensiveUISemanticsSpecs.BoxElementActorSpec);
-      
+      await controller.assertErgonomicCompliance(
+        ComprehensiveUISemanticsSpecs.BoxElementActorSpec
+      );
+
       // Add visual test result to dashboard
-      dashboard.addVisualTestResults([{
-        componentName: 'BoxElementActor',
-        testName: 'Visual Semantics',
-        status: 'pass'
-      }]);
-      
+      dashboard.addVisualTestResults([
+        {
+          componentName: 'BoxElementActor',
+          testName: 'Visual Semantics',
+          status: 'pass',
+        },
+      ]);
+
       // Add ergonomic test result to dashboard
-      dashboard.addErgonomicTestResults([{
-        componentName: 'BoxElementActor',
-        testName: 'Ergonomic Compliance',
-        status: 'pass',
-        requirements: ['minTouchTargetSize', 'minContrastRatio', 'keyboardNavigation', 'screenReaderSupport', 'maxResponseTime'],
-        failures: []
-      }]);
+      dashboard.addErgonomicTestResults([
+        {
+          componentName: 'BoxElementActor',
+          testName: 'Ergonomic Compliance',
+          status: 'pass',
+          requirements: [
+            'minTouchTargetSize',
+            'minContrastRatio',
+            'keyboardNavigation',
+            'screenReaderSupport',
+            'maxResponseTime',
+          ],
+          failures: [],
+        },
+      ]);
     } catch (error) {
       // Report visual regression
       await reporter.reportRegression({
         componentName: 'BoxElementActor',
         testName: 'Visual Semantics',
         failureType: 'visual',
-        description: error instanceof Error ? error.message : 'Unknown error'
+        description: error instanceof Error ? error.message : 'Unknown error',
       });
-      
+
       // Add failed test result to dashboard
-      dashboard.addVisualTestResults([{
-        componentName: 'BoxElementActor',
-        testName: 'Visual Semantics',
-        status: 'fail',
-        errorMessage: error instanceof Error ? error.message : 'Unknown error'
-      }]);
+      dashboard.addVisualTestResults([
+        {
+          componentName: 'BoxElementActor',
+          testName: 'Visual Semantics',
+          status: 'fail',
+          errorMessage:
+            error instanceof Error ? error.message : 'Unknown error',
+        },
+      ]);
     }
-    
+
     // Collect performance metrics
     try {
       const metrics = await collector.collectMetrics(
@@ -164,14 +204,16 @@ test.describe('Unified Dashboard Demo', () => {
           await controller.hover('canvas');
         }
       );
-      
+
       // Add performance test result to dashboard
-      dashboard.addPerformanceTestResults([{
-        componentName: 'BoxElementActor',
-        testName: 'Hover Interaction',
-        status: 'pass',
-        metrics
-      }]);
+      dashboard.addPerformanceTestResults([
+        {
+          componentName: 'BoxElementActor',
+          testName: 'Hover Interaction',
+          status: 'pass',
+          metrics,
+        },
+      ]);
     } catch (error) {
       console.error('Performance test failed:', error);
     }
@@ -179,48 +221,67 @@ test.describe('Unified Dashboard Demo', () => {
 
   test('D3 Force Layout comprehensive test', async () => {
     // Navigate to the layout engines demo
-    await controller.navigateTo('http://localhost:5175/layout-engines-demo.html');
-    
+    await controller.navigateTo(
+      'http://localhost:5175/layout-engines-demo.html'
+    );
+
     try {
       // Test visual state
-      await controller.assertVisualState(ComprehensiveUISemanticsSpecs.D3ForceLayoutSpec);
-      
+      await controller.assertVisualState(
+        ComprehensiveUISemanticsSpecs.D3ForceLayoutSpec
+      );
+
       // Test ergonomic compliance
-      await controller.assertErgonomicCompliance(ComprehensiveUISemanticsSpecs.D3ForceLayoutSpec);
-      
+      await controller.assertErgonomicCompliance(
+        ComprehensiveUISemanticsSpecs.D3ForceLayoutSpec
+      );
+
       // Add visual test result to dashboard
-      dashboard.addVisualTestResults([{
-        componentName: 'D3ForceLayout',
-        testName: 'Visual Semantics',
-        status: 'pass'
-      }]);
-      
+      dashboard.addVisualTestResults([
+        {
+          componentName: 'D3ForceLayout',
+          testName: 'Visual Semantics',
+          status: 'pass',
+        },
+      ]);
+
       // Add ergonomic test result to dashboard
-      dashboard.addErgonomicTestResults([{
-        componentName: 'D3ForceLayout',
-        testName: 'Ergonomic Compliance',
-        status: 'pass',
-        requirements: ['minTouchTargetSize', 'minContrastRatio', 'keyboardNavigation', 'screenReaderSupport', 'maxResponseTime'],
-        failures: []
-      }]);
+      dashboard.addErgonomicTestResults([
+        {
+          componentName: 'D3ForceLayout',
+          testName: 'Ergonomic Compliance',
+          status: 'pass',
+          requirements: [
+            'minTouchTargetSize',
+            'minContrastRatio',
+            'keyboardNavigation',
+            'screenReaderSupport',
+            'maxResponseTime',
+          ],
+          failures: [],
+        },
+      ]);
     } catch (error) {
       // Report visual regression
       await reporter.reportRegression({
         componentName: 'D3ForceLayout',
         testName: 'Visual Semantics',
         failureType: 'visual',
-        description: error instanceof Error ? error.message : 'Unknown error'
+        description: error instanceof Error ? error.message : 'Unknown error',
       });
-      
+
       // Add failed test result to dashboard
-      dashboard.addVisualTestResults([{
-        componentName: 'D3ForceLayout',
-        testName: 'Visual Semantics',
-        status: 'fail',
-        errorMessage: error instanceof Error ? error.message : 'Unknown error'
-      }]);
+      dashboard.addVisualTestResults([
+        {
+          componentName: 'D3ForceLayout',
+          testName: 'Visual Semantics',
+          status: 'fail',
+          errorMessage:
+            error instanceof Error ? error.message : 'Unknown error',
+        },
+      ]);
     }
-    
+
     // Collect performance metrics
     try {
       const metrics = await collector.collectMetrics(
@@ -233,14 +294,16 @@ test.describe('Unified Dashboard Demo', () => {
           await controller.waitForTimeout(2000);
         }
       );
-      
+
       // Add performance test result to dashboard
-      dashboard.addPerformanceTestResults([{
-        componentName: 'D3ForceLayout',
-        testName: 'Layout Execution',
-        status: 'pass',
-        metrics
-      }]);
+      dashboard.addPerformanceTestResults([
+        {
+          componentName: 'D3ForceLayout',
+          testName: 'Layout Execution',
+          status: 'pass',
+          metrics,
+        },
+      ]);
     } catch (error) {
       console.error('Performance test failed:', error);
     }

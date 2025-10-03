@@ -5,6 +5,7 @@
 After thorough analysis of the SpaceGraphJS3 codebase, I've identified the following:
 
 ### ✅ Already Implemented (Excellent Foundation)
+
 - **Core Architecture**: Reactive Data Plane using SolidJS with excellent performance
 - **Plugin System**: All 4 plugins (Camera, Interaction, Layout, HUD) fully implemented
 - **Rendering System**: Node, Edge, HTML, and Instanced renderers working
@@ -16,25 +17,28 @@ After thorough analysis of the SpaceGraphJS3 codebase, I've identified the follo
 
 ### 🔧 Issues Identified
 
-1. **HTMLRenderer Import "Bug"**: The IMPLEMENTATION_PLAN.md mentions an import issue, but the current code is actually correct. The plan mentions `HtmlElement` but the actual type is `HtmlNodeSpec` which is properly defined and imported.
+1. **HTMLRenderer Import "Bug"**: The IMPLEMENTATION_PLAN.md mentions an import issue, but the current code is actually
+   correct. The plan mentions `HtmlElement` but the actual type is `HtmlNodeSpec` which is properly defined and
+   imported.
 
 2. **Missing Layout Engines**: Only 3 of 6 planned layout engines are implemented. Missing:
-   - CircleLayout (circular/spherical arrangements)
-   - ColumnLayout (vertical arrangements) 
-   - RowLayout (horizontal arrangements)
+    - CircleLayout (circular/spherical arrangements)
+    - ColumnLayout (vertical arrangements)
+    - RowLayout (horizontal arrangements)
 
 3. **Edge Interaction System**: Currently edges are purely visual with no interaction capabilities
 
 4. **Additional Element Actors**: Only SphereElementActor is implemented. Missing:
-   - BoxElementActor (cube/box geometry)
-   - CustomGeometryActor (custom THREE.BufferGeometry support)
-   - TextElementActor (3D text rendering)
+    - BoxElementActor (cube/box geometry)
+    - CustomGeometryActor (custom THREE.BufferGeometry support)
+    - TextElementActor (3D text rendering)
 
 ## Implementation Priority
 
 ### Phase 1: Complete Layout Engines (High Priority)
 
 #### 1. CircleLayout Implementation
+
 ```typescript
 // src/layouts/CircleLayout.ts
 export interface CircleLayoutSpec {
@@ -49,12 +53,14 @@ export interface CircleLayoutSpec {
 ```
 
 Features:
+
 - 2D circular arrangements
 - 3D spherical arrangements using Fibonacci spiral distribution
 - Configurable radius, center, and distribution patterns
 - Support for pinned nodes
 
 #### 2. ColumnLayout Implementation
+
 ```typescript
 // src/layouts/ColumnLayout.ts
 export interface ColumnLayoutSpec {
@@ -68,12 +74,14 @@ export interface ColumnLayoutSpec {
 ```
 
 Features:
+
 - Vertical node arrangement
 - Configurable column count and spacing
 - Maximum nodes per column limit
 - Automatic column distribution
 
 #### 3. RowLayout Implementation
+
 ```typescript
 // src/layouts/RowLayout.ts
 export interface RowLayoutSpec {
@@ -87,6 +95,7 @@ export interface RowLayoutSpec {
 ```
 
 Features:
+
 - Horizontal node arrangement
 - Configurable row count and spacing
 - Maximum nodes per row limit
@@ -95,6 +104,7 @@ Features:
 ### Phase 2: Edge Interaction System (Medium Priority)
 
 #### Edge Interaction Features
+
 - Edge hover effects (color changes, thickness)
 - Edge selection with visual feedback
 - Edge-specific events (`edge:click`, `edge:hover`, `edge:select`)
@@ -104,6 +114,7 @@ Features:
 ### Phase 3: Additional Element Actors (Medium Priority)
 
 #### 1. BoxElementActor
+
 ```typescript
 // src/renderers/elementActors/BoxElementActor.ts
 export class BoxElementActor extends BaseElementActor {
@@ -114,6 +125,7 @@ export class BoxElementActor extends BaseElementActor {
 ```
 
 #### 2. CustomGeometryActor
+
 ```typescript
 // src/renderers/elementActors/CustomGeometryActor.ts
 export class CustomGeometryActor extends BaseElementActor {
@@ -124,6 +136,7 @@ export class CustomGeometryActor extends BaseElementActor {
 ```
 
 #### 3. TextElementActor
+
 ```typescript
 // src/renderers/elementActors/TextElementActor.ts
 export class TextElementActor extends BaseElementActor {
@@ -136,16 +149,19 @@ export class TextElementActor extends BaseElementActor {
 ### Phase 4: Performance Optimizations (Lower Priority)
 
 #### 1. Object Pooling System
+
 - Pool for frequently created/destroyed objects
 - Reduce garbage collection pressure
 - Improve performance in dynamic scenarios
 
 #### 2. Level-of-Detail (LOD) System
+
 - Automatic LOD switching based on distance
 - Reduce polygon count for distant objects
 - Maintain visual quality while improving performance
 
 #### 3. Advanced Culling Mechanisms
+
 - Frustum culling for off-screen objects
 - Occlusion culling for hidden objects
 - Distance-based culling for far objects
@@ -153,6 +169,7 @@ export class TextElementActor extends BaseElementActor {
 ### Phase 5: Enhanced Camera Features (Lower Priority)
 
 #### Advanced Camera Features
+
 - Auto-zoom to selected elements
 - Camera presets and bookmarks
 - Smooth rotation controls
@@ -162,6 +179,7 @@ export class TextElementActor extends BaseElementActor {
 ## Implementation Strategy
 
 ### 1. Base Layout Class
+
 Create a base class for all deterministic layouts to reduce code duplication:
 
 ```typescript
@@ -187,6 +205,7 @@ abstract class BaseDeterministicLayout implements ILayoutEngine {
 ```
 
 ### 2. Registration System
+
 Update SpaceGraph registration for new layout engines:
 
 ```typescript
@@ -197,6 +216,7 @@ SpaceGraph.registerLayout('row', RowLayout);
 ```
 
 ### 3. Type Updates
+
 Update TypeScript types to include new layout specifications:
 
 ```typescript
@@ -212,17 +232,20 @@ export type LayoutSpec =
 ## Testing Strategy
 
 ### Unit Tests
+
 - Test position calculations for each layout type
 - Verify pinning behavior (pinned nodes should not move)
 - Test edge cases (empty graphs, single node, many nodes)
 - Verify configuration validation
 
 ### Integration Tests
+
 - Test layout switching between different types
 - Verify interaction with other systems (rendering, interaction)
 - Test performance with large numbers of nodes
 
 ### Visual Tests
+
 - Create reference images for each layout type
 - Test visual consistency across different node counts
 - Verify 2D vs 3D positioning accuracy
@@ -230,12 +253,14 @@ export type LayoutSpec =
 ## Success Metrics
 
 ### Functional Goals
+
 - 100% test pass rate (currently 98.2%)
 - Complete README implementation coverage
 - Zero TypeScript compilation errors
 - All planned features working according to specifications
 
 ### Performance Goals
+
 - Maintain <5ms interaction response time
 - Support 2000+ nodes with smooth performance
 - Memory usage stable over extended sessions
@@ -249,4 +274,5 @@ export type LayoutSpec =
 4. **Write Tests**: Comprehensive test coverage for new functionality
 5. **Update Documentation**: Keep documentation synchronized with implementation
 
-The foundation is exceptionally solid, and these enhancements will transform SpaceGraphJS3 into a feature-complete, production-ready visualization library.
+The foundation is exceptionally solid, and these enhancements will transform SpaceGraphJS3 into a feature-complete,
+production-ready visualization library.

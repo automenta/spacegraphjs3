@@ -22,9 +22,9 @@ export interface HtmlNodeSpec extends NodeSpec {
 }
 
 export interface BoxNodeSpec extends NodeSpec {
-  width?: number;    // Box width (default: 1.0)
-  height?: number;   // Box height (default: 1.0)
-  depth?: number;    // Box depth (default: 1.0)
+  width?: number; // Box width (default: 1.0)
+  height?: number; // Box height (default: 1.0)
+  depth?: number; // Box depth (default: 1.0)
   rounded?: boolean; // Use rounded box geometry (default: false)
 }
 
@@ -32,7 +32,7 @@ export interface BoxNodeSpec extends NodeSpec {
  * Interface for custom geometry node specifications
  */
 export interface CustomGeometryNodeSpec extends NodeSpec {
-  url: string;                    // URL to load the geometry from
+  url: string; // URL to load the geometry from
   format?: 'gltf' | 'glb' | 'obj' | 'fbx' | 'ply' | 'stl'; // Format of the geometry file
   material?: THREE.MaterialParameters; // Material properties for the geometry
 }
@@ -41,16 +41,16 @@ export interface CustomGeometryNodeSpec extends NodeSpec {
  * Interface for text node specifications
  */
 export interface TextNodeSpec extends NodeSpec {
-  text?: string;                 // Text content to display
-  font?: string;                 // Font family (default: 'helvetiker')
-  size?: number;                 // Text size (default: 0.5)
-  depth?: number;                // Text depth/extrusion (default: 0.1)
-  color?: string;                // Text color (default: node color)
+  text?: string; // Text content to display
+  font?: string; // Font family (default: 'helvetiker')
+  size?: number; // Text size (default: 0.5)
+  depth?: number; // Text depth/extrusion (default: 0.1)
+  color?: string; // Text color (default: node color)
   align?: 'left' | 'center' | 'right'; // Text alignment (default: 'center')
-  lineHeight?: number;           // Line height for multi-line text (default: 1.2)
-  maxWidth?: number;             // Maximum width for text wrapping (default: Infinity)
-  bold?: boolean;                // Bold text (default: false)
-  italic?: boolean;              // Italic text (default: false)
+  lineHeight?: number; // Line height for multi-line text (default: 1.2)
+  maxWidth?: number; // Maximum width for text wrapping (default: Infinity)
+  bold?: boolean; // Bold text (default: false)
+  italic?: boolean; // Italic text (default: false)
 }
 
 export interface EdgeSpec {
@@ -58,15 +58,15 @@ export interface EdgeSpec {
   source: string;
   target: string;
   color?: string;
-  width?: number;              // Edge width
+  width?: number; // Edge width
   type?: 'straight' | 'curved' | 'dashed'; // Edge type
-  label?: string;              // Edge label
-  selectable?: boolean;        // Whether edge can be selected
-  hoverable?: boolean;         // Whether edge responds to hover
-  data?: Record<string, any>;  // Arbitrary user data
-  curvature?: number;          // For curved edges (0-1)
-  dashSize?: number;           // For dashed edges
-  gapSize?: number;            // For dashed edges
+  label?: string; // Edge label
+  selectable?: boolean; // Whether edge can be selected
+  hoverable?: boolean; // Whether edge responds to hover
+  data?: Record<string, any>; // Arbitrary user data
+  curvature?: number; // For curved edges (0-1)
+  dashSize?: number; // For dashed edges
+  gapSize?: number; // For dashed edges
 }
 
 export interface DataUpdate {
@@ -145,9 +145,9 @@ export type StyleSpec = {
   'node:selected'?: NodeStyle;
   'edge:hover'?: EdgeStyle;
   'edge:selected'?: EdgeStyle;
-  'edge:source-selected'?: EdgeStyle;  // Style when source node is selected
-  'edge:target-selected'?: EdgeStyle;  // Style when target node is selected
-  'edge:both-selected'?: EdgeStyle;    // Style when both nodes are selected
+  'edge:source-selected'?: EdgeStyle; // Style when source node is selected
+  'edge:target-selected'?: EdgeStyle; // Style when target node is selected
+  'edge:both-selected'?: EdgeStyle; // Style when both nodes are selected
 };
 
 export interface ForceDirectedLayoutSpec {
@@ -201,7 +201,13 @@ export interface RandomLayoutSpec {
   // Random layout doesn't have specific properties
 }
 
-export type LayoutSpec = ForceDirectedLayoutSpec | GridLayoutSpec | CircleLayoutSpec | ColumnLayoutSpec | RowLayoutSpec | RandomLayoutSpec;
+export type LayoutSpec =
+  | ForceDirectedLayoutSpec
+  | GridLayoutSpec
+  | CircleLayoutSpec
+  | ColumnLayoutSpec
+  | RowLayoutSpec
+  | RandomLayoutSpec;
 
 export interface ControlsSpec {
   keyboard: {
@@ -271,7 +277,11 @@ export type GraphEventMap = {
   'element:hover:enter': { target: NodeSpec | EdgeSpec };
   'element:hover:leave': { target: NodeSpec | EdgeSpec };
   'element:drag:start': { target: NodeSpec; startPosition: THREE.Vector3 };
-  'element:drag:end': { target: NodeSpec; startPosition: THREE.Vector3; endPosition: THREE.Vector3 };
+  'element:drag:end': {
+    target: NodeSpec;
+    startPosition: THREE.Vector3;
+    endPosition: THREE.Vector3;
+  };
   'background:click': { event: PointerEvent };
   'layout:pin': string[];
   'layout:unpin': string[];
@@ -305,7 +315,7 @@ export type GraphEventMap = {
   'camera:animation:end': void;
   'camera:framing:start': void;
   'camera:framing:end': void;
-  'log': {
+  log: {
     level: number;
     message: string;
     timestamp: number;
@@ -322,12 +332,14 @@ export type AssertUnreachable = (x: never) => never;
 /**
  * Utility type for making properties required
  */
-export type RequiredKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
+export type RequiredKeys<T, K extends keyof T> = Omit<T, K> &
+  Required<Pick<T, K>>;
 
 /**
  * Utility type for making properties optional
  */
-export type OptionalKeys<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+export type OptionalKeys<T, K extends keyof T> = Omit<T, K> &
+  Partial<Pick<T, K>>;
 
 export interface GroupSpec {
   id: string;

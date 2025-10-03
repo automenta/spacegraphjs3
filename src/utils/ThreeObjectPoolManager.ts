@@ -1,5 +1,11 @@
 import { ObjectPool } from './ObjectPool';
-import { Vector3Pool, Matrix4Pool, BoxGeometryPool, SphereGeometryPool, MaterialPool } from './ThreeObjectPools';
+import {
+  Vector3Pool,
+  Matrix4Pool,
+  BoxGeometryPool,
+  SphereGeometryPool,
+  MaterialPool,
+} from './ThreeObjectPools';
 import * as THREE from 'three';
 
 /**
@@ -59,7 +65,7 @@ export class ThreeObjectPoolManager {
     if (this.vector3Pool) {
       return this.vector3Pool.acquire();
     }
-    
+
     // Fallback to map lookup
     const pool = this.pools.get('vector3') as Vector3Pool;
     return pool.acquire();
@@ -74,7 +80,7 @@ export class ThreeObjectPoolManager {
       this.vector3Pool.release(vec);
       return;
     }
-    
+
     // Fallback to map lookup
     const pool = this.pools.get('vector3') as Vector3Pool;
     pool.release(vec);
@@ -86,22 +92,27 @@ export class ThreeObjectPoolManager {
   public getBoxGeometry(width = 1, height = 1, depth = 1): THREE.BoxGeometry {
     const poolName = `boxGeometry_${width}_${height}_${depth}`;
     let pool = this.pools.get(poolName) as BoxGeometryPool;
-    
+
     if (!pool) {
       pool = new BoxGeometryPool(width, height, depth);
       this.pools.set(poolName, pool);
     }
-    
+
     return pool.acquire();
   }
 
   /**
    * Release pooled BoxGeometry
    */
-  public releaseBoxGeometry(geom: THREE.BoxGeometry, width = 1, height = 1, depth = 1): void {
+  public releaseBoxGeometry(
+    geom: THREE.BoxGeometry,
+    width = 1,
+    height = 1,
+    depth = 1
+  ): void {
     const poolName = `boxGeometry_${width}_${height}_${depth}`;
     const pool = this.pools.get(poolName) as BoxGeometryPool;
-    
+
     if (pool) {
       pool.release(geom);
     }
@@ -110,25 +121,34 @@ export class ThreeObjectPoolManager {
   /**
    * Get pooled SphereGeometry
    */
-  public getSphereGeometry(radius = 1, widthSegments = 32, heightSegments = 32): THREE.SphereGeometry {
+  public getSphereGeometry(
+    radius = 1,
+    widthSegments = 32,
+    heightSegments = 32
+  ): THREE.SphereGeometry {
     const poolName = `sphereGeometry_${radius}_${widthSegments}_${heightSegments}`;
     let pool = this.pools.get(poolName) as SphereGeometryPool;
-    
+
     if (!pool) {
       pool = new SphereGeometryPool(radius, widthSegments, heightSegments);
       this.pools.set(poolName, pool);
     }
-    
+
     return pool.acquire();
   }
 
   /**
    * Release pooled SphereGeometry
    */
-  public releaseSphereGeometry(geom: THREE.SphereGeometry, radius = 1, widthSegments = 32, heightSegments = 32): void {
+  public releaseSphereGeometry(
+    geom: THREE.SphereGeometry,
+    radius = 1,
+    widthSegments = 32,
+    heightSegments = 32
+  ): void {
     const poolName = `sphereGeometry_${radius}_${widthSegments}_${heightSegments}`;
     const pool = this.pools.get(poolName) as SphereGeometryPool;
-    
+
     if (pool) {
       pool.release(geom);
     }
@@ -141,22 +161,22 @@ export class ThreeObjectPoolManager {
     // Use cached reference for better performance
     if (this.materialPool) {
       const material = this.materialPool.acquire();
-      
+
       if (color) {
         material.color.copy(color);
       }
-      
+
       return material;
     }
-    
+
     // Fallback to map lookup
     const pool = this.pools.get('material') as MaterialPool;
     const material = pool.acquire();
-    
+
     if (color) {
       material.color.copy(color);
     }
-    
+
     return material;
   }
 
@@ -169,7 +189,7 @@ export class ThreeObjectPoolManager {
       this.materialPool.release(mat);
       return;
     }
-    
+
     // Fallback to map lookup
     const pool = this.pools.get('material') as MaterialPool;
     pool.release(mat);
@@ -178,19 +198,25 @@ export class ThreeObjectPoolManager {
   /**
    * Get all pool statistics
    */
-  public getAllStats(): Record<string, {
-    size: number;
-    acquired?: number;
-    released?: number;
-    utilization?: number;
-  }> {
-    const stats: Record<string, {
+  public getAllStats(): Record<
+    string,
+    {
       size: number;
       acquired?: number;
       released?: number;
       utilization?: number;
-    }> = {};
-    
+    }
+  > {
+    const stats: Record<
+      string,
+      {
+        size: number;
+        acquired?: number;
+        released?: number;
+        utilization?: number;
+      }
+    > = {};
+
     for (const [name, pool] of this.pools) {
       // Try to get detailed stats, fallback to basic size info
       if (typeof (pool as any).getStats === 'function') {
@@ -199,7 +225,7 @@ export class ThreeObjectPoolManager {
         stats[name] = { size: pool.size };
       }
     }
-    
+
     return stats;
   }
 
@@ -222,7 +248,7 @@ export class ThreeObjectPoolManager {
       pool.clear();
     }
     this.pools.clear();
-    
+
     // Clear cached references
     this.vector3Pool = null;
     this.matrix4Pool = null;

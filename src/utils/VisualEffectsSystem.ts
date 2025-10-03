@@ -51,13 +51,13 @@ export class VisualEffectsSystem {
   private performanceMode: boolean = false;
 
   private logger: Logger;
-  
+
   constructor(scene: THREE.Scene) {
     // Validate input
     if (!scene) {
       throw new Error('Scene is required for VisualEffectsSystem');
     }
-    
+
     this.scene = scene;
     this.clock = new THREE.Clock();
     this.logger = Logger.getInstance();
@@ -69,21 +69,31 @@ export class VisualEffectsSystem {
   createParticleEffect(id: string, config: ParticleEffect): void {
     // Validate inputs
     if (!id) {
-      this.logger.warn('VisualEffectsSystem', 'Cannot create particle effect with empty ID');
+      this.logger.warn(
+        'VisualEffectsSystem',
+        'Cannot create particle effect with empty ID'
+      );
       return;
     }
-    
+
     if (!config) {
-      this.logger.warn('VisualEffectsSystem', 'Cannot create particle effect with null config');
+      this.logger.warn(
+        'VisualEffectsSystem',
+        'Cannot create particle effect with null config'
+      );
       return;
     }
-    
+
     try {
       const system = this.createParticleSystem(config);
       this.particleSystems.set(id, system);
       this.scene.add(system);
     } catch (error) {
-      this.logger.error('VisualEffectsSystem', 'Failed to create particle effect', error);
+      this.logger.error(
+        'VisualEffectsSystem',
+        'Failed to create particle effect',
+        error
+      );
     }
   }
 
@@ -93,21 +103,31 @@ export class VisualEffectsSystem {
   createGlowEffect(id: string, config: GlowEffect): void {
     // Validate inputs
     if (!id) {
-      this.logger.warn('VisualEffectsSystem', 'Cannot create glow effect with empty ID');
+      this.logger.warn(
+        'VisualEffectsSystem',
+        'Cannot create glow effect with empty ID'
+      );
       return;
     }
-    
+
     if (!config) {
-      this.logger.warn('VisualEffectsSystem', 'Cannot create glow effect with null config');
+      this.logger.warn(
+        'VisualEffectsSystem',
+        'Cannot create glow effect with null config'
+      );
       return;
     }
-    
+
     try {
       const mesh = this.createGlowMesh(config);
       this.effectMeshes.set(id, mesh);
       this.scene.add(mesh);
     } catch (error) {
-      this.logger.error('VisualEffectsSystem', 'Failed to create glow effect', error);
+      this.logger.error(
+        'VisualEffectsSystem',
+        'Failed to create glow effect',
+        error
+      );
     }
   }
 
@@ -117,21 +137,31 @@ export class VisualEffectsSystem {
   createTrailEffect(id: string, config: TrailEffect): void {
     // Validate inputs
     if (!id) {
-      this.logger.warn('VisualEffectsSystem', 'Cannot create trail effect with empty ID');
+      this.logger.warn(
+        'VisualEffectsSystem',
+        'Cannot create trail effect with empty ID'
+      );
       return;
     }
-    
+
     if (!config) {
-      this.logger.warn('VisualEffectsSystem', 'Cannot create trail effect with null config');
+      this.logger.warn(
+        'VisualEffectsSystem',
+        'Cannot create trail effect with null config'
+      );
       return;
     }
-    
+
     try {
       const trail = this.createTrailMesh(config);
       this.effectMeshes.set(id, trail);
       this.scene.add(trail);
     } catch (error) {
-      this.logger.error('VisualEffectsSystem', 'Failed to create trail effect', error);
+      this.logger.error(
+        'VisualEffectsSystem',
+        'Failed to create trail effect',
+        error
+      );
     }
   }
 
@@ -141,7 +171,7 @@ export class VisualEffectsSystem {
   private createParticleSystem(config: ParticleEffect): THREE.Points {
     const count = config.count || 100;
     const geometry = new THREE.BufferGeometry();
-    
+
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const sizes = new Float32Array(count);
@@ -190,7 +220,7 @@ export class VisualEffectsSystem {
       vertexColors: true,
       transparent: true,
       opacity: config.opacity || 0.8,
-      blending: THREE.AdditiveBlending
+      blending: THREE.AdditiveBlending,
     });
 
     return new THREE.Points(geometry, material);
@@ -201,16 +231,24 @@ export class VisualEffectsSystem {
    */
   private createGlowMesh(config: GlowEffect): THREE.Mesh {
     let geometry: THREE.BufferGeometry;
-    
+
     switch (config.type) {
       case 'halo':
-        geometry = new THREE.RingGeometry(config.radius || 1, (config.radius || 1) + (config.thickness || 0.2), 32);
+        geometry = new THREE.RingGeometry(
+          config.radius || 1,
+          (config.radius || 1) + (config.thickness || 0.2),
+          32
+        );
         break;
       case 'aura':
         geometry = new THREE.SphereGeometry(config.radius || 1, 32, 32);
         break;
       case 'ring':
-        geometry = new THREE.RingGeometry((config.radius || 1) - (config.thickness || 0.1), config.radius || 1, 32);
+        geometry = new THREE.RingGeometry(
+          (config.radius || 1) - (config.thickness || 0.1),
+          config.radius || 1,
+          32
+        );
         break;
       default:
         geometry = new THREE.SphereGeometry(config.radius || 1, 32, 32);
@@ -220,11 +258,11 @@ export class VisualEffectsSystem {
       color: config.color || 0xffffff,
       transparent: true,
       opacity: config.opacity || 0.3,
-      blending: THREE.AdditiveBlending
+      blending: THREE.AdditiveBlending,
     });
 
     const mesh = new THREE.Mesh(geometry, material);
-    
+
     if (config.target) {
       mesh.position.copy(config.target.position);
       mesh.quaternion.copy(config.target.quaternion);
@@ -239,7 +277,7 @@ export class VisualEffectsSystem {
   private createTrailMesh(config: TrailEffect): THREE.Mesh {
     const segments = config.segments || 20;
     const geometry = new THREE.BufferGeometry();
-    
+
     const positions = new Float32Array(segments * 3);
     const colors = new Float32Array(segments * 3);
     const alphas = new Float32Array(segments);
@@ -247,8 +285,8 @@ export class VisualEffectsSystem {
     const color = new THREE.Color(config.color || 0xffffff);
 
     for (let i = 0; i < segments; i++) {
-      const alpha = 1 - (i / segments);
-      
+      const alpha = 1 - i / segments;
+
       positions[i * 3] = 0;
       positions[i * 3 + 1] = 0;
       positions[i * 3 + 2] = 0;
@@ -269,7 +307,7 @@ export class VisualEffectsSystem {
       vertexColors: true,
       transparent: true,
       opacity: config.opacity || 0.8,
-      blending: THREE.AdditiveBlending
+      blending: THREE.AdditiveBlending,
     });
 
     return new THREE.Points(geometry, material) as any;
@@ -287,7 +325,11 @@ export class VisualEffectsSystem {
         try {
           this.updateParticleSystem(system, deltaTime, time);
         } catch (error) {
-          this.logger.error('VisualEffectsSystem', `Failed to update particle system ${id}`, error);
+          this.logger.error(
+            'VisualEffectsSystem',
+            `Failed to update particle system ${id}`,
+            error
+          );
         }
       });
 
@@ -296,18 +338,30 @@ export class VisualEffectsSystem {
         try {
           this.updateEffectMesh(mesh, deltaTime, time);
         } catch (error) {
-          this.logger.error('VisualEffectsSystem', `Failed to update effect mesh ${id}`, error);
+          this.logger.error(
+            'VisualEffectsSystem',
+            `Failed to update effect mesh ${id}`,
+            error
+          );
         }
       });
     } catch (error) {
-      this.logger.error('VisualEffectsSystem', 'Failed to update effects', error);
+      this.logger.error(
+        'VisualEffectsSystem',
+        'Failed to update effects',
+        error
+      );
     }
   }
 
   /**
    * Update particle system
    */
-  private updateParticleSystem(system: THREE.Points, deltaTime: number, time: number): void {
+  private updateParticleSystem(
+    system: THREE.Points,
+    deltaTime: number,
+    time: number
+  ): void {
     void time; // Intentionally unused, keeping for potential future use
     const geometry = system.geometry;
     const positions = geometry.attributes.position.array as Float32Array;
@@ -318,7 +372,7 @@ export class VisualEffectsSystem {
     for (let i = 0; i < positions.length / 3; i++) {
       // Update lifetime
       lifetimes[i] -= deltaTime;
-      
+
       if (lifetimes[i] <= 0) {
         // Reset particle
         lifetimes[i] = 2 + Math.random() * 2;
@@ -350,7 +404,11 @@ export class VisualEffectsSystem {
   /**
    * Update effect mesh
    */
-  private updateEffectMesh(mesh: THREE.Mesh, deltaTime: number, time: number): void {
+  private updateEffectMesh(
+    mesh: THREE.Mesh,
+    deltaTime: number,
+    time: number
+  ): void {
     // Pulse effect
     if (mesh.material instanceof THREE.MeshBasicMaterial) {
       const pulse = Math.sin(time * 3) * 0.3 + 0.7;
@@ -364,28 +422,35 @@ export class VisualEffectsSystem {
   /**
    * Create explosion effect
    */
-  createExplosion(position: THREE.Vector3, color: number = 0xff4444, intensity: number = 1): void {
+  createExplosion(
+    position: THREE.Vector3,
+    color: number = 0xff4444,
+    intensity: number = 1
+  ): void {
     // Validate inputs
     if (!position) {
-      this.logger.warn('VisualEffectsSystem', 'Cannot create explosion at null position');
+      this.logger.warn(
+        'VisualEffectsSystem',
+        'Cannot create explosion at null position'
+      );
       return;
     }
-    
+
     try {
       const particleCount = Math.floor(50 * intensity);
-      
+
       for (let i = 0; i < particleCount; i++) {
         const particle = new THREE.Mesh(
           new THREE.SphereGeometry(0.05 * intensity, 8, 8),
           new THREE.MeshBasicMaterial({
             color: color,
             transparent: true,
-            opacity: 1
+            opacity: 1,
           })
         );
 
         particle.position.copy(position);
-        
+
         const velocity = new THREE.Vector3(
           (Math.random() - 0.5) * 10 * intensity,
           (Math.random() - 0.5) * 10 * intensity,
@@ -398,7 +463,11 @@ export class VisualEffectsSystem {
         this.animateExplosionParticle(particle, velocity, intensity);
       }
     } catch (error) {
-      this.logger.error('VisualEffectsSystem', 'Failed to create explosion', error);
+      this.logger.error(
+        'VisualEffectsSystem',
+        'Failed to create explosion',
+        error
+      );
     }
   }
 
@@ -433,7 +502,7 @@ export class VisualEffectsSystem {
       // Update opacity and scale
       const opacity = 1 - progress;
       const scale = (1 - progress) * intensity;
-      
+
       (particle.material as THREE.MeshBasicMaterial).opacity = opacity;
       particle.scale.setScalar(scale);
 
@@ -446,13 +515,20 @@ export class VisualEffectsSystem {
   /**
    * Create sparkle effect
    */
-  createSparkle(position: THREE.Vector3, count: number = 20, color: number = 0xffff00): void {
+  createSparkle(
+    position: THREE.Vector3,
+    count: number = 20,
+    color: number = 0xffff00
+  ): void {
     // Validate inputs
     if (!position) {
-      this.logger.warn('VisualEffectsSystem', 'Cannot create sparkle at null position');
+      this.logger.warn(
+        'VisualEffectsSystem',
+        'Cannot create sparkle at null position'
+      );
       return;
     }
-    
+
     try {
       for (let i = 0; i < count; i++) {
         const sparkle = new THREE.Mesh(
@@ -461,16 +537,18 @@ export class VisualEffectsSystem {
             color: color,
             transparent: true,
             opacity: 1,
-            blending: THREE.AdditiveBlending
+            blending: THREE.AdditiveBlending,
           })
         );
 
         sparkle.position.copy(position);
-        sparkle.position.add(new THREE.Vector3(
-          (Math.random() - 0.5) * 2,
-          (Math.random() - 0.5) * 2,
-          (Math.random() - 0.5) * 2
-        ));
+        sparkle.position.add(
+          new THREE.Vector3(
+            (Math.random() - 0.5) * 2,
+            (Math.random() - 0.5) * 2,
+            (Math.random() - 0.5) * 2
+          )
+        );
 
         sparkle.lookAt(this.scene.position);
         this.scene.add(sparkle);
@@ -479,7 +557,11 @@ export class VisualEffectsSystem {
         this.animateSparkle(sparkle);
       }
     } catch (error) {
-      this.logger.error('VisualEffectsSystem', 'Failed to create sparkle', error);
+      this.logger.error(
+        'VisualEffectsSystem',
+        'Failed to create sparkle',
+        error
+      );
     }
   }
 
@@ -503,7 +585,8 @@ export class VisualEffectsSystem {
 
       // Flicker effect
       const flicker = Math.sin(progress * Math.PI * 10) * 0.5 + 0.5;
-      (sparkle.material as THREE.MeshBasicMaterial).opacity = (1 - progress) * flicker;
+      (sparkle.material as THREE.MeshBasicMaterial).opacity =
+        (1 - progress) * flicker;
 
       // Scale effect
       const scale = (1 - progress) * 2;
@@ -518,23 +601,30 @@ export class VisualEffectsSystem {
   /**
    * Create energy beam
    */
-  createEnergyBeam(start: THREE.Vector3, end: THREE.Vector3, color: number = 0x00ffff): void {
+  createEnergyBeam(
+    start: THREE.Vector3,
+    end: THREE.Vector3,
+    color: number = 0x00ffff
+  ): void {
     // Validate inputs
     if (!start || !end) {
-      this.logger.warn('VisualEffectsSystem', 'Cannot create energy beam with null start or end position');
+      this.logger.warn(
+        'VisualEffectsSystem',
+        'Cannot create energy beam with null start or end position'
+      );
       return;
     }
-    
+
     try {
       const direction = end.clone().sub(start);
       const length = direction.length();
       const geometry = new THREE.CylinderGeometry(0.05, 0.05, length, 8);
-      
+
       const material = new THREE.MeshBasicMaterial({
         color: color,
         transparent: true,
         opacity: 0.8,
-        blending: THREE.AdditiveBlending
+        blending: THREE.AdditiveBlending,
       });
 
       const beam = new THREE.Mesh(geometry, material);
@@ -547,7 +637,11 @@ export class VisualEffectsSystem {
       // Animate beam
       this.animateEnergyBeam(beam);
     } catch (error) {
-      this.logger.error('VisualEffectsSystem', 'Failed to create energy beam', error);
+      this.logger.error(
+        'VisualEffectsSystem',
+        'Failed to create energy beam',
+        error
+      );
     }
   }
 
@@ -586,20 +680,27 @@ export class VisualEffectsSystem {
   /**
    * Create shockwave effect
    */
-  createShockwave(position: THREE.Vector3, color: number = 0xffffff, maxRadius: number = 5): void {
+  createShockwave(
+    position: THREE.Vector3,
+    color: number = 0xffffff,
+    maxRadius: number = 5
+  ): void {
     // Validate inputs
     if (!position) {
-      this.logger.warn('VisualEffectsSystem', 'Cannot create shockwave at null position');
+      this.logger.warn(
+        'VisualEffectsSystem',
+        'Cannot create shockwave at null position'
+      );
       return;
     }
-    
+
     try {
       const geometry = new THREE.RingGeometry(0, 0.1, 32);
       const material = new THREE.MeshBasicMaterial({
         color: color,
         transparent: true,
         opacity: 0.8,
-        side: THREE.DoubleSide
+        side: THREE.DoubleSide,
       });
 
       const shockwave = new THREE.Mesh(geometry, material);
@@ -611,7 +712,11 @@ export class VisualEffectsSystem {
       // Animate shockwave
       this.animateShockwave(shockwave, maxRadius);
     } catch (error) {
-      this.logger.error('VisualEffectsSystem', 'Failed to create shockwave', error);
+      this.logger.error(
+        'VisualEffectsSystem',
+        'Failed to create shockwave',
+        error
+      );
     }
   }
 
@@ -636,7 +741,7 @@ export class VisualEffectsSystem {
       // Expand and fade
       const scale = progress * maxRadius;
       const opacity = 1 - progress;
-      
+
       shockwave.scale.set(scale, scale, 1);
       (shockwave.material as THREE.MeshBasicMaterial).opacity = opacity;
 
@@ -652,10 +757,13 @@ export class VisualEffectsSystem {
   removeEffect(id: string): void {
     // Validate input
     if (!id) {
-      this.logger.warn('VisualEffectsSystem', 'Cannot remove effect with empty ID');
+      this.logger.warn(
+        'VisualEffectsSystem',
+        'Cannot remove effect with empty ID'
+      );
       return;
     }
-    
+
     try {
       const particleSystem = this.particleSystems.get(id);
       if (particleSystem) {
@@ -673,7 +781,11 @@ export class VisualEffectsSystem {
         this.effectMeshes.delete(id);
       }
     } catch (error) {
-      this.logger.error('VisualEffectsSystem', `Failed to remove effect ${id}`, error);
+      this.logger.error(
+        'VisualEffectsSystem',
+        `Failed to remove effect ${id}`,
+        error
+      );
     }
   }
 
@@ -688,7 +800,11 @@ export class VisualEffectsSystem {
           system.geometry.dispose();
           (system.material as THREE.Material).dispose();
         } catch (error) {
-          this.logger.error('VisualEffectsSystem', `Failed to dispose particle system ${id}`, error);
+          this.logger.error(
+            'VisualEffectsSystem',
+            `Failed to dispose particle system ${id}`,
+            error
+          );
         }
       });
       this.particleSystems.clear();
@@ -699,12 +815,20 @@ export class VisualEffectsSystem {
           mesh.geometry.dispose();
           (mesh.material as THREE.Material).dispose();
         } catch (error) {
-          this.logger.error('VisualEffectsSystem', `Failed to dispose effect mesh ${id}`, error);
+          this.logger.error(
+            'VisualEffectsSystem',
+            `Failed to dispose effect mesh ${id}`,
+            error
+          );
         }
       });
       this.effectMeshes.clear();
     } catch (error) {
-      this.logger.error('VisualEffectsSystem', 'Failed to clear all effects', error);
+      this.logger.error(
+        'VisualEffectsSystem',
+        'Failed to clear all effects',
+        error
+      );
     }
   }
 
@@ -713,21 +837,24 @@ export class VisualEffectsSystem {
    */
   setPerformanceMode(enabled: boolean): void {
     this.performanceMode = enabled;
-    
+
     if (enabled) {
       // Reduce particle counts and effect complexity
-      this.particleSystems.forEach(system => {
+      this.particleSystems.forEach((system) => {
         const geometry = system.geometry;
         const count = Math.floor(geometry.attributes.position.count / 2);
-        
+
         // Reduce particle count
         const positions = geometry.attributes.position.array as Float32Array;
         const newPositions = new Float32Array(count * 3);
         for (let i = 0; i < count * 3; i++) {
           newPositions[i] = positions[i];
         }
-        
-        geometry.setAttribute('position', new THREE.BufferAttribute(newPositions, 3));
+
+        geometry.setAttribute(
+          'position',
+          new THREE.BufferAttribute(newPositions, 3)
+        );
       });
     }
   }
@@ -740,7 +867,11 @@ export class VisualEffectsSystem {
       this.clearAllEffects();
       this.effects.clear();
     } catch (error) {
-      this.logger.error('VisualEffectsSystem', 'Failed to dispose visual effects system', error);
+      this.logger.error(
+        'VisualEffectsSystem',
+        'Failed to dispose visual effects system',
+        error
+      );
     }
   }
 }

@@ -47,12 +47,12 @@ export class D3ForceLayout extends BaseLayoutEngine {
   private updateNodes(nodes: NodeSpec[]): void {
     // Create a map of existing nodes for quick lookup
     const existingNodeMap = new Map<string, D3Node>();
-    this.simulation.nodes().forEach(node => {
+    this.simulation.nodes().forEach((node) => {
       existingNodeMap.set(node.id, node);
     });
 
     // Update or create nodes
-    const updatedNodes: D3Node[] = nodes.map(node => {
+    const updatedNodes: D3Node[] = nodes.map((node) => {
       let d3Node = existingNodeMap.get(node.id);
       if (!d3Node) {
         // Create new D3Node
@@ -76,7 +76,7 @@ export class D3ForceLayout extends BaseLayoutEngine {
 
   private updateLinks(edges: EdgeSpec[]): void {
     const nodes = this.graph.state.data?.nodes ?? [];
-    const nodeMap = new Map(nodes.map(n => [n.id, n]));
+    const nodeMap = new Map(nodes.map((n) => [n.id, n]));
 
     // Create a map of existing links for quick lookup
     const existingLinkMap = new Map<string, D3Link>();
@@ -85,13 +85,15 @@ export class D3ForceLayout extends BaseLayoutEngine {
       const currentLinks = (linkForce as any).links() || [];
       currentLinks.forEach((link: any) => {
         // Handle both indexed and object forms of source/target
-        const sourceId = typeof link.source === 'number' ?
-          this.simulation.nodes()[link.source]?.id :
-          link.source?.id;
-        const targetId = typeof link.target === 'number' ?
-          this.simulation.nodes()[link.target]?.id :
-          link.target?.id;
-        
+        const sourceId =
+          typeof link.source === 'number'
+            ? this.simulation.nodes()[link.source]?.id
+            : link.source?.id;
+        const targetId =
+          typeof link.target === 'number'
+            ? this.simulation.nodes()[link.target]?.id
+            : link.target?.id;
+
         if (sourceId && targetId) {
           const linkId = `${sourceId}-${targetId}`;
           existingLinkMap.set(linkId, link);
@@ -101,14 +103,14 @@ export class D3ForceLayout extends BaseLayoutEngine {
 
     // Update or create links
     const updatedLinks: D3Link[] = [];
-    edges.forEach(edge => {
+    edges.forEach((edge) => {
       const sourceNode = nodeMap.get(edge.source);
       const targetNode = nodeMap.get(edge.target);
       if (!sourceNode || !targetNode) return;
 
       const linkId = `${edge.source}-${edge.target}`;
       let d3Link = existingLinkMap.get(linkId);
-      
+
       if (!d3Link) {
         // Create new D3Link
         d3Link = {
@@ -126,7 +128,7 @@ export class D3ForceLayout extends BaseLayoutEngine {
           } as D3Node,
         } as D3Link;
       }
-      
+
       updatedLinks.push(d3Link);
     });
 
@@ -139,13 +141,16 @@ export class D3ForceLayout extends BaseLayoutEngine {
     const setState = (fn: (prevState: any) => any) => {
       this.graph.updateStateWithProducer(fn);
     };
-    
+
     // Batch updates to reduce re-renders
     setState(
       produce((s) => {
         const simNodes = this.simulation.nodes();
         // Create a map for faster lookup
-        const nodeUpdates = new Map<string, { x: number; y: number; z: number }>();
+        const nodeUpdates = new Map<
+          string,
+          { x: number; y: number; z: number }
+        >();
         for (let i = 0; i < simNodes.length; i++) {
           const simNode = simNodes[i];
           nodeUpdates.set(simNode.id, {
@@ -161,7 +166,7 @@ export class D3ForceLayout extends BaseLayoutEngine {
           if (update) {
             return {
               ...node,
-              position: update
+              position: update,
             };
           }
           return node;
@@ -197,19 +202,19 @@ export class D3ForceLayout extends BaseLayoutEngine {
 
   private createSimulation() {
     const nodes = this.graph.state.data?.nodes ?? [];
-    const nodesCopy = nodes.map((node) => ({
-      ...node,
-      x: node.position?.x ?? 0,
-      y: node.position?.y ?? 0,
-      z: node.position?.z ?? 0,
-    } as D3Node));
+    const nodesCopy = nodes.map(
+      (node) =>
+        ({
+          ...node,
+          x: node.position?.x ?? 0,
+          y: node.position?.y ?? 0,
+          z: node.position?.z ?? 0,
+        }) as D3Node
+    );
 
     this.simulation = forceSimulation<D3Node, D3Link>(nodesCopy)
       .numDimensions(3)
-      .force(
-        'link',
-        forceLink<D3Node, D3Link>()
-      )
+      .force('link', forceLink<D3Node, D3Link>())
       .force('charge', forceManyBody())
       .force('center', forceCenter())
       .stop();

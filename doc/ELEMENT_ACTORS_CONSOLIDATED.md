@@ -2,7 +2,9 @@
 
 ## Overview
 
-Element Actors provide a flexible and extensible way to render different types of nodes in SpaceGraphJS visualizations. The system uses an inheritance-based approach with a common `BaseElementActor` base class to eliminate code duplication and create a maintainable architecture.
+Element Actors provide a flexible and extensible way to render different types of nodes in SpaceGraphJS visualizations.
+The system uses an inheritance-based approach with a common `BaseElementActor` base class to eliminate code duplication
+and create a maintainable architecture.
 
 ## Class Hierarchy
 
@@ -20,7 +22,8 @@ classDiagram
 
 ### BaseElementActor
 
-The `BaseElementActor` is an abstract base class that defines the common interface and functionality for all element actors:
+The `BaseElementActor` is an abstract base class that defines the common interface and functionality for all element
+actors:
 
 - Common initialization and disposal patterns
 - Shared utility methods for working with Three.js objects
@@ -28,6 +31,7 @@ The `BaseElementActor` is an abstract base class that defines the common interfa
 - Consistent state management integration
 
 #### Key Methods
+
 - `init()`: Initialize the actor, create Three.js objects, and set up reactive effects
 - `getRaycastableObject()`: Return the Three.js object for raycasting
 - `dispose()`: Clean up all resources including Three.js objects and SolidJS effects
@@ -67,6 +71,7 @@ Geometry actors support smooth animations for property changes:
 Renders nodes as Three.js SphereGeometry with customizable properties.
 
 #### Features
+
 - Configurable radius
 - Glow effects for selection/hover states
 - Color management with hex expansion
@@ -74,6 +79,7 @@ Renders nodes as Three.js SphereGeometry with customizable properties.
 - Reactive updates for position, color, and visual states
 
 #### Configuration
+
 ```typescript
 interface NodeSpec {
   radius?: number;  // Sphere radius (default: 0.5)
@@ -85,6 +91,7 @@ interface NodeSpec {
 Renders nodes as Three.js BoxGeometry with customizable dimensions and rounded corners.
 
 #### Features
+
 - Configurable width, height, and depth
 - Optional rounded corners
 - Glow effects for selection/hover states
@@ -93,6 +100,7 @@ Renders nodes as Three.js BoxGeometry with customizable dimensions and rounded c
 - Reactive updates
 
 #### Configuration
+
 ```typescript
 interface BoxNodeSpec extends NodeSpec {
   width?: number;    // Box width (default: 1.0)
@@ -107,6 +115,7 @@ interface BoxNodeSpec extends NodeSpec {
 Renders nodes as 3D text labels with advanced text features.
 
 #### Features
+
 - Configurable font family, size, and weight
 - Text color customization
 - Background color support
@@ -118,6 +127,7 @@ Renders nodes as 3D text labels with advanced text features.
 - Asynchronous font loading
 
 #### Configuration
+
 ```typescript
 interface TextNodeSpec extends NodeSpec {
   text?: string;                 // Text content (defaults to label or ID)
@@ -138,6 +148,7 @@ interface TextNodeSpec extends NodeSpec {
 Renders nodes using custom Three.js geometries from various formats.
 
 #### Features
+
 - Support for multiple geometry formats (GLTF, OBJ, FBX, PLY, STL)
 - Configurable material properties
 - Glow effects
@@ -146,6 +157,7 @@ Renders nodes using custom Three.js geometries from various formats.
 - Asynchronous geometry loading
 
 #### Configuration
+
 ```typescript
 interface CustomGeometryNodeSpec extends NodeSpec {
   url: string;                    // URL to load the geometry from
@@ -159,6 +171,7 @@ interface CustomGeometryNodeSpec extends NodeSpec {
 Renders nodes as HTML elements in 3D space.
 
 #### Features
+
 - Full HTML/CSS support
 - DOM manipulation for dynamic content
 - Integration with CSS3DRenderer
@@ -167,6 +180,7 @@ Renders nodes as HTML elements in 3D space.
 - Z-order management
 
 #### Configuration
+
 ```typescript
 interface HtmlNodeSpec extends NodeSpec {
   content?: string;   // HTML string content to display
@@ -177,20 +191,24 @@ interface HtmlNodeSpec extends NodeSpec {
 ## Performance Optimizations
 
 ### Resource Management
+
 - Proper disposal of Three.js objects to prevent memory leaks
 - Double-disposal prevention using tracking mechanisms
 - Efficient resource cleanup for textures, materials, and geometries
 
 ### Object Pooling
+
 - Integration with global object pooling system for frequently created objects
 - Reuse of common geometries and materials
 - Reduced garbage collection pressure
 
 ### Batch Updates
+
 - Efficient state updates through SolidJS reactive system
 - Batched property changes to minimize re-renders
 
 ### Lazy Initialization
+
 - Resources created only when needed
 - Deferred loading of fonts and geometries
 
@@ -200,14 +218,15 @@ To create a new element actor type:
 
 1. Extend either `BaseElementActor` or `BaseGeometryActor`
 2. Implement required abstract methods:
-   - `init()`: Create the Three.js object
-   - `getRaycastableObject()`: Return the object for raycasting
-   - `dispose()`: Custom cleanup logic
+    - `init()`: Create the Three.js object
+    - `getRaycastableObject()`: Return the object for raycasting
+    - `dispose()`: Custom cleanup logic
 3. Override optional methods as needed:
-   - `update()`: Handle state changes
+    - `update()`: Handle state changes
 4. Register the actor with `SpaceGraph.registerType()`
 
 ### Example Custom Actor
+
 ```typescript
 class CustomActor extends BaseGeometryActor {
   protected createGeometry(): THREE.BufferGeometry {
@@ -225,6 +244,7 @@ SpaceGraph.registerType('custom', CustomActor);
 ## Usage Examples
 
 ### Registering a Custom Actor
+
 ```typescript
 class CustomActor extends BaseGeometryActor {
   protected createGeometry(): THREE.BufferGeometry {
@@ -236,6 +256,7 @@ SpaceGraph.registerType('custom', CustomActor);
 ```
 
 ### Using in Node Specification
+
 ```typescript
 const node: NodeSpec = {
   id: 'node1',
@@ -251,6 +272,7 @@ const node: NodeSpec = {
 ```
 
 ### Mixed Node Types Example
+
 ```javascript
 const spec = {
   data: {
@@ -274,18 +296,21 @@ const spec = {
 ## Best Practices
 
 ### For Performance
+
 1. Use instancing for large numbers of similar nodes
 2. Implement proper disposal to prevent memory leaks
 3. Use object pooling for frequently created/destroyed objects
 4. Minimize geometry complexity when possible
 
 ### For Custom Actors
+
 1. Always call super methods in overridden functions
 2. Implement proper disposal of created resources
 3. Use reactive updates rather than manual polling
 4. Follow the established patterns for consistency
 
 ### For Styling
+
 1. Use the standardized style properties for consistency
 2. Implement hover and selection states when appropriate
 3. Consider accessibility in color choices

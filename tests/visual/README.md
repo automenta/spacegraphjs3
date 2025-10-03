@@ -2,7 +2,8 @@
 
 ## Overview
 
-This directory contains the complete visual semantics testing framework for SpaceGraphJS, providing automated testing of UI/UX behaviors, visual regressions, performance metrics, and ergonomic compliance.
+This directory contains the complete visual semantics testing framework for SpaceGraphJS, providing automated testing of
+UI/UX behaviors, visual regressions, performance metrics, and ergonomic compliance.
 
 ## Directory Structure
 

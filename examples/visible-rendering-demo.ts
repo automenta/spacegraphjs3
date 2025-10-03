@@ -41,7 +41,7 @@ const nodes: NodeSpec[] = [
     position: { x: 0, y: 5, z: 5 },
     color: '#0000ff',
   },
-  
+
   // Box nodes
   {
     id: 'box-1',
@@ -55,7 +55,7 @@ const nodes: NodeSpec[] = [
     position: { x: 5, y: -5, z: 0 },
     color: '#ff00ff',
   },
-  
+
   // Text nodes
   {
     id: 'text-1',
@@ -63,7 +63,7 @@ const nodes: NodeSpec[] = [
     position: { x: 0, y: 0, z: 5 },
     color: '#00ffff',
   },
-  
+
   // Custom geometry nodes
   {
     id: 'custom-1',
@@ -71,22 +71,24 @@ const nodes: NodeSpec[] = [
     position: { x: 0, y: 0, z: -5 },
     color: '#ffa500',
   },
-  
+
   // HTML nodes
   {
     id: 'html-1',
     type: 'html',
     position: { x: -5, y: 0, z: 5 },
-    content: '<div style="padding: 10px; background: #333; color: white; border-radius: 5px; width: 150px; text-align: center;">HTML Node 1</div>',
-    className: 'spacegraph-html-node'
+    content:
+      '<div style="padding: 10px; background: #333; color: white; border-radius: 5px; width: 150px; text-align: center;">HTML Node 1</div>',
+    className: 'spacegraph-html-node',
   } as HtmlNodeSpec,
   {
     id: 'html-2',
     type: 'html',
     position: { x: 5, y: 0, z: 5 },
-    content: '<div style="padding: 10px; background: #333; color: white; border-radius: 5px; width: 150px; text-align: center;">HTML Node 2</div>',
-    className: 'spacegraph-html-node'
-  } as HtmlNodeSpec
+    content:
+      '<div style="padding: 10px; background: #333; color: white; border-radius: 5px; width: 150px; text-align: center;">HTML Node 2</div>',
+    className: 'spacegraph-html-node',
+  } as HtmlNodeSpec,
 ];
 
 // Create edges connecting nodes
@@ -134,7 +136,7 @@ const edges: EdgeSpec[] = [
     width: 2,
     type: 'curved',
     curvature: -0.3,
-  }
+  },
 ];
 
 const spec: Spec = {
@@ -147,20 +149,20 @@ const spec: Spec = {
       color: '#ffffff',
       glow: {
         color: '#ffffff',
-        strength: 0.8
-      }
+        strength: 0.8,
+      },
     },
     'node:selected': {
       color: '#ffffff',
       glow: {
         color: '#ffffff',
-        strength: 1.0
-      }
+        strength: 1.0,
+      },
     },
     'edge:hover': {
       color: '#ffff00',
       width: 3,
-      opacity: 1.0
+      opacity: 1.0,
     },
     'edge:selected': {
       color: '#ffff00',
@@ -168,9 +170,9 @@ const spec: Spec = {
       opacity: 1.0,
       glow: {
         color: '#ffff00',
-        strength: 0.5
-      }
-    }
+        strength: 0.5,
+      },
+    },
   },
   layout: {
     type: 'force-directed',
@@ -209,10 +211,10 @@ const plugins = [
 
 export default function init() {
   const graph = new SpaceGraph('#container', spec, plugins);
-  
+
   // Expose graph to window for easy debugging and testing
   (window as any).graph = graph;
-  
+
   console.log('Visible Rendering Demo initialized with BasicRenderer');
   console.log('All node types are rendered visibly without labels/menus');
   console.log('Try hovering and clicking on nodes to see interaction effects');

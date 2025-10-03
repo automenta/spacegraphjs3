@@ -11,7 +11,9 @@ test.describe('Instanced Renderer Interaction', () => {
       const graph = (window as any).graph;
       try {
         const nodeRenderer = graph.render.getNodeRenderer();
-        return nodeRenderer && nodeRenderer.constructor.name === 'InstancedRenderer';
+        return (
+          nodeRenderer && nodeRenderer.constructor.name === 'InstancedRenderer'
+        );
       } catch (_e) {
         return false;
       }
@@ -21,7 +23,10 @@ test.describe('Instanced Renderer Interaction', () => {
       const graph = (window as any).graph;
       try {
         const nodeRenderer = graph.render.getNodeRenderer();
-        if (nodeRenderer && nodeRenderer.constructor.name === 'InstancedRenderer') {
+        if (
+          nodeRenderer &&
+          nodeRenderer.constructor.name === 'InstancedRenderer'
+        ) {
           // Check if instanced meshes have been populated
           const instancedRenderer = nodeRenderer as any;
           if (instancedRenderer.instancedMeshes) {
@@ -92,7 +97,7 @@ test.describe('Instanced Renderer Interaction', () => {
   test('should correctly handle drag interaction', async ({ page }) => {
     // Wait a bit more for the renderer to be fully ready
     await page.waitForTimeout(1000);
-    
+
     // Hide the test-results div that intercepts pointer events
     await page.evaluate(() => {
       const testResults = document.getElementById('test-results');
@@ -100,18 +105,18 @@ test.describe('Instanced Renderer Interaction', () => {
         testResults.style.display = 'none';
       }
     });
-    
+
     const canvas = page.locator('canvas');
-    
+
     // Do a small pan to ensure the instanced renderer is ready for raycasting
     await canvas.dragTo(canvas, {
       sourcePosition: { x: 10, y: 10 },
       targetPosition: { x: 15, y: 15 },
     });
-    
+
     // Wait a bit more after panning to ensure renderer is ready
     await page.waitForTimeout(500);
-    
+
     const center = {
       x: page.viewportSize()!.width / 2,
       y: page.viewportSize()!.height / 2,

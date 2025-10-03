@@ -31,22 +31,26 @@ export class HUDUtils {
     className?: string
   ): HTMLElementTagNameMap[K] {
     const element = document.createElement(tag);
-    
+
     // Apply styles
     Object.assign(element.style, styles);
-    
+
     // Add class if provided
     if (className) {
       element.className = className;
     }
-    
+
     return element;
   }
 
   /**
    * Apply theme colors to an element
    */
-  static applyTheme(element: HTMLElement, theme: HUDTheme, elementType: keyof HUDTheme): void {
+  static applyTheme(
+    element: HTMLElement,
+    theme: HUDTheme,
+    elementType: keyof HUDTheme
+  ): void {
     const color = theme[elementType];
     if (color) {
       switch (elementType) {
@@ -78,27 +82,22 @@ export class HUDUtils {
     to: Partial<CSSStyleDeclaration>,
     config: HUDAnimationConfig = {}
   ): Promise<void> {
-    const {
-      duration = 300,
-      delay = 0,
-      easing = 'ease-out',
-      callback
-    } = config;
+    const { duration = 300, delay = 0, easing = 'ease-out', callback } = config;
 
     return new Promise((resolve) => {
       setTimeout(() => {
         // Apply initial styles
         Object.assign(element.style, from);
-        
+
         // Set transition
         element.style.transition = `all ${duration}ms ${easing}`;
-        
+
         // Force reflow
         void element.offsetHeight;
-        
+
         // Apply target styles
         Object.assign(element.style, to);
-        
+
         // Clean up and resolve
         setTimeout(() => {
           if (callback) callback();
@@ -124,26 +123,29 @@ export class HUDUtils {
     closeBtn.style.transition = 'transform 0.2s, color 0.2s';
     closeBtn.style.color = theme.closeButton;
     closeBtn.style.padding = '0 4px';
-    
+
     closeBtn.onmouseenter = () => {
       closeBtn.style.color = '#ff4444';
       closeBtn.style.transform = 'scale(1.2)';
     };
-    
+
     closeBtn.onmouseleave = () => {
       closeBtn.style.color = theme.closeButton;
       closeBtn.style.transform = 'scale(1)';
     };
-    
+
     closeBtn.onclick = onClick;
-    
+
     return closeBtn;
   }
 
   /**
    * Create a progress bar for notifications
    */
-  static createProgressBar(duration: number): { container: HTMLDivElement; fill: HTMLDivElement } {
+  static createProgressBar(duration: number): {
+    container: HTMLDivElement;
+    fill: HTMLDivElement;
+  } {
     const progressBar = document.createElement('div');
     progressBar.style.position = 'absolute';
     progressBar.style.bottom = '0';
@@ -152,20 +154,20 @@ export class HUDUtils {
     progressBar.style.width = '100%';
     progressBar.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
     progressBar.style.overflow = 'hidden';
-    
+
     const progressFill = document.createElement('div');
     progressFill.style.height = '100%';
     progressFill.style.width = '100%';
     progressFill.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
     progressFill.style.transition = `width ${duration}ms linear`;
-    
+
     progressBar.appendChild(progressFill);
-    
+
     // Start progress animation
     setTimeout(() => {
       progressFill.style.width = '0%';
     }, 10);
-    
+
     return { container: progressBar, fill: progressFill };
   }
 
@@ -341,7 +343,7 @@ export class HUDUtils {
         headerText: '#ffffff',
         content: 'transparent',
         closeButton: 'rgba(255, 255, 255, 0.7)',
-        accent: '#00ff00'
+        accent: '#00ff00',
       },
       light: {
         background: 'rgba(255, 255, 255, 0.9)',
@@ -351,7 +353,7 @@ export class HUDUtils {
         headerText: '#000000',
         content: 'transparent',
         closeButton: 'rgba(0, 0, 0, 0.7)',
-        accent: '#0066cc'
+        accent: '#0066cc',
       },
       matrix: {
         background: 'rgba(0, 0, 0, 0.9)',
@@ -361,7 +363,7 @@ export class HUDUtils {
         headerText: '#00ff00',
         content: 'transparent',
         closeButton: '#00ff00',
-        accent: '#00ff00'
+        accent: '#00ff00',
       },
       neon: {
         background: 'rgba(20, 0, 40, 0.9)',
@@ -371,8 +373,8 @@ export class HUDUtils {
         headerText: '#ff00ff',
         content: 'transparent',
         closeButton: '#ff00ff',
-        accent: '#ff00ff'
-      }
+        accent: '#ff00ff',
+      },
     };
   }
 
@@ -396,22 +398,38 @@ export class HUDUtils {
     notification.style.wordWrap = 'break-word';
     notification.style.position = 'relative';
     notification.style.overflow = 'hidden';
-    
+
     // Set colors based on type
     const colors = {
-      info: { bg: 'rgba(23, 162, 184, 0.95)', text: 'white', border: '#17a2b8' },
-      success: { bg: 'rgba(40, 167, 69, 0.95)', text: 'white', border: '#28a745' },
-      warning: { bg: 'rgba(255, 193, 7, 0.95)', text: '#212529', border: '#ffc107' },
-      error: { bg: 'rgba(220, 53, 69, 0.95)', text: 'white', border: '#dc3545' }
+      info: {
+        bg: 'rgba(23, 162, 184, 0.95)',
+        text: 'white',
+        border: '#17a2b8',
+      },
+      success: {
+        bg: 'rgba(40, 167, 69, 0.95)',
+        text: 'white',
+        border: '#28a745',
+      },
+      warning: {
+        bg: 'rgba(255, 193, 7, 0.95)',
+        text: '#212529',
+        border: '#ffc107',
+      },
+      error: {
+        bg: 'rgba(220, 53, 69, 0.95)',
+        text: 'white',
+        border: '#dc3545',
+      },
     };
-    
+
     const colorSet = colors[type];
     notification.style.backgroundColor = colorSet.bg;
     notification.style.color = colorSet.text;
     notification.style.borderLeft = `4px solid ${colorSet.border}`;
-    
+
     notification.textContent = message;
-    
+
     return notification;
   }
 
@@ -429,34 +447,40 @@ export class HUDUtils {
       enableGlow?: boolean;
     } = {}
   ): void {
-    const { onHover, onLeave, onClick, enableFloat = false, enableGlow = false } = options;
-    
+    const {
+      onHover,
+      onLeave,
+      onClick,
+      enableFloat = false,
+      enableGlow = false,
+    } = options;
+
     element.addEventListener('mouseenter', () => {
       element.style.transform = 'scale(1.02)';
       element.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.7)';
-      
+
       if (enableGlow) {
         element.classList.add('hud-glow-effect');
       }
-      
+
       if (onHover) onHover();
     });
-    
+
     element.addEventListener('mouseleave', () => {
       element.style.transform = 'scale(1)';
       element.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.6)';
-      
+
       if (enableGlow) {
         element.classList.remove('hud-glow-effect');
       }
-      
+
       if (onLeave) onLeave();
     });
-    
+
     if (onClick) {
       element.addEventListener('click', onClick);
     }
-    
+
     if (enableFloat) {
       element.classList.add('hud-float-effect');
     }
@@ -478,7 +502,11 @@ export class HUDUtils {
       animated?: boolean;
       onClose?: () => void;
     } = {}
-  ): { panel: HTMLDivElement; header: HTMLDivElement; contentArea: HTMLDivElement } {
+  ): {
+    panel: HTMLDivElement;
+    header: HTMLDivElement;
+    contentArea: HTMLDivElement;
+  } {
     const {
       x = 10,
       y = 10,
@@ -486,7 +514,7 @@ export class HUDUtils {
       height = 200,
       theme = HUDUtils.getDefaultTheme().dark,
       animated = true,
-      onClose
+      onClose,
     } = options;
 
     const panel = document.createElement('div');
@@ -507,7 +535,7 @@ export class HUDUtils {
       fontSize: '12px',
       color: theme.text,
       backdropFilter: 'blur(10px)',
-      transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'
+      transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
     } as CSSStyleDeclaration);
 
     if (animated) {
@@ -528,7 +556,7 @@ export class HUDUtils {
       alignItems: 'center',
       borderRadius: '6px 6px 0 0',
       fontWeight: 'bold',
-      color: theme.headerText
+      color: theme.headerText,
     } as CSSStyleDeclaration);
     header.textContent = title;
 
@@ -536,7 +564,7 @@ export class HUDUtils {
     const closeBtn = HUDUtils.createCloseButton((e) => {
       e.stopPropagation();
       if (onClose) onClose();
-      
+
       if (animated) {
         panel.style.transform = 'scale(0.8) translateY(20px)';
         panel.style.opacity = '0';
@@ -547,7 +575,7 @@ export class HUDUtils {
         panel.style.display = 'none';
       }
     }, theme);
-    
+
     header.appendChild(closeBtn);
 
     // Content area
@@ -557,7 +585,7 @@ export class HUDUtils {
       padding: '12px',
       overflow: 'auto',
       backgroundColor: theme.content,
-      borderRadius: '0 0 6px 6px'
+      borderRadius: '0 0 6px 6px',
     } as CSSStyleDeclaration);
     contentArea.innerHTML = content;
 
@@ -588,45 +616,45 @@ export class HUDUtils {
     } = {}
   ): void {
     const { onDragStart, onDragEnd, constrainToViewport = true } = options;
-    
+
     let isDragging = false;
     let offsetX = 0;
     let offsetY = 0;
-    
+
     header.addEventListener('mousedown', (e) => {
       isDragging = true;
       offsetX = e.clientX - panel.offsetLeft;
       offsetY = e.clientY - panel.offsetTop;
       panel.style.zIndex = '1001'; // Bring to front
       e.preventDefault();
-      
+
       if (onDragStart) onDragStart();
     });
-    
+
     document.addEventListener('mousemove', (e) => {
       if (!isDragging) return;
-      
+
       let newX = e.clientX - offsetX;
       let newY = e.clientY - offsetY;
-      
+
       if (constrainToViewport) {
         const rect = panel.getBoundingClientRect();
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
-        
+
         newX = Math.max(0, Math.min(newX, viewportWidth - rect.width));
         newY = Math.max(0, Math.min(newY, viewportHeight - rect.height));
       }
-      
+
       panel.style.left = `${newX}px`;
       panel.style.top = `${newY}px`;
     });
-    
+
     document.addEventListener('mouseup', () => {
       if (isDragging) {
         isDragging = false;
         panel.style.zIndex = '1000'; // Reset z-index
-        
+
         if (onDragEnd) onDragEnd();
       }
     });

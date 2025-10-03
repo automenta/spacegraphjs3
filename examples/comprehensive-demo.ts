@@ -29,69 +29,69 @@ const nodes: NodeSpec[] = [
     type: 'sphere',
     position: { x: -10, y: 5, z: 0 },
     color: '#ff0000',
-    label: 'Red Sphere'
+    label: 'Red Sphere',
   },
   {
     id: 'sphere-2',
     type: 'sphere',
     position: { x: -10, y: 0, z: 0 },
     color: '#00ff00',
-    label: 'Green Sphere'
+    label: 'Green Sphere',
   },
   {
     id: 'sphere-3',
     type: 'sphere',
     position: { x: -10, y: -5, z: 0 },
     color: '#0000ff',
-    label: 'Blue Sphere'
+    label: 'Blue Sphere',
   },
-  
+
   // Box nodes
   {
     id: 'box-1',
     type: 'box',
     position: { x: -5, y: 5, z: 0 },
     color: '#ffff00',
-    label: 'Yellow Box'
+    label: 'Yellow Box',
   },
   {
     id: 'box-2',
     type: 'box',
     position: { x: -5, y: 0, z: 0 },
     color: '#ff00ff',
-    label: 'Magenta Box'
+    label: 'Magenta Box',
   },
   {
     id: 'box-3',
     type: 'box',
     position: { x: -5, y: -5, z: 0 },
     color: '#00ffff',
-    label: 'Cyan Box'
+    label: 'Cyan Box',
   },
-  
+
   // Text nodes
   {
     id: 'text-1',
     type: 'text',
     position: { x: 0, y: 5, z: 0 },
     color: '#ffffff',
-    label: 'Hello'
+    label: 'Hello',
   },
   {
     id: 'text-2',
     type: 'text',
     position: { x: 0, y: 0, z: 0 },
     color: '#ff9900',
-    label: 'World'
+    label: 'World',
   },
   {
     id: 'text-3',
     type: 'text',
     position: { x: 0, y: -5, z: 0 },
     color: '#00ff99',
-    label: 'Text!'
+    label: 'Text!',
   },
-  
+
   // Custom geometry nodes
   {
     id: 'custom-1',
@@ -123,22 +123,24 @@ const nodes: NodeSpec[] = [
       geometry: new THREE.ConeGeometry(0.5, 1, 4),
     },
   },
-  
+
   // HTML nodes
   {
     id: 'html-1',
     type: 'html',
     position: { x: 10, y: 5, z: 0 },
-    content: '<div style="padding: 10px; background: #333; color: white; border-radius: 5px;">HTML Node 1</div>',
-    className: 'spacegraph-html-node'
+    content:
+      '<div style="padding: 10px; background: #333; color: white; border-radius: 5px;">HTML Node 1</div>',
+    className: 'spacegraph-html-node',
   } as HtmlNodeSpec,
   {
     id: 'html-2',
     type: 'html',
     position: { x: 10, y: 0, z: 0 },
-    content: '<div style="padding: 10px; background: #333; color: white; border-radius: 5px;">HTML Node 2</div>',
-    className: 'spacegraph-html-node'
-  } as HtmlNodeSpec
+    content:
+      '<div style="padding: 10px; background: #333; color: white; border-radius: 5px;">HTML Node 2</div>',
+    className: 'spacegraph-html-node',
+  } as HtmlNodeSpec,
 ];
 
 // Create edges with different types
@@ -151,7 +153,7 @@ const edges: EdgeSpec[] = [
     type: 'straight',
     color: '#ff0000',
     width: 3,
-    label: 'Straight Edge'
+    label: 'Straight Edge',
   },
   {
     id: 'e2',
@@ -161,9 +163,9 @@ const edges: EdgeSpec[] = [
     curvature: 0.5,
     color: '#00ff00',
     width: 2,
-    label: 'Curved Edge'
+    label: 'Curved Edge',
   },
-  
+
   // Edges between boxes
   {
     id: 'e3',
@@ -174,7 +176,7 @@ const edges: EdgeSpec[] = [
     gapSize: 0.1,
     color: '#ffff00',
     width: 2,
-    label: 'Dashed Edge'
+    label: 'Dashed Edge',
   },
   {
     id: 'e4',
@@ -183,9 +185,9 @@ const edges: EdgeSpec[] = [
     type: 'straight',
     color: '#ff00ff',
     width: 2,
-    label: 'Straight Edge'
+    label: 'Straight Edge',
   },
-  
+
   // Edges between text nodes
   {
     id: 'e5',
@@ -195,7 +197,7 @@ const edges: EdgeSpec[] = [
     curvature: -0.3,
     color: '#ffffff',
     width: 1,
-    label: 'Curved Edge'
+    label: 'Curved Edge',
   },
   {
     id: 'e6',
@@ -206,9 +208,9 @@ const edges: EdgeSpec[] = [
     gapSize: 0.2,
     color: '#ff9900',
     width: 1,
-    label: 'Dashed Edge'
+    label: 'Dashed Edge',
   },
-  
+
   // Edges between custom nodes
   {
     id: 'e7',
@@ -217,7 +219,7 @@ const edges: EdgeSpec[] = [
     type: 'straight',
     color: '#ff6600',
     width: 2,
-    label: 'Straight Edge'
+    label: 'Straight Edge',
   },
   {
     id: 'e8',
@@ -227,9 +229,9 @@ const edges: EdgeSpec[] = [
     curvature: 0.4,
     color: '#6600ff',
     width: 2,
-    label: 'Curved Edge'
+    label: 'Curved Edge',
   },
-  
+
   // Cross-type edges
   {
     id: 'e9',
@@ -238,7 +240,7 @@ const edges: EdgeSpec[] = [
     type: 'straight',
     color: '#ff00ff',
     width: 1,
-    label: 'Cross Type'
+    label: 'Cross Type',
   },
   {
     id: 'e10',
@@ -248,7 +250,7 @@ const edges: EdgeSpec[] = [
     curvature: 0.3,
     color: '#ffff00',
     width: 1,
-    label: 'Cross Type'
+    label: 'Cross Type',
   },
   {
     id: 'e11',
@@ -259,9 +261,9 @@ const edges: EdgeSpec[] = [
     gapSize: 0.15,
     color: '#00ffff',
     width: 1,
-    label: 'Cross Type'
+    label: 'Cross Type',
   },
-  
+
   // Edges to HTML nodes
   {
     id: 'e12',
@@ -270,7 +272,7 @@ const edges: EdgeSpec[] = [
     type: 'straight',
     color: '#ffffff',
     width: 2,
-    label: 'HTML Connection'
+    label: 'HTML Connection',
   },
   {
     id: 'e13',
@@ -280,8 +282,8 @@ const edges: EdgeSpec[] = [
     curvature: -0.4,
     color: '#ff0000',
     width: 1,
-    label: 'HTML to Sphere'
-  }
+    label: 'HTML to Sphere',
+  },
 ];
 
 const spec: Spec = {
@@ -294,20 +296,20 @@ const spec: Spec = {
       color: '#ffffff',
       glow: {
         color: '#ffffff',
-        strength: 0.8
-      }
+        strength: 0.8,
+      },
     },
     'node:selected': {
       color: '#ffffff',
       glow: {
         color: '#ffffff',
-        strength: 1.0
-      }
+        strength: 1.0,
+      },
     },
     'edge:hover': {
       color: '#ffffff',
       width: 5,
-      opacity: 1.0
+      opacity: 1.0,
     },
     'edge:selected': {
       color: '#ffffff',
@@ -315,24 +317,24 @@ const spec: Spec = {
       opacity: 1.0,
       glow: {
         color: '#ffffff',
-        strength: 0.5
-      }
+        strength: 0.5,
+      },
     },
     'edge:source-selected': {
       color: '#ffaa00',
       width: 4,
-      opacity: 0.9
+      opacity: 0.9,
     },
     'edge:target-selected': {
       color: '#00aaff',
       width: 4,
-      opacity: 0.9
+      opacity: 0.9,
     },
     'edge:both-selected': {
       color: '#ff00ff',
       width: 5,
-      opacity: 1.0
-    }
+      opacity: 1.0,
+    },
   },
   layout: {
     type: 'force-directed',
@@ -371,10 +373,10 @@ const plugins = [
 
 export default function init() {
   const graph = new SpaceGraph('#container', spec, plugins);
-  
+
   // Expose graph to window for easy debugging and testing
   (window as any).graph = graph;
-  
+
   console.log('Comprehensive demo initialized');
 }
 

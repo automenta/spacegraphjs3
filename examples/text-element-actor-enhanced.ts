@@ -16,8 +16,8 @@ const graph = new SpaceGraph('#container', {
           padding: 10,
           borderRadius: 5,
           fontWeight: 'bold',
-          fontFamily: 'Arial, sans-serif'
-        }
+          fontFamily: 'Arial, sans-serif',
+        },
       },
       {
         id: 'node2',
@@ -30,8 +30,8 @@ const graph = new SpaceGraph('#container', {
           backgroundColor: 'rgba(255, 0, 0, 0.7)',
           padding: 8,
           borderRadius: 3,
-          fontStyle: 'italic'
-        }
+          fontStyle: 'italic',
+        },
       },
       {
         id: 'node3',
@@ -45,50 +45,50 @@ const graph = new SpaceGraph('#container', {
           padding: 15,
           borderRadius: 10,
           fontWeight: 'bold',
-          textAlign: 'center'
-        }
-      }
+          textAlign: 'center',
+        },
+      },
     ],
     edges: [
       {
         id: 'edge1',
         source: 'node1',
         target: 'node2',
-        label: 'Connection'
+        label: 'Connection',
       },
       {
         id: 'edge2',
         source: 'node1',
         target: 'node3',
-        label: 'Another Connection'
-      }
-    ]
+        label: 'Another Connection',
+      },
+    ],
   },
   layout: {
-    type: 'force-directed'
+    type: 'force-directed',
   },
   style: {},
   camera: {
     target: { x: 0, y: 0, z: 0 },
     phi: Math.PI / 2,
     theta: 0,
-    distance: 5
+    distance: 5,
   },
   controls: {
     keyboard: {
       enabled: true,
       panSpeed: 1,
       zoomSpeed: 1,
-      orbitSpeed: 1
-    }
+      orbitSpeed: 1,
+    },
   },
   performance: {
-    instancingThreshold: 1000
+    instancingThreshold: 1000,
   },
   interaction: {
     hoveredElementId: null,
-    selectedElementIds: []
-  }
+    selectedElementIds: [],
+  },
 });
 
 // Add some interactivity
@@ -103,12 +103,14 @@ button.onclick = () => {
   graph.update({
     data: {
       nodes: {
-        update: [{
-          id: 'node1',
-          label: `Updated at ${new Date().toLocaleTimeString()}`
-        }]
-      }
-    }
+        update: [
+          {
+            id: 'node1',
+            label: `Updated at ${new Date().toLocaleTimeString()}`,
+          },
+        ],
+      },
+    },
   });
 };
 document.body.appendChild(button);
@@ -121,25 +123,27 @@ addButton.onclick = () => {
   graph.update({
     data: {
       nodes: {
-        add: [{
-          id: newNodeId,
-          type: 'text',
-          position: {
-            x: Math.random() * 10 - 5,
-            y: Math.random() * 10 - 5,
-            z: Math.random() * 10 - 5
+        add: [
+          {
+            id: newNodeId,
+            type: 'text',
+            position: {
+              x: Math.random() * 10 - 5,
+              y: Math.random() * 10 - 5,
+              z: Math.random() * 10 - 5,
+            },
+            label: `New Node ${newNodeId}`,
+            data: {
+              fontSize: 18,
+              color: '#ff00ff',
+              backgroundColor: 'rgba(0, 255, 255, 0.5)',
+              padding: 10,
+              borderRadius: 5,
+            },
           },
-          label: `New Node ${newNodeId}`,
-          data: {
-            fontSize: 18,
-            color: '#ff00ff',
-            backgroundColor: 'rgba(0, 255, 255, 0.5)',
-            padding: 10,
-            borderRadius: 5
-          }
-        }]
-      }
-    }
+        ],
+      },
+    },
   });
 };
 document.body.appendChild(addButton);
