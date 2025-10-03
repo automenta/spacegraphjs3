@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import { SpaceGraph } from '../src/index';
 import { AdvancedCameraControls } from '../src/utils/AdvancedCameraControls';
 import { EnhancedInteractionSystem } from '../src/utils/EnhancedInteractionSystem';
-import { EnhancedHUDSystem } from '../src/utils/EnhancedHUDSystem';
-import { OptimizedPerformanceSystem } from '../src/utils/OptimizedPerformanceSystem';
+import { UnifiedHUDSystem } from '../src/utils/UnifiedHUDSystem';
+import { UnifiedPerformanceSystem } from '../src/utils/UnifiedPerformanceSystem';
 import { UnifiedAnimationSystem } from '../src/utils/UnifiedAnimationSystem';
 import { VisualFeedbackSystem } from '../src/utils/VisualFeedbackSystem';
 
@@ -20,8 +20,8 @@ export class EnhancedIntegrationDemo {
   // Enhanced systems
   private cameraControls!: AdvancedCameraControls;
   private interactionSystem!: EnhancedInteractionSystem;
-  private hudSystem!: EnhancedHUDSystem;
-  private performanceOptimizer!: OptimizedPerformanceSystem;
+  private hudSystem!: UnifiedHUDSystem;
+  private performanceOptimizer!: UnifiedPerformanceSystem;
   private animationSystem!: UnifiedAnimationSystem;
   private visualFeedback!: VisualFeedbackSystem;
 
@@ -132,10 +132,10 @@ export class EnhancedIntegrationDemo {
     this.interactionSystem.setCameraControls(this.cameraControls);
 
     // Initialize HUD system
-    this.hudSystem = new EnhancedHUDSystem(this.container);
+    this.hudSystem = new UnifiedHUDSystem(this.container);
 
     // Initialize performance optimizer
-    this.performanceOptimizer = new OptimizedPerformanceSystem(
+    this.performanceOptimizer = new UnifiedPerformanceSystem(
       this.scene,
       this.camera,
       this.renderer,

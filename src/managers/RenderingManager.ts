@@ -13,7 +13,7 @@ import { ThreeObjectPoolManager } from '../utils/ThreeObjectPoolManager';
 import { LODManager } from '../utils/LODManager';
 import { CullingManager } from '../utils/CullingManager';
 import { MemoryManager } from '../utils/MemoryManager';
-import { AdvancedRenderingOptimizer } from '../utils/AdvancedRenderingOptimizer';
+import { AdvancedRenderingOptimizer } from '../utils/UnifiedPerformanceSystem';
 
 /**
  * Manages the THREE.js rendering environment, including the scene, camera, and renderer.

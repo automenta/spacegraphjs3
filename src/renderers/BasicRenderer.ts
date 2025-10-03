@@ -9,7 +9,7 @@ import { createEffect, on } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { NodeSpec, Spec } from '../types';
 import { IRenderer } from './IRenderer';
-import { parseColor } from '../utils/colorUtils';
+import { parseColor } from '../utils';
 import { CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 
 export class BasicRenderer implements IRenderer {

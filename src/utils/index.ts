@@ -21,12 +21,14 @@ import CameraUtils, {
   CameraAnimationConfig,
 } from './CameraUtils';
 
-// HUD Utils
-import HUDUtils, {
-  HUDUtils as HUDUtilsClass,
+// HUD System - Consolidated
+import UnifiedHUDSystem, {
+  UnifiedHUDSystem as UnifiedHUDSystemClass,
   HUDTheme,
   HUDAnimationConfig,
-} from './HUDUtils';
+  HUDElementConfig,
+  PerformanceMetrics as HUDPerformanceMetrics,
+} from './UnifiedHUDSystem';
 
 // Interaction Utils
 import InteractionUtils, {
@@ -36,12 +38,12 @@ import InteractionUtils, {
   InteractionState,
 } from './InteractionUtils';
 
-// Performance Utils
-import PerformanceUtils, {
-  PerformanceUtils as PerformanceUtilsClass,
+// Performance System - Consolidated
+import UnifiedPerformanceSystem, {
+  UnifiedPerformanceSystem as UnifiedPerformanceSystemClass,
   PerformanceMetrics,
-  PerformanceConfig,
-} from './PerformanceUtils';
+  IOptimizationStrategy,
+} from './UnifiedPerformanceSystem';
 
 // Theme System
 import ThemeSystem, {
@@ -58,6 +60,21 @@ import VisualEffectsSystem, {
   GlowEffect,
   TrailEffect,
 } from './VisualEffectsSystem';
+
+// Visual Feedback System
+import { VisualFeedbackSystem } from './VisualFeedbackSystem';
+
+// Disposal System - Consolidated
+import UnifiedDisposalSystem from './UnifiedDisposalSystem';
+
+// Color System - Consolidated
+import UnifiedColorSystem, {
+  parseColor,
+  expandHex,
+  applyElementStyling,
+  NodeColorUtils,
+  ColorUtils,
+} from './UnifiedColorSystem';
 
 // Error Handler
 import { ErrorHandler } from './ErrorHandler';
@@ -76,7 +93,13 @@ export {
   CameraUtilsClass as CameraUtilsClass,
   CameraAnimationConfig,
 };
-export { HUDUtilsClass as HUDUtils, HUDTheme, HUDAnimationConfig };
+export {
+  UnifiedHUDSystemClass as HUDSystem,
+  HUDTheme,
+  HUDAnimationConfig,
+  HUDElementConfig,
+  HUDPerformanceMetrics,
+};
 export {
   InteractionUtilsClass as InteractionUtils,
   InteractionEvent,
@@ -84,9 +107,9 @@ export {
   InteractionState,
 };
 export {
-  PerformanceUtilsClass as PerformanceUtils,
+  UnifiedPerformanceSystemClass as PerformanceSystem,
   PerformanceMetrics,
-  PerformanceConfig,
+  IOptimizationStrategy,
 };
 export { ThemeSystemClass as ThemeSystem, Theme, ThemeConfig };
 export {
@@ -96,13 +119,21 @@ export {
   GlowEffect,
   TrailEffect,
 };
+export { VisualFeedbackSystem };
+export { UnifiedDisposalSystem };
+export {
+  parseColor,
+  expandHex,
+  applyElementStyling,
+  NodeColorUtils,
+  ColorUtils,
+};
 export { ErrorHandler };
 
 // Re-export existing utilities
 export * from './AnimationUtils';
 export * from './CameraPresets';
 
-export * from './colorUtils';
 export * from './CullingManager';
 export * from './deepMerge';
 export * from './LODManager';
@@ -128,18 +159,31 @@ export interface UtilitySystemConfig {
 export class UtilitySystem {
   public animation: UnifiedAnimationSystem;
   public camera: CameraUtils;
-  public hud: HUDUtils;
+  public hud: UnifiedHUDSystem;
   public interaction: InteractionUtils;
-  public performance: PerformanceUtils;
+  public performance: UnifiedPerformanceSystem;
   public theme: ThemeSystem;
   public visualEffects: VisualEffectsSystem;
+  public visualFeedback: VisualFeedbackSystem;
+  public disposal: UnifiedDisposalSystem;
   public errorHandler: ErrorHandler;
 
   constructor(config: UtilitySystemConfig = {}) {
     this.animation = new UnifiedAnimationSystemClass();
     this.camera = new CameraUtilsClass();
-    this.hud = new HUDUtilsClass();
     this.errorHandler = ErrorHandler.getInstance();
+    this.disposal = UnifiedDisposalSystem.getInstance();
+
+    // Initialize HUD system with container if provided
+    if (config.scene) {
+      // Create a HUD container
+      const hudContainer = document.createElement('div');
+      hudContainer.id = 'hud-container';
+      document.body.appendChild(hudContainer);
+      this.hud = new UnifiedHUDSystemClass(hudContainer);
+    } else {
+      this.hud = null as any;
+    }
 
     if (config.camera && config.scene) {
       this.interaction = new InteractionUtilsClass(
@@ -151,18 +195,20 @@ export class UtilitySystem {
       this.interaction = null as any;
     }
 
-    this.performance = new PerformanceUtilsClass({
-      enableFPSMonitoring: true,
-      enableMemoryTracking: true,
-      enableRenderTiming: true,
-      updateInterval: 1000,
-    });
+    if (config.scene && config.camera) {
+      this.performance = new UnifiedPerformanceSystemClass(config.scene, config.camera, null as any);
+    } else {
+      this.performance = null as any;
+    }
+
     this.theme = new ThemeSystemClass(config.themeConfig);
 
     if (config.scene) {
       this.visualEffects = new VisualEffectsSystemClass(config.scene);
+      this.visualFeedback = new VisualFeedbackSystem(config.scene);
     } else {
       this.visualEffects = null as any;
+      this.visualFeedback = null as any;
     }
   }
 
@@ -170,14 +216,16 @@ export class UtilitySystem {
    * Update all utility systems
    */
   update(deltaTime: number): void {
-    // AnimationSystem doesn't have an update method
-    // this.animation.update(deltaTime);
-
-    // PerformanceUtils doesn't have an update method
-    // this.performance.update(deltaTime);
+    if (this.performance) {
+      this.performance.update(deltaTime);
+    }
 
     if (this.visualEffects) {
       this.visualEffects.update(deltaTime);
+    }
+
+    if (this.visualFeedback) {
+      // VisualFeedbackSystem doesn't have update method
     }
   }
 
@@ -186,8 +234,9 @@ export class UtilitySystem {
    */
   setPerformanceMode(enabled: boolean): void {
     this.animation.setPerformanceMode(enabled);
-    // PerformanceUtils doesn't have setPerformanceMode method
-    // this.performance.setPerformanceMode(enabled);
+    if (this.performance) {
+      // Performance system handles its own performance mode
+    }
     if (this.visualEffects) {
       this.visualEffects.setPerformanceMode(enabled);
     }
@@ -198,9 +247,13 @@ export class UtilitySystem {
    */
   dispose(): void {
     this.animation.stopAll();
-    this.interaction.dispose();
-    this.visualEffects.dispose();
+    if (this.interaction) this.interaction.dispose();
+    if (this.visualEffects) this.visualEffects.dispose();
+    if (this.visualFeedback) this.visualFeedback.dispose();
+    if (this.performance) this.performance.dispose();
+    if (this.hud) this.hud.dispose();
     this.theme.dispose();
+    // Disposal system is singleton, don't dispose
   }
 }
 
@@ -231,11 +284,14 @@ export function disposeUtilitySystem(): void {
 export default {
   UnifiedAnimationSystem,
   CameraUtils,
-  HUDUtils,
+  UnifiedHUDSystem,
   InteractionUtils,
-  PerformanceUtils,
+  UnifiedPerformanceSystem,
   ThemeSystem,
   VisualEffectsSystem,
+  VisualFeedbackSystem,
+  UnifiedDisposalSystem,
+  UnifiedColorSystem,
   UtilitySystem,
   createUtilitySystem,
   getUtilitySystem,

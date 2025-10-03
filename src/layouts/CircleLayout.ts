@@ -46,39 +46,11 @@ export class CircleLayout extends BaseLayoutEngine {
     );
     if (nodes.length === 0) return;
 
-    const positions = this.calculateCirclePositions(nodes.length);
-    console.log('CircleLayout: calculated positions:', positions);
-
-    // Update node positions using the reactive state update mechanism
-    this.graph.updateStateWithProducer(
-      produce((s) => {
-        const updatedNodes = [...s.data.nodes];
-        let positionIndex = 0; // Track position index for non-pinned nodes
-        for (let i = 0; i < nodes.length; i++) {
-          const node = nodes[i];
-          const nodeIndex = updatedNodes.findIndex((n) => n.id === node.id);
-          if (nodeIndex !== -1) {
-            if (this.isPinned(node)) {
-              // For pinned nodes, use the pinning position if available
-              if (node.pinning && typeof node.pinning === 'object') {
-                updatedNodes[nodeIndex] = {
-                  ...updatedNodes[nodeIndex],
-                  position: { ...node.pinning },
-                };
-              }
-            } else {
-              // For non-pinned nodes, use calculated positions
-              updatedNodes[nodeIndex] = {
-                ...updatedNodes[nodeIndex],
-                position: positions[positionIndex],
-              };
-              positionIndex++; // Only increment for non-pinned nodes
-            }
-          }
-        }
-        s.data.nodes = updatedNodes;
-      })
-    );
+    this.arrangeNodesWithPositions((count) => {
+      const positions = this.calculateCirclePositions(count);
+      console.log('CircleLayout: calculated positions:', positions);
+      return positions;
+    });
   }
 
   private calculateCirclePositions(

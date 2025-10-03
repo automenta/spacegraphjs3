@@ -138,6 +138,50 @@ export abstract class BaseLayoutEngine implements ILayoutEngine {
 
     this.updateNodePositions(positionMap);
   }
+  /**
+   * Helper method to arrange nodes using calculated positions.
+   * Handles both pinned and non-pinned nodes automatically.
+   * @param calculatePositions - Function that takes node count and returns positions array
+   */
+  protected arrangeNodesWithPositions(
+    calculatePositions: (count: number) => Array<{ x: number; y: number; z: number }>
+  ): void {
+    const nodes = this.graph.state.data?.nodes ?? [];
+    if (nodes.length === 0) return;
+
+    const positions = calculatePositions(nodes.length);
+
+    // Update node positions using the reactive state update mechanism
+    this.graph.updateStateWithProducer(
+      produce((s) => {
+        const updatedNodes = [...s.data.nodes];
+        let positionIndex = 0; // Track position index for non-pinned nodes
+        for (let i = 0; i < nodes.length; i++) {
+          const node = nodes[i];
+          const nodeIndex = updatedNodes.findIndex((n) => n.id === node.id);
+          if (nodeIndex !== -1) {
+            if (this.isPinned(node)) {
+              // For pinned nodes, use the pinning position if available
+              if (node.pinning && typeof node.pinning === 'object') {
+                updatedNodes[nodeIndex] = {
+                  ...updatedNodes[nodeIndex],
+                  position: { ...node.pinning },
+                };
+              }
+            } else {
+              // For non-pinned nodes, use calculated positions
+              updatedNodes[nodeIndex] = {
+                ...updatedNodes[nodeIndex],
+                position: positions[positionIndex],
+              };
+              positionIndex++; // Only increment for non-pinned nodes
+            }
+          }
+        }
+        s.data.nodes = updatedNodes;
+      })
+    );
+  }
 
   /**
    * Setup the layout engine (called during initialization).

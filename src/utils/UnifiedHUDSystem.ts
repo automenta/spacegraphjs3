@@ -1,8 +1,14 @@
+import { animate } from 'popmotion';
+import { AnimationCurves } from './AnimationUtils';
+
 /**
- * HUD Utilities - Common functions for HUD operations
- * Provides reusable utilities for creating and managing HUD elements
+ * Unified HUD System
+ * Consolidated HUD utilities and interactive elements
  */
 
+/**
+ * HUD theme configuration
+ */
 export interface HUDTheme {
   background: string;
   border: string;
@@ -14,6 +20,9 @@ export interface HUDTheme {
   accent: string;
 }
 
+/**
+ * HUD animation configuration
+ */
 export interface HUDAnimationConfig {
   duration?: number;
   delay?: number;
@@ -21,7 +30,81 @@ export interface HUDAnimationConfig {
   callback?: () => void;
 }
 
-export class HUDUtils {
+/**
+ * HUD element configuration
+ */
+export interface HUDElementConfig {
+  id: string;
+  type: 'text' | 'button' | 'slider' | 'chart' | 'panel' | 'icon';
+  position: { x: number; y: number };
+  size: { width: number; height: number };
+  style?: {
+    backgroundColor?: string;
+    textColor?: string;
+    borderColor?: string;
+    borderRadius?: number;
+    fontSize?: number;
+    opacity?: number;
+  };
+  content?: string;
+  visible?: boolean;
+  interactive?: boolean;
+}
+
+/**
+ * Performance metrics
+ */
+export interface PerformanceMetrics {
+  fps: number;
+  frameTime: number;
+  memoryUsage: number;
+  drawCalls: number;
+  triangles: number;
+  nodes: number;
+  edges: number;
+}
+
+/**
+ * Unified HUD System combining utilities and interactive elements
+ */
+export class UnifiedHUDSystem {
+  private container: HTMLElement;
+  private elements: Map<string, HTMLElement> = new Map();
+  private animations: Map<string, () => void> = new Map();
+  private performanceMetrics: PerformanceMetrics = {
+    fps: 0,
+    frameTime: 0,
+    memoryUsage: 0,
+    drawCalls: 0,
+    triangles: 0,
+    nodes: 0,
+    edges: 0,
+  };
+
+  private fpsHistory: number[] = [];
+  private lastFrameTime = performance.now();
+  private frameCount = 0;
+
+  constructor(container: HTMLElement) {
+    this.container = container;
+    this.setupContainer();
+  }
+
+  /**
+   * Setup HUD container
+   */
+  private setupContainer(): void {
+    this.container.style.position = 'absolute';
+    this.container.style.top = '0';
+    this.container.style.left = '0';
+    this.container.style.width = '100%';
+    this.container.style.height = '100%';
+    this.container.style.pointerEvents = 'none';
+    this.container.style.zIndex = '1000';
+  }
+
+  // ===== HUD UTILITIES (from HUDUtils) =====
+
   /**
    * Create a styled HTML element with common HUD properties
    */
@@ -112,7 +195,7 @@ export class HUDUtils {
    */
   static createCloseButton(
     onClick: (e: MouseEvent) => void,
-    theme: HUDTheme = HUDUtils.getDefaultTheme().dark
+    theme: HUDTheme = UnifiedHUDSystem.getDefaultTheme().dark
   ): HTMLSpanElement {
     const closeBtn = document.createElement('span');
     closeBtn.textContent = '×';
@@ -182,138 +265,138 @@ export class HUDUtils {
         50% { transform: scale(1.05); }
         100% { transform: scale(1); }
       }
-      
+
       @keyframes shake {
         0%, 100% { transform: translateX(0); }
         25% { transform: translateX(-2px); }
         75% { transform: translateX(2px); }
       }
-      
+
       @keyframes fadeIn {
         from { opacity: 0; transform: translateY(-10px); }
         to { opacity: 1; transform: translateY(0); }
       }
-      
+
       @keyframes slideIn {
         from { transform: translateX(-100%); }
         to { transform: translateX(0); }
       }
-      
+
       @keyframes glow {
         0% { box-shadow: 0 0 5px rgba(0, 255, 0, 0.3); }
         50% { box-shadow: 0 0 20px rgba(0, 255, 0, 0.6); }
         100% { box-shadow: 0 0 5px rgba(0, 255, 0, 0.3); }
       }
-      
+
       @keyframes typing {
         from { width: 0; }
         to { width: 100%; }
       }
-      
+
       @keyframes blink {
         0%, 50% { opacity: 1; }
         51%, 100% { opacity: 0; }
       }
-      
+
       @keyframes rainbow {
         0% { background-position: 0% 50%; }
         50% { background-position: 100% 50%; }
         100% { background-position: 0% 50%; }
       }
-      
+
       @keyframes float {
         0%, 100% { transform: translateY(0px); }
         50% { transform: translateY(-5px); }
       }
-      
+
       @keyframes rotate {
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
       }
-      
+
       @keyframes matrix-rain {
         0% { background-position: 0 -100%; }
         100% { background-position: 0 100%; }
       }
-      
+
       .hud-typing-effect {
         overflow: hidden;
         white-space: nowrap;
         animation: typing 2s steps(40, end);
       }
-      
+
       .hud-cursor {
         animation: blink 1s infinite;
       }
-      
+
       .hud-glow-effect {
         animation: glow 2s infinite;
       }
-      
+
       .hud-pulse-effect {
         animation: pulse 1s infinite;
       }
-      
+
       .hud-shake-effect {
         animation: shake 0.5s ease-in-out;
       }
-      
+
       .hud-fade-in {
         animation: fadeIn 0.5s ease-out;
       }
-      
+
       .hud-slide-in {
         animation: slideIn 0.3s ease-out;
       }
-      
+
       .hud-rainbow-border {
         background: linear-gradient(45deg, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080);
         background-size: 400% 400%;
         animation: rainbow 3s ease infinite;
       }
-      
+
       .hud-float-effect {
         animation: float 3s ease-in-out infinite;
       }
-      
+
       .hud-rotate-effect {
         animation: rotate 2s linear infinite;
       }
-      
+
       .hud-glass-effect {
         background: rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.2);
       }
-      
+
       .hud-neon-glow {
         text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor;
       }
-      
+
       .hud-matrix-rain {
         background: linear-gradient(180deg, transparent, rgba(0, 255, 0, 0.1), transparent);
         animation: matrix-rain 2s linear infinite;
       }
-      
+
       /* Custom scrollbar for HUD */
       .hud-scrollbar::-webkit-scrollbar {
         width: 6px;
       }
-      
+
       .hud-scrollbar::-webkit-scrollbar-track {
         background: rgba(0, 0, 0, 0.1);
         border-radius: 3px;
       }
-      
+
       .hud-scrollbar::-webkit-scrollbar-thumb {
         background: rgba(255, 255, 255, 0.3);
         border-radius: 3px;
       }
-      
+
       .hud-scrollbar::-webkit-scrollbar-thumb:hover {
         background: rgba(255, 255, 255, 0.5);
       }
-      
+
       /* Responsive HUD */
       @media (max-width: 768px) {
         .hud-container {
@@ -321,7 +404,7 @@ export class HUDUtils {
           min-width: 250px !important;
           max-width: 90vw !important;
         }
-        
+
         .hud-panel {
           max-width: 90vw !important;
         }
@@ -384,7 +467,7 @@ export class HUDUtils {
   static createNotification(
     message: string,
     type: 'info' | 'success' | 'warning' | 'error' = 'info',
-    _theme: HUDTheme = HUDUtils.getDefaultTheme().dark
+    theme: HUDTheme = UnifiedHUDSystem.getDefaultTheme().dark
   ): HTMLDivElement {
     const notification = document.createElement('div');
     notification.style.padding = '12px 16px';
@@ -512,7 +595,7 @@ export class HUDUtils {
       y = 10,
       width = 300,
       height = 200,
-      theme = HUDUtils.getDefaultTheme().dark,
+      theme = UnifiedHUDSystem.getDefaultTheme().dark,
       animated = true,
       onClose,
     } = options;
@@ -561,7 +644,7 @@ export class HUDUtils {
     header.textContent = title;
 
     // Close button
-    const closeBtn = HUDUtils.createCloseButton((e) => {
+    const closeBtn = UnifiedHUDSystem.createCloseButton((e) => {
       e.stopPropagation();
       if (onClose) onClose();
 
@@ -659,6 +742,399 @@ export class HUDUtils {
       }
     });
   }
+
+  // ===== ENHANCED HUD SYSTEM (from EnhancedHUDSystem) =====
+
+  /**
+   * Create HUD element
+   */
+  public createElement(config: HUDElementConfig): HTMLElement {
+    const element = document.createElement('div');
+    element.id = config.id;
+    element.style.position = 'absolute';
+    element.style.left = `${config.position.x}px`;
+    element.style.top = `${config.position.y}px`;
+    element.style.width = `${config.size.width}px`;
+    element.style.height = `${config.size.height}px`;
+    element.style.pointerEvents = config.interactive ? 'auto' : 'none';
+    element.style.display = config.visible !== false ? 'block' : 'none';
+
+    // Apply styles
+    if (config.style) {
+      if (config.style.backgroundColor) {
+        element.style.backgroundColor = config.style.backgroundColor;
+      }
+      if (config.style.textColor) {
+        element.style.color = config.style.textColor;
+      }
+      if (config.style.borderColor) {
+        element.style.border = `1px solid ${config.style.borderColor}`;
+      }
+      if (config.style.borderRadius) {
+        element.style.borderRadius = `${config.style.borderRadius}px`;
+      }
+      if (config.style.fontSize) {
+        element.style.fontSize = `${config.style.fontSize}px`;
+      }
+      if (config.style.opacity !== undefined) {
+        element.style.opacity = config.style.opacity.toString();
+      }
+    }
+
+    // Set content based on type
+    switch (config.type) {
+      case 'button':
+        element.innerHTML = `<button style="width: 100%; height: 100%; background: transparent; border: none; color: inherit; cursor: pointer;">${config.content}</button>`;
+        break;
+      case 'text':
+        element.innerHTML = config.content || '';
+        break;
+      case 'panel':
+        // Panel is just a styled div
+        break;
+      case 'chart':
+        element.innerHTML = '<canvas width="100%" height="100%"></canvas>';
+        break;
+      case 'icon':
+        element.innerHTML = config.content || '';
+        break;
+      case 'slider':
+        element.innerHTML = `<input type="range" style="width: 100%;" value="50">`;
+        break;
+    }
+
+    this.container.appendChild(element);
+    this.elements.set(config.id, element);
+
+    return element;
+  }
+
+  /**
+   * Update element content
+   */
+  public updateElement(id: string, content: string): void {
+    const element = this.elements.get(id);
+    if (element) {
+      if (element.querySelector('button')) {
+        element.querySelector('button')!.textContent = content;
+      } else if (element.querySelector('canvas')) {
+        // Update chart
+        this.updateChart(id, content);
+      } else {
+        element.textContent = content;
+      }
+    }
+  }
+
+  /**
+   * Show/hide element with animation
+   */
+  public toggleElement(
+    id: string,
+    show: boolean,
+    duration: number = 300
+  ): void {
+    const element = this.elements.get(id);
+    if (!element) return;
+
+    // Stop existing animation
+    const existingAnimation = this.animations.get(id);
+    if (existingAnimation) {
+      existingAnimation();
+    }
+
+    if (show) {
+      element.style.display = 'block';
+
+      const stopAnimation = animate({
+        from: { opacity: 0, scale: 0.8 },
+        to: { opacity: 1, scale: 1 },
+        duration,
+        ease: AnimationCurves.easeOut.easing,
+        onUpdate: ({ opacity, scale }) => {
+          element.style.opacity = opacity.toString();
+          element.style.transform = `scale(${scale})`;
+        },
+      });
+
+      this.animations.set(id, () => stopAnimation.stop());
+    } else {
+      const stopAnimation = animate({
+        from: { opacity: 1, scale: 1 },
+        to: { opacity: 0, scale: 0.8 },
+        duration,
+        ease: AnimationCurves.easeIn.easing,
+        onUpdate: ({ opacity, scale }) => {
+          element.style.opacity = opacity.toString();
+          element.style.transform = `scale(${scale})`;
+        },
+        onComplete: () => {
+          element.style.display = 'none';
+        },
+      });
+
+      this.animations.set(id, () => stopAnimation.stop());
+    }
+  }
+
+  /**
+   * Update performance metrics
+   */
+  public updatePerformanceMetrics(metrics: Partial<PerformanceMetrics>): void {
+    Object.assign(this.performanceMetrics, metrics);
+
+    // Update display
+    this.updateElement(
+      'fps-counter',
+      `FPS: ${Math.round(this.performanceMetrics.fps)}`
+    );
+    this.updateElement(
+      'memory-usage',
+      `Memory: ${Math.round(this.performanceMetrics.memoryUsage)} MB`
+    );
+    this.updateElement('node-count', `Nodes: ${this.performanceMetrics.nodes}`);
+    this.updateElement('edge-count', `Edges: ${this.performanceMetrics.edges}`);
+    this.updateElement(
+      'draw-calls',
+      `Draw Calls: ${this.performanceMetrics.drawCalls}`
+    );
+  }
+
+  /**
+   * Start performance monitoring
+   */
+  private startPerformanceMonitoring(): void {
+    const updateLoop = () => {
+      const currentTime = performance.now();
+      const deltaTime = currentTime - this.lastFrameTime;
+
+      this.frameCount++;
+
+      if (this.frameCount % 60 === 0) {
+        // Update every 60 frames
+        const fps = 1000 / deltaTime;
+        this.fpsHistory.push(fps);
+
+        if (this.fpsHistory.length > 100) {
+          this.fpsHistory.shift();
+        }
+
+        // Update FPS chart
+        this.updateFPSChart();
+
+        // Update memory usage if available
+        if ((performance as any).memory) {
+          this.performanceMetrics.memoryUsage =
+            (performance as any).memory.usedJSHeapSize / 1048576;
+        }
+
+        this.updatePerformanceMetrics({
+          fps:
+            this.fpsHistory.reduce((a, b) => a + b, 0) / this.fpsHistory.length,
+        });
+      }
+
+      this.lastFrameTime = currentTime;
+      requestAnimationFrame(updateLoop);
+    };
+
+    updateLoop();
+  }
+
+  /**
+   * Update FPS chart
+   */
+  private updateFPSChart(): void {
+    const element = this.elements.get('fps-chart');
+    if (!element) return;
+
+    const canvas = element.querySelector('canvas') as HTMLCanvasElement;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const width = canvas.width;
+    const height = canvas.height;
+
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+
+    // Draw grid
+    ctx.strokeStyle = 'rgba(0, 255, 0, 0.2)';
+    ctx.lineWidth = 1;
+
+    for (let i = 0; i <= 4; i++) {
+      const y = (height / 4) * i;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
+    }
+
+    // Draw FPS line
+    if (this.fpsHistory.length > 1) {
+      ctx.strokeStyle = '#00ff00';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+
+      const step = width / (this.fpsHistory.length - 1);
+      const maxFPS = Math.max(...this.fpsHistory, 60);
+
+      this.fpsHistory.forEach((fps, index) => {
+        const x = index * step;
+        const y = height - (fps / maxFPS) * height;
+
+        if (index === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      });
+
+      ctx.stroke();
+    }
+
+    // Draw current FPS text
+    ctx.fillStyle = '#00ff00';
+    ctx.font = '12px monospace';
+    ctx.fillText(`${Math.round(this.performanceMetrics.fps)} FPS`, 5, 15);
+  }
+
+  /**
+   * Update chart data
+   */
+  private updateChart(id: string, data: string): void {
+    // Implementation for updating chart data
+    const element = this.elements.get(id);
+    if (element && element.querySelector('canvas')) {
+      // Parse and update chart data
+      console.log(`Updating chart ${id} with data: ${data}`);
+    }
+  }
+
+  /**
+   * Set status text
+   */
+  public setStatus(text: string, duration: number = 3000): void {
+    this.updateElement('status-text', text);
+
+    if (duration > 0) {
+      setTimeout(() => {
+        this.updateElement('status-text', 'Ready');
+      }, duration);
+    }
+  }
+
+  /**
+   * Show notification
+   */
+  public showNotification(
+    message: string,
+    type: 'info' | 'success' | 'warning' | 'error' = 'info',
+    duration: number = 3000
+  ): void {
+    const notificationId = `notification-${Date.now()}`;
+
+    const colors = {
+      info: '#0088ff',
+      success: '#00ff00',
+      warning: '#ffaa00',
+      error: '#ff0000',
+    };
+
+    this.createElement({
+      id: notificationId,
+      type: 'panel',
+      position: { x: window.innerWidth - 310, y: 120 },
+      size: { width: 300, height: 50 },
+      style: {
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        borderColor: colors[type],
+        borderRadius: 5,
+        opacity: 0,
+      },
+      visible: true,
+    });
+
+    this.createElement({
+      id: `${notificationId}-text`,
+      type: 'text',
+      position: { x: window.innerWidth - 300, y: 135 },
+      size: { width: 280, height: 20 },
+      content: message,
+      style: {
+        textColor: colors[type],
+        fontSize: 14,
+      },
+      visible: true,
+    });
+
+    // Animate in
+    this.toggleElement(notificationId, true, 200);
+    this.toggleElement(`${notificationId}-text`, true, 200);
+
+    // Auto remove
+    setTimeout(() => {
+      this.toggleElement(notificationId, false, 200);
+      this.toggleElement(`${notificationId}-text`, false, 200);
+
+      setTimeout(() => {
+        const element = this.elements.get(notificationId);
+        const textElement = this.elements.get(`${notificationId}-text`);
+
+        if (element) {
+          element.remove();
+          this.elements.delete(notificationId);
+        }
+
+        if (textElement) {
+          textElement.remove();
+          this.elements.delete(`${notificationId}-text`);
+        }
+      }, 200);
+    }, duration);
+  }
+
+  /**
+   * Get element by ID
+   */
+  public getElement(id: string): HTMLElement | undefined {
+    return this.elements.get(id);
+  }
+
+  /**
+   * Remove element
+   */
+  public removeElement(id: string): void {
+    const element = this.elements.get(id);
+    if (element) {
+      element.remove();
+      this.elements.delete(id);
+    }
+  }
+
+  /**
+   * Clear all elements
+   */
+  public clear(): void {
+    this.elements.forEach((element, _id) => {
+      element.remove();
+    });
+    this.elements.clear();
+    this.animations.clear();
+  }
+
+  /**
+   * Dispose of HUD system
+   */
+  public dispose(): void {
+    this.clear();
+
+    // Stop all animations
+    this.animations.forEach((stopAnimation) => stopAnimation());
+    this.animations.clear();
+  }
 }
 
-export default HUDUtils;
+export default UnifiedHUDSystem;

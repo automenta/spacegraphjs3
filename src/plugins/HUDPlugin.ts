@@ -2,7 +2,7 @@ import { createEffect } from 'solid-js';
 import * as THREE from 'three';
 import { ISpaceGraphPlugin } from '../core/plugin';
 import { SpaceGraph } from '../core/SpaceGraph';
-import { HUDUtils } from '../utils/HUDUtils';
+import { HUDUtils } from '../utils';
 import { ThemeSystem } from '../utils/ThemeSystem';
 
 /**
