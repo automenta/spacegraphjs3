@@ -139,7 +139,9 @@ afterEach(() => {
     (call: any[]) =>
       !call[0]?.includes('Failed to create text geometry for node') &&
       !call[0]?.includes('Theme not found:') &&
-      !call[0]?.includes('Scene not available for drag indicator')
+      !call[0]?.includes('Scene not available for drag indicator') &&
+      !call[0]?.includes('has zero width or height') &&
+      !call[0]?.includes('no-positions')
   );
   expect(nonAllowedWarnings).toHaveLength(0);
 

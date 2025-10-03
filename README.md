@@ -76,8 +76,9 @@ const htmlNode = {
   id: 'html-node-1',
   type: 'html',
   position: { x: 0, y: 0, z: 0 },
-  content: '<div class="my-node"><h3>My Node</h3><p>Rich HTML content</p></div>',
-  className: 'my-node-class'
+  content:
+    '<div class="my-node"><h3>My Node</h3><p>Rich HTML content</p></div>',
+  className: 'my-node-class',
 };
 ```
 

@@ -9,6 +9,27 @@ describe('HUDPlugin', () => {
         nodes: [{ id: 'n1', type: 'sphere' }],
         edges: [],
       },
+      style: {},
+      layout: { type: 'force-directed' },
+      camera: {
+        target: { x: 0, y: 0, z: 0 },
+        phi: Math.PI / 2,
+        theta: 0,
+        distance: 100,
+      },
+      controls: {
+        keyboard: {
+          enabled: true,
+          panSpeed: 0.1,
+          zoomSpeed: 0.1,
+          orbitSpeed: 0.1,
+        },
+      },
+      performance: { instancingThreshold: 100 },
+      interaction: {
+        hoveredElementId: null,
+        selectedElementIds: [],
+      },
       hud: {
         visible: true,
         content: 'Initial Content',

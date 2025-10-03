@@ -21,7 +21,7 @@ class WidgetGenerator {
       style: `
         .info-widget h4 { color: #00ff00; font-size: 16px; }
         .info-widget p { color: #ffffff; }
-      `
+      `,
     });
 
     // Metric Widget Template
@@ -36,17 +36,21 @@ class WidgetGenerator {
           <div class="metric-label" style="text-align: center; color: #cccccc; margin-top: 4px;">
             ${data.label || 'Metric'}
           </div>
-          ${data.change !== undefined ? `
+          ${
+            data.change !== undefined
+              ? `
             <div class="metric-change" style="text-align: center; margin-top: 8px; font-size: 12px; color: ${data.change >= 0 ? '#00ff00' : '#ff4444'};">
               ${data.change >= 0 ? '↑' : '↓'} ${Math.abs(data.change)}%
             </div>
-          ` : ''}
+          `
+              : ''
+          }
         </div>
       `,
       style: `
         .metric-widget { text-align: center; }
         .metric-value { font-family: 'Courier New', monospace; }
-      `
+      `,
     });
 
     // Control Widget Template
@@ -55,12 +59,18 @@ class WidgetGenerator {
       icon: 'settings',
       content: (data) => `
         <div class="control-widget">
-          ${data.controls ? data.controls.map(control => `
+          ${
+            data.controls
+              ? data.controls
+                  .map(
+                    (control) => `
             <div class="control-item" style="margin-bottom: 12px;">
               <label style="display: block; color: #cccccc; font-size: 12px; margin-bottom: 4px;">
                 ${control.label}
               </label>
-              ${control.type === 'button' ? `
+              ${
+                control.type === 'button'
+                  ? `
                 <button onclick="${control.action}" style="
                   background: linear-gradient(135deg, #00ff00, #00cc00);
                   border: none;
@@ -76,19 +86,27 @@ class WidgetGenerator {
                 onmouseout="this.style.transform='scale(1)'">
                   ${control.text || 'Action'}
                 </button>
-              ` : control.type === 'slider' ? `
+              `
+                  : control.type === 'slider'
+                    ? `
                 <input type="range" min="${control.min || 0}" max="${control.max || 100}" value="${control.value || 50}"
                   onchange="${control.action}"
                   style="width: 100%; accent-color: #00ff00;">
-              ` : ''}
+              `
+                    : ''
+              }
             </div>
-          `).join('') : '<p style="color: #888; text-align: center;">No controls available</p>'}
+          `
+                  )
+                  .join('')
+              : '<p style="color: #888; text-align: center;">No controls available</p>'
+          }
         </div>
       `,
       style: `
         .control-widget { }
         .control-item button:hover { box-shadow: 0 2px 8px rgba(0, 255, 0, 0.3); }
-      `
+      `,
     });
 
     // Interactive Widget Template
@@ -101,7 +119,11 @@ class WidgetGenerator {
             ${data.content || '<p style="color: #888; text-align: center;">Interactive content goes here</p>'}
           </div>
           <div class="interactive-actions" style="margin-top: 12px; display: flex; gap: 8px;">
-            ${data.actions ? data.actions.map(action => `
+            ${
+              data.actions
+                ? data.actions
+                    .map(
+                      (action) => `
               <button onclick="${action.action}" style="
                 flex: 1;
                 background: linear-gradient(135deg, #00ccff, #0088ff);
@@ -117,14 +139,18 @@ class WidgetGenerator {
               onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'">
                 ${action.label}
               </button>
-            `).join('') : ''}
+            `
+                    )
+                    .join('')
+                : ''
+            }
           </div>
         </div>
       `,
       style: `
         .interactive-widget { }
         .interactive-actions button:hover { background: linear-gradient(135deg, #00aaff, #0066ff); }
-      `
+      `,
     });
   }
 
@@ -133,7 +159,10 @@ class WidgetGenerator {
     const template = this.templates.get(type);
     if (!template) {
       console.warn(`Widget template '${type}' not found`);
-      return this.generateWidget('info', { title: 'Error', message: `Template '${type}' not found` });
+      return this.generateWidget('info', {
+        title: 'Error',
+        message: `Template '${type}' not found`,
+      });
     }
 
     const widgetId = `widget-${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -213,7 +242,7 @@ class WidgetGenerator {
               <line x1="12" y1="12" x2="18" y2="18" stroke="currentColor" stroke-width="1"/>`,
       settings: `<circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
                  <path d="M19.4 15A7.65 7.65 0 0 0 19 12C19 8.13 15.87 5 12 5S5 8.13 5 12C5 15.87 8.13 19 12 19C13.39 19 14.68 18.59 15.8 17.9" stroke="currentColor" stroke-width="2"/>`,
-      interactive: `<path d="M12 2L15 8H21L16.5 12L18 18L12 15L6 18L7.5 12L3 8H9L12 2Z" stroke="currentColor" stroke-width="2" fill="currentColor" fill-opacity="0.2"/>`
+      interactive: `<path d="M12 2L15 8H21L16.5 12L18 18L12 15L6 18L7.5 12L3 8H9L12 2Z" stroke="currentColor" stroke-width="2" fill="currentColor" fill-opacity="0.2"/>`,
     };
 
     return icons[iconName] || icons.widget;
@@ -234,7 +263,7 @@ class WidgetGenerator {
 
   // Auto-generate widgets based on data
   autoGenerateWidgets(dataArray) {
-    return dataArray.map(data => {
+    return dataArray.map((data) => {
       // Determine widget type based on data
       let type = 'info';
       if (typeof data.value !== 'undefined') {

@@ -219,7 +219,8 @@ describe('Element Actors', () => {
 
       // Check that the CSS3D object has the correct element
       const css3DObject: any = actor['threeObject'];
-      expect(css3DObject.element.innerHTML).toBe('<div>Hello World</div>');
+      // The innerHTML includes the user content plus the inner glow styling div
+      expect(css3DObject.element.innerHTML).toContain('<div>Hello World</div>');
       expect(css3DObject.element.className).toBe('test-html-node');
     });
 
@@ -244,7 +245,8 @@ describe('Element Actors', () => {
 
       // Check that the element content was updated
       const css3DObject: any = actor['threeObject'];
-      expect(css3DObject.element.innerHTML).toBe('<div>Updated Content</div>');
+      // The innerHTML includes the user content plus the inner glow styling div
+      expect(css3DObject.element.innerHTML).toContain('<div>Updated Content</div>');
       expect(css3DObject.element.className).toBe('updated-html-node');
       expect(css3DObject.position).toEqual(new THREE.Vector3(10, 20, 30));
     });

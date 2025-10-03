@@ -103,24 +103,6 @@ export abstract class BaseGeometryActor extends BaseElementActor {
     this.updateVisuals(this.elementState, isHovered, isSelected);
   }
 
-  /**
-   * Animate a property value with easing
-   * @param from - Starting value
-   * @param to - Target value
-   * @param duration - Animation duration in ms
-   * @param onUpdate - Callback for each animation frame
-   * @param easing - Easing function
-   */
-  protected animateProperty(
-    from: number,
-    to: number,
-    duration: number,
-    onUpdate: (value: number) => void,
-    easing: (t: number) => number = (t) =>
-      t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
-  ): void {
-    animateProperty(from, to, duration, onUpdate, easing);
-  }
 
   protected updateVisuals(
     elementState: Store<NodeSpec>,
@@ -143,7 +125,7 @@ export abstract class BaseGeometryActor extends BaseElementActor {
 
     if (this.useAnimations && positionDelta > 0.01) {
       // Animate position with easing
-      this.animateProperty(0, 1, 300, (progress) => {
+      animateProperty(0, 1, 300, (progress: number) => {
         group.position.lerpVectors(currentPosition, targetPosition, progress);
       });
     } else {
@@ -169,7 +151,7 @@ export abstract class BaseGeometryActor extends BaseElementActor {
     const targetMainColor = stylingResult.color.clone();
 
     if (this.useAnimations && !currentMainColor.equals(targetMainColor)) {
-      this.animateProperty(0, 1, 200, (progress) => {
+      animateProperty(0, 1, 200, (progress) => {
         mainMaterial.color.lerpColors(
           currentMainColor,
           targetMainColor,
@@ -192,7 +174,7 @@ export abstract class BaseGeometryActor extends BaseElementActor {
       const currentGlowColor = glowMaterial.color.clone();
 
       if (this.useAnimations && !currentGlowColor.equals(targetGlowColor)) {
-        this.animateProperty(0, 1, 200, (progress) => {
+        animateProperty(0, 1, 200, (progress) => {
           glowMaterial.color.lerpColors(
             currentGlowColor,
             targetGlowColor,
@@ -211,7 +193,7 @@ export abstract class BaseGeometryActor extends BaseElementActor {
         this.useAnimations &&
         Math.abs(currentOpacity - targetOpacity!) > 0.01
       ) {
-        this.animateProperty(currentOpacity, targetOpacity!, 200, (value) => {
+        animateProperty(currentOpacity, targetOpacity!, 200, (value) => {
           glowMaterial.opacity = value;
         });
       } else {
@@ -221,7 +203,7 @@ export abstract class BaseGeometryActor extends BaseElementActor {
       // Fade out glow
       const glowMaterial = this.glowMesh.material as THREE.MeshBasicMaterial;
       if (this.useAnimations && glowMaterial.opacity > 0.01) {
-        this.animateProperty(glowMaterial.opacity, 0, 200, (value) => {
+        animateProperty(glowMaterial.opacity, 0, 200, (value) => {
           glowMaterial.opacity = value;
           if (value <= 0.01) {
             this.glowMesh.visible = false;

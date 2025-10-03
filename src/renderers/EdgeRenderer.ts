@@ -704,25 +704,6 @@ export class EdgeRenderer {
     return handles;
   }
 
-  /**
-   * Animate a property value with easing
-   * @param from - Starting value
-   * @param to - Target value
-   * @param duration - Animation duration in ms
-   * @param onUpdate - Callback for each animation frame
-   * @param easing - Easing function
-   */
-  private animateProperty(
-    from: number,
-    to: number,
-    duration: number,
-    onUpdate: (value: number) => void,
-    easing: (t: number) => number = (t) =>
-      t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
-  ): () => void {
-    // Stop any existing animation for this property
-    return animateProperty(from, to, duration, onUpdate, easing);
-  }
 
   /**
    * Animate edge material properties with smooth transitions
@@ -758,7 +739,7 @@ export class EdgeRenderer {
 
     // Animate color
     if (!currentColor.equals(targetColor)) {
-      const stopColorAnimation = this.animateProperty(0, 1, 200, (progress) => {
+      const stopColorAnimation = animateProperty(0, 1, 200, (progress: number) => {
         lineMaterial.color.lerpColors(currentColor, targetColor, progress);
       });
 
@@ -768,11 +749,11 @@ export class EdgeRenderer {
 
     // Animate opacity
     if (Math.abs(currentOpacity - targetOpacity) > 0.01) {
-      const stopOpacityAnimation = this.animateProperty(
+      const stopOpacityAnimation = animateProperty(
         currentOpacity,
         targetOpacity,
         200,
-        (value) => {
+        (value: number) => {
           lineMaterial.opacity = value;
           lineMaterial.transparent = value < 1.0;
         }

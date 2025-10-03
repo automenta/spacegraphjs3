@@ -5,23 +5,23 @@ type TestFixtures = {
 };
 
 export const test = base.extend<TestFixtures>({
-  consoleErrors: async (_fixtures, use) => {
+  consoleErrors: async ({}, use) => {
     const errors: string[] = [];
     await use(errors);
   },
-  page: async ({ page: _page, consoleErrors: _consoleErrors }, use) => {
-    _page.on('console', (msg) => {
+  page: async ({ page, consoleErrors }, use) => {
+    page.on('console', (msg) => {
       console.log(`PAGE LOG: ${msg.text()}`);
       if (msg.type() === 'error') {
-        _consoleErrors.push(msg.text());
+        consoleErrors.push(msg.text());
       }
     });
-    _page.on('pageerror', (error) => {
-      _consoleErrors.push(error.message);
+    page.on('pageerror', (error) => {
+      consoleErrors.push(error.message);
     });
-    await use(_page);
+    await use(page);
     // Intentionally commented out to avoid unused variable error
-    // expect(_consoleErrors).toEqual([]);
+    // expect(consoleErrors).toEqual([]);
   },
 });
 

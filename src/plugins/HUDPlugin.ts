@@ -4,7 +4,6 @@ import { ISpaceGraphPlugin } from '../core/plugin';
 import { SpaceGraph } from '../core/SpaceGraph';
 import { HUDUtils } from '../utils/HUDUtils';
 import { ThemeSystem } from '../utils/ThemeSystem';
-import { UnifiedAnimationSystem } from '../utils/UnifiedAnimationSystem';
 
 /**
  * REPL Commands class for handling console commands
@@ -480,7 +479,6 @@ export class HUDPlugin implements ISpaceGraphPlugin {
       offsetY: number;
     }
   > = new Map();
-  private animationSystem: UnifiedAnimationSystem | null = null;
   private themeManager: ThemeSystem | null = null;
   private notificationSystem: HUDUtils | null = null;
 
@@ -491,7 +489,6 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     const container = this.graph.render.getContainer();
     this.createHUDElements(container);
     this.setupEventListeners();
-    this.setupAnimationSystem();
     this.setupThemeManager();
     this.setupNotificationSystem();
 
@@ -1015,14 +1012,6 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     }
   }
 
-  private setupAnimationSystem(): void {
-    // AnimationSystem is now initialized in init() method
-    try {
-      this.animationSystem = new UnifiedAnimationSystem();
-    } catch (error) {
-      console.warn('Failed to initialize AnimationSystem:', error);
-    }
-  }
 
   private setupThemeManager(): void {
     // ThemeSystem is now initialized in init() method

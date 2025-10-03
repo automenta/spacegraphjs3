@@ -19,21 +19,26 @@ export function expandHex(hex: string): string {
 }
 
 /**
- * Safely sets a color from a hex string, with fallback handling
- * @param colorValue - The hex color string to parse
+ * Safely sets a color from a hex string or number, with fallback handling
+ * @param colorValue - The hex color string or number to parse
  * @param elementId - The element ID for logging purposes
  * @param fallbackColor - The fallback color if parsing fails
  * @returns A THREE.Color object
  */
 export function parseColor(
-  colorValue: string | undefined,
+  colorValue: string | number | undefined,
   elementId: string,
   fallbackColor: string = '#ff00ff'
 ): THREE.Color {
   const color = new THREE.Color();
   try {
-    const value = colorValue || '#ffffff';
-    color.set(expandHex(value));
+    if (colorValue === undefined) {
+      color.set('#ffffff');
+    } else if (typeof colorValue === 'number') {
+      color.setHex(colorValue);
+    } else {
+      color.set(expandHex(colorValue));
+    }
   } catch (error) {
     void error; // Intentionally unused, keeping for potential future use
     console.warn(`Invalid color specified for node ${elementId}:`, colorValue);

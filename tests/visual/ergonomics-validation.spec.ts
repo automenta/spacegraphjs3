@@ -3,7 +3,7 @@ import { EnhancedVisualSemanticsController } from './enhanced-visual-semantics-c
 import {
   getAllErgonomicsSpecs,
   getErgonomicsSpec,
-} from './specs/ergonomics.spec';
+} from './specs/ergonomics';
 
 /**
  * Ergonomics Validation Tests

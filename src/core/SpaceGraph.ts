@@ -148,155 +148,18 @@ export class SpaceGraph {
       // Re-throw the error to allow the caller to handle it.
       throw error;
     }
-  /**
-   * Validates the initial spec and logs warnings if needed
-   */
-  private validateInitialSpec(initialSpec: Spec): void {
-    const validationResult = validateSpec(initialSpec);
-    if (!validationResult.isValid) {
-      const errorMessage = `Invalid Spec provided:\n${formatValidationResult(validationResult)}`;
-      throw new Error(errorMessage);
-    }
-
-    // Log warnings in development mode
-    if (
-      validationResult.warnings.length > 0 &&
-      SpaceGraph.isDevelopmentMode()
-    ) {
-      console.warn(
-        'Spec validation warnings:',
-        formatValidationResult(validationResult)
-      );
-    }
   }
 
   /**
-   * Initializes the core components: container, state, managers, and plugins
-   */
-  private initializeCore(
-    containerSelector: string,
-    initialSpec: Spec,
-    plugins: ISpaceGraphPlugin[]
-  ): void {
-    const container = this.initContainer(containerSelector);
-    this.container = container;
-
-    this.dispose = createRoot((dispose) => {
-      this.initReactiveState(initialSpec);
-      this.initManagers();
-      this.initPlugins(plugins);
-      return dispose;
-    });
-  }
-
-  /**
-   * Sets up scene and camera references from the rendering manager
-   */
-  private setupSceneAndCamera(): void {
-    this.scene = this.render.getScene();
-    this.camera = this.render.getCamera();
-  }
-
-  /**
-   * Handles initialization errors by displaying them in the container
-   */
-  private handleInitializationError(error: any, containerSelector: string): never {
-    console.error('Failed to initialize SpaceGraph:', error);
-    // If we have a container reference, display the error in it
-    const container = document.querySelector(
-      containerSelector
-    ) as HTMLElement;
-    if (container) {
-      container.innerHTML = `<div style="color: red; padding: 20px; font-family: monospace;">
-        <h2>Failed to initialize</h2>
-        <p>${(error as Error).message}</p>
-        <pre>${(error as Error).stack}</pre>
-      </div>`;
-    }
-    // Re-throw the error to allow the caller to handle it.
-    throw error;
-  }
-  }
-
-  /**
-   * Checks if the application is running in development mode
-   */
-  private static isDevelopmentMode(): boolean {
-    return (
-      typeof process !== 'undefined' && process.env.NODE_ENV === 'development'
-    );
-  }
-
-  /**
-   * Checks for potential performance issues and shows helpful warnings
+   * Checks for potential performance issues after initialization
    */
   private checkPerformanceIssues(): void {
-    const now = Date.now();
-    // Only check performance every 5 seconds to avoid spam
-    if (now - this.lastPerformanceCheck < 5000) return;
-    this.lastPerformanceCheck = now;
+    const nodes = this.state.data.nodes || [];
 
-    const nodes = this.state.data?.nodes || [];
-    const edges = this.state.data?.edges || [];
-    const performance = this.state.performance;
-
-    // Check for large datasets
-    if (nodes.length > 1000 && !performance?.useBasicRenderer) {
+    if (nodes.length > 0 && nodes.every(node => !node.position)) {
       this.showPerformanceWarning(
-        'large-dataset',
-        `Large dataset detected: ${nodes.length} nodes, ${edges.length} edges.\n` +
-          '⚠️  Consider enabling useBasicRenderer for better performance with large datasets.\n' +
-          '💡 Add { performance: { useBasicRenderer: true } } to your spec'
-      );
-    }
-
-    // Check for missing performance optimizations
-    if (nodes.length > 500) {
-      const missingOptimizations: string[] = [];
-
-      if (!performance?.enableLOD) {
-        missingOptimizations.push(
-          'LOD (Level of Detail) - reduces geometry complexity at distance'
-        );
-      }
-
-      if (!performance?.enableCulling) {
-        missingOptimizations.push(
-          'frustum culling - hides objects outside camera view'
-        );
-      }
-
-      if (!performance?.enableMemoryManagement) {
-        missingOptimizations.push('memory management - optimizes object reuse');
-      }
-
-      if (missingOptimizations.length > 0) {
-        this.showPerformanceWarning(
-          'missing-optimizations',
-          `Performance optimizations available but not enabled:\n${missingOptimizations.map((opt) => `  • ${opt}`).join('\n')}\n` +
-            '💡 Enable in performance settings: { enableLOD: true, enableCulling: true, enableMemoryManagement: true }'
-        );
-      }
-    }
-
-    // Check for high edge to node ratio (potential performance issue)
-    const edgeToNodeRatio = nodes.length > 0 ? edges.length / nodes.length : 0;
-    if (edgeToNodeRatio > 10) {
-      this.showPerformanceWarning(
-        'high-edge-ratio',
-        `High edge-to-node ratio detected: ${edgeToNodeRatio.toFixed(1)} edges per node.\n` +
-          '⚠️  This may cause performance issues with edge rendering.\n' +
-          '💡 Consider reducing edge density or using edge filtering'
-      );
-    }
-
-    // Check for nodes without positions (layout not applied)
-    const nodesWithoutPosition = nodes.filter((node) => !node.position).length;
-    if (nodesWithoutPosition > 0 && nodesWithoutPosition === nodes.length) {
-      this.showPerformanceWarning(
-        'no-layout',
-        `No node positions detected. Layout engine may not be running.\n` +
-          '⚠️  Nodes will not be visible until positioned.\n' +
+        'no-positions',
+        '⚠️  Nodes will not be visible until positioned.\n' +
           '💡 Ensure a layout plugin is enabled and running'
       );
     }
@@ -320,13 +183,13 @@ export class SpaceGraph {
 
     // Check for disabled performance features that should be enabled
     if (
-      performance &&
-      performance.instancingThreshold > 1000 &&
+      this.state.performance &&
+      this.state.performance.instancingThreshold > 1000 &&
       nodes.length > 500
     ) {
       this.showPerformanceWarning(
         'high-instancing-threshold',
-        `Instancing threshold is very high: ${performance.instancingThreshold}.\n` +
+        `Instancing threshold is very high: ${this.state.performance.instancingThreshold}.\n` +
           '⚠️  Consider lowering to 100-200 for better performance with many nodes.\n' +
           '💡 Instanced rendering is more efficient for large numbers of similar objects'
       );
@@ -821,5 +684,12 @@ export class SpaceGraph {
           `✅ ${initializedPlugins.length} plugins initialized successfully: ${initializedPlugins.join(', ')}`
       );
     }
+  }
+
+  /**
+   * Checks if we're running in development mode
+   */
+  public static isDevelopmentMode(): boolean {
+    return typeof process !== 'undefined' && process.env.NODE_ENV === 'development';
   }
 }

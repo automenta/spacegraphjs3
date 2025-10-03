@@ -62,7 +62,7 @@ const VectorIcons = {
   </svg>`,
 
   // Utility function to create icon element
-  createIcon: function(name, className = '') {
+  createIcon: function (name, className = '') {
     const iconContainer = document.createElement('span');
     iconContainer.className = `sg-icon ${className}`;
     iconContainer.innerHTML = this[name] || this.widget;
@@ -70,7 +70,7 @@ const VectorIcons = {
   },
 
   // Add icons to widget headers
-  addWidgetIcons: function(widgetElement) {
+  addWidgetIcons: function (widgetElement) {
     if (!widgetElement) return;
 
     // Add header with icon if not present
@@ -105,7 +105,7 @@ const VectorIcons = {
         widgetElement.appendChild(header);
       }
     }
-  }
+  },
 };
 
 // Export for use in modules

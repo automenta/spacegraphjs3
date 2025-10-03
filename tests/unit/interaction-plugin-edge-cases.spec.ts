@@ -115,6 +115,7 @@ describe('InteractionPlugin Edge Cases', () => {
           domElement: mockRendererEl,
         }),
         getCamera: () => new THREE.PerspectiveCamera(),
+        getScene: () => new THREE.Scene(),
         getNodeRenderer: () => ({
           getRaycastableObjects: () => [mockNodeObject],
           getNodeIdFromIntersection: (intersection: any) => {
