@@ -1,69 +1,29 @@
-import * as THREE from 'three';
-import {
-  acceleratedRaycast,
-  computeBoundsTree,
-  disposeBoundsTree,
-} from 'three-mesh-bvh';
-import {
-  CameraPlugin,
-  HUDPlugin,
-  InteractionPlugin,
-  LayoutPlugin,
-  SpaceGraph,
-  Spec,
-  NodeSpec,
-} from '../src';
+import { SpaceGraph, HUDPlugin, HtmlNodeSpec } from '../src';
 
-// Add the bvh properties to the THREE objects
-THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
-THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
-THREE.Mesh.prototype.raycast = acceleratedRaycast;
-
-// 1. Define the initial state of the graph.
-const initialSpec: Spec = {
-  data: {
-    nodes: [
-      { id: 'n1', type: 'sphere', label: 'Node 1', color: '#ff5733' },
-      { id: 'n2', type: 'sphere', label: 'Node 2', color: '#33ff57' },
-      { id: 'n3', type: 'sphere', label: 'Node 3', color: '#3357ff' },
-      { id: 'n4', type: 'sphere', label: 'Node 4', color: '#ff33a1' },
-      { id: 'n5', type: 'sphere', label: 'Node 5', color: '#a133ff' },
-      {
-        id: 'n6',
-        type: 'html',
-        content: '<div>Hello World!</div>',
-        className: 'my-html-node',
-      } as NodeSpec,
-    ],
-    edges: [
-      { id: 'e1', source: 'n1', target: 'n2' },
-      { id: 'e5', source: 'n2', target: 'n6' },
-      { id: 'e2', source: 'n1', target: 'n3' },
-      { id: 'e3', source: 'n1', target: 'n4' },
-      { id: 'e4', source: 'n1', target: 'n5' },
-    ],
-  },
-  layout: {
-    type: 'random',
-  },
-  camera: {
-    target: { x: 0, y: 0, z: 0 },
-    phi: 0.2,
-    theta: 0.1,
-    distance: 15,
-  },
-  controls: {
-    keyboard: {
-      enabled: true,
-      panSpeed: 0.1,
-      zoomSpeed: 0.1,
-      orbitSpeed: 0.02,
-    },
-  },
-  interaction: {
-    hoveredElementId: null,
-    selectedElementIds: [],
-  },
+// Create a SpaceGraph instance using the simplified API
+const graph = SpaceGraph.create({
+  nodes: [
+    { id: 'n1', type: 'sphere', label: 'Node 1', color: '#ff5733' },
+    { id: 'n2', type: 'sphere', label: 'Node 2', color: '#33ff57' },
+    { id: 'n3', type: 'sphere', label: 'Node 3', color: '#3357ff' },
+    { id: 'n4', type: 'sphere', label: 'Node 4', color: '#ff33a1' },
+    { id: 'n5', type: 'sphere', label: 'Node 5', color: '#a133ff' },
+    {
+      id: 'n6',
+      type: 'html',
+      content: '<div>Hello World!</div>',
+      className: 'my-html-node',
+    } as HtmlNodeSpec,
+  ],
+  edges: [
+    { id: 'e1', source: 'n1', target: 'n2' },
+    { id: 'e5', source: 'n2', target: 'n6' },
+    { id: 'e2', source: 'n1', target: 'n3' },
+    { id: 'e3', source: 'n1', target: 'n4' },
+    { id: 'e4', source: 'n1', target: 'n5' },
+  ],
+  layout: 'random', // Explicitly use random layout
+  container: '#container',
   style: {
     'node:hover': { color: '#ffff00' },
     'node:selected': {
@@ -71,22 +31,28 @@ const initialSpec: Spec = {
       glow: { color: '#ffffff', strength: 1.5 },
     },
   },
+  camera: {
+    phi: 0.2,
+    theta: 0.1,
+    distance: 15,
+  },
+  controls: {
+    keyboard: {
+      panSpeed: 0.1,
+      zoomSpeed: 0.1,
+      orbitSpeed: 0.02,
+    },
+  },
   performance: {
     instancingThreshold: 100,
     // useBasicRenderer: true, // Uncomment this line to use BasicRenderer instead of InstancedRenderer
   },
-};
+});
 
-// 2. Define the plugins to use.
-const plugins = [
-  new LayoutPlugin(),
-  new CameraPlugin(),
-  new InteractionPlugin(),
-  new HUDPlugin(),
-];
-
-// 3. Create the SpaceGraph instance.
-const graph = new SpaceGraph('#container', initialSpec, plugins);
+// For HUD plugin, we need to create a new instance with the old API approach
+// since the simplified API doesn't include HUD by default
+const hudPlugin = new HUDPlugin();
+hudPlugin.init(graph);
 
 // 4. Expose the graph instance for debugging and testing via the console and the HUD REPL.
 (window as any).graph = graph;

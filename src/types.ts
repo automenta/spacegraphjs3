@@ -380,3 +380,26 @@ export interface Spec {
     content?: string;
   };
 }
+
+/**
+ * Simplified specification interface for easy getting started.
+ * Provides sensible defaults for most configuration options.
+ */
+export interface SimpleSpec {
+  /** Array of nodes to display */
+  nodes?: NodeSpec[];
+  /** Array of edges connecting the nodes */
+  edges?: EdgeSpec[];
+  /** Array of groups for organizing nodes */
+  groups?: GroupSpec[];
+  /** Container element selector or HTMLElement */
+  container?: string | HTMLElement;
+  /** Layout type - auto-selected based on data size if not specified */
+  layout?: 'force-directed' | 'grid' | 'circle' | 'column' | 'row' | 'random';
+  /** Enable basic renderer for better performance with large datasets */
+  useBasicRenderer?: boolean;
+  /** Custom styling overrides */
+  style?: DeepPartial<StyleSpec>;
+  /** Camera configuration */
+  camera?: DeepPartial<CameraSpec>;
+}

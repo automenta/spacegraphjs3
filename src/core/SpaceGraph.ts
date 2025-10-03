@@ -8,12 +8,15 @@ import {
   Spec,
   SpecUpdate,
   GraphEventMap,
+  SimpleSpec,
 } from '../types';
 import { RenderingManager } from '../managers/RenderingManager';
 import { EventManager } from '../managers/EventManager';
 import { DataManager } from '../managers/DataManager';
 import { ISpaceGraphPlugin } from './plugin';
 import { CameraPlugin } from '../plugins/CameraPlugin';
+import { LayoutPlugin } from '../plugins/LayoutPlugin';
+import { InteractionPlugin } from '../plugins/InteractionPlugin';
 import { SphereElementActor } from '../renderers/elementActors/SphereElementActor';
 import { BoxElementActor } from '../renderers/elementActors/BoxElementActor';
 import { CustomGeometryActor } from '../renderers/elementActors/CustomGeometryActor';
@@ -121,6 +124,140 @@ export class SpaceGraph {
       // Re-throw the error to allow the caller to handle it.
       throw error;
     }
+  }
+  /**
+   * Factory method for creating a SpaceGraph instance with simplified configuration.
+   * Automatically sets up default plugins, layout, camera positioning, and styling.
+   * @param simpleSpec - Simplified specification with minimal required configuration
+   * @returns A fully configured SpaceGraph instance
+   */
+  public static create(simpleSpec: SimpleSpec): SpaceGraph {
+    // Extract container
+    const container = simpleSpec.container || '#spacegraph';
+
+    // Auto-select layout based on data size
+    const nodeCount = simpleSpec.nodes?.length || 0;
+    const layout = simpleSpec.layout || SpaceGraph.selectLayoutForDataSize(nodeCount);
+
+    // Create full spec with defaults
+    const fullSpec: Spec = {
+      data: {
+        nodes: simpleSpec.nodes || [],
+        edges: simpleSpec.edges || [],
+        groups: simpleSpec.groups,
+      },
+      style: SpaceGraph.getDefaultStyling(),
+      layout: SpaceGraph.createLayoutSpec(layout),
+      camera: SpaceGraph.createDefaultCameraSpec(),
+      controls: {
+        keyboard: {
+          enabled: true,
+          panSpeed: 1.0,
+          zoomSpeed: 0.1,
+          orbitSpeed: 0.01,
+        },
+      },
+      performance: {
+        instancingThreshold: 100,
+        enableLOD: true,
+        enableCulling: true,
+        enableMemoryManagement: true,
+        useBasicRenderer: simpleSpec.useBasicRenderer || false,
+      },
+      interaction: {
+        hoveredElementId: null,
+        selectedElementIds: [],
+      },
+    };
+
+    // Apply custom overrides
+    if (simpleSpec.style) {
+      Object.assign(fullSpec.style, simpleSpec.style);
+    }
+    if (simpleSpec.camera) {
+      Object.assign(fullSpec.camera, simpleSpec.camera);
+    }
+
+    // Create default plugins
+    const plugins = [
+      new LayoutPlugin(),
+      new CameraPlugin(),
+      new InteractionPlugin(),
+    ];
+
+    // Create and return the SpaceGraph instance
+    const containerSelector = typeof container === 'string' ? container : container.id || '#spacegraph';
+    return new SpaceGraph(containerSelector, fullSpec, plugins);
+  }
+
+  /**
+   * Automatically selects the best layout based on data size
+   */
+  private static selectLayoutForDataSize(nodeCount: number): 'force-directed' | 'grid' | 'circle' | 'column' | 'row' | 'random' {
+    if (nodeCount === 0) return 'random';
+    if (nodeCount <= 10) return 'force-directed';
+    if (nodeCount <= 50) return 'circle';
+    if (nodeCount <= 200) return 'grid';
+    return 'column'; // For very large datasets
+  }
+
+  /**
+   * Creates a layout specification from a layout type
+   */
+  private static createLayoutSpec(layoutType: string): any {
+    switch (layoutType) {
+      case 'force-directed':
+        return { type: 'force-directed', charge: -300, linkDistance: 50 };
+      case 'grid':
+        return { type: 'grid', dimensions: 3, spacing: 2 };
+      case 'circle':
+        return { type: 'circle', radius: 10 };
+      case 'column':
+        return { type: 'column', spacing: 2, columns: 5 };
+      case 'row':
+        return { type: 'row', spacing: 2, rows: 5 };
+      case 'random':
+      default:
+        return { type: 'random' };
+    }
+  }
+
+  /**
+   * Creates default camera specification with zero-config positioning
+   */
+  private static createDefaultCameraSpec(): any {
+    return {
+      target: { x: 0, y: 0, z: 0 },
+      phi: Math.PI / 4, // 45 degrees
+      theta: Math.PI / 4, // 45 degrees
+      distance: 50,
+    };
+  }
+
+  /**
+   * Returns default styling presets
+   */
+  private static getDefaultStyling(): any {
+    return {
+      'node:hover': {
+        color: '#ff6b6b',
+        glow: { color: '#ff6b6b', strength: 0.5 },
+      },
+      'node:selected': {
+        color: '#4ecdc4',
+        glow: { color: '#4ecdc4', strength: 0.7 },
+      },
+      'edge:hover': {
+        color: '#ffa726',
+        width: 3,
+        glow: { color: '#ffa726', strength: 0.3 },
+      },
+      'edge:selected': {
+        color: '#ab47bc',
+        width: 3,
+        glow: { color: '#ab47bc', strength: 0.5 },
+      },
+    };
   }
 
   public static registerType(name: string, actorClass: ElementActorClass) {

@@ -11,3 +11,4 @@ playwright-report
 *.d.ts.map
 !src/**/*.d.ts
 .vscode
+.kilocode/
