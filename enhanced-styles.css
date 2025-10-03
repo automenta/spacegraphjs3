@@ -1,0 +1,222 @@
+/* Enhanced SpaceGraphJS Styles */
+
+/* Modern gradient backgrounds */
+.sg-background {
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+}
+
+/* Enhanced widget styling */
+.sg-widget {
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.95)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  padding: 20px !important;
+  min-width: 240px !important;
+  min-height: 120px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(20px) !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 14px !important;
+  color: #ffffff !important;
+  overflow: hidden !important;
+  line-height: 1.5 !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  position: relative !important;
+}
+
+.sg-widget::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 11px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+  pointer-events: none;
+}
+
+/* Widget hover states */
+.sg-widget:hover {
+  box-shadow: 0 12px 40px rgba(0, 255, 0, 0.3), 0 0 20px rgba(0, 255, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  transform: scale(1.05) translateZ(10px) rotateX(1deg) !important;
+  border-color: rgba(0, 255, 0, 0.3) !important;
+}
+
+.sg-widget.selected {
+  box-shadow: 0 16px 48px rgba(0, 255, 0, 0.4), 0 0 24px rgba(0, 255, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  transform: scale(1.08) translateZ(15px) rotateX(2deg) !important;
+  border-color: rgba(0, 255, 0, 0.4) !important;
+}
+
+/* Enhanced navigation panel */
+.sg-nav-panel {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  z-index: 1000;
+  min-width: 280px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.sg-nav-panel h3 {
+  margin: 0 0 12px 0;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.sg-nav-panel a {
+  display: block;
+  color: #ffffff;
+  text-decoration: none;
+  padding: 8px 12px;
+  margin: 4px 0;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  border: 1px solid transparent;
+}
+
+.sg-nav-panel a:hover {
+  background: linear-gradient(135deg, rgba(0, 255, 0, 0.1), rgba(0, 255, 0, 0.05));
+  border-color: rgba(0, 255, 0, 0.3);
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 255, 0, 0.2);
+}
+
+.sg-nav-panel a.current {
+  background: linear-gradient(135deg, rgba(0, 255, 0, 0.2), rgba(0, 255, 0, 0.1));
+  border-color: rgba(0, 255, 0, 0.4);
+  font-weight: 600;
+}
+
+/* Welcome overlay */
+.sg-welcome-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  z-index: 999;
+  max-width: 500px;
+  animation: sg-fadeIn 1s ease-out;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.sg-welcome-overlay h1 {
+  margin: 0 0 16px 0;
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: 700;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+}
+
+.sg-welcome-overlay p {
+  margin: 0 0 24px 0;
+  color: #cccccc;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.sg-welcome-overlay button {
+  background: linear-gradient(135deg, #00ff00, #00cc00);
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  color: #000000;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 255, 0, 0.3);
+}
+
+.sg-welcome-overlay button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 255, 0, 0.4);
+}
+
+@keyframes sg-fadeIn {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.sg-welcome-overlay.hidden {
+  display: none;
+}
+
+/* Enhanced HUD styling */
+.sg-hud-container {
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.95)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(20px) !important;
+}
+
+.sg-hud-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #00ff00, #00ccff, #ff00ff, #ffff00);
+  opacity: 0.8;
+  border-radius: 12px 12px 0 0;
+}
+
+.sg-hud-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 12px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+  pointer-events: none;
+}
+
+/* Enhanced button styling */
+.sg-button {
+  background: linear-gradient(135deg, #00ff00, #00cc00);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  color: #000;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 255, 0, 0.3);
+}
+
+.sg-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 255, 0, 0.4);
+}
+
+/* Utility classes */
+.sg-text-glow {
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.sg-border-glow {
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+}

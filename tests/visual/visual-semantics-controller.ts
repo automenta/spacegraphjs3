@@ -409,6 +409,35 @@ export class VisualSemanticsController {
     this.ensureInitialized();
     await this.page!.waitForTimeout(milliseconds);
   }
+  /**
+   * Wait for a function to return truthy on the page
+   * @param fn Function to evaluate
+   * @param options Wait options
+   */
+  async waitForFunction(fn: () => any, options?: { timeout?: number }): Promise<void> {
+    this.ensureInitialized();
+    await this.page!.waitForFunction(fn, options);
+  }
+
+  /**
+   * Evaluate JavaScript code on the page
+   * @param fn Function to evaluate
+   * @returns Result of evaluation
+   */
+  async evaluate<T>(fn: () => T): Promise<T> {
+    this.ensureInitialized();
+    return this.page!.evaluate(fn);
+  }
+
+  /**
+   * Get a locator for an element on the page
+   * @param selector Element selector
+   * @returns Playwright locator
+   */
+  getLocator(selector: string) {
+    this.ensureInitialized();
+    return this.page!.locator(selector);
+  }
 }
 
 // Interfaces (would typically be in separate files)
