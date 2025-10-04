@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+
 import { Spec, SpecUpdate } from '../types';
 import { RenderingManager } from '../managers/RenderingManager';
 import { EventManager } from '../managers/EventManager';

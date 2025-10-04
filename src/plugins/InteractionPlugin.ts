@@ -13,7 +13,6 @@ import { ResourceManager } from '../utils/ResourceManager';
 import { PerformanceMonitor } from '../utils/PerformanceMonitor';
 import { EnhancedObjectPool } from '../utils/EnhancedObjectPool';
 import { ValidationSystem } from '../utils/ValidationSystem';
-import { DocumentationSystem } from '../utils/DocumentationSystem';
 
 /**
  * A plugin that handles user interactions with the graph, such as clicking, dragging, and hovering.

@@ -8,15 +8,14 @@ import {
   Spec,
   SpecUpdate,
   GraphEventMap,
-  SimpleSpec,
+  
 } from '../types';
 import { RenderingManager } from '../managers/RenderingManager';
 import { EventManager } from '../managers/EventManager';
 import { DataManager } from '../managers/DataManager';
 import { ISpaceGraphPlugin } from './plugin';
 import { CameraPlugin } from '../plugins/CameraPlugin';
-import { LayoutPlugin } from '../plugins/LayoutPlugin';
-import { InteractionPlugin } from '../plugins/InteractionPlugin';
+
 import { SphereElementActor } from '../renderers/elementActors/SphereElementActor';
 import { BoxElementActor } from '../renderers/elementActors/BoxElementActor';
 import { CustomGeometryActor } from '../renderers/elementActors/CustomGeometryActor';

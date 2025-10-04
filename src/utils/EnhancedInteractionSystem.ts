@@ -318,10 +318,56 @@ export class EnhancedInteractionSystem {
    * Handle double click
    */
   private handleDoubleClick(object: THREE.Object3D): void {
-    // Frame object in camera view - functionality removed due to missing frame method
-    // TODO: Implement camera framing for double-click interactions
+    // Frame object in camera view using CameraUtils
+    if (this.cameraControls) {
+      // Calculate optimal camera position to frame the object
+      const cameraTarget = CameraUtils.calculateOptimalPosition(
+        [{ position: object.position }],
+        this.camera,
+        {
+          padding: 1.5,
+          focusMode: 'center',
+          animate: true,
+          duration: 800
+        }
+      );
 
-    this.triggerCallback('doubleclick', object);
+      // Animate camera to new position if available
+      if (cameraTarget.position && cameraTarget.target) {
+        // Simple camera animation
+        const startPosition = this.camera.position.clone();
+        const startTarget = new THREE.Vector3(0, 0, 0);
+        if ((this.camera as any).target) {
+          startTarget.copy((this.camera as any).target);
+        }
+
+        const duration = 800;
+        const startTime = Date.now();
+
+        const animate = () => {
+          const elapsed = Date.now() - startTime;
+          const progress = Math.min(1, elapsed / duration);
+          const easedProgress = progress < 0.5 ? 4 * progress * progress * progress :
+            (progress - 1) * (2 * progress - 2) * (2 * progress - 2) + 1;
+
+          this.camera.position.lerpVectors(startPosition, cameraTarget.position!, easedProgress);
+          const currentTarget = new THREE.Vector3().lerpVectors(startTarget, cameraTarget.target!, easedProgress);
+          this.camera.lookAt(currentTarget);
+
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          } else {
+            this.triggerCallback('doubleclick', object);
+          }
+        };
+
+        animate();
+      } else {
+        this.triggerCallback('doubleclick', object);
+      }
+    } else {
+      this.triggerCallback('doubleclick', object);
+    }
   }
 
   /**

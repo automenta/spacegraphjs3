@@ -29,7 +29,7 @@ import { CircleLayout as _CircleLayout } from '../layouts/CircleLayout';
 import { ColumnLayout as _ColumnLayout } from '../layouts/ColumnLayout';
 import { RowLayout as _RowLayout } from '../layouts/RowLayout';
 import { registerLayouts } from '../layouts/registerLayouts';
-import { validateSpec, formatValidationResult } from '../utils/specValidation';
+
 import { SpaceGraphCore } from './SpaceGraphCore';
 import { SpaceGraphPluginManager } from './SpaceGraphPluginManager';
 import { SpaceGraphInitialization } from './SpaceGraphInitialization';

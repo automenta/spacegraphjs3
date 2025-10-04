@@ -1,5 +1,8 @@
 
 import * as THREE from 'three';
+import { CameraSpec, NodeSpec, EdgeSpec, GroupSpec } from '../types';
+import { ISpaceGraphPlugin } from '../core/plugin';
+import { AnimationConfig } from './animation/CoreAnimationSystem';
 
 /**
  * Comprehensive validation utilities for type safety and runtime validation
@@ -298,7 +301,7 @@ export class ValidationUtils {
   /**
    * Validates that an animation options object is valid
    */
-  public isValidAnimationOptions(options: any, fieldName?: string): options is AnimationOptions {
+  public isValidAnimationOptions(options: any, fieldName?: string): options is AnimationConfig {
     if (!options || typeof options !== 'object') {
       if (fieldName) {
         throw new Error(`Invalid animation options for ${fieldName}: must be an object`);
@@ -2039,8 +2042,8 @@ export class ValidationUtils {
   /**
    * Validates that a debugger function is valid
    */
-  public isValidDebugger(debugger: any, fieldName?: string): boolean {
-    if (typeof debugger !== 'function') {
+  public isValidDebugger(debugFunction: any, fieldName?: string): boolean {
+    if (typeof debugFunction !== 'function') {
       if (fieldName) {
         throw new Error(`Invalid debugger for ${fieldName}: must be a function`);
       }
@@ -2572,8 +2575,8 @@ export class ValidationUtils {
   /**
    * Validates that a debugger function is valid
    */
-  public isValidDebugger(debugger: any, fieldName?: string): boolean {
-    if (typeof debugger !== 'function') {
+  public isValidDebugger(debugFunction: any, fieldName?: string): boolean {
+    if (typeof debugFunction !== 'function') {
       if (fieldName) {
         throw new Error(`Invalid debugger for ${fieldName}: must be a function`);
       }
@@ -3570,18 +3573,6 @@ export class ValidationUtils {
     return true;
   }
 
-  /**
-   * Validates that a timeout function is valid
-   */
-  public isValidTimeout(timeout: any, fieldName?: string): boolean {
-    if (typeof timeout !== 'function') {
-      if (fieldName) {
-        throw new Error(`Invalid timeout for ${fieldName}: must be a function`);
-      }
-      return false;
-    }
-    return true;
-  }
 
   /**
    * Validates that a retry function is valid
@@ -3946,3 +3937,5 @@ export class ValidationUtils {
     }
     return true;
   }
+
+}

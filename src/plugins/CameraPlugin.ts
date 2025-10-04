@@ -15,7 +15,6 @@ import { ResourceManager } from '../utils/ResourceManager';
 import { PerformanceMonitor } from '../utils/PerformanceMonitor';
 import { EnhancedObjectPool } from '../utils/EnhancedObjectPool';
 import { ValidationSystem } from '../utils/ValidationSystem';
-import { DocumentationSystem } from '../utils/DocumentationSystem';
 
 /**
  * A plugin that manages the camera and provides camera control methods.
@@ -166,8 +165,8 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     }, {
       component: 'CameraPlugin',
       rethrow: false,
-      onError: (error, errorInfo) => {
-        this.logger.error('CameraPlugin', 'Failed to initialize CameraPlugin', error);
+      onError: (_error, _errorInfo) => {
+        this.logger.error('CameraPlugin', 'Failed to initialize CameraPlugin', _error);
       }
     });
   }
@@ -658,8 +657,8 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     }, {
       component: 'CameraPlugin',
       rethrow: false,
-      onError: (error, errorInfo) => {
-        this.logger.error('CameraPlugin', 'flyTo operation failed', error);
+      onError: (_error, _errorInfo) => {
+        this.logger.error('CameraPlugin', 'flyTo operation failed', _error);
       }
     });
   }
@@ -1462,8 +1461,8 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     }, {
       component: 'CameraPlugin',
       rethrow: false,
-      onError: (error, errorInfo) => {
-        this.logger.error('CameraPlugin', 'Error during CameraPlugin disposal', error);
+      onError: (_error, _errorInfo) => {
+        this.logger.error('CameraPlugin', 'Error during CameraPlugin disposal', _error);
       }
     });
   }

@@ -7,7 +7,6 @@ import * as THREE from 'three';
 
 // Animation System
 import UnifiedAnimationSystem, {
-  UnifiedAnimationSystem as UnifiedAnimationSystemClass,
   AnimationTask,
   KeyframeAnimation,
   AnimationConfig,
@@ -17,13 +16,11 @@ import UnifiedAnimationSystem, {
 
 // Camera Utils
 import CameraUtils, {
-  CameraUtils as CameraUtilsClass,
   CameraAnimationConfig,
 } from './CameraUtils';
 
 // HUD System - Consolidated
 import UnifiedHUDSystem, {
-  UnifiedHUDSystem as UnifiedHUDSystemClass,
   HUDTheme,
   HUDAnimationConfig,
   HUDElementConfig,
@@ -32,7 +29,6 @@ import UnifiedHUDSystem, {
 
 // Interaction Utils
 import InteractionUtils, {
-  InteractionUtils as InteractionUtilsClass,
   InteractionEvent,
   GestureConfig,
   InteractionState,
@@ -40,21 +36,18 @@ import InteractionUtils, {
 
 // Performance System - Consolidated
 import UnifiedPerformanceSystem, {
-  UnifiedPerformanceSystem as UnifiedPerformanceSystemClass,
   PerformanceMetrics,
   IOptimizationStrategy,
 } from './UnifiedPerformanceSystem';
 
 // Theme System
 import ThemeSystem, {
-  ThemeSystem as ThemeSystemClass,
   Theme,
   ThemeConfig,
 } from './ThemeSystem';
 
 // Visual Effects System
 import VisualEffectsSystem, {
-  VisualEffectsSystem as VisualEffectsSystemClass,
   EffectConfig,
   ParticleEffect,
   GlowEffect,
