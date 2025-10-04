@@ -10,6 +10,12 @@ import { ObjectPoolManager } from '../utils/ObjectPoolManager';
 import { AnimationCurves } from '../utils/AnimationUtils';
 import { CameraUtils } from '../utils/CameraUtils';
 import { Logger } from '../utils/Logger';
+import { ErrorBoundary } from '../utils/ErrorBoundary';
+import { ResourceManager } from '../utils/ResourceManager';
+import { PerformanceMonitor } from '../utils/PerformanceMonitor';
+import { EnhancedObjectPool } from '../utils/EnhancedObjectPool';
+import { ValidationSystem } from '../utils/ValidationSystem';
+import { DocumentationSystem } from '../utils/DocumentationSystem';
 
 /**
  * A plugin that manages the camera and provides camera control methods.
@@ -64,6 +70,11 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     new Map();
   private cameraUtils!: CameraUtils;
   private logger: Logger = Logger.getInstance();
+  private errorBoundary: ErrorBoundary = ErrorBoundary.getInstance();
+  private resourceManager: ResourceManager = ResourceManager.getInstance();
+  private performanceMonitor: PerformanceMonitor = PerformanceMonitor.getInstance();
+  private objectPool: EnhancedObjectPool = EnhancedObjectPool.getInstance();
+  private validationSystem: ValidationSystem = ValidationSystem.getInstance();
 
   /**
    * Recursively sanitize an object to ensure all values are serializable
@@ -120,20 +131,45 @@ export class CameraPlugin implements ISpaceGraphPlugin {
   }
 
   public init(graph: SpaceGraphCore): void {
-    this.graph = graph;
-    this.threeCamera = graph.render.getCamera();
-    this.presetsManager = new CameraPresetsManager(graph);
-    this.cameraUtils = new CameraUtils(
-      this.threeCamera,
-      graph.render.getScene()
-    );
-    this.logger.setGraph(graph);
-    this.syncCameraToState();
-    this.initKeyboardControls();
-    this.setupAutoFrameWatcher();
-    this.setupPresetCommands();
-    this.setupTouchGestures();
-    this.setupInertiaSystem();
+    this.errorBoundary.execute(() => {
+      // Validate inputs
+      this.validationSystem.assert(graph, 'SpaceGraphCore', { context: 'CameraPlugin.init' });
+
+      this.graph = graph;
+      this.threeCamera = graph.render.getCamera();
+
+      // Register camera resource for tracking
+      this.resourceManager.registerResource(this.threeCamera, 'PerspectiveCamera', {
+        plugin: 'CameraPlugin',
+        purpose: 'Main camera instance'
+      });
+
+      this.presetsManager = new CameraPresetsManager(graph);
+      this.cameraUtils = new CameraUtils(
+        this.threeCamera,
+        graph.render.getScene()
+      );
+
+      this.logger.setGraph(graph);
+
+      // Set up enhanced object pooling for Three.js objects
+      this.objectPool.createThreeJSPools();
+
+      this.syncCameraToState();
+      this.initKeyboardControls();
+      this.setupAutoFrameWatcher();
+      this.setupPresetCommands();
+      this.setupTouchGestures();
+      this.setupInertiaSystem();
+
+      this.logger.info('CameraPlugin', 'CameraPlugin initialized successfully');
+    }, {
+      component: 'CameraPlugin',
+      rethrow: false,
+      onError: (error, errorInfo) => {
+        this.logger.error('CameraPlugin', 'Failed to initialize CameraPlugin', error);
+      }
+    });
   }
 
   /**
@@ -524,10 +560,10 @@ export class CameraPlugin implements ISpaceGraphPlugin {
   }
 
   /**
-   * Animates the camera state to a new target.
-   * @param targetState - The target camera state.
-   * @param options - Animation options.
-   */
+    * Animates the camera state to a new target.
+    * @param targetState - The target camera state.
+    * @param options - Animation options.
+    */
   public flyTo(
     targetState: Partial<SpecUpdate['camera']>,
     options: {
@@ -537,7 +573,13 @@ export class CameraPlugin implements ISpaceGraphPlugin {
       onComplete?: () => void;
       interruptible?: boolean;
     } = { duration: 1000, interruptible: true }
-  ) {
+  ): void {
+    this.errorBoundary.execute(() => {
+      // Validate inputs
+      this.validationSystem.assert(targetState, 'CameraSpec', { context: 'CameraPlugin.flyTo' });
+      this.validationSystem.assert(options, 'AnimationOptions', { context: 'CameraPlugin.flyTo' });
+
+      this.performanceMonitor.measure('CameraPlugin.flyTo', () => {
     // If there's an ongoing animation and it's not interruptible, queue this one
     if (this.isAnimating && !options.interruptible) {
       this.animationCallbacks.push(() => this.flyTo(targetState, options));
@@ -611,7 +653,14 @@ export class CameraPlugin implements ISpaceGraphPlugin {
             nextCallback();
           }
         }
-      },
+      }});
+     }, { context: 'CameraPlugin.flyTo' });
+    }, {
+      component: 'CameraPlugin',
+      rethrow: false,
+      onError: (error, errorInfo) => {
+        this.logger.error('CameraPlugin', 'flyTo operation failed', error);
+      }
     });
   }
 
@@ -1382,12 +1431,41 @@ export class CameraPlugin implements ISpaceGraphPlugin {
   }
 
   public dispose(): void {
-    if (this.boundOnKeyDown) {
-      window.removeEventListener('keydown', this.boundOnKeyDown);
-    }
-    if (this.boundOnKeyUp) {
-      window.removeEventListener('keyup', this.boundOnKeyUp);
-    }
+    this.errorBoundary.execute(() => {
+      // Clean up event listeners
+      if (this.boundOnKeyDown) {
+        window.removeEventListener('keydown', this.boundOnKeyDown);
+      }
+      if (this.boundOnKeyUp) {
+        window.removeEventListener('keyup', this.boundOnKeyUp);
+      }
+
+      // Clear animation callbacks and queues
+      this.animationCallbacks.length = 0;
+      this.animationQueue.length = 0;
+
+      // Reset state
+      this.activeKeys.clear();
+      this.isAnimating = false;
+      this.isPathFollowing = false;
+      this.cameraShakeIntensity = 0;
+
+      // Dispose of resources
+      if (this.threeCamera) {
+        this.resourceManager.registerResource(this.threeCamera, 'PerspectiveCamera', {
+          plugin: 'CameraPlugin',
+          purpose: 'Main camera instance - disposed'
+        });
+      }
+
+      this.logger.info('CameraPlugin', 'CameraPlugin disposed successfully');
+    }, {
+      component: 'CameraPlugin',
+      rethrow: false,
+      onError: (error, errorInfo) => {
+        this.logger.error('CameraPlugin', 'Error during CameraPlugin disposal', error);
+      }
+    });
   }
 
   /**

@@ -7,6 +7,13 @@ import { DragState, HoverState, WheelState } from '../types/use-gesture';
 import { EdgeSpec, GroupSpec, NodeSpec } from '../types';
 import { ContextMenuManager } from '../utils/ContextMenuManager';
 import { ErrorHandler } from '../utils/ErrorHandler';
+import { Logger } from '../utils/Logger';
+import { ErrorBoundary } from '../utils/ErrorBoundary';
+import { ResourceManager } from '../utils/ResourceManager';
+import { PerformanceMonitor } from '../utils/PerformanceMonitor';
+import { EnhancedObjectPool } from '../utils/EnhancedObjectPool';
+import { ValidationSystem } from '../utils/ValidationSystem';
+import { DocumentationSystem } from '../utils/DocumentationSystem';
 
 /**
  * A plugin that handles user interactions with the graph, such as clicking, dragging, and hovering.
@@ -37,69 +44,97 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
   private contextMenuManager: ContextMenuManager = new ContextMenuManager();
   private groupVisualizations: Map<string, THREE.Group> = new Map(); // Visual representations of groups
   private errorHandler: ErrorHandler = ErrorHandler.getInstance();
+  private logger: Logger = Logger.getInstance();
+  private errorBoundary: ErrorBoundary = ErrorBoundary.getInstance();
+  private resourceManager: ResourceManager = ResourceManager.getInstance();
+  private performanceMonitor: PerformanceMonitor = PerformanceMonitor.getInstance();
+  private objectPool: EnhancedObjectPool = EnhancedObjectPool.getInstance();
+  private validationSystem: ValidationSystem = ValidationSystem.getInstance();
 
   public init(graph: SpaceGraphCore): void {
-    this.graph = graph;
-    this.rendererEl = this.graph.render.getRendererDomElement();
-    this.dragPlane = new THREE.Plane();
+    this.errorBoundary.execute(() => {
+      // Validate inputs
+      this.validationSystem.assert(graph, 'SpaceGraphCore', { context: 'InteractionPlugin.init' });
 
-    this.gesture = new Gesture(
-      this.rendererEl,
-      {
-        onDrag: (state) => this.onDrag(state as unknown as DragState),
-        onHover: (state) => this.onHover(state as unknown as HoverState),
-        onWheel: (state) => this.onWheel(state as unknown as WheelState),
-      },
-      {
-        drag: {
-          filterTaps: true,
-          preventDefault: true,
-          pointer: { capture: true },
-          eventOptions: { passive: false },
-        },
-        hover: {
-          enabled: true,
-        },
-        wheel: {
-          preventDefault: true,
-          eventOptions: { passive: false },
-        },
-      }
-    );
+      this.graph = graph;
+      this.rendererEl = this.graph.render.getRendererDomElement();
+      this.dragPlane = new THREE.Plane();
 
-    this.boundOnClick = this.onClick.bind(this) as unknown as (
-      event: PointerEvent
-    ) => void;
-    this.boundOnContextMenu = this.onContextMenu.bind(this) as unknown as (
-      event: PointerEvent
-    ) => void;
-    this.rendererEl.addEventListener(
-      'click',
-      this.boundOnClick as EventListener,
-      { passive: false }
-    );
-    this.rendererEl.addEventListener(
-      'contextmenu',
-      this.boundOnContextMenu as EventListener,
-      { passive: false }
-    );
-
-    this.graph.events.on('element:click', ({ target, event }) => {
-      // Only handle node and edge clicks, not groups
-      if (!('position' in target) && !('source' in target)) return;
-
-      const isMultiSelect = event.metaKey || event.ctrlKey;
-      const currentSelection =
-        this.graph.state.interaction?.selectedElementIds ?? [];
-      const newSelection = isMultiSelect
-        ? currentSelection.includes(target.id)
-          ? currentSelection.filter((id) => id !== target.id)
-          : [...currentSelection, target.id]
-        : [target.id];
-
-      this.graph.update({
-        interaction: { selectedElementIds: newSelection },
+      // Register drag plane resource
+      this.resourceManager.registerResource(this.dragPlane, 'Plane', {
+        plugin: 'InteractionPlugin',
+        purpose: 'Drag plane for interaction calculations'
       });
+
+      // Set up enhanced object pooling for Three.js objects
+      this.objectPool.createThreeJSPools();
+
+      this.gesture = new Gesture(
+        this.rendererEl,
+        {
+          onDrag: (state) => this.onDrag(state as unknown as DragState),
+          onHover: (state) => this.onHover(state as unknown as HoverState),
+          onWheel: (state) => this.onWheel(state as unknown as WheelState),
+        },
+        {
+          drag: {
+            filterTaps: true,
+            preventDefault: true,
+            pointer: { capture: true },
+            eventOptions: { passive: false },
+          },
+          hover: {
+            enabled: true,
+          },
+          wheel: {
+            preventDefault: true,
+            eventOptions: { passive: false },
+          },
+        }
+      );
+
+      this.boundOnClick = this.onClick.bind(this) as unknown as (
+        event: PointerEvent
+      ) => void;
+      this.boundOnContextMenu = this.onContextMenu.bind(this) as unknown as (
+        event: PointerEvent
+      ) => void;
+      this.rendererEl.addEventListener(
+        'click',
+        this.boundOnClick as EventListener,
+        { passive: false }
+      );
+      this.rendererEl.addEventListener(
+        'contextmenu',
+        this.boundOnContextMenu as EventListener,
+        { passive: false }
+      );
+
+      this.graph.events.on('element:click', ({ target, event }) => {
+        // Only handle node and edge clicks, not groups
+        if (!('position' in target) && !('source' in target)) return;
+
+        const isMultiSelect = event.metaKey || event.ctrlKey;
+        const currentSelection =
+          this.graph.state.interaction?.selectedElementIds ?? [];
+        const newSelection = isMultiSelect
+          ? currentSelection.includes(target.id)
+            ? currentSelection.filter((id) => id !== target.id)
+            : [...currentSelection, target.id]
+          : [target.id];
+
+        this.graph.update({
+          interaction: { selectedElementIds: newSelection },
+        });
+      });
+
+      this.logger.info('InteractionPlugin', 'InteractionPlugin initialized successfully');
+    }, {
+      component: 'InteractionPlugin',
+      rethrow: false,
+      onError: (error, errorInfo) => {
+        this.logger.error('InteractionPlugin', 'Failed to initialize InteractionPlugin', error);
+      }
     });
   }
 
@@ -561,20 +596,54 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
   }
 
   public dispose(): void {
-    if (this.gesture) {
-      this.gesture.destroy();
-    }
-    this.rendererEl.removeEventListener(
-      'click',
-      this.boundOnClick as EventListener
-    );
-    this.rendererEl.removeEventListener(
-      'contextmenu',
-      this.boundOnContextMenu as EventListener
-    );
-    this.contextMenuManager.hideContextMenu();
-    this.clearAllEdgeEditHandles();
-    this.clearAllGroupVisualizations();
+    this.errorBoundary.execute(() => {
+      // Clean up gesture system
+      if (this.gesture) {
+        this.gesture.destroy();
+      }
+
+      // Clean up event listeners
+      this.rendererEl.removeEventListener(
+        'click',
+        this.boundOnClick as EventListener
+      );
+      this.rendererEl.removeEventListener(
+        'contextmenu',
+        this.boundOnContextMenu as EventListener
+      );
+
+      // Clean up context menu
+      this.contextMenuManager.hideContextMenu();
+
+      // Clear all edge edit handles and group visualizations
+      this.clearAllEdgeEditHandles();
+      this.clearAllGroupVisualizations();
+
+      // Clear state
+      this.selectedEdgeIds.length = 0;
+      this.edgeEditHandles.clear();
+      this.groupVisualizations.clear();
+
+      // Reset drag state
+      this.draggedElementId = null;
+      this.draggedGroupId = null;
+      this.hoveredEdgeId = null;
+      this.isDragging = false;
+
+      // Dispose of drag plane resource
+      this.resourceManager.registerResource(this.dragPlane, 'Plane', {
+        plugin: 'InteractionPlugin',
+        purpose: 'Drag plane - disposed'
+      });
+
+      this.logger.info('InteractionPlugin', 'InteractionPlugin disposed successfully');
+    }, {
+      component: 'InteractionPlugin',
+      rethrow: false,
+      onError: (error, errorInfo) => {
+        this.logger.error('InteractionPlugin', 'Error during InteractionPlugin disposal', error);
+      }
+    });
   }
 
   private getIntersectedElement(event: MouseEvent | PointerEvent) {
