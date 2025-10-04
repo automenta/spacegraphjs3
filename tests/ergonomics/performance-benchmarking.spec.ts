@@ -13,7 +13,7 @@ test.describe('Performance Benchmarking for Ergonomics', () => {
   });
 
   test('Camera movement performance benchmark', async ({ page }) => {
-    await page.goto('/element-actors-demo.html');
+    await page.goto('/examples/element-actors-demo.html');
 
     await page.waitForFunction(() => (window as any).graph, {
       timeout: 10000,
@@ -149,7 +149,7 @@ test.describe('Performance Benchmarking for Ergonomics', () => {
   });
 
   test('Interaction responsiveness benchmark', async ({ page }) => {
-    await page.goto('/element-actors-demo.html');
+    await page.goto('/examples/element-actors-demo.html');
 
     await page.waitForFunction(() => (window as any).graph, {
       timeout: 10000,
@@ -265,7 +265,7 @@ test.describe('Performance Benchmarking for Ergonomics', () => {
   });
 
   test('Rendering performance under load', async ({ page }) => {
-    await page.goto('/large-graph.html');
+    await page.goto('/examples/large-graph.html');
 
     await page.waitForFunction(() => (window as any).graph, {
       timeout: 10000,
@@ -345,7 +345,7 @@ test.describe('Performance Benchmarking for Ergonomics', () => {
   });
 
   test('Animation system performance', async ({ page }) => {
-    await page.goto('/element-actors-demo.html');
+    await page.goto('/examples/element-actors-demo.html');
 
     await page.waitForFunction(() => (window as any).graph, {
       timeout: 10000,
@@ -444,7 +444,7 @@ test.describe('Performance Benchmarking for Ergonomics', () => {
   });
 
   test('Memory usage and cleanup efficiency', async ({ page }) => {
-    await page.goto('/element-actors-demo.html');
+    await page.goto('/examples/element-actors-demo.html');
 
     await page.waitForFunction(() => (window as any).graph, {
       timeout: 10000,

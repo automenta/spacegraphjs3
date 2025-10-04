@@ -1,7 +1,7 @@
 import { expect, test } from './utils';
 
 test('instanced interaction with basic renderer', async ({ page }) => {
-  await page.goto('/instanced-interaction.html');
+  await page.goto('/examples/instanced-interaction.html');
 
   // Modify the spec to use BasicRenderer
   await page.evaluate(() => {

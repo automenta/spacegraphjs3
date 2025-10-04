@@ -14,7 +14,7 @@ test.describe('Practical Visual Semantics Tests', () => {
 
   test('Element actors base visualization', async ({ page }) => {
     // Navigate to element actors demo
-    await page.goto('/element-actors-demo.html');
+    await page.goto('/examples/element-actors-demo.html');
 
     // Wait for graph to initialize
     await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
@@ -35,7 +35,7 @@ test.describe('Practical Visual Semantics Tests', () => {
 
   test('Node hover interaction visualization', async ({ page }) => {
     // Navigate to element actors demo
-    await page.goto('/element-actors-demo.html');
+    await page.goto('/examples/element-actors-demo.html');
 
     // Wait for graph to initialize
     await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
@@ -66,7 +66,7 @@ test.describe('Practical Visual Semantics Tests', () => {
 
   test('Node selection visualization', async ({ page }) => {
     // Navigate to element actors demo
-    await page.goto('/element-actors-demo.html');
+    await page.goto('/examples/element-actors-demo.html');
 
     // Wait for graph to initialize
     await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
@@ -97,7 +97,7 @@ test.describe('Practical Visual Semantics Tests', () => {
 
   test('Edge interaction visualization', async ({ page }) => {
     // Navigate to edge interaction demo
-    await page.goto('/edge-interaction.html');
+    await page.goto('/examples/edge-interaction.html');
 
     // Wait for graph to initialize
     await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
@@ -129,7 +129,7 @@ test.describe('Practical Visual Semantics Tests', () => {
 
   test('Complex interaction sequence', async ({ page }) => {
     // Navigate to element actors demo
-    await page.goto('/element-actors-demo.html');
+    await page.goto('/examples/element-actors-demo.html');
 
     // Wait for graph to initialize
     await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
@@ -171,7 +171,7 @@ test.describe('Practical Visual Semantics Tests', () => {
 
   test('Layout engines visualization', async ({ page }) => {
     // Navigate to layout engines demo
-    await page.goto('/layout-engines-demo.html');
+    await page.goto('/examples/layout-engines-demo.html');
 
     // Wait for graph to initialize
     await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });
@@ -192,7 +192,7 @@ test.describe('Practical Visual Semantics Tests', () => {
 
   test('Performance optimizations visualization', async ({ page }) => {
     // Navigate to performance optimizations demo
-    await page.goto('/performance-optimizations.html');
+    await page.goto('/examples/performance-optimizations.html');
 
     // Wait for graph to initialize
     await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });

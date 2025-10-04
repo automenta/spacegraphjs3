@@ -1,7 +1,7 @@
 import { expect, test } from './utils';
 
 test('basic renderer test', async ({ page }) => {
-  await page.goto('/basic-renderer-test.html');
+  await page.goto('/examples/basic-renderer-test.html');
 
   // Wait for the graph to be initialized
   await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });

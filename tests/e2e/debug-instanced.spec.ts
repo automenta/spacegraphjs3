@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('debug instanced interaction', async ({ page }) => {
-  await page.goto('/instanced-interaction.html');
+  await page.goto('/examples/instanced-interaction.html');
 
   // Wait for the graph to be initialized
   await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });

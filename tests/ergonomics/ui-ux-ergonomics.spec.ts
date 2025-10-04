@@ -17,7 +17,7 @@ test.describe('UI/UX Ergonomics Validation', () => {
     page,
   }) => {
     // Navigate to element actors demo for comprehensive testing
-    await page.goto('/element-actors-demo.html');
+    await page.goto('/examples/element-actors-demo.html');
 
     // Wait for graph to initialize
     await page.waitForFunction(() => (window as any).graph, {
@@ -70,7 +70,7 @@ test.describe('UI/UX Ergonomics Validation', () => {
   });
 
   test('Camera flyTo animation smoothness', async ({ page }) => {
-    await page.goto('/element-actors-demo.html');
+    await page.goto('/examples/element-actors-demo.html');
 
     await page.waitForFunction(() => (window as any).graph, {
       timeout: 10000,
@@ -118,7 +118,7 @@ test.describe('UI/UX Ergonomics Validation', () => {
   });
 
   test('Touch target size compliance', async ({ page }) => {
-    await page.goto('/element-actors-demo.html');
+    await page.goto('/examples/element-actors-demo.html');
 
     await page.waitForFunction(() => (window as any).graph, {
       timeout: 10000,
@@ -165,7 +165,7 @@ test.describe('UI/UX Ergonomics Validation', () => {
   });
 
   test('Visibility and occlusion testing', async ({ page }) => {
-    await page.goto('/large-graph.html');
+    await page.goto('/examples/large-graph.html');
 
     await page.waitForFunction(() => (window as any).graph, {
       timeout: 10000,
@@ -221,7 +221,7 @@ test.describe('UI/UX Ergonomics Validation', () => {
     }
   });
   test('Text readability and font accessibility', async ({ page }) => {
-    await page.goto('/element-actors-demo.html');
+    await page.goto('/examples/element-actors-demo.html');
 
     await page.waitForFunction(() => (window as any).graph, {
       timeout: 10000,
@@ -294,7 +294,7 @@ test.describe('UI/UX Ergonomics Validation', () => {
   });
 
   test('Interaction feedback responsiveness', async ({ page }) => {
-    await page.goto('/element-actors-demo.html');
+    await page.goto('/examples/element-actors-demo.html');
 
     await page.waitForFunction(() => (window as any).graph, {
       timeout: 10000,
@@ -339,7 +339,7 @@ test.describe('UI/UX Ergonomics Validation', () => {
   });
 
   test('Animation smoothness and frame rate', async ({ page }) => {
-    await page.goto('/element-actors-demo.html');
+    await page.goto('/examples/element-actors-demo.html');
 
     await page.waitForFunction(() => (window as any).graph, {
       timeout: 10000,
@@ -415,7 +415,7 @@ test.describe('UI/UX Ergonomics Validation', () => {
   });
 
   test('Color contrast ratio compliance', async ({ page }) => {
-    await page.goto('/element-actors-demo.html');
+    await page.goto('/examples/element-actors-demo.html');
 
     await page.waitForFunction(() => (window as any).graph, {
       timeout: 10000,
@@ -461,7 +461,7 @@ test.describe('UI/UX Ergonomics Validation', () => {
   });
 
   test('Keyboard navigation support', async ({ page }) => {
-    await page.goto('/element-actors-demo.html');
+    await page.goto('/examples/element-actors-demo.html');
 
     await page.waitForFunction(() => (window as any).graph, {
       timeout: 10000,
@@ -505,7 +505,7 @@ test.describe('UI/UX Ergonomics Validation', () => {
   });
 
   test('Screen reader accessibility', async ({ page }) => {
-    await page.goto('/element-actors-demo.html');
+    await page.goto('/examples/element-actors-demo.html');
 
     await page.waitForFunction(() => (window as any).graph, {
       timeout: 10000,
@@ -550,7 +550,7 @@ test.describe('UI/UX Ergonomics Validation', () => {
   });
 
   test('Response time performance', async ({ page }) => {
-    await page.goto('/element-actors-demo.html');
+    await page.goto('/examples/element-actors-demo.html');
 
     await page.waitForFunction(() => (window as any).graph, {
       timeout: 10000,
@@ -627,7 +627,7 @@ test.describe('UI/UX Ergonomics Validation', () => {
   });
 
   test('Visual feedback for interactions', async ({ page }) => {
-    await page.goto('/element-actors-demo.html');
+    await page.goto('/examples/element-actors-demo.html');
 
     await page.waitForFunction(() => (window as any).graph, {
       timeout: 10000,

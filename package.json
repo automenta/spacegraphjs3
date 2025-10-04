@@ -18,7 +18,8 @@
     "test:visual-perf": "npx playwright test tests/visual/performance-metrics-demo.spec.ts",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "screenshots": "node doc/screenshots/capture-all.js"
+    "generate-screenshots": "npx ts-node docs/generate-screenshots.ts",
+    "generate-docs": "npm run generate-screenshots"
   },
   "repository": {
     "type": "git",

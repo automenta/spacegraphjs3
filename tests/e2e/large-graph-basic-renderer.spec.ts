@@ -1,7 +1,7 @@
 import { expect, test } from './utils';
 
 test('large graph with basic renderer', async ({ page }) => {
-  await page.goto('/large-graph.html');
+  await page.goto('/examples/large-graph.html');
 
   // Modify the spec to use BasicRenderer
   await page.evaluate(() => {

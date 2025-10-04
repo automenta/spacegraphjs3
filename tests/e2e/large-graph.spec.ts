@@ -2,7 +2,7 @@ import { expect, test } from './utils';
 
 test('large graph visual test', async ({ page }) => {
   // Given
-  await page.goto('/large-graph.html');
+  await page.goto('/examples/large-graph.html');
 
   // Wait for the graph to be initialized
   await page.waitForFunction(() => (window as any).graph, { timeout: 10000 });

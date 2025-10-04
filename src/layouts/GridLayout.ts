@@ -1,18 +1,6 @@
 import { createEffect } from 'solid-js';
-import { SpaceGraph as _SpaceGraph } from '../core/SpaceGraph';
-import { NodeSpec as _NodeSpec } from '../types';
+import { GridLayoutSpec } from '../types';
 import { BaseLayoutEngine } from './BaseLayoutEngine';
-
-export interface GridLayoutSpec {
-  type: 'grid';
-  dimensions?: 2 | 3; // 2D or 3D grid
-  spacing?: number; // Distance between nodes
-  columns?: number; // Number of columns (auto-calculated if not specified)
-  rows?: number; // Number of rows (auto-calculated if not specified)
-  depth?: number; // Number of depth layers for 3D (auto-calculated if not specified)
-  origin?: { x: number; y: number; z: number }; // Starting position
-  axisOrder?: ['x' | 'y' | 'z', 'x' | 'y' | 'z', 'x' | 'y' | 'z']; // Traversal order
-}
 
 /**
  * GridLayout - Arranges nodes in a 2D or 3D grid pattern

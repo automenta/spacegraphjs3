@@ -28,7 +28,7 @@ test.describe('Ergonomics Validation with Visual Testing', () => {
 
   test.beforeEach(async () => {
     // Navigate to the main demo page for comprehensive testing
-    await controller.navigateTo('/element-actors-demo.html');
+    await controller.navigateTo('/examples/element-actors-demo.html');
   });
 
   test('Camera Controls Ergonomics Validation', async () => {
@@ -209,7 +209,7 @@ test.describe('Ergonomics Validation with Visual Testing', () => {
 
   test('Videogame-like Responsiveness Benchmark', async () => {
     // Navigate to performance-intensive demo
-    await controller.navigateTo('/large-graph.html');
+    await controller.navigateTo('/examples/large-graph.html');
 
     const startTime = Date.now();
 

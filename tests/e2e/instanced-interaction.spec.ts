@@ -3,7 +3,7 @@ import { expect, test } from './utils';
 test.describe('Instanced Renderer Interaction', () => {
   test.beforeEach(async ({ page }) => {
     test.setTimeout(60000);
-    await page.goto('/instanced-interaction.html');
+    await page.goto('/examples/instanced-interaction.html');
     // Wait for the graph to be initialized
     await page.waitForFunction(() => (window as any).graph);
     // Wait for the instanced renderer to be ready

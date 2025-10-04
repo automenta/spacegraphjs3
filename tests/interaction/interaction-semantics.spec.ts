@@ -8,7 +8,7 @@ test.describe('Interaction Semantics Test Suite', () => {
 
   test('Node selection interaction semantics', async ({ page: _page }) => {
     // Navigate to element actors demo
-    await _page.goto('/element-actors-demo.html');
+    await _page.goto('/examples/element-actors-demo.html');
 
     // Wait for graph to initialize
     await _page.waitForFunction(() => (window as any).graph, {
@@ -48,7 +48,7 @@ test.describe('Interaction Semantics Test Suite', () => {
 
   test('Node hover interaction semantics', async ({ page: _page }) => {
     // Navigate to element actors demo
-    await _page.goto('/element-actors-demo.html');
+    await _page.goto('/examples/element-actors-demo.html');
 
     // Wait for graph to initialize
     await _page.waitForFunction(() => (window as any).graph, {
@@ -88,7 +88,7 @@ test.describe('Interaction Semantics Test Suite', () => {
 
   test('Edge interaction semantics', async ({ page: _page }) => {
     // Navigate to edge interaction demo
-    await _page.goto('/edge-interaction.html');
+    await _page.goto('/examples/edge-interaction.html');
 
     // Wait for graph to initialize
     await _page.waitForFunction(() => (window as any).graph, {
@@ -135,7 +135,7 @@ test.describe('Interaction Semantics Test Suite', () => {
 
   test('Multi-selection interaction semantics', async ({ page: _page }) => {
     // Navigate to element actors demo
-    await _page.goto('/element-actors-demo.html');
+    await _page.goto('/examples/element-actors-demo.html');
 
     // Wait for graph to initialize
     await _page.waitForFunction(() => (window as any).graph, {
@@ -188,7 +188,7 @@ test.describe('Interaction Semantics Test Suite', () => {
 
   test('Drag interaction semantics', async ({ page: _page }) => {
     // Navigate to instanced interaction demo
-    await _page.goto('/instanced-interaction.html');
+    await _page.goto('/examples/instanced-interaction.html');
 
     // Wait for graph to initialize and instanced renderer to be ready
     await _page.waitForFunction(() => (window as any).graph);
@@ -273,7 +273,7 @@ test.describe('Interaction Semantics Test Suite', () => {
 
   test('Keyboard navigation semantics', async ({ page: _page }) => {
     // Navigate to element actors demo
-    await _page.goto('/element-actors-demo.html');
+    await _page.goto('/examples/element-actors-demo.html');
 
     // Wait for graph to initialize
     await _page.waitForFunction(() => (window as any).graph, {

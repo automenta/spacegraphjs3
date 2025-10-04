@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('debug large graph', async ({ page }) => {
-  await page.goto('/large-graph.html');
+  await page.goto('/examples/large-graph.html');
 
   console.log('Page loaded, waiting for graph...');
 
