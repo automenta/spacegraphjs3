@@ -4,7 +4,7 @@ import { AdvancedCameraControls } from '../src/utils/AdvancedCameraControls';
 import { EnhancedInteractionSystem } from '../src/utils/EnhancedInteractionSystem';
 import { UnifiedHUDSystem } from '../src/utils/UnifiedHUDSystem';
 import { UnifiedPerformanceSystem } from '../src/utils/UnifiedPerformanceSystem';
-import { UnifiedAnimationSystem } from '../src/utils/UnifiedAnimationSystem';
+import { UnifiedAnimationSystem } from '../src/utils/animation/CoreAnimationSystem';
 import { VisualFeedbackSystem } from '../src/utils/VisualFeedbackSystem';
 
 /**

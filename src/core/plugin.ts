@@ -1,4 +1,4 @@
-import { SpaceGraph } from './SpaceGraph';
+import { SpaceGraphCore } from './SpaceGraphCore';
 import { SpecUpdate } from '../types';
 
 /**
@@ -30,7 +30,7 @@ export interface ISpaceGraphPlugin {
    * Initializes the plugin. This method is called by the SpaceGraph constructor.
    * @param graph - The SpaceGraph instance.
    */
-  init(graph: SpaceGraph): void;
+  init(graph: SpaceGraphCore): void;
 
   /**
    * Called when the graph state is updated.

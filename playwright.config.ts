@@ -6,6 +6,7 @@ export default defineConfig({
     '**/e2e/**/*.spec.ts',
     '**/ergonomics/**/*.spec.ts',
     '**/visual/**/*.spec.ts',
+    '**/spacegraph-red-square.spec.ts',
   ],
   use: {
     baseURL: 'http://localhost:5174',

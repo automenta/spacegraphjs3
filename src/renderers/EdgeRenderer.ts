@@ -7,7 +7,7 @@ import {
   safeDisposeObject,
   safeDisposeGeometry,
   safeDisposeMaterial,
-} from '../utils/threeUtils';
+} from '../utils/ThreeUtils';
 import { animateProperty } from '../utils/AnimationUtils';
 
 export class EdgeRenderer {

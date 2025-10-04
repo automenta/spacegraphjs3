@@ -2,17 +2,17 @@ import * as THREE from 'three';
 import { createEffect } from 'solid-js';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { CSS3DRenderer } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
-import { SpaceGraph } from '../core/SpaceGraph';
+import { SpaceGraphCore } from '../core/SpaceGraphCore';
 import { IRenderer } from '../renderers/IRenderer';
 import { NodeRenderer } from '../renderers/NodeRenderer';
 import { EdgeRenderer } from '../renderers/EdgeRenderer';
 import { HTMLRenderer } from '../renderers/HTMLRenderer';
 import { InstancedRenderer } from '../renderers/InstancedRenderer';
 import { BasicRenderer } from '../renderers/BasicRenderer';
-import { ThreeObjectPoolManager } from '../utils/ThreeObjectPoolManager';
+import { ObjectPoolManager } from '../utils/ObjectPoolManager';
 import { LODManager } from '../utils/LODManager';
 import { CullingManager } from '../utils/CullingManager';
-import { MemoryManager } from '../utils/MemoryManager';
+import { UnifiedDisposalSystem } from '../utils/UnifiedDisposalSystem';
 import { AdvancedRenderingOptimizer } from '../utils/UnifiedPerformanceSystem';
 
 /**
@@ -28,7 +28,7 @@ export class RenderingManager {
   private readonly cssScene: THREE.Scene;
   private readonly css3DScene: THREE.Scene;
   private readonly camera: THREE.PerspectiveCamera;
-  private graph: SpaceGraph;
+  private graph: SpaceGraphCore;
 
   private nodeRenderer!: IRenderer;
   private edgeRenderer!: EdgeRenderer;
@@ -36,14 +36,14 @@ export class RenderingManager {
   private isLooping = true;
 
   // Performance optimization systems
-  private objectPoolManager: ThreeObjectPoolManager;
+  private objectPoolManager: ObjectPoolManager;
   private lodManager?: LODManager;
   private cullingManager?: CullingManager;
-  private memoryManager?: MemoryManager;
+  private memoryManager?: UnifiedDisposalSystem;
   private renderingOptimizer!: AdvancedRenderingOptimizer;
   private lastFrameTime: number = performance.now();
 
-  constructor(graph: SpaceGraph, container: HTMLElement) {
+  constructor(graph: SpaceGraphCore, container: HTMLElement) {
     this.graph = graph;
     this.container = container;
     this.scene = new THREE.Scene();
@@ -58,7 +58,7 @@ export class RenderingManager {
     this.renderer = new THREE.WebGLRenderer();
     this.cssRenderer = new CSS2DRenderer();
     this.css3DRenderer = new CSS3DRenderer();
-    this.objectPoolManager = ThreeObjectPoolManager.getInstance();
+    this.objectPoolManager = ObjectPoolManager.getInstance();
     this.setupPerformanceSystems();
     this.setupRenderers();
     this.initRenderers();
@@ -191,7 +191,7 @@ export class RenderingManager {
 
     // Setup memory management
     if (this.graph.state.performance?.enableMemoryManagement) {
-      this.memoryManager = MemoryManager.getInstance();
+      this.memoryManager = UnifiedDisposalSystem.getInstance();
     }
   }
 
@@ -281,7 +281,7 @@ export class RenderingManager {
           this.nodeRenderer = new InstancedRenderer(
             this.scene,
             this.graph.state,
-            SpaceGraph.getInstancedGeometryRegistry()
+            SpaceGraphCore.getInstancedGeometryRegistry()
           );
         } else if (targetRendererType === 'BasicRenderer') {
           this.nodeRenderer = new BasicRenderer(
@@ -294,7 +294,7 @@ export class RenderingManager {
             this.scene,
             this.css3DScene,
             this.graph.state,
-            SpaceGraph.getElementActorRegistry()
+            SpaceGraphCore.getElementActorRegistry()
           );
         }
       }

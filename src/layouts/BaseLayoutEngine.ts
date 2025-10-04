@@ -1,4 +1,4 @@
-import { SpaceGraph } from '../core/SpaceGraph';
+import { SpaceGraphCore } from '../core/SpaceGraphCore';
 import { ILayoutEngine, NodeSpec } from '../types';
 import { produce } from 'solid-js/store';
 
@@ -7,7 +7,7 @@ import { produce } from 'solid-js/store';
  * Provides common functionality and enforces a consistent interface.
  */
 export abstract class BaseLayoutEngine implements ILayoutEngine {
-  protected graph!: SpaceGraph;
+  protected graph!: SpaceGraphCore;
   protected isInitialized: boolean = false;
   protected isPaused: boolean = false;
 
@@ -15,7 +15,7 @@ export abstract class BaseLayoutEngine implements ILayoutEngine {
    * Initialize the layout engine with the graph instance.
    * @param graph - The SpaceGraph instance
    */
-  public init(graph: SpaceGraph): void {
+  public init(graph: SpaceGraphCore): void {
     if (this.isInitialized) {
       console.warn('Layout engine is already initialized');
       return;

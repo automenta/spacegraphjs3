@@ -1,6 +1,6 @@
 import { ISpaceGraphPlugin } from '../core/plugin';
 import { ErrorHandler } from '../utils/ErrorHandler';
-import { SpaceGraph } from '../core/SpaceGraph';
+import { SpaceGraphCore } from '../core/SpaceGraphCore';
 
 /**
  * Manages the initialization, execution, and lifecycle of SpaceGraph plugins
@@ -21,7 +21,7 @@ export class PluginManager {
    */
   async initializePlugins(
     plugins: ISpaceGraphPlugin[],
-    graph: SpaceGraph
+    graph: SpaceGraphCore
   ): Promise<{
     initialized: ISpaceGraphPlugin[];
     failed: Array<{ plugin: ISpaceGraphPlugin; error: Error }>;
@@ -157,7 +157,7 @@ export class PluginManager {
 
   private async initializePlugin(
     plugin: ISpaceGraphPlugin,
-    graph: SpaceGraph
+    graph: SpaceGraphCore
   ): Promise<void> {
     await plugin.init(graph);
   }
@@ -175,7 +175,7 @@ export class PluginManager {
     success: boolean,
     error?: Error
   ): void {
-    if (SpaceGraph.isDevelopmentMode()) {
+    if (SpaceGraphCore.isDevelopmentMode()) {
       if (success) {
         console.log(
           `✅ Plugin "${plugin.id}" (${plugin.name} v${plugin.version}) initialized successfully`

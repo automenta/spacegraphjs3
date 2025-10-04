@@ -1,6 +1,6 @@
 import { createStore, produce, SetStoreFunction } from 'solid-js/store';
 import { Spec, SpecUpdate } from '../types';
-import { deepMerge } from '../utils/deepMerge';
+import { deepMerge } from '../utils/DeepMerge';
 
 /**
  * Creates the reactive state management object for the SpaceGraph.

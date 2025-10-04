@@ -3,7 +3,7 @@ import { createEffect, createRoot } from 'solid-js';
 import { Store } from 'solid-js/store';
 import { NodeSpec, Spec } from '../../types';
 import { BaseElementActor } from './BaseElementActor';
-import { parseColor, applyElementStyling } from '../../utils/colorUtils';
+import { parseColor, applyElementStyling } from '../../utils/ColorUtils';
 import { animateProperty } from '../../utils/AnimationUtils';
 
 /**

@@ -2,11 +2,11 @@ import * as THREE from 'three';
 import { createEffect } from 'solid-js';
 import { animate } from 'popmotion';
 import { ISpaceGraphPlugin } from '../core/plugin';
-import { SpaceGraph } from '../core/SpaceGraph';
+import { SpaceGraphCore } from '../core/SpaceGraphCore';
 import { SpecUpdate, CameraSpec, RotationConstraints } from '../types';
 import { InteractionLogic } from '../InteractionLogic';
 import { CameraPresetsManager, CameraPreset } from '../utils/CameraPresets';
-import { ThreeObjectPoolManager } from '../utils/ThreeObjectPoolManager';
+import { ObjectPoolManager } from '../utils/ObjectPoolManager';
 import { AnimationCurves } from '../utils/AnimationUtils';
 import { CameraUtils } from '../utils/CameraUtils';
 import { Logger } from '../utils/Logger';
@@ -22,7 +22,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
   readonly description =
     'Provides advanced camera controls and management for SpaceGraph';
 
-  private graph!: SpaceGraph;
+  private graph!: SpaceGraphCore;
   private threeCamera!: THREE.PerspectiveCamera;
   private activeKeys: Set<string> = new Set();
   private boundOnKeyDown!: (event: KeyboardEvent) => void;
@@ -30,8 +30,8 @@ export class CameraPlugin implements ISpaceGraphPlugin {
   private presetsManager!: CameraPresetsManager;
   private rotationConstraints: RotationConstraints = {};
   private rotationPivot: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
-  private poolManager: ThreeObjectPoolManager =
-    ThreeObjectPoolManager.getInstance();
+  private poolManager: ObjectPoolManager =
+    ObjectPoolManager.getInstance();
   private isAnimating: boolean = false;
   private animationCallbacks: Array<() => void> = [];
   private zoomConstraints: { minDistance?: number; maxDistance?: number } = {};
@@ -119,7 +119,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
     }
   }
 
-  public init(graph: SpaceGraph): void {
+  public init(graph: SpaceGraphCore): void {
     this.graph = graph;
     this.threeCamera = graph.render.getCamera();
     this.presetsManager = new CameraPresetsManager(graph);
@@ -921,7 +921,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
       case 'center': {
         // Focus on the center of all elements with optimal distance
         const center = CameraUtils.calculateWeightedCenter(
-          elements.map((el) => el.position)
+          elements.map((el) => ({ position: el.position }))
         );
         // Use CameraUtils for distance calculation
         const dummyCamera = new THREE.PerspectiveCamera();
@@ -971,7 +971,7 @@ export class CameraPlugin implements ISpaceGraphPlugin {
       case 'weighted': {
         // Focus based on element importance/weight
         const weightedCenter = CameraUtils.calculateWeightedCenter(
-          elements.map((el) => el.position)
+          elements.map((el) => ({ position: el.position }))
         );
         // Use CameraUtils for distance calculation
         const dummyCamera = new THREE.PerspectiveCamera();

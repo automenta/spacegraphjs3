@@ -1,5 +1,5 @@
 import { animate } from 'popmotion';
-import { EasingFunctions } from './UnifiedAnimationSystem';
+import { EasingFunctions } from './animation/EasingFunctions';
 
 export interface AnimationCurve {
   name: string;

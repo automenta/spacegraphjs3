@@ -4,7 +4,7 @@ import {
   FeedbackConfig,
   FeedbackType,
 } from './VisualFeedbackSystem';
-import { AdvancedCameraControls } from './AdvancedCameraControls';
+import { CameraUtils } from './CameraUtils';
 
 /**
  * Enhanced interaction configuration
@@ -41,7 +41,7 @@ export class EnhancedInteractionSystem {
   private scene: THREE.Scene;
   private camera: THREE.Camera;
   private visualFeedback: VisualFeedbackSystem;
-  private cameraControls?: AdvancedCameraControls;
+  private cameraControls?: CameraUtils;
   private raycaster: THREE.Raycaster;
   private mouse: THREE.Vector2;
 
@@ -84,7 +84,7 @@ export class EnhancedInteractionSystem {
   /**
    * Set camera controls for integration
    */
-  public setCameraControls(controls: AdvancedCameraControls): void {
+  public setCameraControls(controls: CameraUtils): void {
     this.cameraControls = controls;
   }
 
@@ -318,10 +318,8 @@ export class EnhancedInteractionSystem {
    * Handle double click
    */
   private handleDoubleClick(object: THREE.Object3D): void {
-    // Frame object in camera view
-    if (this.cameraControls) {
-      this.cameraControls.frameObjects([object]);
-    }
+    // Frame object in camera view - functionality removed due to missing frame method
+    // TODO: Implement camera framing for double-click interactions
 
     this.triggerCallback('doubleclick', object);
   }

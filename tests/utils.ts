@@ -140,6 +140,41 @@ export async function waitForInteractionChange(
 }
 
 /**
+ * Pixel analysis utilities for visual testing
+ */
+
+/**
+ * Checks if a pixel is red based on RGBA values
+ * @param r - Red component (0-255)
+ * @param g - Green component (0-255)
+ * @param b - Blue component (0-255)
+ * @param a - Alpha component (0-255), defaults to 255 if not provided
+ * @returns true if the pixel is considered red
+ */
+export function isRedPixel(r: number, g: number, b: number, a: number = 255): boolean {
+  return a > 200 && r > 200 && g < 50 && b < 50;
+}
+
+/**
+ * Counts red pixels in a PNG image data buffer
+ * @param data - PNG image data buffer
+ * @param width - Image width
+ * @param height - Image height
+ * @returns number of red pixels found
+ */
+export function countRedPixels(data: Buffer, width: number, height: number): number {
+  let redPixels = 0;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const idx = (y * width + x) * 4;
+      const r = data[idx], g = data[idx + 1], b = data[idx + 2], a = data[idx + 3];
+      if (isRedPixel(r, g, b, a)) redPixels++;
+    }
+  }
+  return redPixels;
+}
+
+/**
  * Enhanced test function with common SpaceGraph test setup
  */
 export const test = baseTest.extend({

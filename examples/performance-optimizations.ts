@@ -3,7 +3,7 @@
 
 import { SpaceGraph } from '../src';
 import { CameraPlugin } from '../src/plugins/CameraPlugin';
-import { ThreeObjectPoolManager } from '../src/utils/ThreeObjectPoolManager';
+import { ObjectPoolManager } from '../src/utils/ObjectPoolManager';
 import { LODManager } from '../src/utils/LODManager';
 import { CullingManager } from '../src/utils/CullingManager';
 
@@ -84,7 +84,7 @@ const graph = new SpaceGraph(
 );
 
 // Initialize performance optimization managers
-const poolManager = ThreeObjectPoolManager.getInstance();
+const poolManager = ObjectPoolManager.getInstance();
 const lodManager = new LODManager();
 const cullingManager = new CullingManager();
 

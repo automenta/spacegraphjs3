@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SpaceGraph Red Square Test</title>
+    <style>
+        body { margin: 0; padding: 0; overflow: hidden; background: #000; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <div id="spacegraph-container" style="width: 800px; height: 600px;"></div>
+
+    <script type="module">
+        import {
+            SpaceGraph,
+            CameraPlugin,
+            InteractionPlugin,
+            LayoutPlugin
+        } from '../../dist/spacegraph.js';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // Create a SpaceGraph scene with a red square (box) in the center
+        const spec = {
+            data: {
+                nodes: [{
+                    id: 'red-square',
+                    type: 'box',
+                    position: { x: 0, y: 0, z: 0 },
+                    color: '#ff0000',
+                    width: 1,
+                    height: 1,
+                    depth: 0.1
+                }],
+                edges: []
+            },
+            style: {},
+            layout: { type: 'random' },
+            camera: {
+                target: { x: 0, y: 0, z: 0 },
+                phi: Math.PI / 2, // Top-down view
+                theta: 0,
+                distance: 2 // Close enough to fill view with the square
+            },
+            controls: {
+                keyboard: { enabled: true, panSpeed: 1.0, zoomSpeed: 0.1, orbitSpeed: 0.01 }
+            },
+            performance: {
+                instancingThreshold: 100,
+                enableLOD: true,
+                enableCulling: true,
+                enableMemoryManagement: true,
+                useBasicRenderer: false
+            },
+            interaction: {
+                hoveredElementId: null,
+                selectedElementIds: []
+            }
+        };
+
+        try {
+            const graph = SpaceGraph.create({
+                nodes: [{
+                    id: 'red-square',
+                    type: 'box',
+                    color: '#ff0000',
+                    width: 1,
+                    height: 1,
+                    depth: 0.1
+                }],
+                container: '#spacegraph-container',
+                camera: {
+                    distance: 1,
+                    phi: Math.PI / 2,
+                    theta: 0,
+                    target: { x: 0, y: 0, z: 0 }
+                },
+                controls: {
+                    keyboard: {
+                        enabled: true
+                    }
+                }
+            });
+
+            // Expose for testing
+            window.graph = graph;
+            window.testReady = true;
+
+            console.log('SpaceGraph red square test initialized');
+        } catch (error) {
+            console.error('Failed to initialize SpaceGraph:', error);
+            window.testReady = false;
+        }
+    </script>
+</body>
+</html>

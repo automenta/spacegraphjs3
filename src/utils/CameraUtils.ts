@@ -4,7 +4,7 @@
  */
 
 import * as THREE from 'three';
-import { screenToWorld, worldToScreen, raycastFromScreen, getObjectAtPosition } from './threeUtils';
+import { screenToWorld, worldToScreen, raycastFromScreen, getObjectAtPosition } from './ThreeUtils';
 
 export interface CameraAnimationConfig {
   duration?: number;
@@ -329,6 +329,37 @@ export class CameraUtils {
       distance = (boundingRadius * 2) / Math.sin(fov / 2);
     }
     return distance;
+  }
+
+  /**
+   * Calculate weighted center of elements based on their importance/weight
+   */
+  static calculateWeightedCenter(
+    elements: Array<{ position: THREE.Vector3; weight?: number }>
+  ): THREE.Vector3 {
+    if (elements.length === 0) {
+      return new THREE.Vector3(0, 0, 0);
+    }
+
+    // Default weight is 1 for all elements
+    const elementsWithWeights = elements.map(el => ({
+      position: el.position,
+      weight: el.weight ?? 1
+    }));
+
+    let totalWeight = 0;
+    const weightedCenter = new THREE.Vector3();
+
+    elementsWithWeights.forEach(({ position, weight }) => {
+      weightedCenter.add(position.clone().multiplyScalar(weight));
+      totalWeight += weight;
+    });
+
+    if (totalWeight > 0) {
+      weightedCenter.divideScalar(totalWeight);
+    }
+
+    return weightedCenter;
   }
 }
 

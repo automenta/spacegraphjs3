@@ -1,7 +1,7 @@
 import { Gesture } from '@use-gesture/vanilla';
 import * as THREE from 'three';
 import { ISpaceGraphPlugin } from '../core/plugin';
-import { SpaceGraph } from '../core/SpaceGraph';
+import { SpaceGraphCore } from '../core/SpaceGraphCore';
 import { InteractionLogic } from '../InteractionLogic';
 import { DragState, HoverState, WheelState } from '../types/use-gesture';
 import { EdgeSpec, GroupSpec, NodeSpec } from '../types';
@@ -18,7 +18,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
   readonly description =
     'Handles user interactions with the graph, such as clicking, dragging, and hovering.';
 
-  private graph!: SpaceGraph;
+  private graph!: SpaceGraphCore;
   private gesture: Gesture | null = null;
   private dragPlane!: THREE.Plane;
   private draggedElementId: string | null = null;
@@ -38,7 +38,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
   private groupVisualizations: Map<string, THREE.Group> = new Map(); // Visual representations of groups
   private errorHandler: ErrorHandler = ErrorHandler.getInstance();
 
-  public init(graph: SpaceGraph): void {
+  public init(graph: SpaceGraphCore): void {
     this.graph = graph;
     this.rendererEl = this.graph.render.getRendererDomElement();
     this.dragPlane = new THREE.Plane();

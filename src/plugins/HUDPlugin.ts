@@ -1,15 +1,15 @@
 import { createEffect } from 'solid-js';
 import * as THREE from 'three';
 import { ISpaceGraphPlugin } from '../core/plugin';
-import { SpaceGraph } from '../core/SpaceGraph';
-import { HUDUtils } from '../utils';
+import { SpaceGraphCore } from '../core/SpaceGraphCore';
+import { UnifiedHUDSystem } from '../utils/UnifiedHUDSystem';
 import { ThemeSystem } from '../utils/ThemeSystem';
 
 /**
  * REPL Commands class for handling console commands
  */
 class REPLCommands {
-  constructor(private graph: SpaceGraph) {}
+  constructor(private graph: SpaceGraphCore) {}
 
   help(): string {
     return `Available commands:
@@ -453,7 +453,7 @@ export class HUDPlugin implements ISpaceGraphPlugin {
   readonly description =
     'Head-up display with REPL console and performance metrics';
 
-  private graph!: SpaceGraph;
+  private graph!: SpaceGraphCore;
   private hudContainer!: HTMLElement;
   private consoleContainer!: HTMLElement;
   private inputElement!: HTMLInputElement;
@@ -480,9 +480,9 @@ export class HUDPlugin implements ISpaceGraphPlugin {
     }
   > = new Map();
   private themeManager: ThemeSystem | null = null;
-  private notificationSystem: HUDUtils | null = null;
+  private notificationSystem: UnifiedHUDSystem | null = null;
 
-  public init(graph: SpaceGraph): void {
+  public init(graph: SpaceGraphCore): void {
     this.graph = graph;
     this.replCommands = new REPLCommands(graph);
 

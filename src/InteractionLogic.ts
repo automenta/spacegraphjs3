@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Store } from 'solid-js/store';
 import { Spec, SpecUpdate } from './types';
-import { ThreeObjectPoolManager } from './utils/ThreeObjectPoolManager';
+import { ObjectPoolManager } from './utils/ObjectPoolManager';
 
 export class InteractionLogic {
   public static handlePan(
@@ -14,7 +14,7 @@ export class InteractionLogic {
     if (!state.camera) return;
     const panSpeed = 0.001 * state.camera.distance;
 
-    const poolManager = ThreeObjectPoolManager.getInstance();
+    const poolManager = ObjectPoolManager.getInstance();
 
     const right = poolManager
       .getVector3()
@@ -119,7 +119,7 @@ export class InteractionLogic {
   ) {
     if (!state.camera) return;
 
-    const poolManager = ThreeObjectPoolManager.getInstance();
+    const poolManager = ObjectPoolManager.getInstance();
 
     const right = poolManager
       .getVector3()
@@ -168,7 +168,7 @@ export class InteractionLogic {
     threeCamera: THREE.PerspectiveCamera,
     updateState: (spec: SpecUpdate) => void
   ) {
-    const poolManager = ThreeObjectPoolManager.getInstance();
+    const poolManager = ObjectPoolManager.getInstance();
 
     const pointer = poolManager.getVector3();
     pointer.set(0, 0, 0); // Convert to Vector2 by setting z=0

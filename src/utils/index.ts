@@ -13,7 +13,7 @@ import UnifiedAnimationSystem, {
   AnimationConfig,
   ParallelAnimation,
   SequenceAnimation,
-} from './UnifiedAnimationSystem';
+} from './animation/CoreAnimationSystem';
 
 // Camera Utils
 import CameraUtils, {
@@ -81,7 +81,7 @@ import { ErrorHandler } from './ErrorHandler';
 
 // Export types and classes
 export {
-  UnifiedAnimationSystemClass as AnimationSystem,
+  UnifiedAnimationSystem as AnimationSystem,
   AnimationConfig,
   AnimationTask,
   KeyframeAnimation,
@@ -90,32 +90,29 @@ export {
 };
 export {
   CameraUtils,
-  CameraUtilsClass as CameraUtilsClass,
   CameraAnimationConfig,
 };
 export {
-  UnifiedHUDSystemClass as HUDSystem,
+  UnifiedHUDSystem as HUDSystem,
   HUDTheme,
   HUDAnimationConfig,
   HUDElementConfig,
   HUDPerformanceMetrics,
 };
-export { UnifiedHUDSystemClass as HUDUtils };
 export {
-  InteractionUtilsClass as InteractionUtils,
+  InteractionUtils as InteractionUtils,
   InteractionEvent,
   GestureConfig,
   InteractionState,
 };
 export {
-  UnifiedPerformanceSystemClass as PerformanceSystem,
+  UnifiedPerformanceSystem as PerformanceSystem,
   PerformanceMetrics,
   IOptimizationStrategy,
 };
-export { UnifiedPerformanceSystemClass as PerformanceUtils };
-export { ThemeSystemClass as ThemeSystem, Theme, ThemeConfig };
+export { ThemeSystem, Theme, ThemeConfig };
 export {
-  VisualEffectsSystemClass as VisualEffectsSystem,
+  VisualEffectsSystem as VisualEffectsSystem,
   EffectConfig,
   ParticleEffect,
   GlowEffect,
@@ -137,17 +134,12 @@ export * from './AnimationUtils';
 export * from './CameraPresets';
 
 export * from './CullingManager';
-export * from './deepMerge';
+export * from './DeepMerge';
 export * from './LODManager';
-export * from './MemoryManager';
-export * from './ObjectPool';
-
-export * from './ThreeObjectPoolManager';
-export * from './ThreeObjectPools';
-export * from './threeUtils';
+export * from './ObjectPoolManager';
+export * from './ThreeUtils';
 // Re-export presets
 export * from '../presets';
-export * from './ErrorHandler';
 
 // Utility function to create a complete utility system instance
 export interface UtilitySystemConfig {
@@ -171,8 +163,8 @@ export class UtilitySystem {
   public errorHandler: ErrorHandler;
 
   constructor(config: UtilitySystemConfig = {}) {
-    this.animation = new UnifiedAnimationSystemClass();
-    this.camera = new CameraUtilsClass();
+    this.animation = new UnifiedAnimationSystem();
+    this.camera = new CameraUtils();
     this.errorHandler = ErrorHandler.getInstance();
     this.disposal = UnifiedDisposalSystem.getInstance();
 
@@ -182,11 +174,11 @@ export class UtilitySystem {
       const hudContainer = document.createElement('div');
       hudContainer.id = 'hud-container';
       document.body.appendChild(hudContainer);
-      this.hud = new UnifiedHUDSystemClass(hudContainer);
+      this.hud = new UnifiedHUDSystem(hudContainer);
     }
 
     if (config.camera && config.scene) {
-      this.interaction = new InteractionUtilsClass(
+      this.interaction = new InteractionUtils(
         config.camera,
         config.scene,
         config.interactionConfig
@@ -196,7 +188,7 @@ export class UtilitySystem {
     if (config.scene && config.camera) {
       // Create performance system even without renderer for basic functionality
       // In a real application, this should be initialized with a proper renderer
-      this.performance = new UnifiedPerformanceSystemClass(config.scene, config.camera, {
+      this.performance = new UnifiedPerformanceSystem(config.scene, config.camera, {
         domElement: document.createElement('canvas'),
         getSize: () => ({ width: 800, height: 600 }),
         setSize: () => {},
@@ -216,10 +208,10 @@ export class UtilitySystem {
       (this.performance as any).init();
     }
 
-    this.theme = new ThemeSystemClass(config.themeConfig);
+    this.theme = new ThemeSystem(config.themeConfig);
 
     if (config.scene) {
-      this.visualEffects = new VisualEffectsSystemClass(config.scene);
+      this.visualEffects = new VisualEffectsSystem(config.scene);
       this.visualFeedback = new VisualFeedbackSystem(config.scene);
     }
   }

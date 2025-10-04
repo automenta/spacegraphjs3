@@ -5,7 +5,7 @@
 
 import * as THREE from 'three';
 import { Logger } from './Logger';
-import { safeDisposeObject } from './threeUtils';
+import { safeDisposeObject } from './ThreeUtils';
 
 export interface EffectConfig {
   intensity?: number;

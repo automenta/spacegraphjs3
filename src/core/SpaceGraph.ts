@@ -30,6 +30,10 @@ import { ColumnLayout as _ColumnLayout } from '../layouts/ColumnLayout';
 import { RowLayout as _RowLayout } from '../layouts/RowLayout';
 import { registerLayouts } from '../layouts/registerLayouts';
 import { validateSpec, formatValidationResult } from '../utils/specValidation';
+import { SpaceGraphCore } from './SpaceGraphCore';
+import { SpaceGraphPluginManager } from './SpaceGraphPluginManager';
+import { SpaceGraphInitialization } from './SpaceGraphInitialization';
+import { SpaceGraphStateManager } from './SpaceGraphStateManager';
 
 /**
  * The main class for creating and managing a SpaceGraph visualization.
@@ -73,25 +77,24 @@ export class SpaceGraph {
   }
   private static instancedGeometryRegistry: Map<string, THREE.BufferGeometry> =
     new Map([['sphere', new THREE.SphereGeometry(0.5, 32, 32)]]);
+
+  // Core functionality modules
+  private core!: SpaceGraphCore;
+  private pluginManager!: SpaceGraphPluginManager;
+  private initialization!: SpaceGraphInitialization;
+  private stateManager!: SpaceGraphStateManager;
+
+  // Public API properties (delegated to core)
   public state!: Store<Spec>;
-  public scene: THREE.Scene;
-  public camera: THREE.PerspectiveCamera;
+  public scene!: THREE.Scene;
+  public camera!: THREE.PerspectiveCamera;
   public render!: RenderingManager;
   public events!: EventManager;
   public dataManager!: DataManager;
   public cameraPlugin?: CameraPlugin;
-  private readonly container: HTMLElement;
-  private updateState!: (spec: SpecUpdate) => void;
-  private setState!: (fn: (prevState: Spec) => Spec) => void;
-  private plugins: ISpaceGraphPlugin[] = [];
-  private readonly dispose: () => void;
-  /**
-   * Cleans up all resources, including SolidJS effects, Three.js objects,
-   * and event listeners, to prevent memory leaks.
-   */
+  private readonly container!: HTMLElement;
+  private readonly dispose!: () => void;
   private isDestroyed = false;
-  private performanceWarningsShown = new Set<string>();
-  private lastPerformanceCheck = 0;
 
   constructor(
     containerSelector: string,
@@ -99,111 +102,40 @@ export class SpaceGraph {
     plugins: ISpaceGraphPlugin[] = []
   ) {
     try {
+      // Initialize modules first
+      this.initialization = new SpaceGraphInitialization();
+      this.pluginManager = new SpaceGraphPluginManager();
+      this.stateManager = new SpaceGraphStateManager();
+
       // Validate the initial spec
-      const validationResult = validateSpec(initialSpec);
-      if (!validationResult.isValid) {
-        const errorMessage = `Invalid Spec provided:\n${formatValidationResult(validationResult)}`;
-        throw new Error(errorMessage);
-      }
+      this.initialization.validateInitialSpec(initialSpec);
 
-      // Log warnings in development mode
-      if (
-        validationResult.warnings.length > 0 &&
-        SpaceGraph.isDevelopmentMode()
-      ) {
-        console.warn(
-          'Spec validation warnings:',
-          formatValidationResult(validationResult)
-        );
-      }
-
-      const container = this.initContainer(containerSelector);
+      const container = this.initialization.initializeContainer(containerSelector);
       this.container = container;
 
       this.dispose = createRoot((dispose) => {
         this.initReactiveState(initialSpec);
-        this.initManagers();
+        this.initManagers(container);
         this.initPlugins(plugins);
         return dispose;
       });
 
-      this.scene = this.render.getScene();
-      this.camera = this.render.getCamera();
+      // Set up public API properties
+      this.state = this.stateManager.getState();
 
       // Check for performance issues after initialization
-      this.checkPerformanceIssues();
+      this.initialization.checkPerformanceIssues(this.state);
     } catch (error) {
       console.error('Failed to initialize SpaceGraph:', error);
-      // If we have a container reference, display the error in it
-      const container = document.querySelector(
-        containerSelector
-      ) as HTMLElement;
-      if (container) {
-        container.innerHTML = `<div style="color: red; padding: 20px; font-family: monospace;">
-          <h2>Failed to initialize</h2>
-          <p>${(error as Error).message}</p>
-          <pre>${(error as Error).stack}</pre>
-        </div>`;
+      // Display error in container if available
+      try {
+        this.initialization.displayInitializationError(containerSelector, error as Error);
+      } catch {
+        // If initialization failed completely, just log the error
+        console.error('Failed to display initialization error:', error);
       }
-      // Re-throw the error to allow the caller to handle it.
       throw error;
     }
-  }
-
-  /**
-   * Checks for potential performance issues after initialization
-   */
-  private checkPerformanceIssues(): void {
-    const nodes = this.state.data.nodes || [];
-
-    if (nodes.length > 0 && nodes.every(node => !node.position)) {
-      this.showPerformanceWarning(
-        'no-positions',
-        '⚠️  Nodes will not be visible until positioned.\n' +
-          '💡 Ensure a layout plugin is enabled and running'
-      );
-    }
-
-    // Check for very high node count with complex node types
-    const complexNodes = nodes.filter(
-      (node) =>
-        node.type === 'custom' ||
-        node.type === 'html' ||
-        (node.type === 'text' && node.data)
-    ).length;
-
-    if (complexNodes > 200) {
-      this.showPerformanceWarning(
-        'complex-nodes',
-        `High number of complex nodes detected: ${complexNodes}.\n` +
-          '⚠️  Custom, HTML, and text nodes are more expensive to render.\n' +
-          '💡 Consider using simpler node types (sphere, box) for better performance'
-      );
-    }
-
-    // Check for disabled performance features that should be enabled
-    if (
-      this.state.performance &&
-      this.state.performance.instancingThreshold > 1000 &&
-      nodes.length > 500
-    ) {
-      this.showPerformanceWarning(
-        'high-instancing-threshold',
-        `Instancing threshold is very high: ${this.state.performance.instancingThreshold}.\n` +
-          '⚠️  Consider lowering to 100-200 for better performance with many nodes.\n' +
-          '💡 Instanced rendering is more efficient for large numbers of similar objects'
-      );
-    }
-  }
-
-  /**
-   * Shows a performance warning, but only once per warning type
-   */
-  private showPerformanceWarning(warningId: string, message: string): void {
-    if (this.performanceWarningsShown.has(warningId)) return;
-
-    this.performanceWarningsShown.add(warningId);
-    console.warn(`🚀 Performance Warning [${warningId}]:\n${message}`);
   }
 
   /**
@@ -406,44 +338,9 @@ export class SpaceGraph {
   public update(spec: SpecUpdate) {
     try {
       // Validate the update spec if in development mode
-      if (SpaceGraph.isDevelopmentMode() && spec.data) {
-        const validationResult = validateSpec({
-          data: spec.data,
-          style: {},
-          layout: { type: 'random' },
-          camera: {
-            target: { x: 0, y: 0, z: 0 },
-            phi: 0,
-            theta: 0,
-            distance: 1,
-          },
-          controls: {
-            keyboard: {
-              enabled: false,
-              panSpeed: 1,
-              zoomSpeed: 1,
-              orbitSpeed: 1,
-            },
-          },
-          performance: {
-            instancingThreshold: 100,
-            enableLOD: false,
-            enableCulling: false,
-            enableMemoryManagement: false,
-            useBasicRenderer: false,
-          },
-          interaction: { hoveredElementId: null, selectedElementIds: [] },
-        });
+      this.initialization.validateSpecUpdate(spec);
 
-        if (!validationResult.isValid) {
-          console.warn(
-            'Spec update validation warnings:',
-            formatValidationResult(validationResult)
-          );
-        }
-      }
-
-      this.updateState(spec);
+      this.stateManager.updateState(spec);
     } catch (error) {
       console.error('Failed to update graph state:', error);
       // Continue with partial update if possible, or skip the update
@@ -451,23 +348,11 @@ export class SpaceGraph {
     }
 
     // Notify plugins of state update with graceful degradation
-    for (const plugin of this.plugins) {
-      if (plugin.onStateUpdate) {
-        try {
-          plugin.onStateUpdate(spec);
-        } catch (error) {
-          console.warn(
-            `Plugin ${plugin.id} failed to handle state update, continuing without it:`,
-            error
-          );
-          // Continue with other plugins rather than failing completely
-        }
-      }
-    }
+    this.pluginManager.notifyStateUpdate(spec);
   }
 
   public updateStateWithProducer(fn: (prevState: Spec) => Spec) {
-    this.setState(fn);
+    this.stateManager.updateStateWithProducer(fn);
   }
 
   public destroy() {
@@ -477,76 +362,10 @@ export class SpaceGraph {
     this.isDestroyed = true;
 
     this.dispose(); // Dispose SolidJS root and all effects
-    // Dispose all registered plugins.
-    // This includes the cameraPlugin, which is stored separately for convenience
-    // but is part of the main plugins array.
-    for (const plugin of this.plugins) {
-      if (plugin.dispose) {
-        plugin.dispose();
-      }
-    }
+    this.pluginManager.disposePlugins();
     this.render.dispose();
     this.events.dispose();
     this.dataManager.dispose();
-  }
-
-  private initContainer(containerSelector: string): HTMLElement {
-    // Validate container selector
-    if (
-      !containerSelector ||
-      typeof containerSelector !== 'string' ||
-      containerSelector.trim() === ''
-    ) {
-      throw new Error(
-        'Container selector must be a non-empty string.\n' +
-          '💡 Valid examples: "#my-container", ".graph-container", "body"'
-      );
-    }
-
-    // Check if DOM is available
-    if (typeof document === 'undefined') {
-      throw new Error(
-        'DOM is not available. SpaceGraph requires a browser environment.\n' +
-          '💡 Make sure this code runs in a browser, not in Node.js'
-      );
-    }
-
-    // Try to find the container element
-    const container = document.querySelector(containerSelector);
-    if (!container) {
-      const suggestions = [
-        `Check if element with selector "${containerSelector}" exists in the DOM`,
-        'Verify the selector is correct (case-sensitive)',
-        'Ensure the element is not inside a shadow DOM',
-        'Try using a different selector like "#app", ".container", or "body"',
-      ];
-
-      throw new Error(
-        `Container element '${containerSelector}' not found in DOM.\n` +
-          '💡 Suggestions:\n' +
-          suggestions.map((s) => `   • ${s}`).join('\n')
-      );
-    }
-
-    // Check if it's actually an HTMLElement
-    if (!(container instanceof HTMLElement)) {
-      throw new Error(
-        `Container element '${containerSelector}' is not an HTMLElement.\n` +
-          `💡 Found: ${container.constructor.name}\n` +
-          '💡 Container must be a valid HTML element that can hold child elements'
-      );
-    }
-
-    // Check if container has reasonable dimensions
-    const rect = container.getBoundingClientRect();
-    if (rect.width === 0 || rect.height === 0) {
-      console.warn(
-        `Container element '${containerSelector}' has zero width or height.\n` +
-          '⚠️  This may cause rendering issues. Consider setting explicit dimensions.'
-      );
-    }
-
-    return container;
   }
 
   /**
@@ -554,136 +373,25 @@ export class SpaceGraph {
    */
   private initReactiveState(initialSpec: Spec) {
     const { state, updateState, setState } = createState(initialSpec);
-    this.state = state;
-    this.updateState = updateState;
-    this.setState = setState;
+    this.stateManager.initializeState(state, updateState, setState);
   }
 
   /**
    * Initializes the core managers for rendering and events.
    */
-  private initManagers() {
-    this.render = new RenderingManager(this, this.container);
-    this.events = new EventManager();
-    this.dataManager = new DataManager(this);
-
-    // Initialize rendering optimizer after event manager is available
-    this.render.initRenderingOptimizer();
+  private initManagers(container: HTMLElement) {
+    const managers = this.initialization.initializeManagers(this, container);
+    this.render = managers.render;
+    this.events = managers.events;
+    this.dataManager = managers.dataManager;
   }
 
   /**
    * Initializes the plugins.
    */
   private initPlugins(plugins: ISpaceGraphPlugin[] = []) {
-    // Validate plugins array
-    if (!Array.isArray(plugins)) {
-      throw new Error(
-        'Plugins must be an array of ISpaceGraphPlugin instances.\n' +
-          '💡 Pass an empty array [] or an array of plugin instances'
-      );
-    }
-
-    this.plugins = plugins;
-    const initializedPlugins: string[] = [];
-    const failedPlugins: Array<{ plugin: ISpaceGraphPlugin; error: Error }> =
-      [];
-
-    for (let i = 0; i < this.plugins.length; i++) {
-      const plugin = this.plugins[i];
-
-      // Validate plugin structure
-      if (!plugin || typeof plugin !== 'object') {
-        const error = new Error(
-          `Plugin at index ${i} is not a valid object.\n` +
-            '💡 Plugins must implement the ISpaceGraphPlugin interface'
-        );
-        failedPlugins.push({ plugin, error });
-        continue;
-      }
-
-      if (!plugin.id || typeof plugin.id !== 'string') {
-        const error = new Error(
-          `Plugin at index ${i} is missing a valid id property.\n` +
-            '💡 Plugin id must be a non-empty string'
-        );
-        failedPlugins.push({ plugin, error });
-        continue;
-      }
-
-      if (!plugin.name || typeof plugin.name !== 'string') {
-        const error = new Error(
-          `Plugin "${plugin.id}" is missing a valid name property.\n` +
-            '💡 Plugin name must be a non-empty string'
-        );
-        failedPlugins.push({ plugin, error });
-        continue;
-      }
-
-      if (!plugin.version || typeof plugin.version !== 'string') {
-        const error = new Error(
-          `Plugin "${plugin.id}" is missing a valid version property.\n` +
-            '💡 Plugin version must be a non-empty string'
-        );
-        failedPlugins.push({ plugin, error });
-        continue;
-      }
-
-      if (typeof plugin.init !== 'function') {
-        const error = new Error(
-          `Plugin "${plugin.id}" is missing the required init() method.\n` +
-            '💡 Plugins must implement the ISpaceGraphPlugin interface'
-        );
-        failedPlugins.push({ plugin, error });
-        continue;
-      }
-
-      // Check for duplicate plugin IDs
-      if (initializedPlugins.includes(plugin.id)) {
-        const error = new Error(
-          `Duplicate plugin ID "${plugin.id}".\n` +
-            '💡 Each plugin must have a unique id'
-        );
-        failedPlugins.push({ plugin, error });
-        continue;
-      }
-
-      try {
-        plugin.init(this);
-        initializedPlugins.push(plugin.id);
-
-        if (plugin instanceof CameraPlugin) {
-          this.cameraPlugin = plugin;
-        }
-
-        // Log successful initialization in development mode
-        if (SpaceGraph.isDevelopmentMode()) {
-          console.log(
-            `✅ Plugin "${plugin.id}" (${plugin.name} v${plugin.version}) initialized successfully`
-          );
-        }
-      } catch (error) {
-        const initError = new Error(
-          `Failed to initialize plugin "${plugin.id}" (${plugin.name} v${plugin.version}).\n` +
-            `💡 Error: ${(error as Error).message}\n` +
-            '💡 Check plugin dependencies and configuration'
-        );
-        failedPlugins.push({ plugin, error: initError });
-      }
-    }
-
-    // If any plugins failed to initialize, throw an error with details
-    if (failedPlugins.length > 0) {
-      const errorMessages = failedPlugins
-        .map(({ error }, index) => {
-          return `${index + 1}. ${error.message}`;
-        })
-        .join('\n\n');
-
-      throw new Error(
-        `Failed to initialize ${failedPlugins.length} out of ${plugins.length} plugins:\n\n${errorMessages}\n\n` +
-          `✅ ${initializedPlugins.length} plugins initialized successfully: ${initializedPlugins.join(', ')}`
-      );
-    }
+    this.pluginManager.initializePlugins(plugins, this);
+    this.cameraPlugin = this.pluginManager.getCameraPlugin();
   }
 
   /**

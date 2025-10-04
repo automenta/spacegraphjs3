@@ -1,4 +1,4 @@
-import { SpaceGraph } from '../core/SpaceGraph';
+import { SpaceGraphCore } from '../core/SpaceGraphCore';
 import { GraphEventMap } from '../types';
 
 /**
@@ -22,7 +22,7 @@ export class Logger {
   private logLevel: LogLevel = LogLevel.INFO;
   private logs: LogEntry[] = [];
   private maxLogs: number = 1000;
-  private graph: SpaceGraph | null = null;
+  private graph: SpaceGraphCore | null = null;
 
   private constructor() {}
 
@@ -41,7 +41,7 @@ export class Logger {
    * Set the SpaceGraph instance for event-based logging
    * @param graph - The SpaceGraph instance
    */
-  public setGraph(graph: SpaceGraph): void {
+  public setGraph(graph: SpaceGraphCore): void {
     this.graph = graph;
   }
 

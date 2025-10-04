@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Store } from 'solid-js/store';
 import { NodeSpec, Spec } from '../../types';
-import { safeDisposeObject } from '../../utils/threeUtils';
+import { safeDisposeObject } from '../../utils/ThreeUtils';
 
 /**
  * Base class for all Element Actors.

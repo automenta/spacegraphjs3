@@ -228,7 +228,7 @@ export interface PerformanceSpec {
 
 import { Store } from 'solid-js/store';
 import { BaseElementActor } from './renderers/elementActors/BaseElementActor';
-import { SpaceGraph } from './core/SpaceGraph';
+import { SpaceGraphCore } from './core/SpaceGraphCore';
 
 export type ElementActorClass = new (
   scene: THREE.Scene,
@@ -241,7 +241,7 @@ export interface ILayoutEngine {
    * Initialize the layout engine with the graph instance.
    * @param graph - The SpaceGraph instance
    */
-  init(graph: SpaceGraph): void;
+  init(graph: SpaceGraphCore): void;
 
   /**
    * Dispose of the layout engine and clean up resources.

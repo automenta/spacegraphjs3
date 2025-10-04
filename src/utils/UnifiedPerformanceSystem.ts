@@ -5,10 +5,10 @@
 
 import * as THREE from 'three';
 import { BaseUtilitySystem } from './abstractions/BaseUtilitySystem';
-import { ThreeObjectPoolManager } from './ThreeObjectPoolManager';
+import { ObjectPoolManager } from './ObjectPoolManager';
 import { CullingManager } from './CullingManager';
 import { LODManager, LODSettings } from './LODManager';
-import { MemoryManager } from './MemoryManager';
+import { UnifiedDisposalSystem } from './UnifiedDisposalSystem';
 import { Logger } from './Logger';
 
 // Extend the Performance interface to include memory property
@@ -100,11 +100,11 @@ export interface IOptimizationStrategy {
  * Object Pooling Strategy
  */
 export class ObjectPoolingStrategy implements IOptimizationStrategy {
-  private poolManager: ThreeObjectPoolManager;
+  private poolManager: ObjectPoolManager;
   private enabled = true;
 
   constructor(private config: { maxPoolSize?: number } = {}) {
-    this.poolManager = ThreeObjectPoolManager.getInstance();
+    this.poolManager = ObjectPoolManager.getInstance();
   }
 
   init(_scene: THREE.Scene, _camera: THREE.Camera, _renderer: THREE.WebGLRenderer): void {
@@ -246,11 +246,11 @@ export class LODStrategy implements IOptimizationStrategy {
  * Memory Management Strategy
  */
 export class MemoryManagementStrategy implements IOptimizationStrategy {
-  private memoryManager: MemoryManager;
+  private memoryManager: UnifiedDisposalSystem;
   private enabled = true;
 
   constructor() {
-    this.memoryManager = MemoryManager.getInstance();
+    this.memoryManager = UnifiedDisposalSystem.getInstance();
   }
 
   init(scene: THREE.Scene, _camera: THREE.Camera, _renderer: THREE.WebGLRenderer): void {
@@ -553,7 +553,7 @@ export class UnifiedPerformanceSystem extends BaseUtilitySystem {
   private camera: THREE.Camera;
   private renderer: THREE.WebGLRenderer;
   private config: Required<UnifiedPerformanceConfig>;
-  private logger: Logger = Logger.getInstance();
+  protected logger: Logger = Logger.getInstance();
 
   // Performance tracking
   private metrics: PerformanceMetrics;
@@ -585,6 +585,7 @@ export class UnifiedPerformanceSystem extends BaseUtilitySystem {
       enableMemoryTracking: true,
       enableRenderTiming: true,
       updateInterval: 1000,
+      onMetricsUpdate: config.onMetricsUpdate || (() => {}),
       enableObjectPooling: true,
       enableFrustumCulling: true,
       enableLOD: true,

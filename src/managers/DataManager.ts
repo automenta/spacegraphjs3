@@ -1,18 +1,18 @@
 import { createEffect } from 'solid-js';
-import { SpaceGraph } from '../core/SpaceGraph';
+import { SpaceGraphCore } from '../core/SpaceGraphCore';
 import { EdgeSpec, GroupSpec, NodeSpec } from '../types';
 
 /**
  * Manages the data part of the state, providing efficient access to nodes, edges, and groups.
  */
 export class DataManager {
-  private graph: SpaceGraph;
+  private graph: SpaceGraphCore;
   private nodes: Map<string, NodeSpec> = new Map();
   private edges: Map<string, EdgeSpec> = new Map();
   private groups: Map<string, GroupSpec> = new Map();
   private validationWarningsShown = new Set<string>();
 
-  constructor(graph: SpaceGraph) {
+  constructor(graph: SpaceGraphCore) {
     this.graph = graph;
 
     createEffect(() => {

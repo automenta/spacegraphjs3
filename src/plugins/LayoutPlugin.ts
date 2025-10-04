@@ -1,6 +1,6 @@
 import { createEffect } from 'solid-js';
 import { ISpaceGraphPlugin } from '../core/plugin';
-import { SpaceGraph } from '../core/SpaceGraph';
+import { SpaceGraphCore } from '../core/SpaceGraphCore';
 import { ILayoutEngine } from '../types';
 
 /**
@@ -14,9 +14,9 @@ export class LayoutPlugin implements ISpaceGraphPlugin {
     'Manages the graph layout by delegating to a layout engine.';
 
   public currentLayoutEngine: ILayoutEngine | null = null;
-  private graph!: SpaceGraph;
+  private graph!: SpaceGraphCore;
 
-  public init(graph: SpaceGraph): void {
+  public init(graph: SpaceGraphCore): void {
     this.graph = graph;
 
     createEffect(() => this.updateLayoutEngine());
@@ -30,7 +30,7 @@ export class LayoutPlugin implements ISpaceGraphPlugin {
     }
 
     const LayoutEngineClass =
-      SpaceGraph.getLayoutEngineRegistry().get(layoutType);
+      SpaceGraphCore.getLayoutEngineRegistry().get(layoutType);
 
     if (LayoutEngineClass) {
       this.currentLayoutEngine = new LayoutEngineClass();

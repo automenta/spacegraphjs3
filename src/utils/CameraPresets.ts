@@ -1,4 +1,4 @@
-import { SpaceGraph } from '../core/SpaceGraph';
+import { SpaceGraphCore } from '../core/SpaceGraphCore';
 import { CameraSpec } from '../types';
 
 export interface CameraPreset {
@@ -21,12 +21,12 @@ export interface CameraPresetsCollection {
 }
 
 export class CameraPresetsManager {
-  private graph: SpaceGraph;
+  private graph: SpaceGraphCore;
   private presets: Map<string, CameraPreset> = new Map();
   private categories: Set<string> = new Set();
   private storageKey: string;
 
-  constructor(graph: SpaceGraph, storageKey = 'spacegraph-camera-presets') {
+  constructor(graph: SpaceGraphCore, storageKey = 'spacegraph-camera-presets') {
     this.graph = graph;
     this.storageKey = storageKey;
     this.loadPresets();
