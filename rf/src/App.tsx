@@ -1,10 +1,9 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useCallback } from 'react';
 import {
   ReactFlow,
   Background,
   Controls,
   MiniMap,
-  useReactFlow,
   ReactFlowProvider,
   type Node,
 } from '@xyflow/react';
@@ -13,24 +12,17 @@ import '@xyflow/react/dist/style.css';
 
 import { initialNodes, nodeTypes } from './nodes';
 import { initialEdges, edgeTypes } from './edges';
+import { useFractal } from './hooks/useFractal';
 
 const App = () => {
-  const [path, setPath] = useState<string[]>([]);
-  const { fitView } = useReactFlow();
+  const { path, open, back, fit } = useFractal(initialNodes);
 
   const handleNodeDoubleClick = useCallback(
     (_: any, node: Node) => {
-      const isFractal = initialNodes.some((n) => n.data.parentId === node.id);
-      if (isFractal) {
-        setPath((currentPath) => [...currentPath, node.id]);
-      }
+      open(node);
     },
-    []
+    [open]
   );
-
-  const handleBack = useCallback(() => {
-    setPath((currentPath) => currentPath.slice(0, -1));
-  }, []);
 
   const currentParentId = path.length > 0 ? path[path.length - 1] : undefined;
 
@@ -47,13 +39,13 @@ const App = () => {
   );
 
   useEffect(() => {
-    fitView({ duration: 600, padding: 0.1 });
-  }, [visibleNodes, fitView]);
+    fit();
+  }, [visibleNodes, fit]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && path.length > 0) {
-        handleBack();
+        back();
       }
     };
 
@@ -62,7 +54,7 @@ const App = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [path.length, handleBack]);
+  }, [path.length, back]);
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
@@ -80,7 +72,7 @@ const App = () => {
       </ReactFlow>
       {path.length > 0 && (
         <button
-          onClick={handleBack}
+          onClick={back}
           style={{
             position: 'absolute',
             top: '20px',

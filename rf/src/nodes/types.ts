@@ -1,4 +1,4 @@
-import type { Node as ReactFlowNode, BuiltInNode } from '@xyflow/react';
+import type { Node as ReactFlowNode } from '@xyflow/react';
 
 // A base type for the data that can be associated with our nodes
 export type NodeData = {

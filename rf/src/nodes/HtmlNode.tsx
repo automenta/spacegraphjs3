@@ -1,32 +1,49 @@
-import { Handle, Position } from '@xyflow/react';
-import type { NodeProps } from '@xyflow/react';
+import { Handle, Position, type NodeProps } from '@xyflow/react';
 
-// The props are passed by the React Flow component
 export function HtmlNode({ data }: NodeProps<{ label: string; content: string }>) {
+  const stopPropagation = (e: React.MouseEvent) => e.stopPropagation();
+
   return (
-    // We add this class to ensure the node can be handled by React Flow
-    <div className="react-flow__node-default" style={{
-        padding: '15px',
-        background: 'rgba(255, 255, 255, 0.9)',
-        border: '1px solid #888',
-        borderRadius: '8px',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-        width: '300px',
-        fontFamily: 'sans-serif',
-        fontSize: '14px',
-    }}>
+    <div
+      className="html-node"
+      style={{
+        padding: '20px',
+        background: '#fff',
+        border: '1px solid #ddd',
+        borderRadius: '12px',
+        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)',
+        width: '320px',
+        fontFamily: "'Inter', sans-serif",
+        color: '#333',
+      }}
+      onMouseDown={stopPropagation}
+      onClick={stopPropagation}
+      onDoubleClick={stopPropagation}
+    >
       <Handle type="target" position={Position.Top} />
-      <div style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '16px', color: '#333' }}>{data.label}</div>
-      <p style={{ margin: '0 0 15px 0', color: '#555' }}>{data.content}</p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div style={{ fontWeight: 600, marginBottom: '12px', fontSize: '18px' }}>{data.label}</div>
+      <p style={{ margin: '0 0 18px 0', lineHeight: 1.6, color: '#666' }}>{data.content}</p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         <input
           placeholder="Enter some text..."
-          onClick={(e) => e.stopPropagation()} // Prevent node drag when interacting
-          style={{ padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+          style={{
+            padding: '10px',
+            border: '1px solid #ccc',
+            borderRadius: '6px',
+            fontSize: '14px',
+          }}
         />
         <button
-          onClick={(e) => { e.stopPropagation(); alert('Button clicked!'); }}
-          style={{ padding: '8px 12px', border: 'none', background: '#3498db', color: 'white', borderRadius: '4px', cursor: 'pointer' }}
+          onClick={() => alert('Button clicked!')}
+          style={{
+            padding: '10px 15px',
+            border: 'none',
+            background: '#007bff',
+            color: 'white',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontWeight: 500,
+          }}
         >
           Submit
         </button>
