@@ -1,0 +1,46 @@
+/* Base Edge Style */
+.react-flow__edge-path {
+  stroke-width: 2;
+  transition: stroke-width 0.2s ease, filter 0.2s ease;
+}
+
+/* Edge Hover Effect */
+.react-flow__edge:hover .react-flow__edge-path {
+  stroke-width: 3;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.7));
+}
+
+/* Colored Edge Variations */
+.edge-blue .react-flow__edge-path {
+  stroke: #0A84FF;
+}
+
+.edge-green .react-flow__edge-path {
+  stroke: #30D158;
+}
+
+.edge-purple .react-flow__edge-path {
+  stroke: #9d6cff;
+}
+
+.edge-red .react-flow__edge-path {
+  stroke: #ff6b6b;
+}
+
+.edge-gray .react-flow__edge-path {
+  stroke: #8A8A8E;
+}
+
+/* Animated Edge Glow */
+.react-flow__edge.animated .react-flow__edge-path {
+  animation: edge-glow 2s infinite alternate;
+}
+
+@keyframes edge-glow {
+  from {
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+  }
+  to {
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+  }
+}

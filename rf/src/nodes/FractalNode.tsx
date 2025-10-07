@@ -1,6 +1,6 @@
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { NodeData } from './types';
-import '../styles/Node.css';
+import '../styles/FractalNode.css';
 
 const MIN_FONT_SIZE = 12;
 const MAX_FONT_SIZE = 24;
@@ -16,8 +16,6 @@ export function FractalNode({ data }: NodeProps<NodeData>) {
     ((MAX_FONT_SIZE - MIN_FONT_SIZE) * (width - MIN_NODE_WIDTH)) /
       (MAX_NODE_WIDTH - MIN_NODE_WIDTH);
 
-  const subtextFontSize = fontSize * 0.75;
-
   const nodeStyle = {
     width: `${width}px`,
     height: 'auto', // Adjust height automatically based on content
@@ -27,19 +25,13 @@ export function FractalNode({ data }: NodeProps<NodeData>) {
     fontSize: `${Math.max(MIN_FONT_SIZE, fontSize)}px`,
   };
 
-  const subtextStyle = {
-    fontSize: `${Math.max(MIN_FONT_SIZE * 0.75, subtextFontSize)}px`,
-  };
-
   return (
-    <div className="node-base fractal-node" style={nodeStyle}>
+    <div className="fractal-node" style={nodeStyle}>
       <Handle type="target" position={Position.Top} className="handle" />
       <div className="label" style={labelStyle}>
         {label}
       </div>
-      <div className="subtext" style={subtextStyle}>
-        Double-click to enter
-      </div>
+      <div className="subtext">Double-click to enter</div>
       <Handle type="source" position={Position.Bottom} className="handle" />
     </div>
   );

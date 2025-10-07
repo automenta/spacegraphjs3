@@ -1,13 +1,13 @@
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { NodeData } from './types';
-import '../styles/Node.css';
+import '../styles/HtmlNode.css';
 
 export function HtmlNode({ data }: NodeProps<NodeData>) {
   const stopPropagation = (e: React.MouseEvent) => e.stopPropagation();
 
   return (
     <div
-      className="node-base html-node"
+      className="html-node"
       onMouseDown={stopPropagation}
       onClick={stopPropagation}
       onDoubleClick={stopPropagation}

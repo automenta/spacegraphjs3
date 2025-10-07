@@ -1,0 +1,23 @@
+.shape-node {
+  width: 150px;
+  height: 150px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #444;
+  background-color: rgba(28, 28, 30, 0.8); /* Semi-transparent background */
+  backdrop-filter: blur(10px); /* Frosted glass effect */
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 20px;
+  color: #E2E2E8;
+  font-family: 'Inter', sans-serif;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+}
+
+.shape-node:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border-color: #666;
+}

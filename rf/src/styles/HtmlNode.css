@@ -1,0 +1,68 @@
+.html-node {
+  width: 320px;
+  border: 1px solid #444;
+  background-color: rgba(28, 28, 30, 0.8); /* Semi-transparent background */
+  backdrop-filter: blur(10px); /* Frosted glass effect */
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 20px;
+  color: #E2E2E8;
+  font-family: 'Inter', sans-serif;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+}
+
+.html-node:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border-color: #666;
+}
+
+.html-node .label {
+  font-weight: 600;
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.html-node .content {
+  margin: 12px 0;
+  line-height: 1.6;
+  color: #8A8A8E;
+}
+
+.html-node .input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.html-node input {
+  padding: 12px;
+  border: 1px solid #3C3C3E;
+  border-radius: 10px;
+  font-size: 14px;
+  background: #2C2C2E;
+  color: #E2E2E8;
+  transition: border-color 0.2s ease;
+}
+
+.html-node input:focus {
+  outline: none;
+  border-color: #0A84FF;
+}
+
+.html-node button {
+  padding: 12px 15px;
+  border: none;
+  background: #0A84FF;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 200ms ease;
+}
+
+.html-node button:hover {
+  background: #007AFF;
+}

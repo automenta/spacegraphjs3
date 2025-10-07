@@ -10,6 +10,7 @@ import {
 
 import '@xyflow/react/dist/style.css';
 import './styles/App.css';
+import './styles/Edge.css';
 
 import { initialNodes, nodeTypes } from './nodes';
 import { initialEdges, edgeTypes } from './edges';
