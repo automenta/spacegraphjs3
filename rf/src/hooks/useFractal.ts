@@ -7,20 +7,45 @@ export const useFractal = (initialNodes: Node[]) => {
 
   const open = useCallback(
     (node: Node) => {
-      const isFractal = initialNodes.some((n) => n.data.parentId === node.id);
-      if (isFractal) {
-        fitView({ nodes: [{ id: node.id }], duration: 400, padding: 0.2, maxZoom: 2 });
+      const children = initialNodes.filter((n) => n.data.parentId === node.id);
+      if (children.length > 0) {
+        fitView({
+          nodes: children.map((n) => ({ id: n.id })),
+          duration: 700,
+          padding: 0.1,
+        });
+
         setTimeout(() => {
           setPath((currentPath) => [...currentPath, node.id]);
-        }, 450);
+        }, 750);
       }
     },
-    [initialNodes, fitView]
+    [initialNodes, fitView, setPath]
   );
 
   const back = useCallback(() => {
-    setPath((currentPath) => currentPath.slice(0, -1));
-  }, []);
+    const newPath = path.slice(0, -1);
+    const parentId = newPath.length > 0 ? newPath[newPath.length - 1] : undefined;
+    const visibleNodes = initialNodes.filter((node) => node.data.parentId === parentId);
+
+    if (visibleNodes.length > 0) {
+      fitView({
+        nodes: visibleNodes.map((n) => ({ id: n.id })),
+        duration: 700,
+        padding: 0.1,
+      });
+
+      setTimeout(() => {
+        setPath(newPath);
+      }, 750);
+    } else {
+      // Handle case where we are returning to the root
+      fitView({ duration: 700, padding: 0.1 });
+      setTimeout(() => {
+        setPath(newPath);
+      }, 750);
+    }
+  }, [path, initialNodes, fitView, setPath]);
 
   const set = useCallback((newPath: string[]) => {
     setPath(newPath);

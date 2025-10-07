@@ -9,30 +9,32 @@ export function HtmlNode({ data }: NodeProps<NodeData>) {
       className="html-node"
       style={{
         padding: '25px',
-        background: '#ffffff',
-        border: '1px solid #eaeaea',
+        background: '#1a1a1a',
+        border: '1px solid #333',
         borderRadius: '16px',
-        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.05)',
+        boxShadow: '0 5px 25px rgba(0,0,0,0.3)',
         width: '340px',
         fontFamily: "'Inter', sans-serif",
-        color: '#333',
+        color: '#eee',
         transition: 'transform 300ms ease',
       }}
       onMouseDown={stopPropagation}
       onClick={stopPropagation}
       onDoubleClick={stopPropagation}
     >
-      <Handle type="target" position={Position.Top} style={{ background: '#ccc' }} />
+      <Handle type="target" position={Position.Top} style={{ background: '#555' }} />
       <div style={{ fontWeight: 600, marginBottom: '15px', fontSize: '20px' }}>{data.label}</div>
-      <p style={{ margin: '0 0 20px 0', lineHeight: 1.7, color: '#555' }}>{data.content}</p>
+      <p style={{ margin: '0 0 20px 0', lineHeight: 1.7, color: '#aaa' }}>{data.content}</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
         <input
           placeholder="Enter some text..."
           style={{
             padding: '12px',
-            border: '1px solid #ddd',
+            border: '1px solid #444',
             borderRadius: '8px',
             fontSize: '14px',
+            background: '#222',
+            color: '#eee',
           }}
         />
         <button
@@ -53,7 +55,7 @@ export function HtmlNode({ data }: NodeProps<NodeData>) {
           Submit
         </button>
       </div>
-      <Handle type="source" position={Position.Bottom} style={{ background: '#ccc' }} />
+      <Handle type="source" position={Position.Bottom} style={{ background: '#555' }} />
     </div>
   );
 }

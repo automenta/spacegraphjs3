@@ -1,22 +1,27 @@
 import type { NodeTypes } from '@xyflow/react';
 import { FractalNode } from './FractalNode';
 import { HtmlNode } from './HtmlNode';
+import { ShapeNode } from './ShapeNode';
 import { AppNode } from './types';
 
 export const initialNodes: AppNode[] = [
   // Root level nodes
   { id: '1', type: 'fractal-node', position: { x: 0, y: 0 }, data: { label: 'Explore This Fractal', depth: 0 } },
-  { id: '2', type: 'html-node', position: { x: 250, y: 0 }, data: { label: 'Regular HTML Node', content: 'This is a standard node.', depth: 0 } },
+  { id: '2', type: 'html-node', position: { x: 450, y: 100 }, data: { label: 'Regular HTML Node', content: 'This is a standard node.', depth: 0 } },
+  { id: '3', type: 'shape-node', position: { x: 150, y: 300 }, data: { label: 'Shape Node 1', depth: 0 } },
 
   // Nodes inside fractal '1'
   { id: '1-1', type: 'fractal-node', position: { x: 50, y: 50 }, data: { label: 'Inner Fractal 1', parentId: '1', depth: 1 } },
-  { id: '1-2', type: 'html-node', position: { x: 150, y: 150 }, data: { label: 'Inner HTML Node', content: 'This is inside the first fractal.', parentId: '1', depth: 1 } },
+  { id: '1-2', type: 'html-node', position: { x: 300, y: 120 }, data: { label: 'Inner HTML Node', content: 'This is inside the first fractal.', parentId: '1', depth: 1 } },
+  { id: '1-3', type: 'shape-node', position: { x: 100, y: 250 }, data: { label: 'Inner Shape', parentId: '1', depth: 1 } },
 
   // Nodes inside fractal '1-1'
   { id: '1-1-1', type: 'html-node', position: { x: 20, y: 20 }, data: { label: 'Deepest Node', content: 'You have reached the core.', parentId: '1-1', depth: 2 } },
+  { id: '1-1-2', type: 'shape-node', position: { x: 150, y: 150 }, data: { label: 'Deepest Shape', parentId: '1-1', depth: 2 } },
 ];
 
 export const nodeTypes = {
   'fractal-node': FractalNode,
   'html-node': HtmlNode,
+  'shape-node': ShapeNode,
 } satisfies NodeTypes;

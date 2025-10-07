@@ -66,7 +66,7 @@ const App = () => {
         edgeTypes={edgeTypes}
         onNodeDoubleClick={handleNodeDoubleClick}
       >
-        <Background />
+        <Background color="#444" variant="dots" />
         <MiniMap />
         <Controls />
       </ReactFlow>

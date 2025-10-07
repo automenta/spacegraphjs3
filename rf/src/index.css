@@ -11,7 +11,8 @@ body,
 #root {
   height: 100%;
   margin: 0;
-  background-color: #f8f9fa;
+  background-color: #000;
+  color: #fff;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
