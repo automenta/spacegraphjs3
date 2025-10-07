@@ -15,16 +15,16 @@
 
 /* FractalNode styles */
 .fractal-node {
-  width: 200px;
+  /* Width is now set dynamically via inline styles */
 }
 
 .fractal-node .label {
-  font-size: 16px;
+  /* Font size is now set dynamically */
   font-weight: 600;
 }
 
 .fractal-node .subtext {
-  font-size: 12px;
+  /* Font size is now set dynamically */
   color: #8A8A8E;
   margin-top: 8px;
 }

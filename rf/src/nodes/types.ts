@@ -1,11 +1,13 @@
 import type { Node as ReactFlowNode } from '@xyflow/react';
 
-// A base type for the data that can be associated with our nodes
+// A base type for the data that can be in our nodes
 export type NodeData = {
   label: string;
   content?: string;
   parentId?: string | null;
   depth?: number;
+  width?: number;
+  height?: number;
 };
 
 // Redefine the base node type to use our custom data type

@@ -15,6 +15,7 @@ import { initialNodes, nodeTypes } from './nodes';
 import { initialEdges, edgeTypes } from './edges';
 import { useFractal } from './hooks/useFractal';
 import Breadcrumbs from './components/Breadcrumbs';
+import { getChildren } from './utils/node-tree';
 
 const App = () => {
   const { path, open, back, set, fit } = useFractal(initialNodes);
@@ -29,7 +30,7 @@ const App = () => {
   const currentParentId = path.length > 0 ? path[path.length - 1] : undefined;
 
   const visibleNodes = useMemo(
-    () => initialNodes.filter((node) => (node.data.parentId || undefined) === currentParentId),
+    () => getChildren(currentParentId, initialNodes),
     [currentParentId]
   );
 
@@ -66,6 +67,7 @@ const App = () => {
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         onNodeDoubleClick={handleNodeDoubleClick}
+        onPaneClick={back}
       >
         <Background variant="dots" />
         <MiniMap />

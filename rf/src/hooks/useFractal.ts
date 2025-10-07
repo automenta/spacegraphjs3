@@ -1,13 +1,15 @@
 import { useState, useCallback } from 'react';
-import { useReactFlow, type Node } from '@xyflow/react';
+import { useReactFlow } from '@xyflow/react';
+import { AppNode } from '../nodes/types';
+import { getChildren } from '../utils/node-tree';
 
-export const useFractal = (initialNodes: Node[]) => {
+export const useFractal = (initialNodes: AppNode[]) => {
   const [path, setPath] = useState<string[]>([]);
   const { fitView } = useReactFlow();
 
   const open = useCallback(
-    (node: Node) => {
-      const children = initialNodes.filter((n) => n.data.parentId === node.id);
+    (node: AppNode) => {
+      const children = getChildren(node.id, initialNodes);
       if (children.length > 0) {
         fitView({
           nodes: children.map((n) => ({ id: n.id })),
@@ -15,6 +17,8 @@ export const useFractal = (initialNodes: Node[]) => {
           padding: 0.1,
         });
 
+        // Delay setting the path until the fitView animation is mostly complete.
+        // This provides a smoother visual transition for the user.
         setTimeout(() => {
           setPath((currentPath) => [...currentPath, node.id]);
         }, 750);
@@ -24,9 +28,13 @@ export const useFractal = (initialNodes: Node[]) => {
   );
 
   const back = useCallback(() => {
+    if (path.length === 0) {
+      return;
+    }
+
     const newPath = path.slice(0, -1);
     const parentId = newPath.length > 0 ? newPath[newPath.length - 1] : undefined;
-    const visibleNodes = initialNodes.filter((node) => node.data.parentId === parentId);
+    const visibleNodes = getChildren(parentId, initialNodes);
 
     if (visibleNodes.length > 0) {
       fitView({
@@ -34,17 +42,21 @@ export const useFractal = (initialNodes: Node[]) => {
         duration: 700,
         padding: 0.1,
       });
-
-      setTimeout(() => {
-        setPath(newPath);
-      }, 750);
     } else {
-      // Handle case where we are returning to the root
-      fitView({ duration: 700, padding: 0.1 });
-      setTimeout(() => {
-        setPath(newPath);
-      }, 750);
+      // When returning to the root, fit all root nodes
+      const rootNodes = getChildren(undefined, initialNodes);
+      fitView({
+        nodes: rootNodes.map((n) => ({ id: n.id })),
+        duration: 700,
+        padding: 0.1,
+      });
     }
+
+    // Delay setting the path to sync with the fitView animation, ensuring a
+    // smooth transition when navigating back to the parent view.
+    setTimeout(() => {
+      setPath(newPath);
+    }, 750);
   }, [path, initialNodes, fitView, setPath]);
 
   const set = useCallback((newPath: string[]) => {
@@ -53,9 +65,9 @@ export const useFractal = (initialNodes: Node[]) => {
 
   const fit = useCallback(() => {
     const currentParentId = path.length > 0 ? path[path.length - 1] : undefined;
-    const visibleNodes = initialNodes.filter((node) => node.data.parentId === currentParentId);
+    const visibleNodes = getChildren(currentParentId, initialNodes);
     if (visibleNodes.length > 0) {
-      fitView({ nodes: visibleNodes.map(n => ({ id: n.id })), duration: 600, padding: 0.1 });
+      fitView({ nodes: visibleNodes.map((n) => ({ id: n.id })), duration: 600, padding: 0.1 });
     }
   }, [path, initialNodes, fitView]);
 
