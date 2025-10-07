@@ -131,7 +131,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     }, {
       component: 'InteractionPlugin',
       rethrow: false,
-      onError: (error, errorInfo) => {
+      onError: (error, _errorInfo) => {
         this.logger.error('InteractionPlugin', 'Failed to initialize InteractionPlugin', error);
       }
     });
@@ -639,7 +639,7 @@ export class InteractionPlugin implements ISpaceGraphPlugin {
     }, {
       component: 'InteractionPlugin',
       rethrow: false,
-      onError: (error, errorInfo) => {
+      onError: (error, _errorInfo) => {
         this.logger.error('InteractionPlugin', 'Error during InteractionPlugin disposal', error);
       }
     });

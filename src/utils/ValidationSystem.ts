@@ -373,7 +373,7 @@ export class ValidationSystem {
   /**
    * Create a runtime type assertion decorator
    */
-  public createTypeAssertion<T>(type: string) {
+  public createTypeAssertion<_T>(type: string) {
     return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
       const originalMethod = descriptor.value;
       const validationSystem = ValidationSystem.getInstance();

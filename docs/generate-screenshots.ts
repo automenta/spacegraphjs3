@@ -59,7 +59,7 @@ async function navigateAndLoad(page: any, url: string, timeout = 15000) {
     await page.waitForFunction(() => {
       return (window as any).graph;
     }, { timeout });
-  } catch (error) {
+  } catch {
     console.log(`⚠️  Warning: Graph not detected on ${url}, continuing anyway...`);
   }
 
@@ -106,7 +106,7 @@ async function generateScreenshots() {
             await page.hover('canvas', { timeout: 1000 });
             await page.waitForTimeout(500);
             await captureScreenshot(page, `${example.name}-hover.png`);
-          } catch (e) {
+          } catch {
             console.log(`   ⚠️  Could not capture hover state for ${example.name}`);
           }
 
@@ -115,14 +115,14 @@ async function generateScreenshots() {
             await page.click('canvas', { timeout: 1000 });
             await page.waitForTimeout(500);
             await captureScreenshot(page, `${example.name}-selected.png`);
-          } catch (e) {
+          } catch {
             console.log(`   ⚠️  Could not capture selection state for ${example.name}`);
           }
         }
 
         console.log(`✅ Completed ${example.name}`);
 
-      } catch (error) {
+      } catch (error: any) {
         console.error(`❌ Failed to process ${example.name}:`, error.message);
       }
     }
@@ -142,7 +142,7 @@ async function checkDevServer(port = 5174) {
   try {
     const response = await fetch(`http://localhost:${port}`);
     return response.ok;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -165,8 +165,8 @@ async function main() {
 
   try {
     await generateScreenshots();
-  } catch (error) {
-    console.error('💥 Error during screenshot generation:', error);
+  } catch (_error) {
+    console.error('💥 Error during screenshot generation:', _error);
     process.exit(1);
   }
 }

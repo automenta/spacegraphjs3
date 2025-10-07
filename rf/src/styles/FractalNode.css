@@ -1,0 +1,35 @@
+.fractal-node {
+  background-color: var(--color-bg-node);
+  border: 1px solid var(--color-border-node);
+  backdrop-filter: var(--backdrop-filter-glass);
+  -webkit-backdrop-filter: var(--backdrop-filter-glass);
+  border-radius: 16px;
+  padding: 20px;
+  color: var(--color-text-main);
+  font-family: 'Inter', sans-serif;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+  height: auto;
+}
+
+.fractal-node:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border-color: var(--color-accent);
+}
+
+.fractal-node .label {
+  font-size: var(--font-size); /* Use the dynamic font size variable */
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.fractal-node .subtext {
+  color: var(--color-text-dim);
+  font-size: 0.8em;
+}
+
+.fractal-node .handle {
+    background-color: var(--color-accent);
+    border: none;
+}

@@ -46,7 +46,7 @@ export class PerformanceMonitor {
   private errorHandler: ErrorHandler;
   private measurements: Map<string, PerformanceMeasurement[]> = new Map();
   private metrics: Map<string, PerformanceMetrics> = new Map();
-  private throttleQueues: Map<string, Array<{ fn: Function; timestamp: number }>> = new Map();
+  private throttleQueues: Map<string, Array<{ fn: (...args: any[]) => any; timestamp: number }>> = new Map();
   private throttleTimers: Map<string, NodeJS.Timeout> = new Map();
   private disposed: boolean = false;
 

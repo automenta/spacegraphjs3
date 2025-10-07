@@ -83,7 +83,7 @@ export class EnhancedObjectPool {
       return;
     }
 
-    const { initialSize = 10, maxSize = 100, growOnEmpty = true, growthIncrement = 5 } = config;
+    const { initialSize = 10, growOnEmpty = true, growthIncrement = 5 } = config;
 
     const pool = {
       config: { ...config, growOnEmpty, growthIncrement },
@@ -336,7 +336,7 @@ export class EnhancedObjectPool {
       maxSize: 200,
       factory: () => new THREE.Vector3(),
       reset: (vec: THREE.Vector3) => vec.set(0, 0, 0),
-      dispose: (vec: THREE.Vector3) => {
+      dispose: (_vec: THREE.Vector3) => {
         // Vector3 doesn't need explicit disposal
       },
       validate: (vec: THREE.Vector3) => vec instanceof THREE.Vector3,
@@ -348,7 +348,7 @@ export class EnhancedObjectPool {
       maxSize: 100,
       factory: () => new THREE.Matrix4(),
       reset: (mat: THREE.Matrix4) => mat.identity(),
-      dispose: (mat: THREE.Matrix4) => {
+      dispose: (_mat: THREE.Matrix4) => {
         // Matrix4 doesn't need explicit disposal
       },
       validate: (mat: THREE.Matrix4) => mat instanceof THREE.Matrix4,
@@ -360,7 +360,7 @@ export class EnhancedObjectPool {
       maxSize: 100,
       factory: () => new THREE.Color(),
       reset: (color: THREE.Color) => color.setHex(0xffffff),
-      dispose: (color: THREE.Color) => {
+      dispose: (_color: THREE.Color) => {
         // Color doesn't need explicit disposal
       },
       validate: (color: THREE.Color) => color instanceof THREE.Color,
@@ -372,7 +372,7 @@ export class EnhancedObjectPool {
       maxSize: 50,
       factory: () => new THREE.Box3(),
       reset: (box: THREE.Box3) => box.makeEmpty(),
-      dispose: (box: THREE.Box3) => {
+      dispose: (_box: THREE.Box3) => {
         // Box3 doesn't need explicit disposal
       },
       validate: (box: THREE.Box3) => box instanceof THREE.Box3,

@@ -1,32 +1,33 @@
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { NodeData } from './types';
+import '../styles/FractalNode.css';
+
+const MIN_FONT_SIZE = 12;
+const MAX_FONT_SIZE = 24;
+const MIN_NODE_WIDTH = 150;
+const MAX_NODE_WIDTH = 400;
 
 export function FractalNode({ data }: NodeProps<NodeData>) {
+  const { width = 200, label } = data;
+
+  // Dynamically calculate font size based on node width
+  const fontSize =
+    MIN_FONT_SIZE +
+    ((MAX_FONT_SIZE - MIN_FONT_SIZE) * (width - MIN_NODE_WIDTH)) /
+      (MAX_NODE_WIDTH - MIN_NODE_WIDTH);
+
+  const nodeStyle = {
+    width: `${width}px`,
+    // Font size is now controlled by CSS, but we can pass it as a CSS variable
+    '--font-size': `${Math.max(MIN_FONT_SIZE, fontSize)}px`,
+  };
+
   return (
-    <div style={{
-      padding: '20px',
-      background: 'radial-gradient(circle, rgba(118,10,229,0.2) 0%, rgba(0,0,0,0) 70%)',
-      border: '1px solid rgba(118, 10, 229, 0.5)',
-      borderRadius: '50%',
-      width: '220px',
-      height: '220px',
-      fontFamily: "'Inter', sans-serif",
-      fontSize: '16px',
-      textAlign: 'center',
-      transition: 'transform 300ms ease',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      boxShadow: '0 0 20px rgba(118, 10, 229, 0.3)',
-      color: '#eee',
-    }}>
-      <Handle type="target" position={Position.Top} style={{ background: '#760AE5' }} />
-      <div style={{ fontWeight: 600, fontSize: '18px', color: '#9d6cff' }}>{data.label}</div>
-      <div style={{ marginTop: '10px', color: '#888', fontStyle: 'italic', fontSize: '12px' }}>
-        (Double-click to enter)
-      </div>
-      <Handle type="source" position={Position.Bottom} style={{ background: '#760AE5' }} />
+    <div className="fractal-node" style={nodeStyle}>
+      <Handle type="target" position={Position.Top} className="handle" />
+      <div className="label">{label}</div>
+      <div className="subtext">Double-click to enter</div>
+      <Handle type="source" position={Position.Bottom} className="handle" />
     </div>
   );
 }

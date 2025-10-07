@@ -1,0 +1,74 @@
+.markdown-node {
+  background-color: var(--color-bg-node);
+  border: 1px solid var(--color-border-node);
+  backdrop-filter: var(--backdrop-filter-glass);
+  -webkit-backdrop-filter: var(--backdrop-filter-glass);
+  border-radius: 16px;
+  color: var(--color-text-main);
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s ease-in-out;
+}
+
+.markdown-node:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border-color: var(--color-accent);
+}
+
+.markdown-node .markdown-node-content {
+  padding: 15px 20px;
+  text-align: left;
+  line-height: 1.6;
+  font-size: var(--font-size);
+}
+
+/* Styling for markdown elements */
+.markdown-node .markdown-node-content h1,
+.markdown-node .markdown-node-content h2,
+.markdown-node .markdown-node-content h3 {
+  color: var(--color-text-main);
+  border-bottom: 1px solid var(--color-border-node);
+  padding-bottom: 8px;
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.markdown-node .markdown-node-content p {
+  margin-bottom: 12px;
+}
+
+.markdown-node .markdown-node-content a {
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.markdown-node .markdown-node-content a:hover {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+}
+
+.markdown-node .markdown-node-content ul,
+.markdown-node .markdown-node-content ol {
+  padding-left: 20px;
+  margin-bottom: 12px;
+}
+
+.markdown-node .markdown-node-content code {
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.markdown-node .markdown-node-content pre {
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.markdown-node .handle {
+    background-color: var(--color-accent);
+    border: none;
+}

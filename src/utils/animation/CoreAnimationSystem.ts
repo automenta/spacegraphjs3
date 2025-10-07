@@ -3,7 +3,6 @@
  * Provides comprehensive animation capabilities with performance optimization
  */
 
-import * as THREE from 'three';
 import { animate } from 'popmotion';
 import { BaseUtilitySystem } from '../abstractions/BaseUtilitySystem';
 import { EasingFunctions } from './EasingFunctions';

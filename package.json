@@ -48,6 +48,7 @@
     "popmotion": "^11.0.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-markdown": "^9.0.1",
     "solid-js": "^1.9.9",
     "three": "^0.179.0",
     "three-mesh-bvh": "^0.9.1",

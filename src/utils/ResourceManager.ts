@@ -103,7 +103,7 @@ export class ResourceManager {
     });
 
     // Event listener cleanup
-    this.disposalHandlers.set('EventListeners', (element: HTMLElement) => {
+    this.disposalHandlers.set('EventListeners', (_element: HTMLElement) => {
       // This would need more specific implementation based on stored listener info
       this.logger.debug('ResourceManager', 'EventListeners disposal requires specific cleanup');
     });

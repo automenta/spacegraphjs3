@@ -519,7 +519,7 @@ export class ValidationUtils {
   /**
    * Validates that a callback function is valid
    */
-  public isValidCallback(fn: any, fieldName?: string): fn is Function {
+  public isValidCallback(fn: any, fieldName?: string): fn is (...args: any[]) => any {
     if (typeof fn !== 'function') {
       if (fieldName) {
         throw new Error(`Invalid callback for ${fieldName}: must be a function`);

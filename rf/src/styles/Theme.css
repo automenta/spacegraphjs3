@@ -1,0 +1,18 @@
+:root {
+  /* Colors */
+  --color-bg-main: #1a1a1a;
+  --color-bg-node: rgba(40, 40, 40, 0.7);
+  --color-border-node: #555;
+  --color-text-main: #f0f0f0;
+  --color-text-dim: #aaa;
+  --color-accent: #00aaff;
+  --color-accent-hover: #0088cc;
+
+  /* Glass effect */
+  --backdrop-filter-glass: blur(10px);
+}
+
+body {
+  background-color: var(--color-bg-main);
+  color: var(--color-text-main);
+}

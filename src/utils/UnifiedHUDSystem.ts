@@ -467,7 +467,7 @@ export class UnifiedHUDSystem {
   static createNotification(
     message: string,
     type: 'info' | 'success' | 'warning' | 'error' = 'info',
-    theme: HUDTheme = UnifiedHUDSystem.getDefaultTheme().dark
+    _theme: HUDTheme = UnifiedHUDSystem.getDefaultTheme().dark
   ): HTMLDivElement {
     const notification = document.createElement('div');
     notification.style.padding = '12px 16px';
@@ -521,7 +521,7 @@ export class UnifiedHUDSystem {
    */
   static addInteractiveEffects(
     element: HTMLElement,
-    theme: HUDTheme,
+    _theme: HUDTheme,
     options: {
       onHover?: () => void;
       onLeave?: () => void;

@@ -1,14 +1,15 @@
 import { Handle, Position, type NodeProps } from '@xyflow/react';
+import ReactMarkdown from 'react-markdown';
 import { NodeData } from './types';
-import '../styles/HtmlNode.css';
+import '../styles/MarkdownNode.css';
 
 const MIN_FONT_SIZE = 12;
 const MAX_FONT_SIZE = 24;
 const MIN_NODE_WIDTH = 150;
 const MAX_NODE_WIDTH = 400;
 
-export function HtmlNode({ data }: NodeProps<NodeData>) {
-  const { width = 200, label, content } = data;
+export function MarkdownNode({ data }: NodeProps<NodeData>) {
+  const { width = 200, content } = data;
   const stopPropagation = (e: React.MouseEvent) => e.stopPropagation();
 
   // Dynamically calculate font size based on node width
@@ -24,18 +25,15 @@ export function HtmlNode({ data }: NodeProps<NodeData>) {
 
   return (
     <div
-      className="html-node"
+      className="markdown-node"
       style={nodeStyle}
       onMouseDown={stopPropagation}
       onClick={stopPropagation}
       onDoubleClick={stopPropagation}
     >
       <Handle type="target" position={Position.Top} className="handle" />
-      <div className="label">{label}</div>
-      <p className="content">{content}</p>
-      <div className="input-group">
-        <input placeholder="Enter text..." />
-        <button onClick={() => alert('Button clicked!')}>Submit</button>
+      <div className="markdown-node-content">
+        <ReactMarkdown>{content || ''}</ReactMarkdown>
       </div>
       <Handle type="source" position={Position.Bottom} className="handle" />
     </div>

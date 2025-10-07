@@ -1,0 +1,19 @@
+.node-base {
+  background: #1C1C1E;
+  color: #E2E2E8;
+  font-family: 'Inter', sans-serif;
+  padding: 20px;
+  border-radius: 16px;
+  border: none;
+  text-align: center;
+  transition: background 0.2s ease-in-out;
+}
+
+.node-base:hover {
+  background: #2C2C2E;
+}
+
+.handle {
+  background: transparent;
+  border: none;
+}
