@@ -9,19 +9,30 @@ export const useFractal = (initialNodes: Node[]) => {
     (node: Node) => {
       const isFractal = initialNodes.some((n) => n.data.parentId === node.id);
       if (isFractal) {
-        setPath((currentPath) => [...currentPath, node.id]);
+        fitView({ nodes: [{ id: node.id }], duration: 400, padding: 0.2, maxZoom: 2 });
+        setTimeout(() => {
+          setPath((currentPath) => [...currentPath, node.id]);
+        }, 450);
       }
     },
-    [initialNodes]
+    [initialNodes, fitView]
   );
 
   const back = useCallback(() => {
     setPath((currentPath) => currentPath.slice(0, -1));
   }, []);
 
-  const fit = useCallback(() => {
-    fitView({ duration: 600, padding: 0.1 });
-  }, [fitView]);
+  const set = useCallback((newPath: string[]) => {
+    setPath(newPath);
+  }, []);
 
-  return { path, open, back, fit };
+  const fit = useCallback(() => {
+    const currentParentId = path.length > 0 ? path[path.length - 1] : undefined;
+    const visibleNodes = initialNodes.filter((node) => node.data.parentId === currentParentId);
+    if (visibleNodes.length > 0) {
+      fitView({ nodes: visibleNodes.map(n => ({ id: n.id })), duration: 600, padding: 0.1 });
+    }
+  }, [path, initialNodes, fitView]);
+
+  return { path, open, back, set, fit };
 };

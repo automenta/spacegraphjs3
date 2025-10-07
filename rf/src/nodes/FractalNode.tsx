@@ -1,23 +1,32 @@
-import { Handle, Position } from '@xyflow/react';
-import type { NodeProps } from '@xyflow/react';
+import { Handle, Position, type NodeProps } from '@xyflow/react';
+import { NodeData } from './types';
 
-export function FractalNode({ data }: NodeProps<{ label: string }>) {
+export function FractalNode({ data }: NodeProps<NodeData>) {
   return (
     <div style={{
-      padding: '15px',
-      background: 'rgba(240, 240, 255, 0.95)',
-      border: '2px dashed #888',
-      borderRadius: '8px',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-      width: '200px',
-      fontFamily: 'sans-serif',
-      fontSize: '14px',
+      padding: '20px',
+      background: 'radial-gradient(circle, rgba(118,10,229,0.1) 0%, rgba(230,230,255,0.1) 100%)',
+      border: '2px solid #760AE5',
+      borderRadius: '50%',
+      width: '220px',
+      height: '220px',
+      fontFamily: "'Inter', sans-serif",
+      fontSize: '16px',
       textAlign: 'center',
+      transition: 'transform 300ms ease',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      boxShadow: '0 10px 30px rgba(118, 10, 229, 0.2)',
+      color: '#333',
     }}>
-      <Handle type="target" position={Position.Top} />
-      <div style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '16px', color: '#333' }}>{data.label}</div>
-      <div style={{ color: '#555', fontStyle: 'italic' }}>(Double-click to enter)</div>
-      <Handle type="source" position={Position.Bottom} />
+      <Handle type="target" position={Position.Top} style={{ background: '#760AE5' }} />
+      <div style={{ fontWeight: 600, fontSize: '18px', color: '#760AE5' }}>{data.label}</div>
+      <div style={{ marginTop: '10px', color: '#555', fontStyle: 'italic', fontSize: '12px' }}>
+        (Double-click to enter)
+      </div>
+      <Handle type="source" position={Position.Bottom} style={{ background: '#760AE5' }} />
     </div>
   );
 }

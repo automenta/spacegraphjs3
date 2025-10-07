@@ -13,9 +13,10 @@ import '@xyflow/react/dist/style.css';
 import { initialNodes, nodeTypes } from './nodes';
 import { initialEdges, edgeTypes } from './edges';
 import { useFractal } from './hooks/useFractal';
+import Breadcrumbs from './components/Breadcrumbs';
 
 const App = () => {
-  const { path, open, back, fit } = useFractal(initialNodes);
+  const { path, open, back, set, fit } = useFractal(initialNodes);
 
   const handleNodeDoubleClick = useCallback(
     (_: any, node: Node) => {
@@ -27,7 +28,7 @@ const App = () => {
   const currentParentId = path.length > 0 ? path[path.length - 1] : undefined;
 
   const visibleNodes = useMemo(
-    () => initialNodes.filter((node) => node.data.parentId === currentParentId),
+    () => initialNodes.filter((node) => (node.data.parentId || undefined) === currentParentId),
     [currentParentId]
   );
 
@@ -40,7 +41,7 @@ const App = () => {
 
   useEffect(() => {
     fit();
-  }, [visibleNodes, fit]);
+  }, [path, fit]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -64,25 +65,37 @@ const App = () => {
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         onNodeDoubleClick={handleNodeDoubleClick}
-        fitView
       >
         <Background />
         <MiniMap />
         <Controls />
       </ReactFlow>
+      <Breadcrumbs path={path} nodes={initialNodes} onNavigate={set} />
       {path.length > 0 && (
         <button
           onClick={back}
           style={{
             position: 'absolute',
-            top: '20px',
-            left: '20px',
+            top: '25px',
+            left: '25px',
             zIndex: 10,
-            padding: '10px 15px',
-            background: 'white',
-            border: '1px solid #ccc',
-            borderRadius: '5px',
+            padding: '10px 20px',
+            background: '#ffffff',
+            border: '1px solid #ddd',
+            borderRadius: '12px',
             cursor: 'pointer',
+            fontSize: '15px',
+            fontWeight: 500,
+            boxShadow: '0 5px 15px rgba(0,0,0,0.08)',
+            transition: 'background 200ms ease, box-shadow 200ms ease',
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.background = '#f9f9f9';
+            e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.1)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = '#ffffff';
+            e.currentTarget.style.boxShadow = '0 5px 15px rgba(0,0,0,0.08)';
           }}
         >
           Back

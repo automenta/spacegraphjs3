@@ -5,6 +5,7 @@ export type NodeData = {
   label: string;
   content?: string;
   parentId?: string | null;
+  depth?: number;
 };
 
 // Redefine the base node type to use our custom data type

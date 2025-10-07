@@ -1,5 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', sans-serif;
   line-height: 1.5;
   font-weight: 400;
 }
@@ -9,4 +11,31 @@ body,
 #root {
   height: 100%;
   margin: 0;
+  background-color: #f8f9fa;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.react-flow__node {
+  /* remove default border and background so we can have fully custom nodes */
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.react-flow__handle {
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.react-flow__node:hover .react-flow__handle {
+  opacity: 1;
+}
+
+.react-flow__controls {
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08) !important;
+}
+
+.react-flow__minimap {
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08) !important;
 }
