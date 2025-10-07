@@ -1,0 +1,35 @@
+.breadcrumbs-container {
+  position: absolute;
+  top: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  background: #1c1c1e;
+  padding: 10px 20px;
+  border-radius: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-family: 'Inter', sans-serif;
+}
+
+.breadcrumb-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  color: #a2a2a7;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 200ms ease, color 200ms ease;
+  font-weight: 500;
+}
+
+.breadcrumb-button:hover {
+  background: #2c2c2e;
+  color: #e2e2e8;
+}
+
+.breadcrumb-separator {
+  color: #48484a;
+}

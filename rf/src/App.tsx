@@ -9,6 +9,7 @@ import {
 } from '@xyflow/react';
 
 import '@xyflow/react/dist/style.css';
+import './styles/App.css';
 
 import { initialNodes, nodeTypes } from './nodes';
 import { initialEdges, edgeTypes } from './edges';
@@ -66,38 +67,13 @@ const App = () => {
         edgeTypes={edgeTypes}
         onNodeDoubleClick={handleNodeDoubleClick}
       >
-        <Background color="#444" variant="dots" />
+        <Background variant="dots" />
         <MiniMap />
         <Controls />
       </ReactFlow>
       <Breadcrumbs path={path} nodes={initialNodes} onNavigate={set} />
       {path.length > 0 && (
-        <button
-          onClick={back}
-          style={{
-            position: 'absolute',
-            top: '25px',
-            left: '25px',
-            zIndex: 10,
-            padding: '10px 20px',
-            background: '#ffffff',
-            border: '1px solid #ddd',
-            borderRadius: '12px',
-            cursor: 'pointer',
-            fontSize: '15px',
-            fontWeight: 500,
-            boxShadow: '0 5px 15px rgba(0,0,0,0.08)',
-            transition: 'background 200ms ease, box-shadow 200ms ease',
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.background = '#f9f9f9';
-            e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.1)';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.background = '#ffffff';
-            e.currentTarget.style.boxShadow = '0 5px 15px rgba(0,0,0,0.08)';
-          }}
-        >
+        <button onClick={back} className="back-button">
           Back
         </button>
       )}
